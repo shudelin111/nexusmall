@@ -1,0 +1,26 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: nexusmall-product
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos服务器地址
+        namespace: public # 命名空间
+        group: DEFAULT_GROUP # 分组
+      config:
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        group: ${spring.cloud.nacos.discovery.group}
+        file-extension: yaml # 配置文件格式
+
+# 服务端口
+server:
+  port: 10000
+
+# 推荐使用logging.file.path或自定义配置
+logging:
+  file:
+    path: D:/IdeaProjects/nexusmall/logs
+

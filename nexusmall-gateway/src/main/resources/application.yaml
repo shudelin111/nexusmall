@@ -1,0 +1,44 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: nexusmall-gateway
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos服务器地址
+    gateway:
+      discovery:
+        locator:
+          enabled: true # 开启服务自动发现
+          lower-case-service-id: true # 服务ID小写
+      routes:
+        - id: product-service
+          uri: lb://nexusmall-product # 使用负载均衡访问product服务
+          predicates:
+            - Path=/product/**
+          filters:
+            - StripPrefix=1 # 去掉前缀
+      globalcors:  # 跨域配置
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
+
+# 暴露所有端点用于监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+# 服务端口
+server:
+  port: 88
+
+# 推荐使用logging.file.path或自定义配置
+logging:
+  file:
+    path: D:/IdeaProjects/nexusmall/logs

@@ -13,34 +13,49 @@
     <version>0.0.1-SNAPSHOT</version>
     <name>nexusmall</name>
     <description>nexusmall</description>
-    <url/>
-    <licenses>
-        <license/>
-    </licenses>
-    <developers>
-        <developer/>
-    </developers>
-    <scm>
-        <connection/>
-        <developerConnection/>
-        <tag/>
-        <url/>
-    </scm>
+    <!-- 添加packaging类型为pom -->
+    <packaging>pom</packaging>
+
+    <!-- 统一管理子模块 -->
+    <modules>
+        <module>nexusmall-product</module>
+        <module>nexusmall-gateway</module>
+        <module>nexusmall-auth</module>
+        <module>nexusmall-common</module>
+        <module>nexusmall-third-party</module>
+    </modules>
+
+    <!-- 统一的属性配置 -->
     <properties>
         <java.version>8</java.version>
+        <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
+        <spring-cloud.version>2021.0.5</spring-cloud.version>
+        <!-- 日志配置 -->
+        <log.path>D:/IdeaProjects/nexusmall/logs</log.path>
+        <log.level>INFO</log.level>
     </properties>
-    <dependencies>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter</artifactId>
-        </dependency>
 
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+    <!-- 依赖管理，统一管理版本 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Cloud -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            <!-- Spring Cloud Alibaba -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>
@@ -49,6 +64,16 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
         </plugins>
-    </build>
 
+        <!-- 插件管理，统一管理插件版本 -->
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>2.7.18</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
 </project>

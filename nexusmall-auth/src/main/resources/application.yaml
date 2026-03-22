@@ -1,0 +1,33 @@
+spring:
+  profiles:
+    active: dev
+  application:
+    name: nexusmall-auth
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 127.0.0.1:8848 # Nacos服务器地址
+        namespace: public # 命名空间
+        group: DEFAULT_GROUP # 分组
+
+# 安全配置
+security:
+  jwt:
+    secret-key: mySecretKeyForJWTGenerationAndValidation
+    expire-time-in-ms: 86400000 # 24小时
+
+# 暴露所有端点用于监控
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+# 服务端口
+server:
+  port: 8000
+
+# 推荐使用logging.file.path或自定义配置
+logging:
+  file:
+    path: D:/IdeaProjects/nexusmall/logs
