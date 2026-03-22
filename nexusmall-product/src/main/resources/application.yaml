@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   config:
     import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
   profiles:
@@ -32,9 +32,4 @@ spring:
 # 服务端口
 server:
   port: 10000
-
-# 推荐使用logging.file.path或自定义配置
-logging:
-  file:
-    path: D:/IdeaProjects/nexusmall/logs
 

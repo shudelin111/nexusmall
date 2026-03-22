@@ -1,10 +1,13 @@
-spring:
+﻿spring:
   profiles:
     active: dev
   application:
     name: nexusmall-common
 
-LOG_PATH: D:/IdeaProjects/nexusmall/logs
+# 日志配置（统一）
+nexusmall:
+  logging:
+    path: ${LOG_PATH:D:/IdeaProjects/nexusmall/logs}
 
 # 通用配置
 common:

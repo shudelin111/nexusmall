@@ -1,4 +1,4 @@
-spring:
+﻿spring:
   profiles:
     active: dev
   application:
@@ -50,7 +50,3 @@ management:
 server:
   port: 88
 
-# 推荐使用logging.file.path或自定义配置
-logging:
-  file:
-    path: D:/IdeaProjects/nexusmall/logs
