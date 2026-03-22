@@ -37,12 +37,18 @@
 		</dependency>
 
 		<!-- 公共模块 -->
-		<dependency>
-			<groupId>com.nexusmall</groupId>
-			<artifactId>nexusmall-common</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-	</dependencies>
+			<dependency>
+				<groupId>com.nexusmall</groupId>
+				<artifactId>nexusmall-common</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
 
 	<build>
 		<plugins>

@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
   profiles:
     active: dev
   application:

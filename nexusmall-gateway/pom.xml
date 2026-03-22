@@ -49,18 +49,24 @@
 		</dependency>
 
 		<!-- 公共模块 -->
-		<dependency>
-			<groupId>com.nexusmall</groupId>
-			<artifactId>nexusmall-common</artifactId>
-			<version>${project.version}</version>
-			<exclusions>
+			<dependency>
+				<groupId>com.nexusmall</groupId>
+				<artifactId>nexusmall-common</artifactId>
+				<version>${project.version}</version>
+				<exclusions>
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-web</artifactId>
 				</exclusion>
-			</exclusions>
-		</dependency>
-	</dependencies>
+				</exclusions>
+			</dependency>
+
+			<dependency>
+				<groupId>org.springframework.boot</groupId>
+				<artifactId>spring-boot-starter-test</artifactId>
+				<scope>test</scope>
+			</dependency>
+		</dependencies>
 
 	<build>
 		<plugins>
