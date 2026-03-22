@@ -2,6 +2,7 @@ package com.nexusmall.gateway.config;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -11,6 +12,9 @@ import org.springframework.web.server.ServerWebExchange;
 import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
+
+import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 
 @Component
 public class JwtAuthenticationWebFilter implements WebFilter {
@@ -32,8 +36,9 @@ public class JwtAuthenticationWebFilter implements WebFilter {
 
         String token = authorization.substring(BEARER_PREFIX.length());
         try {
-            Claims claims = Jwts.parser()
-                    .setSigningKey(jwtConfig.getSecretKey())
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
                     .parseClaimsJws(token)
                     .getBody();
 
@@ -47,5 +52,9 @@ public class JwtAuthenticationWebFilter implements WebFilter {
         } catch (Exception ex) {
             return chain.filter(exchange);
         }
+    }
+
+    private SecretKey getSigningKey() {
+        return Keys.hmacShaKeyFor(jwtConfig.getSecretKey().getBytes(StandardCharsets.UTF_8));
     }
 }
