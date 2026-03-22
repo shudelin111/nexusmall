@@ -3,35 +3,39 @@ package com.nexusmall.auth.controller;
 import com.nexusmall.auth.service.AuthService;
 import com.nexusmall.auth.vo.AuthRequest;
 import com.nexusmall.auth.vo.AuthResponse;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.nexusmall.common.vo.Result;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
 
-    @Autowired
-    private AuthService authService;
+    private final AuthService authService;
+
+    public AuthController(AuthService authService) {
+        this.authService = authService;
+    }
 
     @PostMapping("/login")
-    public AuthResponse login(@RequestBody AuthRequest request) {
-        return authService.login(request);
+    public Result<AuthResponse> login(@RequestBody AuthRequest request) {
+        return Result.success(authService.login(request));
     }
 
     @PostMapping("/logout")
-    public void logout(@RequestHeader("Authorization") String token) {
+    public Result<Void> logout(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
             authService.logout(token);
         }
+        return Result.success();
     }
 
     @GetMapping("/validate")
-    public boolean validateToken(@RequestHeader("Authorization") String token) {
+    public Result<Boolean> validateToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            return authService.validateToken(token);
+            return Result.success(authService.validateToken(token));
         }
-        return false;
+        return Result.success(false);
     }
 }

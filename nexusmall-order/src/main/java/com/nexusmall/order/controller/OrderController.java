@@ -1,5 +1,6 @@
 package com.nexusmall.order.controller;
 
+import com.nexusmall.common.vo.Result;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.vo.CreateOrderRequest;
@@ -22,22 +23,22 @@ public class OrderController {
     }
 
     @PostMapping
-    public Order createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        return orderService.createOrder(request);
+    public Result<Order> createOrder(@Valid @RequestBody CreateOrderRequest request) {
+        return Result.success(orderService.createOrder(request));
     }
 
     @GetMapping("/{orderSn}")
-    public Order getOrder(@PathVariable String orderSn) {
-        return orderService.getByOrderSn(orderSn);
+    public Result<Order> getOrder(@PathVariable String orderSn) {
+        return Result.success(orderService.getByOrderSn(orderSn));
     }
 
     @GetMapping
-    public List<Order> listOrders(@RequestParam(value = "memberId", required = false) Long memberId) {
-        return orderService.listOrders(memberId);
+    public Result<List<Order>> listOrders(@RequestParam(value = "memberId", required = false) Long memberId) {
+        return Result.success(orderService.listOrders(memberId));
     }
 
     @PutMapping("/{orderSn}/status")
-    public Order updateStatus(@PathVariable String orderSn, @Valid @RequestBody UpdateOrderStatusRequest request) {
-        return orderService.updateStatus(orderSn, request);
+    public Result<Order> updateStatus(@PathVariable String orderSn, @Valid @RequestBody UpdateOrderStatusRequest request) {
+        return Result.success(orderService.updateStatus(orderSn, request));
     }
 }
