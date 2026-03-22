@@ -1,55 +1,121 @@
-﻿spring:
+﻿# ==============================
+# 基础 Spring 配置
+# ==============================
+spring:
   profiles:
+    # 当前激活环境：dev/test/prod
+    # 建议在生产环境通过启动参数覆盖：--spring.profiles.active=prod
     active: dev
+
   application:
+    # 服务名（会注册到 Nacos，也会用于日志目录名）
     name: nexusmall-third-party
+
+  # ------------------------------
+  # Redis 连接配置（用于缓存/幂等/验证码等场景）
+  # ------------------------------
   redis:
+    # Redis 主机地址，默认本机
     host: ${REDIS_HOST:127.0.0.1}
+    # Redis 端口
     port: ${REDIS_PORT:6379}
+    # Redis 库编号（0-15）
     database: ${REDIS_DATABASE:0}
+    # Redis 密码（无密码可留空）
     password: ${REDIS_PASSWORD:}
+    # 连接超时时间（毫秒）
     timeout: 5000
     lettuce:
       pool:
+        # 最大连接数（含正在使用和空闲）
         max-active: 16
+        # 最大空闲连接数
         max-idle: 8
+        # 最小空闲连接数
         min-idle: 0
+        # 从连接池获取连接的最大等待时间
         max-wait: 1000ms
+
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848 # Nacos服务器地址
-        namespace: public # 命名空间
-        group: DEFAULT_GROUP # 分组
+        # Nacos 地址（服务注册与发现）
+        server-addr: 127.0.0.1:8848
+        # Nacos 命名空间，public 表示默认命名空间
+        namespace: public
+        # 服务分组
+        group: DEFAULT_GROUP
       config:
+        # Nacos 配置中心地址，默认复用 discovery 地址
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        # Nacos 配置命名空间，默认复用 discovery 命名空间
         namespace: ${spring.cloud.nacos.discovery.namespace}
+        # Nacos 配置分组，默认复用 discovery 分组
         group: ${spring.cloud.nacos.discovery.group}
-        file-extension: yaml # 配置文件格式
+        # 配置文件后缀（对应 dataId 后缀）
+        file-extension: yaml
 
-# 第三方服务配置
+# ==============================
+# 第三方服务业务配置
+# ==============================
 third-party:
   sms:
+    # 是否启用短信能力（false 时不会装配短信客户端）
     enabled: true
-    provider: aliyun # 可选: aliyun, tencent, huawei
+    # 短信服务商：aliyun / tencent / huawei
+    provider: aliyun
+
+    # 阿里云短信参数（provider=aliyun 时使用）
+    aliyun:
+      # 短信服务地域，常用 cn-hangzhou
+      region-id: ${ALIYUN_SMS_REGION_ID:cn-hangzhou}
+      # 阿里云访问凭证
+      access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+      access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+      # 短信签名（控制台已审核通过）
+      sign-name: ${ALIYUN_SMS_SIGN_NAME:}
+      # 短信模板CODE（控制台已审核通过）
+      template-code: ${ALIYUN_SMS_TEMPLATE_CODE:}
+
   payment:
+    # 是否启用支付能力（当前仅配置开关）
     enabled: true
+    # 启用的支付渠道列表（后续可按需扩展参数）
     providers:
       - alipay
       - wechatpay
       - unionpay
-  storage:
-    enabled: true
-    provider: qiniu # 可选: qiniu, aliyun-oss, tencent-cos
 
-# 暴露所有端点用于监控
+  storage:
+    # 是否启用对象存储能力（false 时不会装配存储客户端）
+    enabled: true
+    # 存储服务商：qiniu / aliyun-oss / tencent-cos
+    provider: qiniu
+
+    # 阿里云 OSS 参数（provider=aliyun-oss 时使用）
+    aliyun-oss:
+      # OSS 访问地址，例如 oss-cn-hangzhou.aliyuncs.com
+      endpoint: ${ALIYUN_OSS_ENDPOINT:}
+      # 阿里云访问凭证
+      access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+      access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+      # Bucket 名称
+      bucket-name: ${ALIYUN_OSS_BUCKET:}
+
+# ==============================
+# 运维与监控
+# ==============================
 management:
   endpoints:
     web:
       exposure:
+        # 当前暴露全部端点（仅建议开发环境）
+        # 生产建议改为：health,info,prometheus
         include: "*"
 
-# 服务端口
+# ==============================
+# 服务监听端口
+# ==============================
 server:
+  # third-party 服务端口
   port: 17000
-
