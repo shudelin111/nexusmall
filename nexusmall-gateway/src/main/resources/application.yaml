@@ -1,4 +1,4 @@
-﻿spring:
+spring:
   profiles:
     active: dev
   application:
@@ -18,24 +18,26 @@
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848 # Nacos服务器地址
+        server-addr: 127.0.0.1:8848
     gateway:
       discovery:
         locator:
-          enabled: true # 开启服务自动发现
-          lower-case-service-id: true # 服务ID小写
+          enabled: true
+          lower-case-service-id: true
       routes:
+        - id: auth-service
+          uri: lb://nexusmall-auth
+          predicates:
+            - Path=/auth/**
         - id: product-service
-          uri: lb://nexusmall-product # 使用负载均衡访问product服务
+          uri: lb://nexusmall-product
           predicates:
             - Path=/product/**
-          filters:
-            - StripPrefix=1 # 去掉前缀
         - id: order-service
           uri: lb://nexusmall-order
           predicates:
             - Path=/order/**
-      globalcors:  # 跨域配置
+      globalcors:
         cors-configurations:
           '[/**]':
             allowedOrigins: "*"
@@ -43,14 +45,16 @@
             allowedHeaders: "*"
             allowCredentials: true
 
-# 暴露所有端点用于监控
 management:
   endpoints:
     web:
       exposure:
         include: "*"
 
-# 服务端口
+security:
+  jwt:
+    secret-key: mySecretKeyForJWTGenerationAndValidation
+    expire-time-in-ms: 86400000
+
 server:
   port: 88
-

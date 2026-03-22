@@ -30,6 +30,8 @@ public class ProductController {
         payload.put("service", "nexusmall-product");
         payload.put("status", "UP");
         payload.put("message", "product service is ready");
+        redisUtils.set("kkk", "vvv");
+        System.out.println(redisUtils.get("kkk"));
         return Result.success(payload);
     }
 

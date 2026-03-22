@@ -22,7 +22,7 @@ public class AuthServiceImpl implements AuthService {
     private final User mockUser = User.builder()
             .id(1L)
             .username("admin")
-            .password("$2a$10$dXJ3SW6G7P50lGmMkkmwe.20cQQubK3.HZWzG3YB1tlRy.fqvM/BG")
+            .password("$2a$10$qT2ce24nXVmKuMa91Ae8v.iYqIO9wHAz4EjGkVDFIjnbUs0ouOETW")
             .email("admin@nexusmall.com")
             .status(1)
             .build();
