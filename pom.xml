@@ -19,6 +19,7 @@
     <!-- 统一管理子模块 -->
     <modules>
         <module>nexusmall-product</module>
+        <module>nexusmall-order</module>
         <module>nexusmall-gateway</module>
         <module>nexusmall-auth</module>
         <module>nexusmall-common</module>

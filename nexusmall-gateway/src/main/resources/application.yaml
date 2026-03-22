@@ -31,6 +31,10 @@
             - Path=/product/**
           filters:
             - StripPrefix=1 # 去掉前缀
+        - id: order-service
+          uri: lb://nexusmall-order
+          predicates:
+            - Path=/order/**
       globalcors:  # 跨域配置
         cors-configurations:
           '[/**]':
