@@ -90,7 +90,7 @@ third-party:
     # 是否启用对象存储能力（false 时不会装配存储客户端）
     enabled: true
     # 存储服务商：qiniu / aliyun-oss / tencent-cos
-    provider: qiniu
+    provider: aliyun-oss
 
     # 阿里云 OSS 参数（provider=aliyun-oss 时使用）
     aliyun-oss:

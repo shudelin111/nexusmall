@@ -25,7 +25,10 @@ public class ThirdPartyClientConfig {
      */
     @Bean
     @ConditionalOnExpression(
-            "'${third-party.sms.enabled:false}' == 'true' and '${third-party.sms.provider:}' == 'aliyun'"
+            "'${third-party.sms.enabled:false}' == 'true' and " +
+            "'${third-party.sms.provider:}' == 'aliyun' and " +
+            "'${third-party.sms.aliyun.access-key-id:}' != '' and " +
+            "'${third-party.sms.aliyun.access-key-secret:}' != ''"
     )
     public IAcsClient aliyunSmsClient(ThirdPartyProperties properties) {
         ThirdPartyProperties.Aliyun aliyun = properties.getSms().getAliyun();
@@ -44,7 +47,11 @@ public class ThirdPartyClientConfig {
      */
     @Bean(destroyMethod = "shutdown")
     @ConditionalOnExpression(
-            "'${third-party.storage.enabled:false}' == 'true' and '${third-party.storage.provider:}' == 'aliyun-oss'"
+            "'${third-party.storage.enabled:false}' == 'true' and " +
+            "'${third-party.storage.provider:}' == 'aliyun-oss' and " +
+            "'${third-party.storage.aliyun-oss.endpoint:}' != '' and " +
+            "'${third-party.storage.aliyun-oss.access-key-id:}' != '' and " +
+            "'${third-party.storage.aliyun-oss.access-key-secret:}' != ''"
     )
     public OSS aliyunOssClient(ThirdPartyProperties properties) {
         ThirdPartyProperties.AliyunOss aliyunOss = properties.getStorage().getAliyunOss();
