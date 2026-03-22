@@ -3,6 +3,18 @@ spring:
     active: dev
   application:
     name: nexusmall-auth
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
+    password: ${REDIS_PASSWORD:}
+    timeout: 5000
+    lettuce:
+      pool:
+        max-active: 16
+        max-idle: 8
+        min-idle: 0
+        max-wait: 1000ms
   cloud:
     nacos:
       discovery:
