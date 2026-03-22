@@ -40,9 +40,15 @@ spring:
       globalcors:
         cors-configurations:
           '[/**]':
-            allowedOrigins: "*"
+            # 如果你的前端需要带 Cookie 或 Token 访问后端，请这样改：使用 allowedOriginPatterns: "*" 可以绕过浏览器的通配符限制，同时保持 allowCredentials: true。
+            # 不要用 allowedOrigins，改用 allowedOriginPatterns
+            allowedOriginPatterns: "*"
+            # allowedOrigins: "*"
             allowedMethods: "*"
             allowedHeaders: "*"
+            # 如果你通过 Header（如 Authorization: Bearer xxx）传 Token，且不需要 Cookie，可以直接关掉凭证：
+            # allowCredentials: false
+            # allowedOrigins: "*"
             allowCredentials: true
 
 management:
