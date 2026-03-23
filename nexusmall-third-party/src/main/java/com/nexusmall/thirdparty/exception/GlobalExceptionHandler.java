@@ -1,11 +1,10 @@
-package com.nexusmall.order.exception;
+package com.nexusmall.thirdparty.exception;
 
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -15,28 +14,11 @@ public class GlobalExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(OrderNotFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public Result<Void> handleOrderNotFound(OrderNotFoundException ex) {
-        log.warn("订单未找到：{}", ex.getMessage());
-        return Result.failure(CommonResultCode.NOT_FOUND.getCode(), ex.getMessage());
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex) {
         log.warn("参数异常：{}", ex.getMessage());
         return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), ex.getMessage());
-    }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public Result<Void> handleValidation(MethodArgumentNotValidException ex) {
-        String message = ex.getBindingResult().getFieldError() == null
-                ? "参数校验失败"
-                : ex.getBindingResult().getFieldError().getDefaultMessage();
-        log.warn("参数校验失败：{}", message);
-        return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), message);
     }
 
     @ExceptionHandler(Exception.class)

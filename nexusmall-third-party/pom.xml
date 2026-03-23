@@ -37,7 +37,7 @@
 			<version>5.2.1</version>
 		</dependency>
 
-		<!-- 阿里云OSS -->
+		<!-- 阿里云 OSS -->
 		<dependency>
 			<groupId>com.aliyun.oss</groupId>
 			<artifactId>aliyun-sdk-oss</artifactId>
@@ -61,6 +61,18 @@
 			<groupId>com.nexusmall</groupId>
 			<artifactId>nexusmall-common</artifactId>
 			<version>${project.version}</version>
+			<exclusions>
+				<!-- 排除 MySQL 驱动 -->
+				<exclusion>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
+				</exclusion>
+				<!-- 排除 JDBC Starter -->
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-jdbc</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>

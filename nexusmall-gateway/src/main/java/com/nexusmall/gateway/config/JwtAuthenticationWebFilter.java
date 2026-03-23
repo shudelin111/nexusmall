@@ -15,6 +15,8 @@ import reactor.core.publisher.Mono;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class JwtAuthenticationWebFilter implements WebFilter {
@@ -42,15 +44,32 @@ public class JwtAuthenticationWebFilter implements WebFilter {
                     .parseClaimsJws(token)
                     .getBody();
 
+            String username = claims.getSubject();
+            
+            List<String> roles = claims.get("roles", List.class);
+            List<String> permissions = claims.get("permissions", List.class);
+            
+            List<String> authorities = new ArrayList<>();
+            if (roles != null) {
+                authorities.addAll(roles);
+            }
+            if (permissions != null) {
+                authorities.addAll(permissions);
+            }
+            
+            if (authorities.isEmpty()) {
+                authorities.add("ROLE_USER");
+            }
+
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                    claims.getSubject(),
+                    username,
                     token,
-                    AuthorityUtils.createAuthorityList("ROLE_USER")
+                    AuthorityUtils.createAuthorityList(authorities.toArray(new String[0]))
             );
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         } catch (Exception ex) {
-            return chain.filter(exchange);
+            return Mono.error(new RuntimeException("Token 验证失败：" + ex.getMessage()));
         }
     }
 
