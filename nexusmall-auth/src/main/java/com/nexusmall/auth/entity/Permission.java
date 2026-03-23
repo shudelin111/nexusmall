@@ -12,14 +12,17 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("sys_user")
-public class User {
+@TableName("sys_permission")
+public class Permission {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String username;
-    private String password;
-    private String email;
-    private String phone;
+    private String permissionCode;
+    private String permissionName;
+    private Integer resourceType;
+    private Long parentId;
+    private String path;
+    private String method;
+    private String description;
     private Integer status;
     private Long createTime;
     private Long updateTime;

@@ -1,5 +1,6 @@
 package com.nexusmall.auth.service.impl;
 
+import com.nexusmall.auth.dao.UserMapper;
 import com.nexusmall.auth.entity.User;
 import com.nexusmall.auth.exception.AuthException;
 import com.nexusmall.auth.service.AuthService;
@@ -19,32 +20,32 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private final User mockUser = User.builder()
-            .id(1L)
-            .username("admin")
-            .password("$2a$10$qT2ce24nXVmKuMa91Ae8v.iYqIO9wHAz4EjGkVDFIjnbUs0ouOETW")
-            .email("admin@nexusmall.com")
-            .status(1)
-            .build();
+    @Autowired
+    private UserMapper userMapper;
 
     @Override
     public AuthResponse login(AuthRequest request) {
-        if (!mockUser.getUsername().equals(request.getUsername())
-                || !passwordEncoder.matches(request.getPassword(), mockUser.getPassword())) {
+        User user = userMapper.findByUsername(request.getUsername());
+        if (user == null || user.getStatus() != 1) {
             throw new AuthException("用户名或密码错误");
         }
 
-        String token = jwtUtil.generateToken(mockUser.getUsername());
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AuthException("用户名或密码错误");
+        }
+
+        String token = jwtUtil.generateToken(user.getUsername());
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
         response.setExpireTime(System.currentTimeMillis() + 86400000);
-        response.setUsername(mockUser.getUsername());
+        response.setUsername(user.getUsername());
         return response;
     }
 
     @Override
     public void logout(String token) {
+        // TODO: 可以将 token 加入黑名单（使用 Redis）
     }
 
     @Override

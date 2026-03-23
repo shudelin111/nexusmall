@@ -12,14 +12,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@TableName("sys_user")
-public class User {
+@TableName("sys_role")
+public class Role {
     @TableId(type = IdType.AUTO)
     private Long id;
-    private String username;
-    private String password;
-    private String email;
-    private String phone;
+    private String roleCode;
+    private String roleName;
+    private String description;
     private Integer status;
     private Long createTime;
     private Long updateTime;
