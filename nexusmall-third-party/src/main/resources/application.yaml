@@ -40,7 +40,7 @@ spring:
     nacos:
       discovery:
         # Nacos 地址（服务注册与发现）
-        server-addr: 127.0.0.1:8848
+        server-addr: 10.10.1.1:8848
         # Nacos 命名空间，public 表示默认命名空间
         namespace: public
         # 服务分组
