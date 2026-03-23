@@ -18,7 +18,13 @@
 
     <select id="findByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         SELECT
-        <include refid="Base_Column_List"/>
+            r.id,
+            r.role_code,
+            r.role_name,
+            r.description,
+            r.status,
+            r.create_time,
+            r.update_time
         FROM sys_role r
         INNER JOIN sys_user_role ur ON r.id = ur.role_id
         WHERE ur.user_id = #{userId}

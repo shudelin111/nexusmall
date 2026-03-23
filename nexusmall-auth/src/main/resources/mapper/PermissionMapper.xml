@@ -22,7 +22,17 @@
 
     <select id="findByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
         SELECT DISTINCT
-        <include refid="Base_Column_List"/>
+            p.id,
+            p.permission_code,
+            p.permission_name,
+            p.resource_type,
+            p.parent_id,
+            p.path,
+            p.method,
+            p.description,
+            p.status,
+            p.create_time,
+            p.update_time
         FROM sys_permission p
         INNER JOIN sys_role_permission rp ON p.id = rp.permission_id
         INNER JOIN sys_user_role ur ON rp.role_id = ur.role_id
