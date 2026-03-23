@@ -31,3 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
+/nexusmall-common/src/test/java/com/nexusmall/TestResult.java
