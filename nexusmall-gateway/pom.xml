@@ -55,9 +55,24 @@
 			<artifactId>nexusmall-common</artifactId>
 			<version>${project.version}</version>
 			<exclusions>
+				<!-- 排除 Servlet Web 依赖，避免与网关的 WebFlux 冲突 -->
 				<exclusion>
 					<groupId>org.springframework.boot</groupId>
 					<artifactId>spring-boot-starter-web</artifactId>
+				</exclusion>
+				<!-- 排除 JDBC Starter 和 HikariCP 连接池 -->
+				<exclusion>
+					<groupId>org.springframework.boot</groupId>
+					<artifactId>spring-boot-starter-jdbc</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.zaxxer</groupId>
+					<artifactId>HikariCP</artifactId>
+				</exclusion>
+				<!-- 排除 MySQL 驱动 -->
+				<exclusion>
+					<groupId>mysql</groupId>
+					<artifactId>mysql-connector-java</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
