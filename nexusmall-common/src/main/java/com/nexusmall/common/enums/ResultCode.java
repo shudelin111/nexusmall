@@ -2,7 +2,7 @@ package com.nexusmall.common.enums;
 
 public interface ResultCode {
 
-    String getCode();
+    int getCode();
 
     String getMessage();
 }

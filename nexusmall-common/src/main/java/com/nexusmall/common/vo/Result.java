@@ -12,7 +12,7 @@ public class Result<T> implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private boolean success;
-    private String code;
+    private Integer code;
     private String message;
     private T data;
 
@@ -36,7 +36,7 @@ public class Result<T> implements Serializable {
         return result;
     }
 
-    public static <T> Result<T> failure(String code, String message) {
+    public static <T> Result<T> failure(int code, String message) {
         Result<T> result = new Result<T>();
         result.setSuccess(false);
         result.setCode(code);
