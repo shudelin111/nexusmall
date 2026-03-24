@@ -31,6 +31,14 @@ public class JwtAuthenticationWebFilter implements WebFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        // 跳过公开路径（登录、注册等）
+        String path = exchange.getRequest().getPath().value();
+        if (path.startsWith("/auth/login") || 
+            path.startsWith("/auth/register") || 
+            path.startsWith("/auth/validate")) {
+            return chain.filter(exchange);
+        }
+        
         String authorization = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
             return chain.filter(exchange);

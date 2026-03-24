@@ -20,6 +20,7 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeRequests()
+            // 允许登录、注册等接口匿名访问
             .antMatchers("/auth/**", "/actuator/**").permitAll()
             .anyRequest().authenticated();
 

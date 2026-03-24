@@ -26,23 +26,25 @@ spring:
           lower-case-service-id: true
       routes:
         - id: auth-service
-          uri: lb://nexusmall-auth
+          uri: http://localhost:8000
           predicates:
             - Path=/auth/**
           filters:
-            - StripPrefix=1
+            - PreserveHostHeader
         - id: product-service
-          uri: lb://nexusmall-product
+          uri: http://localhost:10000
           predicates:
             - Path=/product/**
           filters:
             - StripPrefix=1
+            - PreserveHostHeader
         - id: order-service
-          uri: lb://nexusmall-order
+          uri: http://localhost:11000
           predicates:
             - Path=/order/**
           filters:
             - StripPrefix=1
+            - PreserveHostHeader
       globalcors:
         cors-configurations:
           '[/**]':
@@ -78,3 +80,4 @@ logging:
     com.nexusmall.gateway: DEBUG
     org.springframework.cloud.gateway: DEBUG
     org.springframework.http.server.reactive: DEBUG
+    org.springframework.security: DEBUG
