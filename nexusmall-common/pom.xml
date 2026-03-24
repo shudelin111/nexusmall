@@ -71,10 +71,16 @@
 
 	<build>
 		<plugins>
+			<!-- 只使用编译插件，不使用 Spring Boot 打包插件 -->
 			<plugin>
-				<groupId>org.springframework.boot</groupId>
-				<artifactId>spring-boot-maven-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
 			</plugin>
+			<!-- 明确禁用 Spring Boot Maven Plugin -->
 		</plugins>
 	</build>
 
