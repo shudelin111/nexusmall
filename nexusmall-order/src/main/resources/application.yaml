@@ -33,20 +33,62 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 10.10.1.1:8848
-        namespace: public
-        group: DEFAULT_GROUP
+        server-addr: 10.10.1.1:8848 # Nacos 服务器地址
+        namespace: public # 命名空间
+        group: DEFAULT_GROUP # 分组
       config:
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
         namespace: ${spring.cloud.nacos.discovery.namespace}
         group: ${spring.cloud.nacos.discovery.group}
-        file-extension: yaml
+        file-extension: yaml # 配置文件格式
+
+# 服务端口
+server:
+  port: 11000
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.nexusmall.order.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+# Feign 配置
+feign:
+  sentinel:
+    enabled: true
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+
+# Seata 分布式事务配置
+seata:
+  enabled: true
+  application-id: nexusmall-order
+  tx-service-group: nexusmall-tx-group
+  service:
+    vgroup-mapping:
+      nexusmall-tx-group: default
+    grouplist:
+      default: 10.10.1.1:8091
+  registry:
+    type: file
+  config:
+    type: file
+  client:
+    rm:
+      report-success-enable: false
+      report-failure-enable: false
+    tm:
+      commit-retry-count: 5
+      rollback-retry-count: 5
 
 management:
   endpoints:
     web:
       exposure:
         include: "*"
-
-server:
-  port: 11000

@@ -30,6 +30,24 @@
 		<java.version>8</java.version>
 	</properties>
 	<dependencies>
+		<!-- Nacos 配置中心 -->
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+		</dependency>
+
+		<!-- Nacos 服务发现 -->
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+		</dependency>
+
+		<!-- Seata 分布式事务（预留） -->
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+		</dependency>
+
 		<!-- 安全框架 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

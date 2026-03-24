@@ -30,5 +30,16 @@
         WHERE ur.user_id = #{userId}
         AND r.status = 1
     </select>
+    
+    <!-- 插入角色权限关联 -->
+    <insert id="insertRolePermission" parameterType="com.nexusmall.auth.entity.RolePermission">
+        INSERT INTO sys_role_permission (role_id, permission_id, create_time)
+        VALUES (#{roleId}, #{permissionId}, NOW())
+    </insert>
+    
+    <!-- 删除角色权限关联 -->
+    <delete id="deleteRolePermissions" parameterType="java.lang.Long">
+        DELETE FROM sys_role_permission WHERE role_id = #{roleId}
+    </delete>
 
 </mapper>

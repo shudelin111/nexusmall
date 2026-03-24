@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexusmall.product.dao.CategoryMapper">
+
+    <resultMap id="BaseResultMap" type="com.nexusmall.product.entity.Category">
+        <id column="id" property="id"/>
+        <result column="name" property="name"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="level" property="level"/>
+        <result column="sort_order" property="sortOrder"/>
+        <result column="icon" property="icon"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        id, name, parent_id, level, sort_order, icon, status, create_time, update_time
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        WHERE id = #{id}
+    </select>
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        ORDER BY sort_order ASC, create_time DESC
+    </select>
+
+    <select id="listFirstLevel" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        WHERE parent_id = 0 AND level = 1
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="listByParentId" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        WHERE parent_id = #{parentId}
+        ORDER BY sort_order ASC
+    </select>
+
+    <insert id="insert" parameterType="com.nexusmall.product.entity.Category" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO category (
+            name, parent_id, level, sort_order, icon, status
+        ) VALUES (
+            #{name}, #{parentId}, #{level}, #{sortOrder}, #{icon}, #{status}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.nexusmall.product.entity.Category">
+        UPDATE category
+        <set>
+            <if test="name != null">name = #{name},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="level != null">level = #{level},</if>
+            <if test="sortOrder != null">sort_order = #{sortOrder},</if>
+            <if test="icon != null">icon = #{icon},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM category WHERE id = #{id}
+    </delete>
+
+    <select id="listByLevel" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        WHERE level = #{level}
+        ORDER BY sort_order ASC
+    </select>
+
+    <select id="listByStatus" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM category
+        WHERE status = #{status}
+        ORDER BY sort_order ASC
+    </select>
+</mapper>

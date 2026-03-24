@@ -1,44 +1,167 @@
 package com.nexusmall.order.controller;
 
+import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.service.OrderService;
-import com.nexusmall.order.vo.CreateOrderRequest;
-import com.nexusmall.order.vo.UpdateOrderStatusRequest;
-import org.springframework.validation.annotation.Validated;
+import com.nexusmall.order.vo.OrderCreateRequest;
+import io.seata.spring.annotation.GlobalTransactional;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 
-@Validated
+/**
+ * 订单控制器
+ */
+@Slf4j
 @RestController
 @RequestMapping("/order")
 public class OrderController {
 
-    private final OrderService orderService;
+    @Autowired
+    private OrderService orderService;
 
-    public OrderController(OrderService orderService) {
-        this.orderService = orderService;
+    /**
+     * 根据 ID 查询订单
+     */
+    @GetMapping("/{id}")
+    public Result<Order> getOrderById(@PathVariable("id") Long id) {
+        Order order = orderService.getById(id);
+        return order != null ? Result.success(order) : Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
     }
 
-    @PostMapping
-    public Result<Order> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        return Result.success(orderService.createOrder(request));
+    /**
+     * 根据订单号查询订单
+     */
+    @GetMapping("/sn/{orderSn}")
+    public Result<Order> getOrderByOrderSn(@PathVariable("orderSn") String orderSn) {
+        Order order = orderService.getByOrderSn(orderSn);
+        return order != null ? Result.success(order) : Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
     }
 
-    @GetMapping("/{orderSn}")
-    public Result<Order> getOrder(@PathVariable String orderSn) {
-        return Result.success(orderService.getByOrderSn(orderSn));
+    /**
+     * 查询所有订单
+     */
+    @GetMapping("/list")
+    public Result<List<Order>> listOrders() {
+        List<Order> orders = orderService.list();
+        return Result.success(orders);
     }
 
-    @GetMapping
-    public Result<List<Order>> listOrders(@RequestParam(value = "memberId", required = false) Long memberId) {
-        return Result.success(orderService.listOrders(memberId));
+    /**
+     * 根据用户 ID 查询订单列表
+     */
+    @GetMapping("/member/{memberId}")
+    public Result<List<Order>> listByMemberId(@PathVariable("memberId") Long memberId) {
+        List<Order> orders = orderService.listByMemberId(memberId);
+        return Result.success(orders);
     }
 
-    @PutMapping("/{orderSn}/status")
-    public Result<Order> updateStatus(@PathVariable String orderSn, @Valid @RequestBody UpdateOrderStatusRequest request) {
-        return Result.success(orderService.updateStatus(orderSn, request));
+    /**
+     * 根据订单状态查询订单列表
+     */
+    @GetMapping("/status/{status}")
+    public Result<List<Order>> listByStatus(@PathVariable("status") Integer status) {
+        List<Order> orders = orderService.listByStatus(status);
+        return Result.success(orders);
+    }
+
+    /**
+     * 条件查询订单列表
+     */
+    @GetMapping("/search")
+    public Result<List<Order>> searchOrders(
+            @RequestParam(required = false) Long memberId,
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        List<Order> orders = orderService.listByCondition(memberId, status, startTime, endTime);
+        return Result.success(orders);
+    }
+
+    /**
+     * 创建订单（带分布式事务）
+     */
+    @PostMapping("/create")
+    @GlobalTransactional(name = "create-order-api-tx", rollbackFor = Exception.class)
+    public Result<Order> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+        try {
+            Order order = orderService.createOrder(request);
+            return Result.success("订单创建成功", order);
+        } catch (Exception e) {
+            log.error("创建订单失败", e);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单创建失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 更新订单
+     */
+    @PutMapping("/{id}")
+    public Result<Boolean> updateOrder(@PathVariable("id") Long id, @RequestBody Order order) {
+        order.setId(id);
+        boolean result = orderService.updateById(order);
+        return result ? Result.success("订单更新成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单更新失败");
+    }
+
+    /**
+     * 删除订单
+     */
+    @DeleteMapping("/{id}")
+    public Result<Boolean> deleteOrder(@PathVariable("id") Long id) {
+        boolean result = orderService.deleteById(id);
+        return result ? Result.success("订单删除成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单删除失败");
+    }
+
+    /**
+     * 批量删除订单
+     */
+    @DeleteMapping("/batch")
+    public Result<Boolean> batchDeleteOrders(@RequestBody List<Long> ids) {
+        boolean result = orderService.batchDelete(ids);
+        return result ? Result.success("批量删除成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量删除失败");
+    }
+
+    /**
+     * 支付订单
+     */
+    @PostMapping("/{id}/pay")
+    public Result<Boolean> payOrder(
+            @PathVariable("id") Long id,
+            @RequestParam("paymentType") Integer paymentType) {
+        boolean result = orderService.payOrder(id, paymentType);
+        return result ? Result.success("支付成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "支付失败");
+    }
+
+    /**
+     * 发货
+     */
+    @PostMapping("/{id}/deliver")
+    public Result<Boolean> deliverOrder(@PathVariable("id") Long id) {
+        boolean result = orderService.deliveryOrder(id);
+        return result ? Result.success("发货成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "发货失败");
+    }
+
+    /**
+     * 确认收货
+     */
+    @PostMapping("/{id}/receive")
+    public Result<Boolean> receiveOrder(@PathVariable("id") Long id) {
+        boolean result = orderService.receiveOrder(id);
+        return result ? Result.success("确认收货成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "确认收货失败");
+    }
+
+    /**
+     * 取消订单
+     */
+    @PostMapping("/{id}/cancel")
+    public Result<Boolean> cancelOrder(@PathVariable("id") Long id) {
+        boolean result = orderService.cancelOrder(id);
+        return result ? Result.success("订单取消成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单取消失败");
     }
 }

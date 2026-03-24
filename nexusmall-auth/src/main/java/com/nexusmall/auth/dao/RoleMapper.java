@@ -2,7 +2,9 @@ package com.nexusmall.auth.dao;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.nexusmall.auth.entity.Role;
+import com.nexusmall.auth.entity.RolePermission;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -20,4 +22,14 @@ public interface RoleMapper extends BaseMapper<Role> {
     int updateById(Role role);
 
     int deleteById(Long id);
+    
+    /**
+     * 插入角色权限关联
+     */
+    int insertRolePermission(RolePermission rolePermission);
+    
+    /**
+     * 删除角色权限关联
+     */
+    int deleteRolePermissions(@Param("roleId") Long roleId);
 }

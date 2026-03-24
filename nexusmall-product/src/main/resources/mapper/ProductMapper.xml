@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexusmall.product.dao.ProductMapper">
+
+    <resultMap id="BaseResultMap" type="com.nexusmall.product.entity.Product">
+        <id column="sku_id" property="skuId"/>
+        <result column="sku_name" property="skuName"/>
+        <result column="price" property="price"/>
+        <result column="stock" property="stock"/>
+        <result column="category_id" property="categoryId"/>
+        <result column="category_name" property="categoryName"/>
+        <result column="brand_id" property="brandId"/>
+        <result column="brand_name" property="brandName"/>
+        <result column="description" property="description"/>
+        <result column="status" property="status"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+        <result column="version" property="version"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        sku_id, sku_name, price, stock, category_id, category_name, brand_id, brand_name, 
+        description, status, create_time, update_time, version
+    </sql>
+
+    <select id="selectById" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM product
+        WHERE sku_id = #{skuId}
+    </select>
+
+    <select id="list" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM product
+        ORDER BY create_time DESC
+    </select>
+
+    <select id="listByCondition" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM product
+        <where>
+            <if test="keyword != null and keyword != ''">
+                AND (sku_name LIKE CONCAT('%', #{keyword}, '%') OR description LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="categoryId != null">
+                AND category_id = #{categoryId}
+            </if>
+            <if test="brandId != null">
+                AND brand_id = #{brandId}
+            </if>
+            <if test="status != null">
+                AND status = #{status}
+            </if>
+        </where>
+        ORDER BY create_time DESC
+    </select>
+
+    <insert id="insert" parameterType="com.nexusmall.product.entity.Product" useGeneratedKeys="true" keyProperty="skuId">
+        INSERT INTO product (
+            sku_name, price, stock, category_id, category_name, brand_id, brand_name,
+            description, status
+        ) VALUES (
+            #{skuName}, #{price}, #{stock}, #{categoryId}, #{categoryName}, #{brandId}, #{brandName},
+            #{description}, #{status}
+        )
+    </insert>
+
+    <update id="updateById" parameterType="com.nexusmall.product.entity.Product">
+        UPDATE product
+        <set>
+            <if test="skuName != null">sku_name = #{skuName},</if>
+            <if test="price != null">price = #{price},</if>
+            <if test="stock != null">stock = #{stock},</if>
+            <if test="categoryId != null">category_id = #{categoryId},</if>
+            <if test="categoryName != null">category_name = #{categoryName},</if>
+            <if test="brandId != null">brand_id = #{brandId},</if>
+            <if test="brandName != null">brand_name = #{brandName},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="version != null">version = version + 1,</if>
+        </set>
+        WHERE sku_id = #{skuId}
+        <if test="version != null">
+            AND version = #{version}
+        </if>
+    </update>
+
+    <delete id="deleteById">
+        DELETE FROM product WHERE sku_id = #{skuId}
+    </delete>
+
+    <update id="decreaseStock">
+        UPDATE product
+        SET stock = stock - #{count}, version = version + 1
+        WHERE sku_id = #{skuId} AND stock >= #{count}
+    </update>
+
+    <update id="increaseStock">
+        UPDATE product
+        SET stock = stock + #{count}, version = version + 1
+        WHERE sku_id = #{skuId}
+    </update>
+
+    <update id="batchDecreaseStock">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE product
+            SET stock = stock - #{item.count}, version = version + 1
+            WHERE sku_id = #{item.skuId} AND stock >= #{item.count}
+        </foreach>
+    </update>
+
+    <update id="batchIncreaseStock">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE product
+            SET stock = stock + #{item.count}, version = version + 1
+            WHERE sku_id = #{item.skuId}
+        </foreach>
+    </update>
+
+    <select id="checkStock" resultType="boolean">
+        SELECT CASE WHEN COUNT(1) > 0 THEN true ELSE false END
+        FROM product
+        WHERE sku_id = #{skuId} AND stock >= #{count}
+    </select>
+
+    <update id="putOnSale">
+        UPDATE product SET status = 1, version = version + 1 WHERE sku_id = #{skuId}
+    </update>
+
+    <update id="putOffSale">
+        UPDATE product SET status = 0, version = version + 1 WHERE sku_id = #{skuId}
+    </update>
+
+    <select id="listBySkuIds" resultMap="BaseResultMap">
+        SELECT <include refid="Base_Column_List"/>
+        FROM product
+        WHERE sku_id IN
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+</mapper>

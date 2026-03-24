@@ -1,21 +1,21 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.util.RedisUtils;
 import com.nexusmall.common.vo.Result;
+import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.service.ProductService;
+import com.nexusmall.product.vo.ProductVO;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * Controller for handling product-related requests.
+ * 商品控制器 - 处理所有商品相关请求
  */
 @RestController
 @RequestMapping("/product")
@@ -28,10 +28,7 @@ public class ProductController {
     private RedisUtils redisUtils;
 
     /**
-     * Health check endpoint to verify the service status.
-     * Also performs a quick Redis write/read check to ensure connectivity.
-     *
-     * @return Result containing service status and message.
+     * 健康检查接口
      */
     @GetMapping("/ping")
     public Result<Map<String, Object>> ping() {
@@ -49,9 +46,7 @@ public class ProductController {
     }
 
     /**
-     * Retrieves a list of all products.
-     *
-     * @return Result containing a list of Product entities.
+     * 查询所有商品
      */
     @GetMapping("/list")
     public Result<List<Product>> listProducts() {
@@ -59,10 +54,7 @@ public class ProductController {
     }
 
     /**
-     * Retrieves a specific product by its SKU ID.
-     *
-     * @param skuId The unique identifier for the stock keeping unit.
-     * @return Result containing the requested Product.
+     * 根据 SKU ID 查询商品
      */
     @GetMapping("/{skuId}")
     public Result<Product> getProduct(@PathVariable Long skuId) {
@@ -70,23 +62,109 @@ public class ProductController {
     }
 
     /**
-     * Debug endpoint to test Redis caching for a specific product.
-     * Stores the product in Redis and immediately retrieves it to verify serialization.
-     *
-     * @param skuId The SKU ID of the product to test.
-     * @return Result containing debug information about the cache operation.
+     * 根据条件查询商品列表
      */
-    @GetMapping("/redis/debug/{skuId}")
-    public Result<Map<String, Object>> debugRedis(@PathVariable Long skuId) {
-        Product product = productService.getBySkuId(skuId);
-        String cacheKey = "product:debug:" + skuId;
-        redisUtils.set(cacheKey, product);
+    @GetMapping("/listByCondition")
+    public Result<List<ProductVO>> listByCondition(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long brandId,
+            @RequestParam(required = false) Integer status) {
+        return Result.success(productService.listByCondition(keyword, categoryId, brandId, status));
+    }
 
-        Product cachedProduct = redisUtils.get(cacheKey, Product.class);
-        Map<String, Object> payload = new LinkedHashMap<String, Object>();
-        payload.put("key", cacheKey);
-        payload.put("exists", redisUtils.hasKey(cacheKey));
-        payload.put("value", cachedProduct);
-        return Result.success(payload);
+    /**
+     * 新增商品
+     */
+    @PostMapping("/save")
+    public Result<Integer> saveProduct(@RequestBody ProductVO productVO) {
+        int result = productService.save(productVO);
+        return result > 0 ? Result.success("商品添加成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品添加失败");
+    }
+
+    /**
+     * 更新商品
+     */
+    @PutMapping("/update")
+    public Result<Integer> updateProduct(@RequestBody ProductVO productVO) {
+        int result = productService.updateById(productVO);
+        return result > 0 ? Result.success("商品更新成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品更新失败");
+    }
+
+    /**
+     * 删除商品
+     */
+    @DeleteMapping("/delete/{skuId}")
+    public Result<Integer> deleteProduct(@PathVariable Long skuId) {
+        int result = productService.deleteById(skuId);
+        return result > 0 ? Result.success("商品删除成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品删除失败");
+    }
+
+    /**
+     * 扣减库存（支持分布式事务）
+     */
+    @PostMapping("/decreaseStock")
+    public Result<Boolean> decreaseStock(
+            @RequestParam("productId") Long productId,
+            @RequestParam("count") Integer count) {
+        boolean result = productService.decreaseStock(productId, count);
+        return result ? Result.success("库存扣减成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存扣减失败");
+    }
+
+    /**
+     * 增加库存（支持分布式事务）
+     */
+    @PostMapping("/increaseStock")
+    public Result<Boolean> increaseStock(
+            @RequestParam("productId") Long productId,
+            @RequestParam("count") Integer count) {
+        boolean result = productService.increaseStock(productId, count);
+        return result ? Result.success("库存增加成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
+    }
+
+    /**
+     * 检查库存是否充足
+     */
+    @GetMapping("/checkStock")
+    public Result<Boolean> checkStock(
+            @RequestParam("productId") Long productId,
+            @RequestParam("count") Integer count) {
+        return Result.success(productService.checkStock(productId, count));
+    }
+
+    /**
+     * 上架商品
+     */
+    @PutMapping("/putOnSale/{skuId}")
+    public Result<Boolean> putOnSale(@PathVariable Long skuId) {
+        boolean result = productService.putOnSale(skuId);
+        return result ? Result.success("商品上架成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品上架失败");
+    }
+
+    /**
+     * 下架商品
+     */
+    @PutMapping("/putOffSale/{skuId}")
+    public Result<Boolean> putOffSale(@PathVariable Long skuId) {
+        boolean result = productService.putOffSale(skuId);
+        return result ? Result.success("商品下架成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品下架失败");
+    }
+
+    /**
+     * 批量扣减库存
+     */
+    @PostMapping("/batchDecreaseStock")
+    public Result<Boolean> batchDecreaseStock(@RequestBody List<ProductStockDTO> stockDTOS) {
+        boolean result = productService.batchDecreaseStock(stockDTOS);
+        return result ? Result.success("批量扣减库存成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
+    }
+
+    /**
+     * 批量增加库存
+     */
+    @PostMapping("/batchIncreaseStock")
+    public Result<Boolean> batchIncreaseStock(@RequestBody List<ProductStockDTO> stockDTOS) {
+        boolean result = productService.batchIncreaseStock(stockDTOS);
+        return result ? Result.success("批量增加库存成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
     }
 }

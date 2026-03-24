@@ -1,57 +1,142 @@
 package com.nexusmall.product.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
+import com.nexusmall.product.dao.ProductMapper;
+import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.exception.ProductNotFoundException;
 import com.nexusmall.product.service.ProductService;
+import com.nexusmall.product.vo.ProductVO;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
 
-    private final List<Product> mockProducts = Arrays.asList(
-            Product.builder()
-                    .skuId(1001L)
-                    .skuName("NexusMall iPhone 16 Pro")
-                    .price(new BigDecimal("7999.00"))
-                    .stock(25)
-                    .categoryName("手机")
-                    .brandName("Apple")
-                    .description("用于接口联调的模拟商品")
-                    .build(),
-            Product.builder()
-                    .skuId(1002L)
-                    .skuName("NexusMall Mate 70")
-                    .price(new BigDecimal("5999.00"))
-                    .stock(40)
-                    .categoryName("手机")
-                    .brandName("Huawei")
-                    .description("用于网关和订单联调的模拟商品")
-                    .build(),
-            Product.builder()
-                    .skuId(1003L)
-                    .skuName("NexusMall Redmi Book Pro")
-                    .price(new BigDecimal("4999.00"))
-                    .stock(18)
-                    .categoryName("电脑")
-                    .brandName("Xiaomi")
-                    .description("用于前端商品页调试的模拟商品")
-                    .build()
-    );
+    @Autowired
+    private ProductMapper productMapper;
 
     @Override
     public List<Product> listProducts() {
-        return mockProducts;
+        return productMapper.list();
     }
 
     @Override
     public Product getBySkuId(Long skuId) {
-        return mockProducts.stream()
-                .filter(product -> product.getSkuId().equals(skuId))
-                .findFirst()
-                .orElseThrow(() -> new ProductNotFoundException(skuId));
+        Product product = productMapper.selectById(skuId);
+        if (product == null) {
+            throw new ProductNotFoundException(skuId);
+        }
+        return product;
+    }
+
+    @Override
+    public List<ProductVO> listByCondition(String keyword, Long categoryId, Long brandId, Integer status) {
+        List<Product> products = productMapper.listByCondition(keyword, categoryId, brandId, status);
+        return products.stream()
+                .map(p -> BeanUtil.copyProperties(p, ProductVO.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int save(ProductVO productVO) {
+        Product product = BeanUtil.copyProperties(productVO, Product.class);
+        product.setStatus(1); // 默认上架
+        return productMapper.insert(product);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int updateById(ProductVO productVO) {
+        Product product = BeanUtil.copyProperties(productVO, Product.class);
+        return productMapper.updateById(product);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public int deleteById(Long skuId) {
+        return productMapper.deleteById(skuId);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean decreaseStock(Long skuId, Integer count) {
+        log.info("开始扣减库存，skuId: {}, count: {}", skuId, count);
+        int result = productMapper.decreaseStock(skuId, count);
+        if (result > 0) {
+            log.info("库存扣减成功，skuId: {}, count: {}", skuId, count);
+            return true;
+        } else {
+            log.error("库存扣减失败，skuId: {}, count: {}，库存不足", skuId, count);
+            throw new RuntimeException("库存不足");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean increaseStock(Long skuId, Integer count) {
+        log.info("开始增加库存，skuId: {}, count: {}", skuId, count);
+        int result = productMapper.increaseStock(skuId, count);
+        if (result > 0) {
+            log.info("库存增加成功，skuId: {}, count: {}", skuId, count);
+            return true;
+        } else {
+            log.error("库存增加失败，skuId: {}, count: {}", skuId, count);
+            throw new RuntimeException("库存增加失败");
+        }
+    }
+
+    @Override
+    public boolean checkStock(Long skuId, Integer count) {
+        return productMapper.checkStock(skuId, count);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean putOnSale(Long skuId) {
+        int result = productMapper.putOnSale(skuId);
+        return result > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean putOffSale(Long skuId) {
+        int result = productMapper.putOffSale(skuId);
+        return result > 0;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchDecreaseStock(List<ProductStockDTO> stockDTOS) {
+        log.info("开始批量扣减库存，stockDTOS: {}", stockDTOS);
+        int result = productMapper.batchDecreaseStock(stockDTOS);
+        if (result > 0) {
+            log.info("批量扣减库存成功");
+            return true;
+        } else {
+            log.error("批量扣减库存失败");
+            throw new RuntimeException("批量扣减库存失败");
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchIncreaseStock(List<ProductStockDTO> stockDTOS) {
+        log.info("开始批量增加库存，stockDTOS: {}", stockDTOS);
+        int result = productMapper.batchIncreaseStock(stockDTOS);
+        if (result > 0) {
+            log.info("批量增加库存成功");
+            return true;
+        } else {
+            log.error("批量增加库存失败");
+            throw new RuntimeException("批量增加库存失败");
+        }
     }
 }

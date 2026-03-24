@@ -1,12 +1,13 @@
-package com.nexusmall.product.entity;
+package com.nexusmall.product.vo;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Data
-public class Product {
+public class ProductVO implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     private Long skuId;
     private String skuName;
@@ -18,7 +19,4 @@ public class Product {
     private String brandName;
     private String description;
     private Integer status;
-    private LocalDateTime createTime;
-    private LocalDateTime updateTime;
-    private Integer version;
 }
