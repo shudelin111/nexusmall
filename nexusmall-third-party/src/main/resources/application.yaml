@@ -121,3 +121,4 @@ management:
 server:
   # third-party 服务端口
   port: 17000
+  address: 0.0.0.0

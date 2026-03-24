@@ -71,6 +71,7 @@ management:
 # 服务端口
 server:
   port: 8000
+  address: 0.0.0.0
 
 # Seata 分布式事务配置（预留）
 seata:

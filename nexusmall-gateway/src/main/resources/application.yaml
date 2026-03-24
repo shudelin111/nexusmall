@@ -29,14 +29,20 @@ spring:
           uri: lb://nexusmall-auth
           predicates:
             - Path=/auth/**
+          filters:
+            - StripPrefix=1
         - id: product-service
           uri: lb://nexusmall-product
           predicates:
             - Path=/product/**
+          filters:
+            - StripPrefix=1
         - id: order-service
           uri: lb://nexusmall-order
           predicates:
             - Path=/order/**
+          filters:
+            - StripPrefix=1
       globalcors:
         cors-configurations:
           '[/**]':
@@ -64,3 +70,11 @@ security:
 
 server:
   port: 88
+  address: 0.0.0.0
+
+logging:
+  level:
+    root: INFO
+    com.nexusmall.gateway: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.http.server.reactive: DEBUG

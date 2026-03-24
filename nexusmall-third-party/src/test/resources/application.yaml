@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: nexusmall-third-party
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/nexusmall_third_party?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: root
+    password: root
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimum-idle: 1
+      maximum-pool-size: 2
+  cloud:
+    nacos:
+      discovery:
+        enabled: false
+      config:
+        enabled: false
+        import-check:
+          enabled: false
+  autoconfigure:
+    exclude:
+      - io.seata.spring.boot.autoconfigure.SeataAutoConfiguration
+
+server:
+  port: 13000
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.nexusmall.thirdparty.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+
+logging:
+  level:
+    root: INFO
+    com.nexusmall.thirdparty: DEBUG
