@@ -55,6 +55,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+            <!-- Seata 分布式事务 -->
+            <dependency>
+                <groupId>io.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>1.5.2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

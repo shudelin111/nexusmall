@@ -42,12 +42,6 @@
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 		</dependency>
 
-		<!-- Seata 分布式事务（预留） -->
-		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-seata</artifactId>
-		</dependency>
-
 		<!-- 安全框架 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -88,11 +82,36 @@
 			<scope>runtime</scope>
 		</dependency>
 
+		<!-- Redis 支持 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-redis</artifactId>
+		</dependency>
+
+		<!-- Web 支持 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-web</artifactId>
+		</dependency>
+
+		<!-- 健康检查 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
 		<!-- 公共模块 -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>
 			<artifactId>nexusmall-common</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- 安全测试依赖 -->

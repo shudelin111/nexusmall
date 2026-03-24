@@ -44,8 +44,8 @@
 
 		<!-- Seata 分布式事务 -->
 		<dependency>
-			<groupId>com.alibaba.cloud</groupId>
-			<artifactId>spring-cloud-starter-alibaba-seata</artifactId>
+			<groupId>io.seata</groupId>
+			<artifactId>seata-spring-boot-starter</artifactId>
 		</dependency>
 
 		<!-- OpenFeign 服务调用 -->
@@ -58,13 +58,6 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
-		</dependency>
-
-		<!-- 公共模块 -->
-		<dependency>
-			<groupId>com.nexusmall</groupId>
-			<artifactId>nexusmall-common</artifactId>
-			<version>${project.version}</version>
 		</dependency>
 
 		<!-- MyBatis Plus -->
@@ -98,6 +91,20 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+		</dependency>
+
+		<!-- 公共模块 -->
+		<dependency>
+			<groupId>com.nexusmall</groupId>
+			<artifactId>nexusmall-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<!-- 测试依赖 -->
