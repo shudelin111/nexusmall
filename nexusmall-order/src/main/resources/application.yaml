@@ -82,8 +82,8 @@ seata:
     type: file
   client:
     rm:
-      report-success-enable: false
-      report-failure-enable: false
+      report-success-enable: true
+      report-failure-enable: true
     tm:
       commit-retry-count: 5
       rollback-retry-count: 5

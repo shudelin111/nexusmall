@@ -124,6 +124,9 @@ public class OrderServiceImpl implements OrderService {
             throw new RuntimeException("创建订单失败");
         }
 
+        // TODO: 测试分布式事务回滚 - 取消下面这行的注释来测试回滚功能
+        // throw new RuntimeException("测试回滚 - 订单创建后会回滚");
+
         log.info("订单创建成功，订单号：{}", orderSn);
         return order;
     }

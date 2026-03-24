@@ -7,6 +7,7 @@ import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.exception.ProductNotFoundException;
 import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.vo.ProductVO;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -66,6 +67,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @GlobalTransactional(name = "decrease-stock-tx", rollbackFor = Exception.class)
     @Transactional(rollbackFor = Exception.class)
     public boolean decreaseStock(Long skuId, Integer count) {
         log.info("开始扣减库存，skuId: {}, count: {}", skuId, count);
