@@ -36,14 +36,12 @@ spring:
           predicates:
             - Path=/product/**
           filters:
-            - StripPrefix=1
             - PreserveHostHeader
         - id: order-service
           uri: http://localhost:11000
           predicates:
             - Path=/order/**
           filters:
-            - StripPrefix=1
             - PreserveHostHeader
       globalcors:
         cors-configurations:

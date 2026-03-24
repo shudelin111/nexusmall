@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -24,6 +26,6 @@ public class Permission {
     private String method;
     private String description;
     private Integer status;
-    private Long createTime;
-    private Long updateTime;
+    private LocalDateTime createTime;
+    private LocalDateTime updateTime;
 }

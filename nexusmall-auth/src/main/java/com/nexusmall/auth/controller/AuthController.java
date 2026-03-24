@@ -6,6 +6,9 @@ import com.nexusmall.auth.vo.AuthResponse;
 import com.nexusmall.common.vo.Result;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.LinkedHashMap;
+import java.util.Map;
+
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -14,6 +17,18 @@ public class AuthController {
 
     public AuthController(AuthService authService) {
         this.authService = authService;
+    }
+
+    /**
+     * 健康检查接口
+     */
+    @GetMapping("/ping")
+    public Result<Map<String, Object>> ping() {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("service", "nexusmall-auth");
+        payload.put("status", "UP");
+        payload.put("message", "auth service is ready");
+        return Result.success(payload);
     }
 
     @PostMapping("/login")

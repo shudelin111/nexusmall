@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * 订单控制器
@@ -25,6 +27,18 @@ public class OrderController {
 
     @Autowired
     private OrderService orderService;
+
+    /**
+     * 健康检查接口
+     */
+    @GetMapping("/ping")
+    public Result<Map<String, Object>> ping() {
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("service", "nexusmall-order");
+        payload.put("status", "UP");
+        payload.put("message", "order service is ready");
+        return Result.success(payload);
+    }
 
     /**
      * 根据 ID 查询订单
