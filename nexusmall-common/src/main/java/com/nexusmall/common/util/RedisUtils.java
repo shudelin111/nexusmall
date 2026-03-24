@@ -29,12 +29,15 @@ public class RedisUtils {
         return redisTemplate.opsForValue().get(key);
     }
 
+    @SuppressWarnings("unchecked")
     public <T> T get(String key, Class<T> clazz) {
         Object value = get(key);
-        if (value == null) {
-            return null;
+        if (value != null) {
+            if (clazz.isInstance(value)) {
+                return (T) value;
+            }
         }
-        return clazz.cast(value);
+        return null;
     }
 
     public Boolean delete(String key) {
@@ -45,14 +48,6 @@ public class RedisUtils {
         return redisTemplate.delete(keys);
     }
 
-    public Boolean expire(String key, long timeout, TimeUnit timeUnit) {
-        return redisTemplate.expire(key, timeout, timeUnit);
-    }
-
-    public Long getExpire(String key, TimeUnit timeUnit) {
-        return redisTemplate.getExpire(key, timeUnit);
-    }
-
     public Boolean hasKey(String key) {
         return redisTemplate.hasKey(key);
     }
@@ -61,8 +56,16 @@ public class RedisUtils {
         return redisTemplate.opsForValue().increment(key, delta);
     }
 
+    public Long decrement(String key, long delta) {
+        return redisTemplate.opsForValue().decrement(key, delta);
+    }
+
+    public Boolean expire(String key, long timeout, TimeUnit timeUnit) {
+        return redisTemplate.expire(key, timeout, timeUnit);
+    }
+
     public Set<String> keys(String pattern) {
-        Set<String> keys = redisTemplate.keys(pattern);
-        return keys == null ? Collections.<String>emptySet() : keys;
+        Set<String> result = redisTemplate.keys(pattern);
+        return result != null ? result : Collections.emptySet();
     }
 }
