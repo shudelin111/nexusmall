@@ -36,6 +36,12 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 	
+		<!-- Nacos 配置中心 -->
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+		</dependency>
+	
 		<!-- Nacos 服务发现 -->
 		<dependency>
 			<groupId>com.alibaba.cloud</groupId>
@@ -58,26 +64,22 @@
 		<dependency>
 			<groupId>org.apache.httpcomponents.client5</groupId>
 			<artifactId>httpclient5</artifactId>
-			<version>5.2.1</version>
 		</dependency>
 
 		<!-- 阿里云 OSS -->
 		<dependency>
 			<groupId>com.aliyun.oss</groupId>
 			<artifactId>aliyun-sdk-oss</artifactId>
-			<version>3.17.4</version>
 		</dependency>
 
 		<!-- 阿里云短信 -->
 		<dependency>
 			<groupId>com.aliyun</groupId>
 			<artifactId>aliyun-java-sdk-core</artifactId>
-			<version>4.6.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.aliyun</groupId>
 			<artifactId>aliyun-java-sdk-dysmsapi</artifactId>
-			<version>2.2.1</version>
 		</dependency>
 
 		<!-- 公共模块 -->
@@ -97,6 +99,13 @@
 					<artifactId>spring-boot-starter-jdbc</artifactId>
 				</exclusion>
 			</exclusions>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<optional>true</optional>
 		</dependency>
 
 		<dependency>
