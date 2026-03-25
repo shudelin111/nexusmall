@@ -42,12 +42,15 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(AuthRequest request) {
+        log.info("用户登录，username: {}", request.getUsername());
         User user = userMapper.findByUsername(request.getUsername());
         if (user == null || user.getStatus() != 1) {
+            log.warn("用户不存在或已禁用，username: {}", request.getUsername());
             throw new AuthException("用户名或密码错误");
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            log.warn("密码不匹配，username: {}", request.getUsername());
             throw new AuthException("用户名或密码错误");
         }
 
@@ -63,6 +66,9 @@ public class AuthServiceImpl implements AuthService {
                 .collect(Collectors.toList());
 
         String token = jwtUtil.generateToken(user.getUsername(), roleCodes, permissionCodes);
+        
+        log.info("用户登录成功，username: {}, roles: {}, permissions: {}", 
+                user.getUsername(), roleCodes.size(), permissionCodes.size());
 
         AuthResponse response = new AuthResponse();
         response.setToken(token);
@@ -75,12 +81,17 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String token) {
+        log.info("用户登出，token: {}...", token.length() > 20 ? token.substring(0, 20) : token);
         // TODO: 可以将 token 加入黑名单（使用 Redis）
+        log.debug("用户登出处理完成");
     }
 
     @Override
     public boolean validateToken(String token) {
-        return jwtUtil.validateToken(token);
+        log.debug("验证 Token: {}...", token.length() > 20 ? token.substring(0, 20) : token);
+        boolean valid = jwtUtil.validateToken(token);
+        log.info("Token 验证{}", valid ? "成功" : "失败");
+        return valid;
     }
 
     @Override

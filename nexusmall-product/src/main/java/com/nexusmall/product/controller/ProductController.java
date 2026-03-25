@@ -64,7 +64,10 @@ public class ProductController {
      */
     @GetMapping("/list")
     public Result<List<Product>> listProducts() {
-        return Result.success(productService.listProducts());
+        log.info("查询所有商品列表");
+        List<Product> products = productService.listProducts();
+        log.info("查询到{}条商品数据", products.size());
+        return Result.success(products);
     }
 
     /**
@@ -74,6 +77,7 @@ public class ProductController {
     public Result<Product> getProduct(@PathVariable Long skuId,
                                       @RequestParam(required = false) Long userId,
                                       @RequestParam(required = false) String userName) {
+        log.info("查询商品详情，skuId: {}, userId: {}", skuId, userId);
         Product product = productService.getBySkuId(skuId);
         
         // 发送用户浏览行为到 RocketMQ
@@ -107,7 +111,11 @@ public class ProductController {
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long brandId,
             @RequestParam(required = false) Integer status) {
-        return Result.success(productService.listByCondition(keyword, categoryId, brandId, status));
+        log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
+                keyword, categoryId, brandId, status);
+        List<ProductVO> products = productService.listByCondition(keyword, categoryId, brandId, status);
+        log.info("查询到{}条商品数据", products.size());
+        return Result.success(products);
     }
 
     /**
@@ -115,8 +123,15 @@ public class ProductController {
      */
     @PostMapping("/save")
     public Result<Integer> saveProduct(@RequestBody ProductVO productVO) {
+        log.info("新增商品，productName: {}, categoryId: {}", productVO.getName(), productVO.getCategoryId());
         int result = productService.save(productVO);
-        return result > 0 ? Result.success("商品添加成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品添加失败");
+        if (result > 0) {
+            log.info("商品添加成功，result: {}", result);
+            return Result.success("商品添加成功", result);
+        } else {
+            log.error("商品添加失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品添加失败");
+        }
     }
 
     /**
@@ -124,8 +139,15 @@ public class ProductController {
      */
     @PutMapping("/update")
     public Result<Integer> updateProduct(@RequestBody ProductVO productVO) {
+        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getName());
         int result = productService.updateById(productVO);
-        return result > 0 ? Result.success("商品更新成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品更新失败");
+        if (result > 0) {
+            log.info("商品更新成功，result: {}", result);
+            return Result.success("商品更新成功", result);
+        } else {
+            log.error("商品更新失败，skuId: {}", productVO.getSkuId());
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品更新失败");
+        }
     }
 
     /**
@@ -133,8 +155,15 @@ public class ProductController {
      */
     @DeleteMapping("/delete/{skuId}")
     public Result<Integer> deleteProduct(@PathVariable Long skuId) {
+        log.info("删除商品，skuId: {}", skuId);
         int result = productService.deleteById(skuId);
-        return result > 0 ? Result.success("商品删除成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品删除失败");
+        if (result > 0) {
+            log.info("商品删除成功，skuId: {}", skuId);
+            return Result.success("商品删除成功", result);
+        } else {
+            log.error("商品删除失败，skuId: {}", skuId);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品删除失败");
+        }
     }
 
     /**
@@ -163,8 +192,15 @@ public class ProductController {
     public Result<Boolean> increaseStock(
             @RequestParam("productId") Long productId,
             @RequestParam("count") Integer count) {
+        log.info("增加库存，productId: {}, count: {}", productId, count);
         boolean result = productService.increaseStock(productId, count);
-        return result ? Result.success("库存增加成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
+        if (result) {
+            log.info("库存增加成功，productId: {}, count: {}", productId, count);
+            return Result.success("库存增加成功", true);
+        } else {
+            log.error("库存增加失败，productId: {}, count: {}", productId, count);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
+        }
     }
 
     /**
@@ -174,7 +210,10 @@ public class ProductController {
     public Result<Boolean> checkStock(
             @RequestParam("productId") Long productId,
             @RequestParam("count") Integer count) {
-        return Result.success(productService.checkStock(productId, count));
+        log.info("检查库存，productId: {}, count: {}", productId, count);
+        boolean result = productService.checkStock(productId, count);
+        log.info("库存检查结果：{}", result ? "充足" : "不足");
+        return Result.success(result);
     }
 
     /**
@@ -182,8 +221,15 @@ public class ProductController {
      */
     @PutMapping("/putOnSale/{skuId}")
     public Result<Boolean> putOnSale(@PathVariable Long skuId) {
+        log.info("商品上架，skuId: {}", skuId);
         boolean result = productService.putOnSale(skuId);
-        return result ? Result.success("商品上架成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品上架失败");
+        if (result) {
+            log.info("商品上架成功，skuId: {}", skuId);
+            return Result.success("商品上架成功", true);
+        } else {
+            log.error("商品上架失败，skuId: {}", skuId);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品上架失败");
+        }
     }
 
     /**
@@ -191,8 +237,15 @@ public class ProductController {
      */
     @PutMapping("/putOffSale/{skuId}")
     public Result<Boolean> putOffSale(@PathVariable Long skuId) {
+        log.info("商品下架，skuId: {}", skuId);
         boolean result = productService.putOffSale(skuId);
-        return result ? Result.success("商品下架成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品下架失败");
+        if (result) {
+            log.info("商品下架成功，skuId: {}", skuId);
+            return Result.success("商品下架成功", true);
+        } else {
+            log.error("商品下架失败，skuId: {}", skuId);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品下架失败");
+        }
     }
 
     /**
@@ -200,8 +253,15 @@ public class ProductController {
      */
     @PostMapping("/batchDecreaseStock")
     public Result<Boolean> batchDecreaseStock(@RequestBody List<ProductStockDTO> stockDTOS) {
+        log.info("批量扣减库存，stockDTOS size: {}", stockDTOS.size());
         boolean result = productService.batchDecreaseStock(stockDTOS);
-        return result ? Result.success("批量扣减库存成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
+        if (result) {
+            log.info("批量扣减库存成功");
+            return Result.success("批量扣减库存成功", true);
+        } else {
+            log.error("批量扣减库存失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
+        }
     }
 
     /**
@@ -209,7 +269,14 @@ public class ProductController {
      */
     @PostMapping("/batchIncreaseStock")
     public Result<Boolean> batchIncreaseStock(@RequestBody List<ProductStockDTO> stockDTOS) {
+        log.info("批量增加库存，stockDTOS size: {}", stockDTOS.size());
         boolean result = productService.batchIncreaseStock(stockDTOS);
-        return result ? Result.success("批量增加库存成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
+        if (result) {
+            log.info("批量增加库存成功");
+            return Result.success("批量增加库存成功", true);
+        } else {
+            log.error("批量增加库存失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
+        }
     }
 }

@@ -27,7 +27,7 @@ import java.util.List;
  *    - 关键行为 → MySQL + Kafka + ES
  *    - 一般行为 → Kafka + ES
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @Slf4j

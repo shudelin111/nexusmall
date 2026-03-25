@@ -6,7 +6,7 @@ import com.nexusmall.behavior.entity.UserBehaviorLog;
 /**
  * 用户行为日志 Service 接口
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 public interface UserBehaviorLogService extends IService<UserBehaviorLog> {

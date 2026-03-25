@@ -39,11 +39,13 @@ public class JwtAuthenticationWebFilter implements WebFilter {
         if (path.startsWith("/auth/login") || 
             path.startsWith("/auth/register") || 
             path.startsWith("/auth/validate")) {
+            log.debug("跳过公开路径：{}", path);
             return chain.filter(exchange);
         }
         
         String authorization = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
         if (authorization == null || !authorization.startsWith(BEARER_PREFIX)) {
+            log.debug("请求头中缺少 Authorization 或格式不正确，path: {}", path);
             return chain.filter(exchange);
         }
 
@@ -77,6 +79,8 @@ public class JwtAuthenticationWebFilter implements WebFilter {
                     token,
                     AuthorityUtils.createAuthorityList(authorities.toArray(new String[0]))
             );
+            log.info("JWT 认证成功，username: {}, roles: {}, permissions: {}", 
+                    username, roles != null ? roles.size() : 0, permissions != null ? permissions.size() : 0);
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         } catch (Exception ex) {

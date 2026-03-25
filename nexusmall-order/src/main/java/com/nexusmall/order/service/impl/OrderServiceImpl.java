@@ -47,32 +47,59 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public Order getById(Long id) {
-        return orderMapper.selectById(id);
+        log.debug("根据 ID 查询订单，orderId: {}", id);
+        Order order = orderMapper.selectById(id);
+        if (order != null) {
+            log.info("订单查询成功，orderId: {}, orderSn: {}", id, order.getOrderSn());
+        } else {
+            log.warn("订单不存在，orderId: {}", id);
+        }
+        return order;
     }
 
     @Override
     public Order getByOrderSn(String orderSn) {
-        return orderMapper.selectByOrderSn(orderSn);
+        log.debug("根据订单号查询订单，orderSn: {}", orderSn);
+        Order order = orderMapper.selectByOrderSn(orderSn);
+        if (order != null) {
+            log.info("订单查询成功，orderSn: {}, orderId: {}", orderSn, order.getId());
+        } else {
+            log.warn("订单不存在，orderSn: {}", orderSn);
+        }
+        return order;
     }
 
     @Override
     public List<Order> list() {
-        return orderMapper.list();
+        log.debug("查询所有订单");
+        List<Order> orders = orderMapper.list();
+        log.info("查询到{}条订单", orders.size());
+        return orders;
     }
 
     @Override
     public List<Order> listByMemberId(Long memberId) {
-        return orderMapper.listByMemberId(memberId);
+        log.debug("根据用户 ID 查询订单，memberId: {}", memberId);
+        List<Order> orders = orderMapper.listByMemberId(memberId);
+        log.info("用户 {} 查询到{}条订单", memberId, orders.size());
+        return orders;
     }
 
     @Override
     public List<Order> listByStatus(Integer status) {
-        return orderMapper.listByStatus(status);
+        log.debug("根据状态查询订单，status: {}", status);
+        List<Order> orders = orderMapper.listByStatus(status);
+        log.info("状态 {} 查询到{}条订单", status, orders.size());
+        return orders;
     }
 
     @Override
     public List<Order> listByCondition(Long memberId, Integer status, LocalDateTime startTime, LocalDateTime endTime) {
-        return orderMapper.listByCondition(memberId, status, startTime, endTime);
+        log.debug("条件查询订单，memberId: {}, status: {}, startTime: {}, endTime: {}", 
+                memberId, status, startTime, endTime);
+        List<Order> orders = orderMapper.listByCondition(memberId, status, startTime, endTime);
+        log.info("条件查询到{}条订单", orders.size());
+        return orders;
     }
 
     @Override

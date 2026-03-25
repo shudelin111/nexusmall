@@ -18,7 +18,7 @@ import java.time.format.DateTimeFormatter;
 /**
  * 用户行为日志 Elasticsearch Service 实现类
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @Slf4j

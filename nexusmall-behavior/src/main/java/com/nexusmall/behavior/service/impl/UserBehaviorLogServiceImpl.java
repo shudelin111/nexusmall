@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * 用户行为日志 Service 实现类
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @Slf4j

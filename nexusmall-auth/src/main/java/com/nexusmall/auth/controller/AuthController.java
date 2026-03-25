@@ -4,11 +4,13 @@ import com.nexusmall.auth.service.AuthService;
 import com.nexusmall.auth.vo.AuthRequest;
 import com.nexusmall.auth.vo.AuthResponse;
 import com.nexusmall.common.vo.Result;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
@@ -33,14 +35,25 @@ public class AuthController {
 
     @PostMapping("/login")
     public Result<AuthResponse> login(@RequestBody AuthRequest request) {
-        return Result.success(authService.login(request));
+        log.info("收到登录请求，username: {}", request.getUsername());
+        try {
+            AuthResponse response = authService.login(request);
+            log.info("用户登录成功，username: {}", request.getUsername());
+            return Result.success(response);
+        } catch (Exception e) {
+            log.error("用户登录失败，username: {}, 错误：{}", request.getUsername(), e.getMessage(), e);
+            throw e;
+        }
     }
 
     @PostMapping("/logout")
     public Result<Void> logout(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
+            log.info("用户登出，token 已处理");
             authService.logout(token);
+        } else {
+            log.warn("无效的 Token 格式");
         }
         return Result.success();
     }
@@ -49,8 +62,12 @@ public class AuthController {
     public Result<Boolean> validateToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
-            return Result.success(authService.validateToken(token));
+            log.debug("验证 Token: {}", token.substring(0, Math.min(20, token.length())) + "...");
+            boolean valid = authService.validateToken(token);
+            log.info("Token 验证结果：{}", valid ? "有效" : "无效");
+            return Result.success(valid);
         }
+        log.warn("无效的 Token 格式");
         return Result.success(false);
     }
 }

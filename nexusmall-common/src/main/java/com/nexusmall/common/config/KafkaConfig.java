@@ -25,7 +25,7 @@ import java.util.Map;
  * 2. 支持日志消息的发送和接收
  * 3. 异步处理，不阻塞业务线程
  * 
- * @author nexusmall
+ * @author shudl
  * @since 2026-03-25
  */
 @EnableKafka

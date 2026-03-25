@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * 用户行为日志 Mapper 接口
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @Mapper

@@ -45,8 +45,15 @@ public class OrderController {
      */
     @GetMapping("/{id}")
     public Result<Order> getOrderById(@PathVariable("id") Long id) {
+        log.info("查询订单，orderId: {}", id);
         Order order = orderService.getById(id);
-        return order != null ? Result.success(order) : Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+        if (order != null) {
+            log.info("订单查询成功，orderId: {}, orderSn: {}", id, order.getOrderSn());
+            return Result.success(order);
+        } else {
+            log.warn("订单不存在，orderId: {}", id);
+            return Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+        }
     }
 
     /**
@@ -54,8 +61,15 @@ public class OrderController {
      */
     @GetMapping("/sn/{orderSn}")
     public Result<Order> getOrderByOrderSn(@PathVariable("orderSn") String orderSn) {
+        log.info("查询订单，orderSn: {}", orderSn);
         Order order = orderService.getByOrderSn(orderSn);
-        return order != null ? Result.success(order) : Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+        if (order != null) {
+            log.info("订单查询成功，orderSn: {}, orderId: {}", orderSn, order.getId());
+            return Result.success(order);
+        } else {
+            log.warn("订单不存在，orderSn: {}", orderSn);
+            return Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+        }
     }
 
     /**
@@ -63,7 +77,9 @@ public class OrderController {
      */
     @GetMapping("/list")
     public Result<List<Order>> listOrders() {
+        log.info("查询所有订单");
         List<Order> orders = orderService.list();
+        log.info("查询到{}条订单", orders.size());
         return Result.success(orders);
     }
 
@@ -72,7 +88,9 @@ public class OrderController {
      */
     @GetMapping("/member/{memberId}")
     public Result<List<Order>> listByMemberId(@PathVariable("memberId") Long memberId) {
+        log.info("查询用户订单，memberId: {}", memberId);
         List<Order> orders = orderService.listByMemberId(memberId);
+        log.info("用户 {} 查询到{}条订单", memberId, orders.size());
         return Result.success(orders);
     }
 
@@ -81,7 +99,9 @@ public class OrderController {
      */
     @GetMapping("/status/{status}")
     public Result<List<Order>> listByStatus(@PathVariable("status") Integer status) {
+        log.info("查询订单，status: {}", status);
         List<Order> orders = orderService.listByStatus(status);
+        log.info("状态 {} 查询到{}条订单", status, orders.size());
         return Result.success(orders);
     }
 
@@ -94,7 +114,10 @@ public class OrderController {
             @RequestParam(required = false) Integer status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+        log.info("条件查询订单，memberId: {}, status: {}, startTime: {}, endTime: {}", 
+                memberId, status, startTime, endTime);
         List<Order> orders = orderService.listByCondition(memberId, status, startTime, endTime);
+        log.info("条件查询到{}条订单", orders.size());
         return Result.success(orders);
     }
 
@@ -103,8 +126,16 @@ public class OrderController {
      */
     @PostMapping("/create")
     public Result<Order> createOrder(@Valid @RequestBody OrderCreateRequest request) {
-        Order order = orderService.createOrder(request);
-        return Result.success("订单创建成功", order);
+        log.info("收到创建订单请求，userId: {}, productId: {}, count: {}", 
+                request.getMemberId(), request.getProductId(), request.getCount());
+        try {
+            Order order = orderService.createOrder(request);
+            log.info("订单创建成功，orderId: {}, orderSn: {}", order.getId(), order.getOrderSn());
+            return Result.success("订单创建成功", order);
+        } catch (Exception e) {
+            log.error("订单创建失败，userId: {}, 错误：{}", request.getMemberId(), e.getMessage(), e);
+            throw e;
+        }
     }
 
     /**
@@ -112,9 +143,16 @@ public class OrderController {
      */
     @PutMapping("/{id}")
     public Result<Boolean> updateOrder(@PathVariable("id") Long id, @RequestBody Order order) {
+        log.info("更新订单，orderId: {}", id);
         order.setId(id);
         boolean result = orderService.updateById(order);
-        return result ? Result.success("订单更新成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单更新失败");
+        if (result) {
+            log.info("订单更新成功，orderId: {}", id);
+            return Result.success("订单更新成功", true);
+        } else {
+            log.error("订单更新失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单更新失败");
+        }
     }
 
     /**
@@ -122,8 +160,15 @@ public class OrderController {
      */
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteOrder(@PathVariable("id") Long id) {
+        log.info("删除订单，orderId: {}", id);
         boolean result = orderService.deleteById(id);
-        return result ? Result.success("订单删除成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单删除失败");
+        if (result) {
+            log.info("订单删除成功，orderId: {}", id);
+            return Result.success("订单删除成功", true);
+        } else {
+            log.error("订单删除失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单删除失败");
+        }
     }
 
     /**
@@ -131,8 +176,15 @@ public class OrderController {
      */
     @DeleteMapping("/batch")
     public Result<Boolean> batchDeleteOrders(@RequestBody List<Long> ids) {
+        log.info("批量删除订单，ids: {}", ids);
         boolean result = orderService.batchDelete(ids);
-        return result ? Result.success("批量删除成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量删除失败");
+        if (result) {
+            log.info("批量删除成功，count: {}", ids.size());
+            return Result.success("批量删除成功", true);
+        } else {
+            log.error("批量删除失败，ids: {}", ids);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量删除失败");
+        }
     }
 
     /**
@@ -142,8 +194,15 @@ public class OrderController {
     public Result<Boolean> payOrder(
             @PathVariable("id") Long id,
             @RequestParam("paymentType") Integer paymentType) {
+        log.info("支付订单，orderId: {}, paymentType: {}", id, paymentType);
         boolean result = orderService.payOrder(id, paymentType);
-        return result ? Result.success("支付成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "支付失败");
+        if (result) {
+            log.info("订单支付成功，orderId: {}", id);
+            return Result.success("支付成功", true);
+        } else {
+            log.error("订单支付失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "支付失败");
+        }
     }
 
     /**
@@ -151,8 +210,15 @@ public class OrderController {
      */
     @PostMapping("/{id}/deliver")
     public Result<Boolean> deliverOrder(@PathVariable("id") Long id) {
+        log.info("订单发货，orderId: {}", id);
         boolean result = orderService.deliveryOrder(id);
-        return result ? Result.success("发货成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "发货失败");
+        if (result) {
+            log.info("订单发货成功，orderId: {}", id);
+            return Result.success("发货成功", true);
+        } else {
+            log.error("订单发货失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "发货失败");
+        }
     }
 
     /**
@@ -160,8 +226,15 @@ public class OrderController {
      */
     @PostMapping("/{id}/receive")
     public Result<Boolean> receiveOrder(@PathVariable("id") Long id) {
+        log.info("确认收货，orderId: {}", id);
         boolean result = orderService.receiveOrder(id);
-        return result ? Result.success("确认收货成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "确认收货失败");
+        if (result) {
+            log.info("订单确认收货成功，orderId: {}", id);
+            return Result.success("确认收货成功", true);
+        } else {
+            log.error("订单确认收货失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "确认收货失败");
+        }
     }
 
     /**
@@ -169,7 +242,14 @@ public class OrderController {
      */
     @PostMapping("/{id}/cancel")
     public Result<Boolean> cancelOrder(@PathVariable("id") Long id) {
+        log.info("取消订单，orderId: {}", id);
         boolean result = orderService.cancelOrder(id);
-        return result ? Result.success("订单取消成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单取消失败");
+        if (result) {
+            log.info("订单取消成功，orderId: {}", id);
+            return Result.success("订单取消成功", true);
+        } else {
+            log.error("订单取消失败，orderId: {}", id);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单取消失败");
+        }
     }
 }

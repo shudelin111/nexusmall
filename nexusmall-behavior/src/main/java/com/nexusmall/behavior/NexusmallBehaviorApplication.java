@@ -8,7 +8,7 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 /**
  * 用户行为日志服务启动类
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @SpringBootApplication

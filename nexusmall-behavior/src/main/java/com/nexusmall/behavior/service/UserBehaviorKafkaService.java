@@ -3,7 +3,7 @@ package com.nexusmall.behavior.service;
 /**
  * 用户行为日志 Kafka Service 接口
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 public interface UserBehaviorKafkaService {

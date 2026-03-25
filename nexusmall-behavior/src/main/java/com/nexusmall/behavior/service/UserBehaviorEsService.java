@@ -5,7 +5,7 @@ import com.nexusmall.behavior.entity.UserBehaviorEsLog;
 /**
  * 用户行为日志 Elasticsearch Service 接口
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 public interface UserBehaviorEsService {

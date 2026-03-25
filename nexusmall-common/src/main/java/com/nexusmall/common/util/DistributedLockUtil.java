@@ -11,7 +11,7 @@ import java.util.function.Supplier;
 /**
  * Redisson 分布式锁工具类
  * 
- * @author NexusMall
+ * @author shudl
  */
 @Component
 public class DistributedLockUtil {

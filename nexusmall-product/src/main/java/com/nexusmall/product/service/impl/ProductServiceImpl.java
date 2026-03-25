@@ -28,43 +28,62 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public List<Product> listProducts() {
-        return productMapper.list();
+        log.debug("查询所有商品列表");
+        List<Product> products = productMapper.list();
+        log.info("查询到{}条商品数据", products.size());
+        return products;
     }
 
     @Override
     public Product getBySkuId(Long skuId) {
+        log.debug("根据 SKU ID 查询商品，skuId: {}", skuId);
         Product product = productMapper.selectById(skuId);
         if (product == null) {
+            log.warn("商品不存在，skuId: {}", skuId);
             throw new ProductNotFoundException(skuId);
         }
+        log.info("商品查询成功，skuId: {}, productName: {}", skuId, product.getName());
         return product;
     }
 
     @Override
     public List<ProductVO> listByCondition(String keyword, Long categoryId, Long brandId, Integer status) {
+        log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
+                keyword, categoryId, brandId, status);
         List<Product> products = productMapper.listByCondition(keyword, categoryId, brandId, status);
-        return products.stream().map(p -> BeanUtil.copyProperties(p, ProductVO.class)).collect(Collectors.toList());
+        List<ProductVO> result = products.stream().map(p -> BeanUtil.copyProperties(p, ProductVO.class)).collect(Collectors.toList());
+        log.info("查询到{}条商品数据", result.size());
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int save(ProductVO productVO) {
+        log.info("保存商品，productName: {}, categoryId: {}", productVO.getName(), productVO.getCategoryId());
         Product product = BeanUtil.copyProperties(productVO, Product.class);
         product.setStatus(1); // 默认上架
-        return productMapper.insert(product);
+        int result = productMapper.insert(product);
+        log.info("商品保存{}，skuId: {}, result: {}", result > 0 ? "成功" : "失败", product.getSkuId(), result);
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateById(ProductVO productVO) {
+        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getName());
         Product product = BeanUtil.copyProperties(productVO, Product.class);
-        return productMapper.updateById(product);
+        int result = productMapper.updateById(product);
+        log.info("商品更新{}，skuId: {}, result: {}", result > 0 ? "成功" : "失败", productVO.getSkuId(), result);
+        return result;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int deleteById(Long skuId) {
-        return productMapper.deleteById(skuId);
+        log.info("删除商品，skuId: {}", skuId);
+        int result = productMapper.deleteById(skuId);
+        log.info("商品删除{}，skuId: {}, result: {}", result > 0 ? "成功" : "失败", skuId, result);
+        return result;
     }
 
     @Override
@@ -103,7 +122,10 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public boolean checkStock(Long skuId, Integer count) {
-        return productMapper.checkStock(skuId, count);
+        log.debug("检查库存，skuId: {}, count: {}", skuId, count);
+        boolean result = productMapper.checkStock(skuId, count);
+        log.info("库存检查结果：skuId: {}, available: {}", skuId, result);
+        return result;
     }
 
     @Override

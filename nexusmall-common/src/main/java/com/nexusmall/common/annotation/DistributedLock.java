@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * 分布式锁注解
  * 用于标记需要加分布式锁的方法
  * 
- * @author NexusMall
+ * @author shudl
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)

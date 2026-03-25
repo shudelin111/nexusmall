@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁 AOP 切面
  * 
- * @author NexusMall
+ * @author shudl
  */
 @Aspect
 @Component

@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * Redisson 分布式锁配置
  * 
- * @author NexusMall
+ * @author shudl
  */
 @Configuration
 public class RedissonConfig {

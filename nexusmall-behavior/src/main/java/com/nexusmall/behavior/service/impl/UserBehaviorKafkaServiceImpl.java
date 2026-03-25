@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * 用户行为日志 Kafka Service 实现类
  * 
- * @author NexusMall
+ * @author shudl
  * @since 2026-03-25
  */
 @Slf4j
