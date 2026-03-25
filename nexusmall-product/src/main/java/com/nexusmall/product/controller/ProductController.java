@@ -110,11 +110,34 @@ public class ProductController {
             @RequestParam(required = false) String keyword,
             @RequestParam(required = false) Long categoryId,
             @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) Integer status) {
+            @RequestParam(required = false) Integer status,
+            @RequestParam(required = false) Long userId,
+            @RequestParam(required = false) String userName) {
         log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
                 keyword, categoryId, brandId, status);
         List<ProductVO> products = productService.listByCondition(keyword, categoryId, brandId, status);
         log.info("查询到{}条商品数据", products.size());
+        
+        // 发送用户搜索行为到 RocketMQ（仅当有搜索关键词且传了 userId 时）
+        if (userId != null && keyword != null && !keyword.trim().isEmpty()) {
+            try {
+                UserBehaviorVO behaviorVO = UserBehaviorVO.builder()
+                    .userId(userId)
+                    .behaviorType(UserBehaviorType.SEARCH_PRODUCT.getCode())
+                    .objectId(null) // 搜索行为没有具体的对象 ID
+                    .objectType("keyword")
+                    .extraData("{\"keyword\":\"" + keyword + "\"}") // 将搜索词存入 extraData
+                    .occurTime(LocalDateTime.now())
+                    .build();
+                
+                Message<UserBehaviorVO> message = MessageBuilder.withPayload(behaviorVO).build();
+                rocketMQTemplate.send("USER_BEHAVIOR_TOPIC", message);
+                log.info("【发送搜索行为】userId: {}, keyword: {}", userId, keyword);
+            } catch (Exception e) {
+                log.error("【发送搜索行为失败】userId: {}, keyword: {}", userId, keyword, e);
+            }
+        }
+        
         return Result.success(products);
     }
 
@@ -123,7 +146,7 @@ public class ProductController {
      */
     @PostMapping("/save")
     public Result<Integer> saveProduct(@RequestBody ProductVO productVO) {
-        log.info("新增商品，productName: {}, categoryId: {}", productVO.getName(), productVO.getCategoryId());
+        log.info("新增商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
         int result = productService.save(productVO);
         if (result > 0) {
             log.info("商品添加成功，result: {}", result);
@@ -139,7 +162,7 @@ public class ProductController {
      */
     @PutMapping("/update")
     public Result<Integer> updateProduct(@RequestBody ProductVO productVO) {
-        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getName());
+        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getSkuName());
         int result = productService.updateById(productVO);
         if (result > 0) {
             log.info("商品更新成功，result: {}", result);

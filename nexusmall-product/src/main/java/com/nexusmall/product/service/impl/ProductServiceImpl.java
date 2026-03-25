@@ -42,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
             log.warn("商品不存在，skuId: {}", skuId);
             throw new ProductNotFoundException(skuId);
         }
-        log.info("商品查询成功，skuId: {}, productName: {}", skuId, product.getName());
+        log.info("商品查询成功，skuId: {}, productName: {}", skuId, product.getSkuName());
         return product;
     }
 
@@ -59,7 +59,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int save(ProductVO productVO) {
-        log.info("保存商品，productName: {}, categoryId: {}", productVO.getName(), productVO.getCategoryId());
+        log.info("保存商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
         Product product = BeanUtil.copyProperties(productVO, Product.class);
         product.setStatus(1); // 默认上架
         int result = productMapper.insert(product);
@@ -70,7 +70,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateById(ProductVO productVO) {
-        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getName());
+        log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getSkuName());
         Product product = BeanUtil.copyProperties(productVO, Product.class);
         int result = productMapper.updateById(product);
         log.info("商品更新{}，skuId: {}, result: {}", result > 0 ? "成功" : "失败", productVO.getSkuId(), result);
