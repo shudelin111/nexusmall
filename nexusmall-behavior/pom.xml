@@ -91,6 +91,12 @@
 			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
+		<!-- Sentinel 熔断限流 -->
+		<dependency>
+			<groupId>com.alibaba.cloud</groupId>
+			<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+		</dependency>
+
 		<!-- 公共模块 -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>

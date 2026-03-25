@@ -27,6 +27,26 @@ spring:
     name: nexusmall-order
   
   # ------------------------------
+  # Sentinel 熔断限流配置
+  # ------------------------------
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # 控制台地址（生产环境改为实际 IP）
+      transport:
+        dashboard: 10.10.1.1:8858
+      # 数据源配置（推荐用 Nacos 持久化规则）
+      datasource:
+        ds1:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-sentinel
+            groupId: DEFAULT_GROUP
+            rule-type: flow
+  
+  # ------------------------------
   # 数据源配置（HikariCP 连接池）
   # ------------------------------
   datasource:
@@ -139,8 +159,7 @@ mybatis-plus:
 # =====================================================
 feign:
   sentinel:
-    # 是否启用 Sentinel 熔断降级
-    # true: 集成 Sentinel 实现服务保护
+    # 启用 Sentinel 熔断
     enabled: true
   client:
     config:

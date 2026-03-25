@@ -142,8 +142,7 @@ docker run -d \
   -p 10911:10911 \
   -p 10909:10909 \
   -v /opt/docker/rocketmq/broker:/home/rocketmq/broker \
-  --link rocketmq-namesrv:namesrv \
-  -e "NAMESRV_ADDR=namesrv:9876" \
+  -e "NAMESRV_ADDR=rocketmq-namesrv:9876" \
   -e "JAVA_OPTS=-Xms256m -Xmx256m -XX:+UseG1GC" \
   apache/rocketmq:4.9.7 sh mqbroker -c /home/rocketmq/broker/broker.conf
 

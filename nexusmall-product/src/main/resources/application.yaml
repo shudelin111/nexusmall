@@ -14,9 +14,53 @@ spring:
   # 配置导入（从 Nacos 加载配置）
   # ------------------------------
   config:
-    # 从 Nacos 配置中心导入配置文件
-    # optional: 表示配置可选，Nacos 连接失败时使用本地配置
     import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
+  
+  # ------------------------------
+  # Spring Cloud 配置
+  # ------------------------------
+  cloud:
+    # Nacos 服务注册与配置中心配置
+    nacos:
+      # 服务发现配置
+      discovery:
+        # Nacos 服务器地址
+        server-addr: 10.10.1.1:8848
+        # 命名空间（用于环境隔离）
+        namespace: public
+        # 服务分组
+        group: DEFAULT_GROUP
+      
+      # 配置中心配置
+      config:
+        # 配置中心地址
+        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        # 配置命名空间
+        namespace: ${spring.cloud.nacos.discovery.namespace}
+        # 配置分组
+        group: ${spring.cloud.nacos.discovery.group}
+        # 配置文件后缀名
+        file-extension: yaml
+    
+    # Sentinel 熔断限流配置
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # 控制台地址（生产环境改为实际 IP）
+      transport:
+        dashboard: 10.10.1.1:8858
+        # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
+        port: 8719
+      # 数据源配置（推荐用 Nacos 持久化规则）
+      datasource:
+        ds1:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: ${spring.application.name}-sentinel
+            groupId: DEFAULT_GROUP
+            rule-type: flow
   
   profiles:
     # 当前运行环境：dev(开发) / test(测试) / prod(生产)
@@ -65,8 +109,8 @@ spring:
     port: ${REDIS_PORT:6379}
     # 使用的数据库编号（0-15）
     database: ${REDIS_DATABASE:0}
-    # Redis 密码
-    password: ${REDIS_PASSWORD:123456}
+    # Redis 密码（无密码请留空）
+    password: "123456"
     # 连接超时时间（毫秒）
     timeout: 5000  # 5 秒
     # Lettuce 连接池配置
@@ -81,30 +125,7 @@ spring:
         # 获取连接的最大等待时间（毫秒）
         max-wait: 1000ms  # 1 秒
   
-  # ------------------------------
-  # Spring Cloud 配置
-  # ------------------------------
-  cloud:
-    nacos:
-      # 服务发现配置
-      discovery:
-        # Nacos 服务器地址
-        server-addr: 10.10.1.1:8848
-        # 命名空间（用于环境隔离）
-        namespace: public
-        # 服务分组
-        group: DEFAULT_GROUP
-      
-      # 配置中心配置
-      config:
-        # 配置中心地址
-        server-addr: ${spring.cloud.nacos.discovery.server-addr}
-        # 配置命名空间
-        namespace: ${spring.cloud.nacos.discovery.namespace}
-        # 配置分组
-        group: ${spring.cloud.nacos.discovery.group}
-        # 配置文件后缀名
-        file-extension: yaml
+
 
 # =====================================================
 # 服务器配置
@@ -139,7 +160,7 @@ mybatis-plus:
 # =====================================================
 feign:
   sentinel:
-    # 是否启用 Sentinel 熔断降级
+    # 启用 Sentinel 熔断
     enabled: true
   client:
     config:
@@ -172,7 +193,7 @@ rocketmq:
 # =====================================================
 seata:
   # 是否启用 Seata
-  enabled: true
+  enabled: false
   # 应用 ID（用于标识事务发起方）
   application-id: nexusmall-product
   # 事务服务组名称
