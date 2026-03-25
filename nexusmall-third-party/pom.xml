@@ -105,6 +105,7 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
+			<!-- 版本由父工程 dependencyManagement 统一管理 -->
 		</dependency>
 
 		<!-- Lombok -->
