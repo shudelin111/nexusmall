@@ -1,6 +1,7 @@
 package com.nexusmall.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.nexusmall.common.annotation.DistributedLock;
 import com.nexusmall.product.dao.ProductMapper;
 import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
@@ -67,6 +68,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @DistributedLock(key = "'stock:decrease:' + #skuId", waitTime = 5, leaseTime = 30)
     @Transactional(rollbackFor = Exception.class)
     public boolean decreaseStock(Long skuId, Integer count) {
         log.info("开始扣减库存，skuId: {}, count: {}", skuId, count);
@@ -85,6 +87,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @DistributedLock(key = "'stock:increase:' + #skuId", waitTime = 5, leaseTime = 30)
     @Transactional(rollbackFor = Exception.class)
     public boolean increaseStock(Long skuId, Integer count) {
         log.info("开始增加库存，skuId: {}, count: {}", skuId, count);
@@ -118,6 +121,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @DistributedLock(key = "'stock:batch:decrease'", waitTime = 10, leaseTime = 60)
     @Transactional(rollbackFor = Exception.class)
     public boolean batchDecreaseStock(List<ProductStockDTO> stockDTOS) {
         log.info("开始批量扣减库存，stockDTOS: {}", stockDTOS);
@@ -132,6 +136,7 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @DistributedLock(key = "'stock:batch:increase'", waitTime = 10, leaseTime = 60)
     @Transactional(rollbackFor = Exception.class)
     public boolean batchIncreaseStock(List<ProductStockDTO> stockDTOS) {
         log.info("开始批量增加库存，stockDTOS: {}", stockDTOS);
