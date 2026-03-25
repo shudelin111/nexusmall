@@ -7,6 +7,8 @@ import com.aliyun.oss.model.PutObjectResult;
 import com.nexusmall.thirdparty.config.ThirdPartyProperties;
 import com.nexusmall.thirdparty.service.OssService;
 import com.nexusmall.thirdparty.vo.OssUploadResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -22,6 +24,8 @@ import java.util.UUID;
 @Service
 @ConditionalOnBean(OSS.class)
 public class AliyunOssServiceImpl implements OssService {
+
+    private static final Logger log = LoggerFactory.getLogger(AliyunOssServiceImpl.class);
 
     @Autowired
     private OSS ossClient;
@@ -60,6 +64,7 @@ public class AliyunOssServiceImpl implements OssService {
             response.setUrl(buildFileUrl(bucket, objectKey));
             return response;
         } catch (IOException e) {
+            log.error("OSS 文件上传失败，文件名：{}, 错误：{}", file.getOriginalFilename(), e.getMessage(), e);
             throw new RuntimeException("读取上传文件失败", e);
         }
     }

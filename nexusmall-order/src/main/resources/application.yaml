@@ -65,6 +65,22 @@ feign:
       default:
         connectTimeout: 5000
         readTimeout: 5000
+  httpclient:
+    enabled: true
+  compression:
+    request:
+      enabled: true
+    response:
+      enabled: true
+# Feign 日志级别
+logging:
+  level:
+    # Seata 日志（生产环境建议 INFO）
+    io.seata: DEBUG
+    # Feign 调用日志
+    com.nexusmall.order.config.FeignConfig: DEBUG
+    com.nexusmall.order.feign: DEBUG
+    com.nexusmall.common.config.SeataFeignConfig: DEBUG
 
 # Seata 分布式事务配置
 seata:
@@ -80,13 +96,6 @@ seata:
     type: file
   config:
     type: file
-  client:
-    rm:
-      report-success-enable: true
-      report-failure-enable: true
-    tm:
-      commit-retry-count: 5
-      rollback-retry-count: 5
 
 management:
   endpoints:

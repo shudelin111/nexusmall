@@ -66,6 +66,12 @@ feign:
         connectTimeout: 5000
         readTimeout: 5000
 
+# 日志配置
+logging:
+  level:
+    # Seata 日志（生产环境建议 INFO）
+    io.seata: INFO
+
 # Seata 分布式事务配置
 seata:
   enabled: true
@@ -80,11 +86,4 @@ seata:
     type: file
   config:
     type: file
-  client:
-    rm:
-      report-success-enable: true
-      report-failure-enable: true
-    tm:
-      commit-retry-count: 5
-      rollback-retry-count: 5
 

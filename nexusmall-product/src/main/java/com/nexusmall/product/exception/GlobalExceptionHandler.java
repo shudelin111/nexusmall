@@ -17,14 +17,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ProductNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<Void> handleProductNotFound(ProductNotFoundException ex) {
-        log.warn("商品未找到：{}", ex.getMessage());
+        log.error("商品未找到：{}", ex.getMessage(), ex);
         return Result.failure(CommonResultCode.NOT_FOUND.getCode(), ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("参数异常：{}", ex.getMessage());
+        log.error("参数异常：{}", ex.getMessage(), ex);
         return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), ex.getMessage());
     }
 

@@ -1,5 +1,7 @@
 -- Seata 分布式事务回滚日志表
 -- 需要在每个参与分布式事务的数据库中创建此表
+-- 使用方法：在 MySQL 客户端中执行 source 命令
+-- mysql -h10.10.1.1 -uroot -p123456 < undo_log.sql
 
 -- nexusmall_order 数据库
 USE nexusmall_order;

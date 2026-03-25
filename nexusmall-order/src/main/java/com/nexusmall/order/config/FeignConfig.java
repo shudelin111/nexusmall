@@ -1,42 +1,29 @@
 package com.nexusmall.order.config;
 
-import feign.RequestInterceptor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import feign.Logger;
+import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
-
-import javax.servlet.http.HttpServletRequest;
+import org.springframework.web.client.RestTemplate;
 
 /**
- * Feign 配置类
+ * Feign 和 RestTemplate 配置（本服务特定配置）
+ * Seata XID 传递已由 nexusmall-common 的 SeataFeignConfig 全局处理
  */
 @Configuration
 public class FeignConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(FeignConfig.class);
-
+    /**
+     * 配置支持负载均衡的 RestTemplate
+     */
     @Bean
-    public feign.Logger.Level feignLoggerLevel() {
-        return feign.Logger.Level.FULL;
+    @LoadBalanced
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
     }
 
     @Bean
-    public RequestInterceptor requestInterceptor() {
-        return requestTemplate -> {
-            ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-            if (attributes != null) {
-                HttpServletRequest request = attributes.getRequest();
-                
-                // 传递 Seata 的 XID（全局事务 ID）
-                String xid = request.getHeader("XID");
-                if (xid != null && !xid.isEmpty()) {
-                    requestTemplate.header("XID", xid);
-                    log.debug("Feign 调用传递 Seata XID: {}", xid);
-                }
-            }
-        };
+    public Logger.Level feignLoggerLevel() {
+        return Logger.Level.FULL;
     }
 }

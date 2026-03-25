@@ -37,6 +37,25 @@
 
     <!-- 环境控制 -->
     <springProfile name="dev">
+        <!-- Seata 详细日志配置 -->
+        <logger name="io.seata" level="DEBUG"/>
+        <logger name="io.seata.core.rpc" level="DEBUG"/>
+        <logger name="io.seata.core.protocol" level="DEBUG"/>
+        <logger name="io.seata.rm" level="DEBUG"/>
+        <logger name="io.seata.rm.datasource" level="DEBUG"/>
+        <logger name="io.seata.rm.datasource.undo" level="DEBUG"/>
+        <logger name="io.seata.tm" level="DEBUG"/>
+        <logger name="io.seata.spring.annotation" level="DEBUG"/>
+        <logger name="io.seata.sqlparser" level="DEBUG"/>
+        <logger name="io.seata.core.context" level="DEBUG"/>
+        
+        <!-- MyBatis SQL 执行日志 -->
+        <logger name="com.nexusmall.product.config.SeataHandlerInterceptor" level="DEBUG"/>
+        <logger name="com.nexusmall.product.config.WebConfig" level="DEBUG"/>
+        
+        <!-- Druid 连接池日志 -->
+        <logger name="com.alibaba.druid.pool" level="DEBUG"/>
+        
         <root level="INFO">
             <appender-ref ref="console"/>
             <appender-ref ref="file"/>

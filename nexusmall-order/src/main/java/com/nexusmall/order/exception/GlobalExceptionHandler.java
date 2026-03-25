@@ -18,14 +18,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(OrderNotFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<Void> handleOrderNotFound(OrderNotFoundException ex) {
-        log.warn("订单未找到：{}", ex.getMessage());
+        log.error("订单未找到：{}", ex.getMessage(), ex);
         return Result.failure(CommonResultCode.NOT_FOUND.getCode(), ex.getMessage());
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("参数异常：{}", ex.getMessage());
+        log.error("参数异常：{}", ex.getMessage(), ex);
         return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), ex.getMessage());
     }
 
@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
         String message = ex.getBindingResult().getFieldError() == null
                 ? "参数校验失败"
                 : ex.getBindingResult().getFieldError().getDefaultMessage();
-        log.warn("参数校验失败：{}", message);
+        log.error("参数校验失败：{}", message, ex);
         return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), message);
     }
 

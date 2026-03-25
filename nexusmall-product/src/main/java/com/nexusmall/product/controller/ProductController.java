@@ -7,6 +7,9 @@ import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.vo.ProductVO;
+import io.seata.core.context.RootContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +23,8 @@ import java.util.Map;
 @RestController
 @RequestMapping("/product")
 public class ProductController {
+
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
 
     @Autowired
     private ProductService productService;
@@ -107,6 +112,14 @@ public class ProductController {
     public Result<Boolean> decreaseStock(
             @RequestParam("productId") Long productId,
             @RequestParam("count") Integer count) {
+        // 打印接收到的 XID，用于调试
+        String xid = RootContext.getXID();
+        log.info("====== Product 服务接收到 Feign 调用，XID: {}, productId: {}, count: {} ======", xid, productId, count);
+        if (xid != null && !xid.isEmpty()) {
+            log.info("✓ Product 服务成功接收到 XID: {}", xid);
+        } else {
+            log.error("✗ Product 服务未接收到 XID！");
+        }
         boolean result = productService.decreaseStock(productId, count);
         return result ? Result.success("库存扣减成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存扣减失败");
     }

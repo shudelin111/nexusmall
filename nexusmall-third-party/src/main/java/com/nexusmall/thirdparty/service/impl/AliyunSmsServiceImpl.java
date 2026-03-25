@@ -10,6 +10,8 @@ import com.nexusmall.thirdparty.config.ThirdPartyProperties;
 import com.nexusmall.thirdparty.service.SmsService;
 import com.nexusmall.thirdparty.vo.SmsSendRequest;
 import com.nexusmall.thirdparty.vo.SmsSendResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
@@ -21,6 +23,8 @@ import org.springframework.stereotype.Service;
 @Service
 @ConditionalOnBean(IAcsClient.class)
 public class AliyunSmsServiceImpl implements SmsService {
+
+    private static final Logger log = LoggerFactory.getLogger(AliyunSmsServiceImpl.class);
 
     @Autowired
     private IAcsClient acsClient;
@@ -46,7 +50,9 @@ public class AliyunSmsServiceImpl implements SmsService {
             try {
                 smsRequest.setTemplateParam(objectMapper.writeValueAsString(request.getTemplateParam()));
             } catch (JsonProcessingException e) {
-                throw new IllegalArgumentException("短信模板参数无法序列化为JSON", e);
+                log.error("短信模板参数序列化失败，phone: {}, 参数：{}, 错误：{}", 
+                         request.getPhoneNumber(), request.getTemplateParam(), e.getMessage(), e);
+                throw new IllegalArgumentException("短信模板参数无法序列化为 JSON", e);
             }
         }
 
@@ -62,7 +68,9 @@ public class AliyunSmsServiceImpl implements SmsService {
             result.setSuccess("OK".equalsIgnoreCase(response.getCode()));
             return result;
         } catch (ClientException e) {
-            throw new RuntimeException("调用阿里云短信接口失败: " + e.getErrMsg(), e);
+            log.error("调用阿里云短信接口失败，phone: {}, 错误码：{}, 错误：{}", 
+                     request.getPhoneNumber(), e.getErrCode(), e.getErrMsg(), e);
+            throw new RuntimeException("调用阿里云短信接口失败：" + e.getErrMsg(), e);
         }
     }
 }

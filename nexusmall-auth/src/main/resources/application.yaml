@@ -68,6 +68,12 @@ management:
       exposure:
         include: "*"
 
+# 日志配置
+logging:
+  level:
+    # Seata 日志（生产环境建议 INFO）
+    io.seata: INFO
+
 # 服务端口
 server:
   port: 8000
@@ -87,11 +93,4 @@ seata:
     type: file
   config:
     type: file
-  client:
-    rm:
-      report-success-enable: false
-      report-failure-enable: false
-    tm:
-      commit-retry-count: 5
-      rollback-retry-count: 5
 

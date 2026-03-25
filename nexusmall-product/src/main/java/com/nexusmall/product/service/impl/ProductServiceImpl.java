@@ -7,14 +7,12 @@ import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.exception.ProductNotFoundException;
 import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.vo.ProductVO;
-import io.seata.spring.annotation.GlobalTransactional;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -40,9 +38,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public List<ProductVO> listByCondition(String keyword, Long categoryId, Long brandId, Integer status) {
         List<Product> products = productMapper.listByCondition(keyword, categoryId, brandId, status);
-        return products.stream()
-                .map(p -> BeanUtil.copyProperties(p, ProductVO.class))
-                .collect(Collectors.toList());
+        return products.stream().map(p -> BeanUtil.copyProperties(p, ProductVO.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -67,7 +63,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @GlobalTransactional(name = "decrease-stock-tx", rollbackFor = Exception.class)
     @Transactional(rollbackFor = Exception.class)
     public boolean decreaseStock(Long skuId, Integer count) {
         log.info("开始扣减库存，skuId: {}, count: {}", skuId, count);

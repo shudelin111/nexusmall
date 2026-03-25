@@ -8,15 +8,14 @@ import com.nexusmall.order.entity.OrderItem;
 import com.nexusmall.order.feign.ProductFeignService;
 import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.vo.OrderCreateRequest;
+import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
 
 /**
  * 订单服务实现类
@@ -65,19 +64,20 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    @GlobalTransactional(name = "create-order-tx", rollbackFor = Exception.class)
-    @Transactional(rollbackFor = Exception.class)
+    @GlobalTransactional(name = "nexusmall-create-order-tx", rollbackFor = Exception.class)
     public Order createOrder(OrderCreateRequest request) {
         log.info("开始创建订单，请求参数：{}", request);
+
+        // 打印当前事务上下文中的 XID
+        String xid = RootContext.getXID();
+        log.info("====== Order 服务 createOrder 方法中的 XID: {} ======", xid);
 
         // 1. 生成订单号
         String orderSn = generateOrderSn();
 
         // 2. 扣减库存（调用 Product 服务）
-        Result<Boolean> stockResult = productFeignService.decreaseStock(
-                request.getProductId(),
-                request.getCount()
-        );
+        log.info("====== 准备调用 Product 服务 Feign 接口，当前 XID: {} ======", xid);
+        Result<Boolean> stockResult = productFeignService.decreaseStock(request.getProductId(), request.getCount());
         if (!stockResult.isSuccess() || !stockResult.getData()) {
             log.error("库存扣减失败：{}", stockResult.getMessage());
             throw new RuntimeException("库存不足");
@@ -123,9 +123,6 @@ public class OrderServiceImpl implements OrderService {
             log.error("创建订单失败，插入订单项数据为 0");
             throw new RuntimeException("创建订单失败");
         }
-
-        // TODO: 测试分布式事务回滚 - 取消下面这行的注释来测试回滚功能
-        // throw new RuntimeException("测试回滚 - 订单创建后会回滚");
 
         log.info("订单创建成功，订单号：{}", orderSn);
         return order;
@@ -221,7 +218,7 @@ public class OrderServiceImpl implements OrderService {
      * 生成订单号
      */
     private String generateOrderSn() {
-        return "ORD-" + LocalDateTime.now().toLocalDate().toString().replace("-", "")
-                + "-" + String.format("%06d", (int) (Math.random() * 1000000));
+        return "ORD-" + LocalDateTime.now().toLocalDate().toString().replace("-", "") + "-" +
+                String.format("%06d", (int) (Math.random() * 1000000));
     }
 }

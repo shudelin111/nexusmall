@@ -102,15 +102,9 @@ public class OrderController {
      * 创建订单（带分布式事务）
      */
     @PostMapping("/create")
-    @GlobalTransactional(name = "create-order-api-tx", rollbackFor = Exception.class)
     public Result<Order> createOrder(@Valid @RequestBody OrderCreateRequest request) {
-        try {
-            Order order = orderService.createOrder(request);
-            return Result.success("订单创建成功", order);
-        } catch (Exception e) {
-            log.error("创建订单失败", e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单创建失败：" + e.getMessage());
-        }
+        Order order = orderService.createOrder(request);
+        return Result.success("订单创建成功", order);
     }
 
     /**

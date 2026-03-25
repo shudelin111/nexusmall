@@ -17,7 +17,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("参数异常：{}", ex.getMessage());
+        log.error("参数异常：{}", ex.getMessage(), ex);
         return Result.failure(CommonResultCode.PARAM_INVALID.getCode(), ex.getMessage());
     }
 

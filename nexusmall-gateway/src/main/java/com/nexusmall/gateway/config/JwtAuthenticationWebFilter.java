@@ -3,6 +3,8 @@ package com.nexusmall.gateway.config;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.AuthorityUtils;
@@ -21,6 +23,7 @@ import java.util.List;
 @Component
 public class JwtAuthenticationWebFilter implements WebFilter {
 
+    private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationWebFilter.class);
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtConfig jwtConfig;
@@ -77,7 +80,9 @@ public class JwtAuthenticationWebFilter implements WebFilter {
             return chain.filter(exchange)
                     .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
         } catch (Exception ex) {
-            return Mono.error(new RuntimeException("Token 验证失败：" + ex.getMessage()));
+            log.error("Gateway Token 验证失败，path: {}, token: {}, 错误：{}", 
+                     exchange.getRequest().getPath(), token, ex.getMessage(), ex);
+            return Mono.error(new RuntimeException("Token 验证失败：" + ex.getMessage(), ex));
         }
     }
 
