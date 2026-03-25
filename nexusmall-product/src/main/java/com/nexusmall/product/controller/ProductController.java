@@ -2,19 +2,23 @@ package com.nexusmall.product.controller;
 
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
-import com.nexusmall.common.service.UserBehaviorService;
 import com.nexusmall.common.util.RedisUtils;
 import com.nexusmall.common.vo.Result;
+import com.nexusmall.common.vo.UserBehaviorVO;
 import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.vo.ProductVO;
 import io.seata.core.context.RootContext;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,7 +39,7 @@ public class ProductController {
     private RedisUtils redisUtils;
 
     @Autowired
-    private UserBehaviorService userBehaviorService;
+    private RocketMQTemplate rocketMQTemplate;
 
     /**
      * 健康检查接口
@@ -67,20 +71,28 @@ public class ProductController {
      * 根据 SKU ID 查询商品（记录浏览行为）
      */
     @GetMapping("/{skuId}")
-    public Result<Product> getProduct(@PathVariable Long skuId) {
+    public Result<Product> getProduct(@PathVariable Long skuId,
+                                      @RequestParam(required = false) Long userId,
+                                      @RequestParam(required = false) String userName) {
         Product product = productService.getBySkuId(skuId);
         
-        // 记录用户浏览行为（假设用户 ID 为 1，实际从 Token 中获取）
-        try {
-            userBehaviorService.recordBehavior(
-                1L,  // TODO: 从登录 Token 中获取真实用户 ID
-                UserBehaviorType.VIEW_PRODUCT,
-                skuId,
-                "product_id",
-                null
-            );
-        } catch (Exception e) {
-            log.error("记录用户浏览行为失败，skuId: {}", skuId, e);
+        // 发送用户浏览行为到 RocketMQ
+        if (userId != null && product != null) {
+            try {
+                UserBehaviorVO behaviorVO = UserBehaviorVO.builder()
+                    .userId(userId)
+                    .behaviorType(UserBehaviorType.VIEW_PRODUCT.getCode())
+                    .objectId(product.getSkuId())
+                    .objectType("product")
+                    .occurTime(LocalDateTime.now())
+                    .build();
+                
+                Message<UserBehaviorVO> message = MessageBuilder.withPayload(behaviorVO).build();
+                rocketMQTemplate.send("USER_BEHAVIOR_TOPIC", message);
+                log.info("【发送浏览行为】userId: {}, productId: {}", userId, product.getSkuId());
+            } catch (Exception e) {
+                log.error("【发送浏览行为失败】userId: {}, productId: {}", userId, product.getSkuId(), e);
+            }
         }
         
         return Result.success(product);

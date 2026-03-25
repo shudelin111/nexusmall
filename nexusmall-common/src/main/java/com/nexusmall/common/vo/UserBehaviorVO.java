@@ -28,7 +28,7 @@ public class UserBehaviorVO implements Serializable {
     /**
      * 行为类型
      */
-    private UserBehaviorType behaviorType;
+    private String behaviorType;
 
     /**
      * 业务对象 ID（如商品 ID、订单 ID）

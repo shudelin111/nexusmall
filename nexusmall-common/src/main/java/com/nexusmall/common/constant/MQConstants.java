@@ -20,4 +20,9 @@ public class MQConstants {
      */
     public static final String USER_BEHAVIOR_CONSUMER_GROUP = "user-behavior-consumer-group";
 
+    /**
+     * 用户行为日志 Kafka Topic（用于大数据分析）
+     */
+    public static final String USER_BEHAVIOR_KAFKA_TOPIC = "user-behavior-log";
+
 }

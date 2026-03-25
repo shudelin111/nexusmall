@@ -1,6 +1,8 @@
 package com.nexusmall.order.service.impl;
 
+import com.nexusmall.common.enums.UserBehaviorType;
 import com.nexusmall.common.vo.Result;
+import com.nexusmall.common.vo.UserBehaviorVO;
 import com.nexusmall.order.dao.OrderItemMapper;
 import com.nexusmall.order.dao.OrderMapper;
 import com.nexusmall.order.entity.Order;
@@ -14,7 +16,10 @@ import io.seata.spring.annotation.GlobalTransactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,6 +41,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private RocketMQProducer rocketMQProducer;
+
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public Order getById(Long id) {
@@ -129,6 +137,23 @@ public class OrderServiceImpl implements OrderService {
         }
 
         log.info("订单创建成功，订单号：{}", orderSn);
+        
+        // 发送用户下单行为到 RocketMQ
+        try {
+            UserBehaviorVO behaviorVO = UserBehaviorVO.builder()
+                .userId(request.getMemberId())
+                .behaviorType(UserBehaviorType.PLACE_ORDER.getCode())
+                .objectId(order.getId())
+                .objectType("order")
+                .occurTime(LocalDateTime.now())
+                .build();
+            
+            Message<UserBehaviorVO> message = MessageBuilder.withPayload(behaviorVO).build();
+            rocketMQTemplate.send("USER_BEHAVIOR_TOPIC", message);
+            log.info("【发送下单行为】userId: {}, orderId: {}", request.getMemberId(), order.getId());
+        } catch (Exception e) {
+            log.error("【发送下单行为失败】userId: {}, orderId: {}", request.getMemberId(), order.getId(), e);
+        }
         
         // 5. 发送延迟消息（30 分钟后检查支付状态）
         rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), 17); // 17 表示 30 分钟延迟

@@ -149,8 +149,8 @@ mybatis-plus:
     # 示例：user_name -> userName
     map-underscore-to-camel-case: true
     # SQL 日志实现类
-    # StdOutImpl: 将 SQL 输出到控制台（开发环境使用）
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # Slf4jImpl: 使用 SLF4J 记录日志（生产环境推荐）
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   # 全局配置
   global-config:
     db-config:
@@ -165,6 +165,21 @@ mybatis-plus:
       logic-delete-value: 1
       # 逻辑未删除值（0 表示未删除）
       logic-not-delete-value: 0
+
+# =====================================================
+# OpenFeign 服务调用配置
+# =====================================================
+feign:
+  sentinel:
+    # 是否启用 Sentinel 熔断降级
+    enabled: true
+  client:
+    config:
+      default:
+        # 连接建立超时时间（毫秒）
+        connectTimeout: 5000  # 5 秒
+        # 读取数据超时时间（毫秒）
+        readTimeout: 5000  # 5 秒
 
 # =====================================================
 # 安全配置（JWT 相关）
@@ -236,14 +251,20 @@ management:
       enabled: true
 
 # =====================================================
-# 日志配置
+# 日志级别配置
 # =====================================================
 logging:
   level:
-    # Seata 分布式事务日志级别
+    # 根日志级别（默认级别）
+    root: INFO
+    # Seata 分布式事务日志
     # DEBUG: 查看详细事务流程（开发环境）
     # INFO: 查看关键事务信息（生产环境）
     io.seata: INFO
+    # 本服务业务日志（DEBUG 级别查看详细逻辑）
+    com.nexusmall.auth: DEBUG
+    # MyBatis SQL 日志
+    com.nexusmall.auth.dao: DEBUG
 
 # =====================================================
 # 应用元信息配置（通过 Actuator /actuator/info 端点查看）

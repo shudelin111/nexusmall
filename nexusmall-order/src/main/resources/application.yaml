@@ -165,6 +165,27 @@ feign:
       enabled: true
 
 # =====================================================
+# RocketMQ 消息队列配置
+# =====================================================
+rocketmq:
+  # NameServer 地址（RocketMQ 的注册中心）
+  # 格式：ip1:port1;ip2:port2（支持集群）
+  name-server: 10.10.1.1:9876
+  
+  # 生产者配置
+  producer:
+    # 生产者组名称（用于标识一组相同角色的生产者）
+    group: order-producer-group
+    # 发送消息超时时间（毫秒）
+    # 超过此时间未收到 Broker 确认则认为发送失败
+    send-message-timeout: 3000  # 3 秒
+    # 同步发送失败重试次数
+    # 网络抖动时自动重试，提高成功率
+    retry-times-when-send-failed: 2
+    # 异步发送失败重试次数
+    retry-times-when-send-async-failed: 2
+
+# =====================================================
 # Seata 分布式事务配置
 # =====================================================
 seata:
@@ -192,35 +213,20 @@ seata:
     type: file
 
 # =====================================================
-# RocketMQ 消息队列配置
-# =====================================================
-rocketmq:
-  # NameServer 地址（RocketMQ 的注册中心）
-  # 格式：ip1:port1;ip2:port2（支持集群）
-  name-server: 10.10.1.1:9876
-  
-  # 生产者配置
-  producer:
-    # 生产者组名称（用于标识一组相同角色的生产者）
-    group: order-producer-group
-    # 发送消息超时时间（毫秒）
-    # 超过此时间未收到 Broker 确认则认为发送失败
-    send-message-timeout: 3000  # 3 秒
-    # 同步发送失败重试次数
-    # 网络抖动时自动重试，提高成功率
-    retry-times-when-send-failed: 2
-    # 异步发送失败重试次数
-    retry-times-when-send-async-failed: 2
-
-# =====================================================
 # 日志级别配置
 # =====================================================
 logging:
   level:
+    # 根日志级别（默认级别）
+    root: INFO
     # Seata 分布式事务日志
     # DEBUG: 查看详细事务流程（开发环境）
     # INFO: 查看关键事务信息（生产环境）
-    io.seata: DEBUG
+    io.seata: INFO
+    # 本服务业务日志（DEBUG 级别查看详细逻辑）
+    com.nexusmall.order: DEBUG
+    # MyBatis SQL 日志
+    com.nexusmall.order.dao: DEBUG
     # Feign 调用日志（查看服务间调用详情）
     com.nexusmall.order.config.FeignConfig: DEBUG
     com.nexusmall.order.feign: DEBUG

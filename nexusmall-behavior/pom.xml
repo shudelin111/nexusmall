@@ -9,10 +9,10 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 	<groupId>com.nexusmall</groupId>
-	<artifactId>nexusmall-product</artifactId>
+	<artifactId>nexusmall-behavior</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>nexusmall-product</name>
-	<description>nexusmall-product</description>
+	<name>nexusmall-behavior</name>
+	<description>nexusmall-behavior - 用户行为日志服务</description>
 	<url/>
 	<licenses>
 		<license/>
@@ -42,22 +42,28 @@
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 		</dependency>
 
-		<!-- Seata 分布式事务 -->
-		<dependency>
-			<groupId>io.seata</groupId>
-			<artifactId>seata-spring-boot-starter</artifactId>
-		</dependency>
-
 		<!-- OpenFeign 服务调用 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-openfeign</artifactId>
 		</dependency>
 
-		<!-- LoadBalancer 负载均衡 -->
+		<!-- RocketMQ -->
 		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
+			<groupId>org.apache.rocketmq</groupId>
+			<artifactId>rocketmq-spring-boot-starter</artifactId>
+		</dependency>
+
+		<!-- Kafka -->
+		<dependency>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
+		</dependency>
+
+		<!-- Elasticsearch -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-elasticsearch</artifactId>
 		</dependency>
 
 		<!-- MyBatis Plus -->
@@ -79,17 +85,10 @@
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
 
-		<!-- RocketMQ -->
-		<dependency>
-			<groupId>org.apache.rocketmq</groupId>
-			<artifactId>rocketmq-spring-boot-starter</artifactId>
-		</dependency>
-
 		<!-- 健康检查 -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-			<!-- 版本由父工程 dependencyManagement 统一管理 -->
 		</dependency>
 
 		<!-- 公共模块 -->
