@@ -68,6 +68,7 @@
 			<!-- 版本由父工程 dependencyManagement 统一管理 -->
 		</dependency>
 
+		<!-- 公共模块 -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>
 			<artifactId>nexusmall-common</artifactId>
@@ -91,6 +92,11 @@
 				<exclusion>
 					<groupId>mysql</groupId>
 					<artifactId>mysql-connector-java</artifactId>
+				</exclusion>
+				<!-- 排除 RocketMQ（网关不需要） -->
+				<exclusion>
+					<groupId>org.apache.rocketmq</groupId>
+					<artifactId>rocketmq-spring-boot-starter</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
