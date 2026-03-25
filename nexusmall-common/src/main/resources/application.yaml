@@ -21,6 +21,29 @@ spring:
   application:
     # 应用名称（用于日志标识、监控分组等）
     name: nexusmall-common
+  
+  # Kafka 配置（用于日志收集）
+  kafka:
+    # Kafka Broker 地址
+    bootstrap-servers: ${KAFKA_SERVERS:10.10.1.1:9092}
+    # 消费者配置
+    consumer:
+      # 消费者组 ID（可用于负载均衡和广播模式切换）
+      group-id: ${spring.application.name}-log-group
+      # 自动重置 offset 策略
+      auto-offset-reset: latest
+      # 是否启用自动提交（建议手动提交更可靠）
+      enable-auto-commit: false
+    # 生产者配置
+    producer:
+      # 确认模式：0=不确认，1=leader 确认，all=all 确认
+      acks: 1
+      # 失败重试次数
+      retries: 3
+      # 批量发送大小（字节）
+      batch-size: 16384
+      # 缓冲区内存大小
+      buffer-memory: 33554432
 
 # =====================================================
 # 自定义项目配置

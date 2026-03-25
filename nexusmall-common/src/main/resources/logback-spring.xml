@@ -102,6 +102,37 @@
         </rollingPolicy>
     </appender>
 
+    <!-- Kafka 日志收集 Appender -->
+    <!-- 💡 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
+    <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <!-- Kafka Broker 地址 -->
+        <topic>app-logs</topic>
+        
+        <!-- 生产者配置 -->
+        <producerConfig>bootstrap.servers=10.10.1.1:9092</producerConfig>
+        <producerConfig>acks=1</producerConfig>
+        <producerConfig>retries=3</producerConfig>
+        <producerConfig>batch.size=16384</producerConfig>
+        <producerConfig>linger.ms=100</producerConfig>
+        <producerConfig>buffer.memory=33554432</producerConfig>
+        <producerConfig>key.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
+        <producerConfig>value.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
+        
+        <!-- 使用异步发送，不阻塞业务线程 -->
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        
+        <!-- 编码器：定义发送到 Kafka 的日志格式 -->
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+        
+        <!-- 只发送 WARN 和 ERROR 级别的日志到 Kafka（节省资源） -->
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>WARN</level>
+        </filter>
+    </appender>
+
     <!-- ===============================
          分环境日志配置（Spring Profile）
          =============================== -->
@@ -138,6 +169,8 @@
         <root level="INFO">
             <appender-ref ref="console"/>  <!-- 输出到控制台 -->
             <appender-ref ref="file"/>    <!-- 输出到文件 -->
+            <!-- 开发环境暂不发送到 Kafka，避免干扰调试 -->
+            <!-- <appender-ref ref="kafka"/> -->
         </root>
     </springProfile>
 
@@ -146,12 +179,14 @@
         <!-- 根日志配置 -->
         <!-- 
              💡 生产环境注意事项：
-             1. 只输出到文件（不输出到控制台，节省资源）
+             1. 输出到文件和控制台
              2. 日志级别为 INFO（不输出 DEBUG 详细日志）
              3. Seata 等框架日志建议调整为 INFO 或 WARN
+             4. 开启 Kafka 日志收集（仅 WARN 和 ERROR）
         -->
         <root level="INFO">
-            <appender-ref ref="file"/>  <!-- 仅输出到文件 -->
+            <appender-ref ref="file"/>      <!-- 输出到文件 -->
+            <appender-ref ref="kafka"/>     <!-- 输出到 Kafka（集中收集） -->
         </root>
     </springProfile>
 </configuration>
