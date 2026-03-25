@@ -97,6 +97,15 @@ seata:
   config:
     type: file
 
+# RocketMQ 消息队列配置
+rocketmq:
+  name-server: 10.10.1.1:9876  # NameServer 地址
+  producer:
+    group: order-producer-group  # 生产者组名
+    send-message-timeout: 3000   # 发送超时时间（毫秒）
+    retry-times-when-send-failed: 2  # 发送失败重试次数
+    retry-times-when-send-async-failed: 2  # 异步发送失败重试次数
+
 management:
   endpoints:
     web:

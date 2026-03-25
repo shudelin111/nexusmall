@@ -80,4 +80,9 @@ public interface OrderService {
      * 取消订单
      */
     boolean cancelOrder(Long id);
+
+    /**
+     * 取消未支付订单（MQ 延迟消息回调）
+     */
+    void cancelUnpaidOrder(Long orderId);
 }

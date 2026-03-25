@@ -7,6 +7,7 @@ import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.entity.OrderItem;
 import com.nexusmall.order.feign.ProductFeignService;
 import com.nexusmall.order.service.OrderService;
+import com.nexusmall.order.service.RocketMQProducer;
 import com.nexusmall.order.vo.OrderCreateRequest;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
@@ -32,6 +33,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductFeignService productFeignService;
+
+    @Autowired
+    private RocketMQProducer rocketMQProducer;
 
     @Override
     public Order getById(Long id) {
@@ -125,6 +129,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         log.info("订单创建成功，订单号：{}", orderSn);
+        
+        // 5. 发送延迟消息（30 分钟后检查支付状态）
+        rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), 17); // 17 表示 30 分钟延迟
+        
         return order;
     }
 
@@ -211,6 +219,36 @@ public class OrderServiceImpl implements OrderService {
         } else {
             log.error("订单取消失败，orderId: {}", id);
             return false;
+        }
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void cancelUnpaidOrder(Long orderId) {
+        log.info("检查并取消未支付订单，orderId: {}", orderId);
+        
+        // 查询订单
+        Order order = orderMapper.selectById(orderId);
+        if (order == null) {
+            log.warn("订单不存在，orderId: {}", orderId);
+            return;
+        }
+        
+        // 检查订单状态：0-待支付
+        if (order.getStatus() == 0) {
+            log.info("订单未支付，执行取消操作，orderId: {}", orderId);
+            // 取消订单
+            int result = orderMapper.cancelOrder(orderId);
+            if (result > 0) {
+                log.info("订单已取消，orderId: {}", orderId);
+                
+                // TODO: 这里可以调用 Product 服务恢复库存
+                // productFeignService.increaseStock(...);
+            } else {
+                log.error("订单取消失败，orderId: {}", orderId);
+            }
+        } else {
+            log.info("订单已支付，无需取消，orderId: {}, status: {}", orderId, order.getStatus());
         }
     }
 

@@ -6,6 +6,7 @@ import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.exception.ProductNotFoundException;
 import com.nexusmall.product.service.ProductService;
+import com.nexusmall.product.service.RocketMQProducer;
 import com.nexusmall.product.vo.ProductVO;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Autowired
     private ProductMapper productMapper;
+
+    @Autowired
+    private RocketMQProducer rocketMQProducer;
 
     @Override
     public List<Product> listProducts() {
@@ -69,6 +73,10 @@ public class ProductServiceImpl implements ProductService {
         int result = productMapper.decreaseStock(skuId, count);
         if (result > 0) {
             log.info("库存扣减成功，skuId: {}, count: {}", skuId, count);
+            
+            // 发送库存扣减成功消息
+            rocketMQProducer.sendStockDecreasedMessage(skuId, count);
+            
             return true;
         } else {
             log.error("库存扣减失败，skuId: {}, count: {}，库存不足", skuId, count);

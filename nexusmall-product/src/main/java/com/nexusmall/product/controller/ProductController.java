@@ -1,6 +1,8 @@
 package com.nexusmall.product.controller;
 
 import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.UserBehaviorType;
+import com.nexusmall.common.service.UserBehaviorService;
 import com.nexusmall.common.util.RedisUtils;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.dao.ProductStockDTO;
@@ -32,6 +34,9 @@ public class ProductController {
     @Autowired
     private RedisUtils redisUtils;
 
+    @Autowired
+    private UserBehaviorService userBehaviorService;
+
     /**
      * 健康检查接口
      */
@@ -59,11 +64,26 @@ public class ProductController {
     }
 
     /**
-     * 根据 SKU ID 查询商品
+     * 根据 SKU ID 查询商品（记录浏览行为）
      */
     @GetMapping("/{skuId}")
     public Result<Product> getProduct(@PathVariable Long skuId) {
-        return Result.success(productService.getBySkuId(skuId));
+        Product product = productService.getBySkuId(skuId);
+        
+        // 记录用户浏览行为（假设用户 ID 为 1，实际从 Token 中获取）
+        try {
+            userBehaviorService.recordBehavior(
+                1L,  // TODO: 从登录 Token 中获取真实用户 ID
+                UserBehaviorType.VIEW_PRODUCT,
+                skuId,
+                "product_id",
+                null
+            );
+        } catch (Exception e) {
+            log.error("记录用户浏览行为失败，skuId: {}", skuId, e);
+        }
+        
+        return Result.success(product);
     }
 
     /**
