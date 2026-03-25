@@ -110,4 +110,19 @@ management:
   endpoints:
     web:
       exposure:
-        include: "*"
+        include: "*"  # 暴露所有端点
+  endpoint:
+    health:
+      show-details: always  # 显示健康检查详情
+    info:
+      enabled: true  # 启用 info 端点
+  info:
+    env:
+      enabled: true  # 启用环境变量显示
+
+# 应用信息配置
+info:
+  app.name: nexusmall-order
+  app.description: NexusMall 订单服务
+  app.version: 0.0.1-SNAPSHOT
+  java.version: 1.8

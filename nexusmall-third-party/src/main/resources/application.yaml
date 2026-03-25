@@ -114,6 +114,21 @@ management:
         # 当前暴露全部端点（仅建议开发环境）
         # 生产建议改为：health,info,prometheus
         include: "*"
+  endpoint:
+    health:
+      show-details: always  # 显示健康检查详情
+    info:
+      enabled: true  # 启用 info 端点
+  info:
+    env:
+      enabled: true  # 启用环境变量显示
+
+# 应用信息配置
+info:
+  app.name: nexusmall-third-party
+  app.description: NexusMall 第三方服务集成模块
+  app.version: 0.0.1-SNAPSHOT
+  java.version: 1.8
 
 # ==============================
 # 服务监听端口
