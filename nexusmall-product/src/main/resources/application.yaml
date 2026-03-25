@@ -1,120 +1,243 @@
+# =====================================================
+# NexusMall 商品服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 商品信息管理（CRUD）
+# 2. 商品分类管理
+# 3. 品牌管理
+# 4. 库存管理（支持分布式事务扣减）
+# 5. 商品搜索（预留 Elasticsearch 集成）
+# =====================================================
+
 spring:
+  # ------------------------------
+  # 配置导入（从 Nacos 加载配置）
+  # ------------------------------
   config:
+    # 从 Nacos 配置中心导入配置文件
+    # optional: 表示配置可选，Nacos 连接失败时使用本地配置
     import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
+  
   profiles:
+    # 当前运行环境：dev(开发) / test(测试) / prod(生产)
     active: dev
+  
   application:
+    # 服务名称（注册到 Nacos 的唯一标识）
     name: nexusmall-product
+  
+  # ------------------------------
+  # 数据源配置（HikariCP 连接池）
+  # ------------------------------
   datasource:
+    # MySQL 驱动类名
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # JDBC 连接 URL
     url: jdbc:mysql://10.10.1.1:3306/nexusmall_product?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    # 数据库用户名
     username: root
+    # 数据库密码
     password: "123456"
+    # 数据源类型：HikariCP
     type: com.zaxxer.hikari.HikariDataSource
+    # HikariCP 连接池详细配置
     hikari:
+      # 最小空闲连接数
       minimum-idle: 5
+      # 最大连接数
       maximum-pool-size: 20
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      # 空闲连接超时时间（毫秒）
+      idle-timeout: 30000  # 30 秒
+      # 连接最大生命周期（毫秒）
+      max-lifetime: 1800000  # 30 分钟
+      # 连接超时时间（毫秒）
+      connection-timeout: 30000  # 30 秒
+      # 连接测试查询语句
       connection-test-query: SELECT 1
+  
+  # ------------------------------
+  # Redis 缓存配置
+  # ------------------------------
   redis:
+    # Redis 服务器地址（支持环境变量覆盖）
     host: ${REDIS_HOST:10.10.1.1}
+    # Redis 端口
     port: ${REDIS_PORT:6379}
+    # 使用的数据库编号（0-15）
     database: ${REDIS_DATABASE:0}
+    # Redis 密码
     password: ${REDIS_PASSWORD:123456}
-    timeout: 5000
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
     lettuce:
       pool:
+        # 最大活跃连接数
         max-active: 16
+        # 最大空闲连接数
         max-idle: 8
+        # 最小空闲连接数
         min-idle: 0
-        max-wait: 1000ms
+        # 获取连接的最大等待时间（毫秒）
+        max-wait: 1000ms  # 1 秒
+  
+  # ------------------------------
+  # Spring Cloud 配置
+  # ------------------------------
   cloud:
     nacos:
+      # 服务发现配置
       discovery:
-        server-addr: 10.10.1.1:8848 # Nacos服务器地址
-        namespace: public # 命名空间
-        group: DEFAULT_GROUP # 分组
+        # Nacos 服务器地址
+        server-addr: 10.10.1.1:8848
+        # 命名空间（用于环境隔离）
+        namespace: public
+        # 服务分组
+        group: DEFAULT_GROUP
+      
+      # 配置中心配置
       config:
+        # 配置中心地址
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        # 配置命名空间
         namespace: ${spring.cloud.nacos.discovery.namespace}
+        # 配置分组
         group: ${spring.cloud.nacos.discovery.group}
-        file-extension: yaml # 配置文件格式
+        # 配置文件后缀名
+        file-extension: yaml
 
-# 服务端口
+# =====================================================
+# 服务器配置
+# =====================================================
 server:
+  # 服务监听端口
   port: 10000
+  # 监听地址（0.0.0.0 表示可通过任意 IP 访问）
   address: 0.0.0.0
 
-# MyBatis-Plus 配置
+# =====================================================
+# MyBatis-Plus ORM 配置
+# =====================================================
 mybatis-plus:
+  # Mapper XML 文件位置
   mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包路径
   type-aliases-package: com.nexusmall.product.entity
+  # MyBatis 原生配置
   configuration:
+    # 是否开启驼峰命名转换
     map-underscore-to-camel-case: true
+    # 是否启用二级缓存
+    # false: 禁用（微服务架构中通常用 Redis 做缓存）
     cache-enabled: false
+    # SQL 日志实现类
+    # Slf4jImpl: 使用 SLF4J 记录日志（生产环境推荐）
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
 
-# Feign 配置
+# =====================================================
+# OpenFeign 服务调用配置
+# =====================================================
 feign:
   sentinel:
+    # 是否启用 Sentinel 熔断降级
     enabled: true
   client:
     config:
       default:
-        connectTimeout: 5000
-        readTimeout: 5000
+        # 连接建立超时时间（毫秒）
+        connectTimeout: 5000  # 5 秒
+        # 读取数据超时时间（毫秒）
+        readTimeout: 5000  # 5 秒
 
-# 日志配置
-logging:
-  level:
-    # Seata 日志（生产环境建议 INFO）
-    io.seata: INFO
+# =====================================================
+# RocketMQ 消息队列配置
+# =====================================================
+rocketmq:
+  # NameServer 地址（RocketMQ 的注册中心）
+  name-server: 10.10.1.1:9876
+  
+  # 生产者配置
+  producer:
+    # 生产者组名称
+    group: product-producer-group
+    # 发送消息超时时间（毫秒）
+    send-message-timeout: 3000  # 3 秒
+    # 同步发送失败重试次数
+    retry-times-when-send-failed: 2
+    # 异步发送失败重试次数
+    retry-times-when-send-async-failed: 2
 
+# =====================================================
 # Seata 分布式事务配置
+# =====================================================
 seata:
+  # 是否启用 Seata
   enabled: true
+  # 应用 ID（用于标识事务发起方）
   application-id: nexusmall-product
+  # 事务服务组名称
   tx-service-group: nexusmall-tx-group
   service:
+    # 事务组映射配置
     vgroup-mapping:
+      # 将事务组映射到具体的 Seata Server 集群
       nexusmall-tx-group: default
+    # Seata Server 地址列表
     grouplist:
       default: 10.10.1.1:8091
   registry:
+    # 注册中心类型
+    # file: 使用本地文件（开发环境）
+    # nacos: 使用 Nacos（生产环境推荐）
     type: file
   config:
+    # 配置中心类型
     type: file
 
-# RocketMQ 消息队列配置
-rocketmq:
-  name-server: 10.10.1.1:9876  # NameServer 地址
-  producer:
-    group: product-producer-group  # 生产者组名
-    send-message-timeout: 3000   # 发送超时时间（毫秒）
-    retry-times-when-send-failed: 2  # 发送失败重试次数
-    retry-times-when-send-async-failed: 2  # 异步发送失败重试次数
-
+# =====================================================
 # Actuator 监控端点配置
+# =====================================================
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # 暴露所有端点
+        # 暴露的端点列表
+        # "*": 暴露所有端点（开发环境）
+        # ⚠️ 生产环境建议只暴露必要的端点
+        include: "*"
   endpoint:
     health:
-      show-details: always  # 显示健康检查详情
+      # 健康检查详情显示级别
+      show-details: always  # 显示详细信息
     info:
-      enabled: true  # 启用 info 端点
+      # 是否启用 info 端点
+      enabled: true
   info:
     env:
-      enabled: true  # 启用环境变量显示
+      # 是否在 info 端点中显示环境变量
+      enabled: true
 
-# 应用信息配置
+# =====================================================
+# 日志级别配置
+# =====================================================
+logging:
+  level:
+    # Seata 分布式事务日志
+    # DEBUG: 查看详细事务流程（开发环境）
+    # INFO: 查看关键事务信息（生产环境）
+    io.seata: INFO
+
+# =====================================================
+# 应用元信息配置
+# =====================================================
 info:
-  app.name: nexusmall-product
-  app.description: NexusMall 商品服务
-  app.version: 0.0.1-SNAPSHOT
+  app:
+    # 应用名称
+    name: nexusmall-product
+    # 应用描述
+    description: NexusMall 商品服务
+    # 应用版本号
+    version: 0.0.1-SNAPSHOT
+  # Java 版本
   java.version: 1.8
 

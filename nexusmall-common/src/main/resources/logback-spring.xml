@@ -1,43 +1,115 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- =====================================================
+     NexusMall 统一日志配置文件（基于 Logback）
+     =====================================================
+     职责说明：
+     1. 定义统一的日志输出格式
+     2. 配置日志文件滚动策略（按日期 + 大小）
+     3. 分环境控制日志级别（dev/test/prod）
+     4. 集成 Spring Boot 动态属性
+     ===================================================== -->
 <configuration>
-    <!-- 包含 Spring Boot 默认配置 -->
+    <!-- 包含 Spring Boot 默认日志配置 -->
+    <!-- 作用：继承 Spring Boot 的基础日志能力 -->
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
 
-    <!-- 定义日志输出格式 -->
+    <!-- ===============================
+         自定义日志属性
+         =============================== -->
+    
+    <!-- 定义日志输出格式（Pattern） -->
+    <!-- 格式说明：
+         %d{yyyy-MM-dd HH:mm:ss.SSS} - 时间戳（精确到毫秒）
+         [%thread]                   - 线程名
+         %-5level                    - 日志级别（左对齐，占 5 字符）
+         %logger{50}                 - 类名（最多显示 50 个字符）
+         %msg                        - 日志消息
+         %n                          - 换行符
+         
+         示例输出：
+         2026-03-25 14:30:00.123 [main] INFO  c.n.auth.controller.LoginController - 用户登录成功
+    -->
     <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>
 
-    <!-- 使用 Spring Boot 2.7+ 推荐的属性 -->
+    <!-- 从 application.yaml 中读取日志路径配置 -->
+    <!-- 
+         springProperty: Spring Boot 提供的标签，可从配置文件中读取属性
+         scope="context": 属性作用域为整个上下文
+         name="LOG_PATH": 定义变量名
+         source="nexusmall.logging.path": 对应的配置文件属性
+         defaultValue="./logs": 默认值（当配置文件中未设置时使用）
+    -->
     <springProperty scope="context" name="LOG_PATH" source="nexusmall.logging.path" defaultValue="./logs"/>
+    
+    <!-- 读取应用名称（用于日志文件命名） -->
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="app"/>
 
-    <!-- 动态日志路径 -->
+    <!-- 动态计算服务日志路径 -->
+    <!-- 最终路径示例：D:/IdeaProjects/nexusmall/logs/nexusmall-auth -->
     <property name="SERVICE_LOG_PATH" value="${LOG_PATH}/${APP_NAME}"/>
 
+    <!-- ===============================
+         Appender 配置（日志输出目的地）
+         =============================== -->
+    
+    <!-- 控制台输出（Console） -->
     <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
+            <!-- 使用上面定义的日志格式 -->
             <pattern>${LOG_PATTERN}</pattern>
+            <!-- 字符编码（防止中文乱码） -->
             <charset>UTF-8</charset>
         </encoder>
     </appender>
 
-    <!-- 滚动文件输出 -->
+    <!-- 文件输出（RollingFileAppender - 支持滚动） -->
     <appender name="file" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <encoder>
+            <!-- 日志文件格式 -->
             <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
         </encoder>
+        
+        <!-- 滚动策略（核心配置） -->
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 日志文件命名模式 -->
+            <!-- 
+                 %d{yyyy-MM-dd}   - 按日期分组
+                 %i               - 同一天内的序号（当文件大小超过限制时递增）
+                 
+                 生成的文件名示例：
+                 - 2026-03-25.0.log
+                 - 2026-03-25.1.log （当天第一个文件超过 100MB 时创建）
+                 - 2026-03-25.2.log
+            -->
             <fileNamePattern>${SERVICE_LOG_PATH}/%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            
+            <!-- 单个日志文件的最大大小 -->
+            <!-- 超过此大小会自动创建新文件（序号 +1） -->
             <maxFileSize>100MB</maxFileSize>
+            
+            <!-- 日志保留天数 -->
+            <!-- 超过此天数的日志文件会被自动删除 -->
             <maxHistory>30</maxHistory>
+            
+            <!-- 总日志大小上限 -->
+            <!-- 超过此大小会删除最旧的日志文件 -->
             <totalSizeCap>10GB</totalSizeCap>
+            
+            <!-- 应用启动时是否清理历史日志 -->
+            <!-- true: 启动时删除所有旧日志（慎用！） -->
             <cleanHistoryOnStart>true</cleanHistoryOnStart>
         </rollingPolicy>
     </appender>
 
-    <!-- 环境控制 -->
+    <!-- ===============================
+         分环境日志配置（Spring Profile）
+         =============================== -->
+    
+    <!-- 开发环境（dev）配置 -->
     <springProfile name="dev">
-        <!-- Seata 详细日志配置 -->
+        <!-- Seata 分布式事务详细日志 -->
+        <!-- 💡 用途：查看分布式事务的完整执行流程 -->
         <logger name="io.seata" level="DEBUG"/>
         <logger name="io.seata.core.rpc" level="DEBUG"/>
         <logger name="io.seata.core.protocol" level="DEBUG"/>
@@ -50,21 +122,36 @@
         <logger name="io.seata.core.context" level="DEBUG"/>
         
         <!-- MyBatis SQL 执行日志 -->
+        <!-- 💡 用途：查看 SQL 执行情况，调试数据库操作 -->
         <logger name="com.nexusmall.product.config.SeataHandlerInterceptor" level="DEBUG"/>
         <logger name="com.nexusmall.product.config.WebConfig" level="DEBUG"/>
         
         <!-- Druid 连接池日志 -->
+        <!-- 💡 用途：监控数据库连接池状态 -->
         <logger name="com.alibaba.druid.pool" level="DEBUG"/>
         
+        <!-- 根日志配置 -->
+        <!-- 
+             level="INFO": 默认输出 INFO 及以上级别的日志
+             appender-ref: 引用上面定义的输出目标
+        -->
         <root level="INFO">
-            <appender-ref ref="console"/>
-            <appender-ref ref="file"/>
+            <appender-ref ref="console"/>  <!-- 输出到控制台 -->
+            <appender-ref ref="file"/>    <!-- 输出到文件 -->
         </root>
     </springProfile>
 
+    <!-- 生产/测试环境（prod, test）配置 -->
     <springProfile name="prod,test">
+        <!-- 根日志配置 -->
+        <!-- 
+             💡 生产环境注意事项：
+             1. 只输出到文件（不输出到控制台，节省资源）
+             2. 日志级别为 INFO（不输出 DEBUG 详细日志）
+             3. Seata 等框架日志建议调整为 INFO 或 WARN
+        -->
         <root level="INFO">
-            <appender-ref ref="file"/>
+            <appender-ref ref="file"/>  <!-- 仅输出到文件 -->
         </root>
     </springProfile>
 </configuration>

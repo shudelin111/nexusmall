@@ -1,96 +1,204 @@
+# =====================================================
+# NexusMall 网关服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 统一入口：所有外部请求的流量入口
+# 2. 路由转发：根据路径将请求转发到对应微服务
+# 3. 身份认证：JWT Token 验证
+# 4. 限流熔断：保护后端服务（需集成 Sentinel）
+# 5. 跨域处理：解决前后端分离的跨域问题
+# =====================================================
+
 spring:
   profiles:
+    # 当前运行环境：dev(开发) / test(测试) / prod(生产)
     active: dev
+  
   application:
+    # 服务名称（注册到 Nacos）
     name: nexusmall-gateway
+  
+  # ------------------------------
+  # Redis 配置（用于 JWT 黑名单、限流计数器等）
+  # ------------------------------
   redis:
+    # Redis 服务器地址（支持环境变量覆盖）
     host: ${REDIS_HOST:10.10.1.1}
+    # Redis 端口
     port: ${REDIS_PORT:6379}
+    # 使用的数据库编号（0-15）
     database: ${REDIS_DATABASE:0}
+    # Redis 密码
     password: ${REDIS_PASSWORD:123456}
-    timeout: 5000
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
     lettuce:
       pool:
+        # 最大活跃连接数
         max-active: 16
+        # 最大空闲连接数
         max-idle: 8
+        # 最小空闲连接数
         min-idle: 0
-        max-wait: 1000ms
+        # 获取连接的最大等待时间（毫秒）
+        max-wait: 1000ms  # 1 秒
+  
+  # ------------------------------
+  # Spring Cloud Gateway 核心配置
+  # ------------------------------
   cloud:
     nacos:
       discovery:
+        # Nacos 服务发现地址
         server-addr: 10.10.1.1:8848
+    
     gateway:
+      # 服务发现相关配置
       discovery:
         locator:
+          # 是否启用从注册中心自动发现服务并创建路由
+          # true: 可以通过 http://gateway/服务名/路径 访问任意已注册的服务
           enabled: true
+          # 是否使用小写的服务 ID
+          # true: 服务名自动转为小写（避免大小写不一致问题）
           lower-case-service-id: true
+      
+      # 路由规则配置（核心功能）
       routes:
+        # ===============================
+        # 路由 1：认证服务
+        # ===============================
         - id: auth-service
+          # 目标服务地址
+          # 方式 1：直接指定 URL（当前使用）
+          # 方式 2：lb://nexusmall-auth（通过 Nacos 负载均衡调用）
           uri: http://localhost:8000
           predicates:
+            # 断言：匹配请求路径
+            # Path=/auth/**: 匹配所有以 /auth 开头的请求
+            # 示例：/auth/login、/auth/register
             - Path=/auth/**
           filters:
+            # 过滤器：保留原始 Host 头
+            # 作用：后端服务可以获取到原始的域名信息
             - PreserveHostHeader
+        
+        # ===============================
+        # 路由 2：商品服务
+        # ===============================
         - id: product-service
           uri: http://localhost:10000
           predicates:
+            # 匹配路径：/product/**
+            # 示例：/product/list、/product/detail/1
             - Path=/product/**
           filters:
             - PreserveHostHeader
+        
+        # ===============================
+        # 路由 3：订单服务
+        # ===============================
         - id: order-service
           uri: http://localhost:11000
           predicates:
+            # 匹配路径：/order/**
+            # 示例：/order/create、/order/list
             - Path=/order/**
           filters:
             - PreserveHostHeader
+      
+      # 跨域资源共享（CORS）配置
       globalcors:
         cors-configurations:
+          # 对所有路径生效
           '[/**]':
-            # 如果你的前端需要带 Cookie 或 Token 访问后端，请这样改：使用 allowedOriginPatterns: "*" 可以绕过浏览器的通配符限制，同时保持 allowCredentials: true。
-            # 不要用 allowedOrigins，改用 allowedOriginPatterns
+            # 允许的源（前端地址）
+            # ⚠️ 重要说明：
+            # allowedOrigins: "*" 与 allowCredentials: true 不能同时使用（浏览器限制）
+            # 解决方案：使用 allowedOriginPatterns: "*" 绕过此限制
+            # 如果你的前端需要带 Cookie 或 Token 访问后端，必须这样配置
             allowedOriginPatterns: "*"
-            # allowedOrigins: "*"
-            allowedMethods: "*"
-            allowedHeaders: "*"
-            # 如果你通过 Header（如 Authorization: Bearer xxx）传 Token，且不需要 Cookie，可以直接关掉凭证：
-            # allowCredentials: false
-            # allowedOrigins: "*"
+            # 允许的 HTTP 方法
+            allowedMethods: "*"  # GET, POST, PUT, DELETE, OPTIONS 等
+            # 允许的请求头
+            allowedHeaders: "*"  # Content-Type, Authorization 等
+            # 是否允许携带凭证（Cookie、Authorization headers 等）
+            # true: 允许（适用于需要登录的场景）
+            # false: 不允许（适用于公开 API）
             allowCredentials: true
 
+# =====================================================
+# Actuator 监控端点配置
+# =====================================================
 management:
   endpoints:
     web:
       exposure:
-        include: "*"  # 暴露所有端点
+        # 暴露的端点列表
+        # "*": 暴露所有端点（开发环境方便调试）
+        # ⚠️ 生产环境建议只暴露：health,info,gateway
+        include: "*"
   endpoint:
     health:
-      show-details: always  # 显示健康检查详情
+      # 健康检查详情显示级别
+      show-details: always  # 显示详细信息
     info:
-      enabled: true  # 启用 info 端点
+      # 是否启用 info 端点
+      enabled: true  # 显示应用信息
   info:
     env:
-      enabled: true  # 启用环境变量显示
+      # 是否在 info 端点中显示环境变量
+      enabled: true
 
-# 应用信息配置
-info:
-  app.name: nexusmall-gateway
-  app.description: NexusMall 网关服务
-  app.version: 0.0.1-SNAPSHOT
-  java.version: 1.8
-
+# =====================================================
+# 安全配置（JWT 相关）
+# =====================================================
 security:
   jwt:
+    # JWT 签名密钥
+    # ⚠️ 生产环境务必更换为复杂密钥
     secret-key: mySecretKeyForJWTGenerationAndValidation
+    # Token 过期时间（毫秒）
+    # 86400000ms = 24 小时
     expire-time-in-ms: 86400000
 
+# =====================================================
+# 服务器配置
+# =====================================================
 server:
+  # 网关服务端口（整个系统的统一入口）
   port: 88
+  # 监听地址
+  # 0.0.0.0: 监听所有网络接口
   address: 0.0.0.0
 
+# =====================================================
+# 日志级别配置
+# =====================================================
 logging:
   level:
+    # 根日志级别（默认级别）
     root: INFO
+    # 网关业务日志（DEBUG 级别查看详细逻辑）
     com.nexusmall.gateway: DEBUG
+    # Spring Cloud Gateway 框架日志
     org.springframework.cloud.gateway: DEBUG
+    # HTTP 响应式服务器日志（查看底层通信）
     org.springframework.http.server.reactive: DEBUG
+    # Spring Security 安全框架日志
     org.springframework.security: DEBUG
+
+# =====================================================
+# 应用元信息配置
+# =====================================================
+info:
+  app:
+    # 应用名称
+    name: nexusmall-gateway
+    # 应用描述
+    description: NexusMall 网关服务
+    # 应用版本号
+    version: 0.0.1-SNAPSHOT
+  # Java 版本
+  java.version: 1.8

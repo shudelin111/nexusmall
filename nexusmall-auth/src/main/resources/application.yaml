@@ -1,111 +1,261 @@
+# =====================================================
+# NexusMall 认证服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 用户注册、登录、登出
+# 2. JWT Token 生成与验证
+# 3. 用户权限管理
+# 4. OAuth2 第三方登录（预留）
+# =====================================================
+
 spring:
+  # ------------------------------
+  # 配置导入（从 Nacos 加载配置）
+  # ------------------------------
   config:
+    # 从 Nacos 配置中心导入配置文件
+    # 格式：nacos:{应用名}.{文件后缀}
+    # optional: 表示配置可选，Nacos 连接失败时使用本地配置
     import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
+  
   profiles:
+    # 当前运行环境：dev(开发) / test(测试) / prod(生产)
     active: dev
+  
   application:
+    # 服务名称（注册到 Nacos 的唯一标识）
     name: nexusmall-auth
+  
+  # ------------------------------
+  # 数据源配置（HikariCP 连接池）
+  # ------------------------------
   datasource:
+    # MySQL 驱动类名
     driver-class-name: com.mysql.cj.jdbc.Driver
+    # JDBC 连接 URL
+    # useUnicode=true: 支持 Unicode 字符集
+    # characterEncoding=UTF-8: 使用 UTF-8 编码
+    # serverTimezone=Asia/Shanghai: 设置服务器时区为上海时间
+    # useSSL=false: 禁用 SSL（内网环境可禁用，提升性能）
     url: jdbc:mysql://10.10.1.1:3306/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    # 数据库用户名
     username: root
+    # 数据库密码
     password: "123456"
+    # 数据源类型：HikariCP（Spring Boot 2.x 默认连接池，性能最优）
     type: com.zaxxer.hikari.HikariDataSource
+    # HikariCP 连接池详细配置
     hikari:
+      # 最小空闲连接数（保持池中至少有这么多连接）
       minimum-idle: 5
+      # 最大连接数（池中允许的最大活跃连接数）
+      # 建议值：CPU 核心数 * 2 + 1（根据实际业务调整）
       maximum-pool-size: 20
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      connection-timeout: 30000
+      # 空闲连接超时时间（毫秒）
+      # 含义：连接在池中空闲超过此时间将被回收
+      # 建议：小于数据库的 wait_timeout 参数
+      idle-timeout: 30000  # 30 秒
+      # 连接最大生命周期（毫秒）
+      # 含义：连接从创建到强制关闭的总时长
+      # 建议：比数据库的 wait_timeout 短几分钟
+      max-lifetime: 1800000  # 30 分钟
+      # 连接超时时间（毫秒）
+      # 含义：获取连接时最多等待多久
+      connection-timeout: 30000  # 30 秒
+      # 连接测试查询语句
+      # 作用：检测连接是否有效（MySQL 常用 SELECT 1）
       connection-test-query: SELECT 1
+  
+  # ------------------------------
+  # Redis 缓存配置（用于 Token 存储、验证码等）
+  # ------------------------------
   redis:
+    # Redis 服务器地址（支持环境变量覆盖）
     host: ${REDIS_HOST:10.10.1.1}
+    # Redis 端口
     port: ${REDIS_PORT:6379}
+    # 使用的数据库编号（0-15，默认 0）
     database: ${REDIS_DATABASE:0}
+    # Redis 密码（无密码可留空）
     password: ${REDIS_PASSWORD:123456}
-    timeout: 5000
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置（Lettuce 是 Spring Boot 默认的 Redis 客户端）
     lettuce:
       pool:
+        # 最大活跃连接数（含正在使用和空闲）
         max-active: 16
+        # 最大空闲连接数
         max-idle: 8
+        # 最小空闲连接数
         min-idle: 0
-        max-wait: 1000ms
+        # 获取连接的最大等待时间（毫秒）
+        # -1: 永久等待；0: 立即返回；>0: 等待指定时间
+        max-wait: 1000ms  # 1 秒
+  
+  # ------------------------------
+  # Spring Cloud 配置
+  # ------------------------------
   cloud:
     nacos:
+      # 服务发现配置（注册到 Nacos）
       discovery:
-        server-addr: 10.10.1.1:8848 # Nacos 服务器地址
-        namespace: public # 命名空间
-        group: DEFAULT_GROUP # 分组
+        # Nacos 服务器地址
+        server-addr: 10.10.1.1:8848
+        # 命名空间（用于隔离不同环境或业务线）
+        # public: 默认命名空间
+        # 也可创建独立命名空间实现环境隔离
+        namespace: public
+        # 服务分组（用于区分同一服务的不同版本或业务组）
+        group: DEFAULT_GROUP
+      
+      # 配置中心配置（从 Nacos 读取配置）
       config:
+        # 配置中心地址（复用服务发现的地址）
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        # 配置命名空间（复用服务发现的命名空间）
         namespace: ${spring.cloud.nacos.discovery.namespace}
+        # 配置分组（复用服务发现的分组）
         group: ${spring.cloud.nacos.discovery.group}
-        file-extension: yaml # 配置文件格式
+        # 配置文件后缀名
+        # dataId 格式：{spring.application.name}.{file-extension}
+        # 示例：nexusmall-auth.yaml
+        file-extension: yaml
 
-# MyBatis-Plus 配置
+# =====================================================
+# 服务器配置
+# =====================================================
+server:
+  # 服务监听端口
+  port: 8000
+  # 监听地址
+  # 0.0.0.0: 监听所有网络接口（可通过 IP 访问）
+  # 127.0.0.1: 仅本地访问
+  address: 0.0.0.0
+
+# =====================================================
+# MyBatis-Plus ORM 配置
+# =====================================================
 mybatis-plus:
+  # Mapper XML 文件位置（支持通配符匹配）
   mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包路径
+  # 作用：XML 中可以直接用实体类名而不需要写全限定名
   type-aliases-package: com.nexusmall.auth.entity
+  # MyBatis 原生配置
   configuration:
+    # 是否开启驼峰命名转换
+    # true: 数据库下划线字段自动映射为 Java 驼峰字段
+    # 示例：user_name -> userName
     map-underscore-to-camel-case: true
+    # SQL 日志实现类
+    # StdOutImpl: 将 SQL 输出到控制台（开发环境使用）
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # 全局配置
   global-config:
     db-config:
+      # 主键生成策略
+      # auto: 数据库自增 ID
+      # assign_id: 雪花算法生成 ID
+      # assign_uuid: UUID
       id-type: auto
+      # 逻辑删除字段名
       logic-delete-field: deleted
+      # 逻辑删除值（1 表示已删除）
       logic-delete-value: 1
+      # 逻辑未删除值（0 表示未删除）
       logic-not-delete-value: 0
-# 安全配置
+
+# =====================================================
+# 安全配置（JWT 相关）
+# =====================================================
 security:
   jwt:
+    # JWT 签名密钥（用于生成和验证 Token）
+    # ⚠️ 生产环境务必更换为复杂密钥，并妥善保管
     secret-key: mySecretKeyForJWTGenerationAndValidation
-    expire-time-in-ms: 86400000 # 24小时
+    # Token 过期时间（毫秒）
+    # 86400000ms = 24 小时
+    # 建议：根据业务安全要求调整（如 2 小时、7 天等）
+    expire-time-in-ms: 86400000
 
-# 暴露所有端点用于监控
+# =====================================================
+# Seata 分布式事务配置
+# =====================================================
+seata:
+  # 是否启用 Seata
+  enabled: true
+  # 应用 ID（用于标识事务发起方）
+  application-id: nexusmall-auth
+  # 事务服务组名称
+  tx-service-group: nexusmall-tx-group
+  service:
+    # 事务组映射配置
+    vgroup-mapping:
+      # 将事务组映射到具体的 Seata Server 集群
+      nexusmall-tx-group: default
+    # Seata Server 地址列表
+    grouplist:
+      # default 集群的地址
+      default: 10.10.1.1:8091
+  registry:
+    # 注册中心类型
+    # file: 使用本地文件（开发环境）
+    # nacos: 使用 Nacos（生产环境推荐）
+    type: file
+  config:
+    # 配置中心类型
+    # file: 使用本地文件（开发环境）
+    # nacos: 使用 Nacos（生产环境推荐）
+    type: file
+
+# =====================================================
+# Actuator 监控端点配置
+# =====================================================
 management:
   endpoints:
     web:
       exposure:
+        # 暴露的端点列表
+        # "*": 暴露所有端点（包括 health/info/metrics/beans 等）
+        # ⚠️ 生产环境建议只暴露必要的端点（如 health,info,prometheus）
         include: "*"
   endpoint:
     health:
+      # 健康检查详情显示级别
+      # never: 不显示
+      # when_authorized: 仅授权用户可见
+      # always: 始终显示详细信息
       show-details: always
     info:
+      # 是否启用 info 端点（显示应用信息）
       enabled: true
   info:
     env:
+      # 是否在 info 端点中显示环境变量
       enabled: true
 
+# =====================================================
 # 日志配置
+# =====================================================
 logging:
   level:
-    # Seata 日志（生产环境建议 INFO）
+    # Seata 分布式事务日志级别
+    # DEBUG: 查看详细事务流程（开发环境）
+    # INFO: 查看关键事务信息（生产环境）
     io.seata: INFO
 
-# 服务端口
-server:
-  port: 8000
-  address: 0.0.0.0
-
-# Seata 分布式事务配置（预留）
-seata:
-  enabled: true
-  application-id: nexusmall-auth
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
-    grouplist:
-      default: 10.10.1.1:8091
-  registry:
-    type: file
-  config:
-    type: file
-
-# 应用信息配置
+# =====================================================
+# 应用元信息配置（通过 Actuator /actuator/info 端点查看）
+# =====================================================
 info:
-  app.name: nexusmall-auth
-  app.description: NexusMall 认证服务
-  app.version: 0.0.1-SNAPSHOT
+  app:
+    # 应用名称
+    name: nexusmall-auth
+    # 应用描述
+    description: NexusMall 认证服务
+    # 应用版本号
+    version: 0.0.1-SNAPSHOT
+  # Java 版本
   java.version: 1.8
 

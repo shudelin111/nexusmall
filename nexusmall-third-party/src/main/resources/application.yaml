@@ -1,139 +1,269 @@
-# ==============================
+# =====================================================
+# NexusMall 第三方服务集成模块配置文件
+# =====================================================
+# 模块职责：
+# 1. 短信服务（阿里云/腾讯云/华为云）
+# 2. 支付服务（支付宝/微信支付/银联）
+# 3. 对象存储（七牛云/阿里云 OSS/腾讯云 COS）
+# 4. 邮件服务（预留）
+# 5. 物流查询（预留）
+# =====================================================
+
+# ===============================
 # 基础 Spring 配置
-# ==============================
+# ===============================
 spring:
+  # ------------------------------
+  # 配置导入（从 Nacos 加载配置）
+  # ------------------------------
   config:
-    import: optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}
+    # 从 Nacos 配置中心导入配置文件
+    # optional: 表示配置可选，Nacos 连接失败时使用本地配置
+    import: "optional:nacos:${spring.application.name}.${spring.cloud.nacos.config.file-extension}"
+  
   profiles:
-    # 当前激活环境：dev/test/prod
-    # 建议在生产环境通过启动参数覆盖：--spring.profiles.active=prod
+    # 当前运行环境：dev(开发) / test(测试) / prod(生产)
+    # 💡 建议：生产环境通过启动参数覆盖，如 --spring.profiles.active=prod
     active: dev
-
+  
   application:
-    # 服务名（会注册到 Nacos，也会用于日志目录名）
+    # 服务名称（注册到 Nacos，也会用于日志目录名）
     name: nexusmall-third-party
-
+  
   # ------------------------------
-  # Redis 连接配置（用于缓存/幂等/验证码等场景）
+  # Redis 连接配置
   # ------------------------------
+  # 用途说明：
+  # 1. 缓存验证码
+  # 2. 幂等性控制（防止重复提交）
+  # 3. 分布式锁
+  # 4. 临时数据存储
   redis:
-    # Redis 主机地址，默认本机
+    # Redis 主机地址
+    # 💡 支持环境变量替换：${REDIS_HOST}
+    # 冒号后的值为默认值（当环境变量不存在时使用）
     host: ${REDIS_HOST:10.10.1.1}
+    
     # Redis 端口
     port: ${REDIS_PORT:6379}
-    # Redis 库编号（0-15）
+    
+    # Redis 数据库编号（0-15）
+    # 💡 建议：不同业务使用不同数据库，实现数据隔离
+    # 示例：0-用户，1-订单，2-商品，3-缓存
     database: ${REDIS_DATABASE:0}
-    # Redis 密码（无密码可留空）
+    
+    # Redis 密码
+    # 💡 无密码可留空：password: ""
     password: ${REDIS_PASSWORD:123456}
+    
     # 连接超时时间（毫秒）
-    timeout: 5000
+    timeout: 5000  # 5 秒
+    
+    # Lettuce 连接池配置
+    # Lettuce 是 Spring Boot 默认的 Redis 客户端（基于 Netty）
     lettuce:
       pool:
-        # 最大连接数（含正在使用和空闲）
+        # 最大连接数（含正在使用和空闲的连接）
+        # 💡 建议值：根据并发量调整，公式：CPU 核心数 * 2 + 1
         max-active: 16
+        
         # 最大空闲连接数
+        # 💡 含义：池中保持多少空闲连接以备不时之需
         max-idle: 8
+        
         # 最小空闲连接数
+        # 💡 含义：即使没有请求，池中也至少保持多少空闲连接
         min-idle: 0
-        # 从连接池获取连接的最大等待时间
-        max-wait: 1000ms
-
+        
+        # 从连接池获取连接的最大等待时间（毫秒）
+        # 💡 -1: 永久等待；0: 立即返回；>0: 等待指定时间
+        max-wait: 1000ms  # 1 秒
+  
+  # ------------------------------
+  # Spring Cloud 配置
+  # ------------------------------
   cloud:
     nacos:
+      # 服务发现配置（注册到 Nacos）
       discovery:
-        # Nacos 地址（服务注册与发现）
+        # Nacos 服务器地址
         server-addr: 10.10.1.1:8848
-        # Nacos 命名空间，public 表示默认命名空间
+        
+        # Nacos 命名空间
+        # 💡 用途：用于隔离不同环境或业务线
+        # public: 默认命名空间
+        # 💡 最佳实践：
+        #   - 开发环境：dev-namespace
+        #   - 测试环境：test-namespace
+        #   - 生产环境：prod-namespace
         namespace: public
+        
         # 服务分组
+        # 💡 用途：区分同一服务的不同版本或业务组
         group: DEFAULT_GROUP
+      
+      # 配置中心配置（从 Nacos 读取配置）
       config:
-        # Nacos 配置中心地址，默认复用 discovery 地址
+        # 配置中心地址（默认复用 discovery 的地址）
         server-addr: ${spring.cloud.nacos.discovery.server-addr}
-        # Nacos 配置命名空间，默认复用 discovery 命名空间
+        
+        # 配置命名空间（默认复用 discovery 的命名空间）
         namespace: ${spring.cloud.nacos.discovery.namespace}
-        # Nacos 配置分组，默认复用 discovery 分组
+        
+        # 配置分组（默认复用 discovery 的分组）
         group: ${spring.cloud.nacos.discovery.group}
-        # 配置文件后缀（对应 dataId 后缀）
+        
+        # 配置文件后缀名
+        # 💡 dataId 格式：{应用名}.{后缀}
+        # 示例：nexusmall-third-party.yaml
         file-extension: yaml
 
-# ==============================
-# 第三方服务业务配置
-# ==============================
-third-party:
-  sms:
-    # 是否启用短信能力（false 时不会装配短信客户端）
-    enabled: true
-    # 短信服务商：aliyun / tencent / huawei
-    provider: aliyun
+# ===============================
+# RocketMQ 配置
+# ===============================
+rocketmq:
+  # NameServer 地址
+  # 💡 格式：ip:port;ip:port（支持集群，用分号分隔）
+  name-server: 10.10.1.1:9876
+  
+  # 生产者配置
+  producer:
+    # 生产者组名称
+    # 💡 用途：标识一类生产者（通常按服务维度划分）
+    group: third-party-producer-group
+    
+    # 发送消息超时时间（毫秒）
+    send-message-timeout: 3000  # 3 秒
 
+# ===============================
+# 第三方服务业务配置
+# ===============================
+third-party:
+  # ------------------------------
+  # 短信服务配置
+  # ------------------------------
+  sms:
+    # 是否启用短信能力
+    # 💡 false 时不会装配短信客户端（节省资源）
+    enabled: true
+    
+    # 短信服务商
+    # 💡 可选值：aliyun（阿里云）/ tencent（腾讯云）/ huawei（华为云）
+    provider: aliyun
+    
     # 阿里云短信参数（provider=aliyun 时使用）
     aliyun:
-      # 短信服务地域，常用 cn-hangzhou
+      # 短信服务地域
+      # 💡 常用值：cn-hangzhou（杭州）、cn-shanghai（上海）
+      # 💡 选择离你用户最近的地域可降低延迟
       region-id: ${ALIYUN_SMS_REGION_ID:cn-hangzhou}
-      # 阿里云访问凭证
+      
+      # 阿里云访问凭证（AccessKey）
+      # 💡 获取方式：阿里云控制台 -> 用户信息管理
+      # 💡 安全建议：生产环境使用环境变量或配置中心管理，不要硬编码
       access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
       access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+      
       # 短信签名（控制台已审核通过）
+      # 💡 示例：【NexusMall 商城】
       sign-name: ${ALIYUN_SMS_SIGN_NAME:}
-      # 短信模板CODE（控制台已审核通过）
+      
+      # 短信模板 CODE（控制台已审核通过）
+      # 💡 示例：SMS_123456789
+      # 💡 模板内容示例："您的验证码是${code}，5 分钟内有效"
       template-code: ${ALIYUN_SMS_TEMPLATE_CODE:}
-
+  
+  # ------------------------------
+  # 支付服务配置
+  # ------------------------------
   payment:
-    # 是否启用支付能力（当前仅配置开关）
+    # 是否启用支付能力
     enabled: true
-    # 启用的支付渠道列表（后续可按需扩展参数）
+    
+    # 启用的支付渠道列表
+    # 💡 后续可按需扩展各渠道的详细参数
     providers:
-      - alipay
-      - wechatpay
-      - unionpay
-
+      - alipay    # 支付宝
+      - wechatpay # 微信支付
+      - unionpay  # 银联支付
+  
+  # ------------------------------
+  # 对象存储配置
+  # ------------------------------
   storage:
-    # 是否启用对象存储能力（false 时不会装配存储客户端）
+    # 是否启用对象存储能力
+    # 💡 false 时不会装配存储客户端
     enabled: true
-    # 存储服务商：qiniu / aliyun-oss / tencent-cos
+    
+    # 存储服务商
+    # 💡 可选值：qiniu（七牛云）/ aliyun-oss（阿里云 OSS）/ tencent-cos（腾讯云 COS）
     provider: aliyun-oss
-
+    
     # 阿里云 OSS 参数（provider=aliyun-oss 时使用）
     aliyun-oss:
-      # OSS 访问地址，例如 oss-cn-hangzhou.aliyuncs.com
+      # OSS 访问地址（Endpoint）
+      # 💡 格式：oss-{地域}.aliyuncs.com
+      # 💡 示例：oss-cn-hangzhou.aliyuncs.com
       endpoint: ${ALIYUN_OSS_ENDPOINT:}
-      # 阿里云访问凭证
+      
+      # 阿里云访问凭证（与短信共用 AccessKey）
       access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
       access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
-      # Bucket 名称
+      
+      # Bucket 名称（存储空间名称）
+      # 💡 全局唯一，类似域名命名规则
       bucket-name: ${ALIYUN_OSS_BUCKET:}
 
-# ==============================
+# ===============================
 # 运维与监控
-# ==============================
+# ===============================
 management:
   endpoints:
     web:
       exposure:
-        # 当前暴露全部端点（仅建议开发环境）
-        # 生产建议改为：health,info,prometheus
+        # 暴露的端点列表
+        # 💡 开发环境："*" 暴露所有端点（方便调试）
+        # 💡 生产环境建议：health,info,prometheus
+        #   - health: 健康检查
+        #   - info: 应用信息
+        #   - prometheus: Prometheus 监控指标
         include: "*"
+  
   endpoint:
     health:
-      show-details: always  # 显示健康检查详情
+      # 健康检查详情显示级别
+      show-details: always  # 显示详细信息
     info:
-      enabled: true  # 启用 info 端点
+      # 是否启用 info 端点
+      enabled: true
+  
   info:
     env:
-      enabled: true  # 启用环境变量显示
+      # 是否在 info 端点中显示环境变量
+      enabled: true
 
-# 应用信息配置
-info:
-  app.name: nexusmall-third-party
-  app.description: NexusMall 第三方服务集成模块
-  app.version: 0.0.1-SNAPSHOT
-  java.version: 1.8
-
-# ==============================
+# ===============================
 # 服务监听端口
-# ==============================
+# ===============================
 server:
-  # third-party 服务端口
+  # 服务监听端口
   port: 17000
+  
+  # 监听地址
+  # 💡 0.0.0.0: 监听所有网络接口（可通过任意 IP 访问）
+  # 💡 127.0.0.1: 仅本地访问
   address: 0.0.0.0
+
+# ===============================
+# 应用元信息配置
+# ===============================
+info:
+  app:
+    # 应用名称
+    name: nexusmall-third-party
+    # 应用描述
+    description: NexusMall 第三方服务集成模块
+    # 应用版本号
+    version: 0.0.1-SNAPSHOT
+  # Java 版本
+  java.version: 1.8
