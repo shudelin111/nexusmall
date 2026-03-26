@@ -33,9 +33,9 @@ import java.util.List;
 @Slf4j
 @Component
 @RocketMQMessageListener(
-    topic = MQConstants.USER_BEHAVIOR_TOPIC,
-    consumerGroup = "behavior-service-consumer-group",
-    selectorExpression = "*"
+    topic = MQConstants.UserBehavior.TOPIC,
+    selectorExpression = "*",
+    consumerGroup = MQConstants.UserBehavior.CONSUMER_GROUP
 )
 public class UserBehaviorListener implements RocketMQListener<String> {
 

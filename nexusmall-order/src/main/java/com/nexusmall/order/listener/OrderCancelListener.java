@@ -1,6 +1,6 @@
 package com.nexusmall.order.listener;
 
-import com.nexusmall.order.constant.RocketMQConstants;
+import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.order.service.OrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -14,9 +14,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RocketMQMessageListener(
-    topic = RocketMQConstants.ORDER_TOPIC,
-    selectorExpression = RocketMQConstants.ORDER_CANCEL_TAG,
-    consumerGroup = RocketMQConstants.ORDER_CONSUMER_GROUP
+    topic = MQConstants.Order.TOPIC,
+    selectorExpression = MQConstants.Order.CANCEL_TAG,
+    consumerGroup = MQConstants.Order.CONSUMER_GROUP
 )
 public class OrderCancelListener implements RocketMQListener<Long> {
 

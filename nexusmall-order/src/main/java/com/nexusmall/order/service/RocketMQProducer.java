@@ -1,8 +1,8 @@
 package com.nexusmall.order.service;
 
+import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.exception.OrderException;
-import com.nexusmall.order.constant.RocketMQConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class RocketMQProducer {
             Message<Long> message = MessageBuilder.withPayload(orderId).build();
             
             // 发送到订单 Topic，使用订单取消 Tag
-            String destination = RocketMQConstants.ORDER_TOPIC + ":" + RocketMQConstants.ORDER_CANCEL_TAG;
+            String destination = MQConstants.Order.TOPIC + ":" + MQConstants.Order.CANCEL_TAG;
             
             // 发送延迟消息
             rocketMQTemplate.syncSend(destination, message, 3000, delayLevel);

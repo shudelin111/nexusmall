@@ -249,8 +249,11 @@ logging:
     # DEBUG: 查看详细事务流程（开发环境）
     # INFO: 查看关键事务信息（生产环境）
     io.seata: INFO
+    # Sentinel 流控熔断日志（记录限流、降级等事件）
+    com.alibaba.csp.sentinel: DEBUG
     # 本服务业务日志（DEBUG 级别查看详细逻辑）
     com.nexusmall.product: DEBUG
+    com.nexusmall.common: DEBUG
     # MyBatis SQL 日志
     com.nexusmall.product.dao: DEBUG
 

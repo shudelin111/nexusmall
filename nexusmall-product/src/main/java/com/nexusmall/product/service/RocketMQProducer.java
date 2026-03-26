@@ -1,6 +1,6 @@
 package com.nexusmall.product.service;
 
-import com.nexusmall.product.constant.RocketMQConstants;
+import com.nexusmall.common.constant.MQConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class RocketMQProducer {
             message.setCount(count);
             
             // 发送到库存 Topic
-            String destination = RocketMQConstants.STOCK_TOPIC + ":" + RocketMQConstants.STOCK_DECREASED_TAG;
+            String destination = MQConstants.Stock.TOPIC + ":" + MQConstants.Stock.DECREASED_TAG;
             
             // 发送普通消息
             rocketMQTemplate.convertAndSend(destination, message);

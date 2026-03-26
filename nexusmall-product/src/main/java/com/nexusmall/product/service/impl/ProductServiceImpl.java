@@ -96,11 +96,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @SentinelResource(
-        value = "decreaseStock",
-        fallback = "decreaseStockFallback",
-        blockHandler = "decreaseStockBlock"
-    )
     @DistributedLock(key = "'stock:decrease:' + #skuId", waitTime = 5, leaseTime = 30)
     @Transactional(rollbackFor = Exception.class)
     public boolean decreaseStock(Long skuId, Integer count) {
@@ -117,22 +112,6 @@ public class ProductServiceImpl implements ProductService {
             log.error("库存扣减失败，skuId: {}, count: {}，库存不足", skuId, count);
             throw new ProductException(CommonResultCode.PARAM_INVALID.getCode(), "库存不足");
         }
-    }
-
-    /**
-     * decreaseStock 的降级处理方法
-     */
-    public boolean decreaseStockFallback(Long skuId, Integer count, Throwable ex) {
-        log.error("扣减库存失败，已触发降级，skuId: {}, count: {}", skuId, count, ex);
-        throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "库存服务暂时不可用，请稍后再试");
-    }
-
-    /**
-     * decreaseStock 的限流处理方法
-     */
-    public boolean decreaseStockBlock(Long skuId, Integer count, BlockException ex) {
-        log.warn("扣减库存被限流，skuId: {}, count: {}", skuId, count);
-        throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "系统繁忙，请稍后再试");
     }
 
     @Override

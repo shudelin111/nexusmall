@@ -49,7 +49,7 @@ public class UserBehaviorKafkaServiceImpl implements UserBehaviorKafkaService {
             String messageJson = objectMapper.writeValueAsString(message);
             
             // 发送到 Kafka
-            kafkaTemplate.send(MQConstants.USER_BEHAVIOR_KAFKA_TOPIC, messageJson);
+            kafkaTemplate.send(MQConstants.UserBehavior.KAFKA_TOPIC, messageJson);
             
             log.info("【用户行为发送至 Kafka 成功】userId: {}, behaviorType: {}", 
                     userId, behaviorType);

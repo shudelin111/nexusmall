@@ -7,6 +7,7 @@ public enum CommonResultCode implements ResultCode {
     UNAUTHORIZED(401, "未登录或登录已过期"),
     FORBIDDEN(403, "无权限访问"),
     NOT_FOUND(404, "资源不存在"),
+    SYSTEM_BUSY(429, "系统繁忙，请稍后再试"),
     SYSTEM_ERROR(500, "系统异常");
 
     private final int code;

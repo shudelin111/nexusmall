@@ -1,0 +1,155 @@
+# =====================================================
+# NexusMall-Product 服务 Sentinel 熔断降级规则配置
+# =====================================================
+# 用途：在 Nacos 配置中心创建此文件，实现动态熔断降级
+# =====================================================
+# 配置步骤：
+# 1. 登录 Nacos 控制台：http://10.10.1.1:8848/nacos
+# 2. 进入「配置管理」->「配置列表」
+# 3. 点击「+」创建配置：
+#    - Data ID: nexusmall-product-sentinel.yaml
+#    - Group: DEFAULT_GROUP
+#    - 配置格式：YAML
+# 4. 复制本文件内容到配置内容区域
+# 5. 点击「发布」
+# 6. 重启 Product 服务或在 Sentinel Dashboard 刷新
+# =====================================================
+
+spring:
+  cloud:
+    sentinel:
+      datasource:
+        # ===============================
+        # 流控规则数据源（控制 QPS 或并发数）
+        # ===============================
+        flow:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: nexusmall-product-flow-rule.json
+            groupId: DEFAULT_GROUP
+            rule-type: flow
+            data-type: json
+        
+        # ===============================
+        # 熔断降级规则数据源（异常比例/慢调用）
+        # ===============================
+        degrade:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: nexusmall-product-degrade-rule.json
+            groupId: DEFAULT_GROUP
+            rule-type: degrade
+            data-type: json
+        
+        # ===============================
+        # 系统自适应保护规则数据源
+        # ===============================
+        system:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            dataId: nexusmall-product-system-rule.json
+            groupId: DEFAULT_GROUP
+            rule-type: system
+            data-type: json
+
+---
+# =====================================================
+# 流控规则详细配置（JSON 格式）
+# =====================================================
+# Data ID: nexusmall-product-flow-rule.json
+# Group: DEFAULT_GROUP
+# 配置格式：JSON
+# =====================================================
+[
+  {
+    "resource": "/product/list",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 200,
+    "strategy": 0,
+    "controlBehavior": 0,
+    "clusterMode": false
+  },
+  {
+    "resource": "/product/detail/{id}",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 300,
+    "strategy": 0,
+    "controlBehavior": 1,
+    "warmUpPeriodSec": 10,
+    "clusterMode": false
+  },
+  {
+    "resource": "decreaseStock",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 100,
+    "strategy": 0,
+    "controlBehavior": 2,
+    "maxQueueingTimeMs": 500,
+    "clusterMode": false
+  },
+  {
+    "resource": "/product/category/list",
+    "limitApp": "default",
+    "grade": 1,
+    "count": 500,
+    "strategy": 0,
+    "controlBehavior": 0,
+    "clusterMode": false
+  }
+]
+
+---
+# =====================================================
+# 熔断降级规则详细配置（JSON 格式）
+# =====================================================
+# Data ID: nexusmall-product-degrade-rule.json
+# Group: DEFAULT_GROUP
+# 配置格式：JSON
+# =====================================================
+[
+  {
+    "resource": "decreaseStock",
+    "count": 0.5,
+    "timeWindow": 60,
+    "grade": 0,
+    "limitApp": "default",
+    "minRequestAmount": 5
+  },
+  {
+    "resource": "/product/detail/{id}",
+    "count": 1000,
+    "timeWindow": 30,
+    "grade": 2,
+    "limitApp": "default",
+    "minRequestAmount": 10
+  },
+  {
+    "resource": "/product/list",
+    "count": 0.6,
+    "timeWindow": 90,
+    "grade": 0,
+    "limitApp": "default",
+    "minRequestAmount": 10
+  }
+]
+
+---
+# =====================================================
+# 系统自适应保护规则（JSON 格式）
+# =====================================================
+# Data ID: nexusmall-product-system-rule.json
+# Group: DEFAULT_GROUP
+# 配置格式：JSON
+# =====================================================
+[
+  {
+    "highestSystemLoad": 5.0,
+    "highestCpuUsage": 80.0,
+    "qps": 1000,
+    "avgRt": 1000,
+    "maxThread": 200
+  }
+]

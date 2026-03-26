@@ -50,7 +50,7 @@ docker run -d \
 --name rmqdashboard \
 --network rocketmq \
 --restart=always \
--p 8082:8082 \
+-p 8080:8080 \
 -e "NAMESRV_ADDR=rmqnamesrv:9876" \
 -e "JAVA_OPTS=-Xms128M -Xmx256M" \
 apacherocketmq/rocketmq-dashboard:1.0.0

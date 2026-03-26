@@ -1,7 +1,6 @@
 package com.nexusmall.order.service.impl;
 
-import com.alibaba.csp.sentinel.annotation.SentinelResource;
-import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
 import com.nexusmall.common.exception.OrderException;
@@ -9,7 +8,6 @@ import com.nexusmall.common.vo.Result;
 import com.nexusmall.common.vo.UserBehaviorVO;
 import com.nexusmall.order.dao.OrderItemMapper;
 import com.nexusmall.order.dao.OrderMapper;
-import com.nexusmall.order.constant.RocketMQConstants;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.entity.OrderItem;
 import com.nexusmall.order.feign.ProductFeignService;
@@ -52,11 +50,6 @@ public class OrderServiceImpl implements OrderService {
     private RocketMQTemplate rocketMQTemplate;
 
     @Override
-    @SentinelResource(
-        value = "getOrderById",
-        fallback = "getOrderByIdFallback",
-        blockHandler = "getOrderByIdBlock"
-    )
     public Order getById(Long id) {
         log.debug("根据 ID 查询订单，orderId: {}", id);
         Order order = orderMapper.selectById(id);
@@ -66,23 +59,6 @@ public class OrderServiceImpl implements OrderService {
             log.warn("订单不存在，orderId: {}", id);
         }
         return order;
-    }
-
-    /**
-     * getOrderById 的降级处理方法
-     */
-    public Order getOrderByIdFallback(Long id, Throwable ex) {
-        log.error("查询订单失败，已触发降级，orderId: {}", id, ex);
-        // 可以返回缓存数据或 null
-        return null;
-    }
-
-    /**
-     * getOrderById 的限流处理方法
-     */
-    public Order getOrderByIdBlock(Long id, BlockException ex) {
-        log.warn("查询订单被限流，orderId: {}", id);
-        return null;
     }
 
     @Override
@@ -136,11 +112,6 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @GlobalTransactional(name = "nexusmall-create-order-tx", rollbackFor = Exception.class)
-    @SentinelResource(
-        value = "createOrder",
-        fallback = "createOrderFallback",
-        blockHandler = "createOrderBlock"
-    )
     public Order createOrder(OrderCreateRequest request) {
         log.info("开始创建订单，请求参数：{}", request);
 
@@ -213,34 +184,16 @@ public class OrderServiceImpl implements OrderService {
                 .build();
             
             Message<UserBehaviorVO> message = MessageBuilder.withPayload(behaviorVO).build();
-            rocketMQTemplate.send("USER_BEHAVIOR_TOPIC", message);
+            rocketMQTemplate.send(MQConstants.UserBehavior.TOPIC + ":" + MQConstants.UserBehavior.TAG, message);
             log.info("【发送下单行为】userId: {}, orderId: {}", request.getMemberId(), order.getId());
         } catch (Exception e) {
             log.error("【发送下单行为失败】userId: {}, orderId: {}", request.getMemberId(), order.getId(), e);
         }
         
         // 5. 发送延迟消息（30 分钟后检查支付状态）
-        rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), RocketMQConstants.DELAY_LEVEL_30MIN);
+        rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), MQConstants.Order.DELAY_LEVEL_30MIN);
         
         return order;
-    }
-
-    /**
-     * createOrder 的降级处理方法
-     */
-    public Order createOrderFallback(OrderCreateRequest request, Throwable ex) {
-        log.error("创建订单失败，已触发降级，userId: {}, productId: {}", 
-                request.getMemberId(), request.getProductId(), ex);
-        throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "订单服务暂时不可用，请稍后再试");
-    }
-
-    /**
-     * createOrder 的限流处理方法
-     */
-    public Order createOrderBlock(OrderCreateRequest request, BlockException ex) {
-        log.warn("创建订单被限流，userId: {}, productId: {}", 
-                request.getMemberId(), request.getProductId());
-        throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "系统繁忙，请稍后再试");
     }
 
     @Override

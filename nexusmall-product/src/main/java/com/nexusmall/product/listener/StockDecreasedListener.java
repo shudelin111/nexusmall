@@ -1,6 +1,6 @@
 package com.nexusmall.product.listener;
 
-import com.nexusmall.product.constant.RocketMQConstants;
+import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.product.service.RocketMQProducer.StockDecreasedMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
@@ -13,9 +13,9 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RocketMQMessageListener(
-    topic = RocketMQConstants.STOCK_TOPIC,
-    selectorExpression = RocketMQConstants.STOCK_DECREASED_TAG,
-    consumerGroup = RocketMQConstants.STOCK_CONSUMER_GROUP
+    topic = MQConstants.Stock.TOPIC,
+    selectorExpression = MQConstants.Stock.DECREASED_TAG,
+    consumerGroup = MQConstants.Stock.CONSUMER_GROUP
 )
 public class StockDecreasedListener implements RocketMQListener<StockDecreasedMessage> {
 
