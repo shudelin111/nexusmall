@@ -34,6 +34,11 @@ public class DistributedLockAspect {
     private RedissonClient redissonClient;
 
     private final ExpressionParser parser = new SpelExpressionParser();
+    
+    /**
+     * 错误消息分隔符
+     */
+    private static final String ERROR_MESSAGE_SEPARATOR = "：";
 
     /**
      * 环绕通知，处理带有@DistributedLock 注解的方法
@@ -64,11 +69,18 @@ public class DistributedLockAspect {
                 return joinPoint.proceed();
             } else {
                 // 获取锁失败
-                throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁失败：" + lockKey);
+                throw new NexusmallException(
+                    CommonResultCode.LOCK_FAILED.getCode(), 
+                    CommonResultCode.LOCK_FAILED.getMessage() + ERROR_MESSAGE_SEPARATOR + lockKey
+                );
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁被中断", e);
+            throw new NexusmallException(
+                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
+                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
+                e
+            );
         } finally {
             // 释放锁
             if (isLocked && lock.isHeldByCurrentThread()) {

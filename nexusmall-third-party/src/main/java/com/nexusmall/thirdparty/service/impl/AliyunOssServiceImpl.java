@@ -38,12 +38,12 @@ public class AliyunOssServiceImpl implements OssService {
     @Override
     public OssUploadResponse upload(MultipartFile file, String dir) {
         if (file == null || file.isEmpty()) {
-            throw new ThirdPartyException(CommonResultCode.PARAM_INVALID.getCode(), "上传文件不能为空");
+            throw new ThirdPartyException(CommonResultCode.FILE_UPLOAD_FAILED.getCode(), CommonResultCode.FILE_UPLOAD_FAILED.getMessage());
         }
     
         String bucket = properties.getStorage().getAliyunOss().getBucketName();
         if (bucket == null || bucket.trim().isEmpty()) {
-            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "未配置 OSS bucket-name");
+            throw new ThirdPartyException(CommonResultCode.OSS_CONFIG_ERROR.getCode(), CommonResultCode.OSS_CONFIG_ERROR.getMessage());
         }
 
         // 生成对象key（目录 + 随机文件名）
@@ -67,7 +67,7 @@ public class AliyunOssServiceImpl implements OssService {
             return response;
         } catch (IOException e) {
             log.error("OSS 文件上传失败，文件名：{}, 错误：{}", file.getOriginalFilename(), e.getMessage(), e);
-            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "读取上传文件失败", e);
+            throw new ThirdPartyException(CommonResultCode.FILE_UPLOAD_FAILED.getCode(), "读取上传文件失败", e);
         }
     }
 

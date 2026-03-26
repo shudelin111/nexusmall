@@ -54,7 +54,7 @@ public class AliyunSmsServiceImpl implements SmsService {
             } catch (JsonProcessingException e) {
                 log.error("短信模板参数序列化失败，phone: {}, 参数：{}, 错误：{}", 
                          request.getPhoneNumber(), request.getTemplateParam(), e.getMessage(), e);
-                throw new ThirdPartyException(CommonResultCode.PARAM_INVALID.getCode(), "短信模板参数无法序列化为 JSON", e);
+                throw new ThirdPartyException(CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getCode(), CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getMessage(), e);
             }
         }
 

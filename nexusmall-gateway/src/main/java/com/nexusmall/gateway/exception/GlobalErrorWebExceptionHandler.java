@@ -79,7 +79,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
         } catch (JsonProcessingException e) {
             // ObjectMapper 序列化失败属于系统异常，记录日志后抛出网关业务异常
             log.error("JSON 序列化失败，result={}", result, e);
-            throw new GatewayException(CommonResultCode.SYSTEM_ERROR.getCode(), "JSON 序列化失败", e);
+            throw new GatewayException(CommonResultCode.JSON_SERIALIZE_FAILED.getCode(), CommonResultCode.JSON_SERIALIZE_FAILED.getMessage(), e);
         }
         
         DataBufferFactory bufferFactory = response.bufferFactory();

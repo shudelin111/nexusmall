@@ -110,7 +110,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("库存扣减失败，skuId: {}, count: {}，库存不足", skuId, count);
-            throw new ProductException(CommonResultCode.PARAM_INVALID.getCode(), "库存不足");
+            throw new ProductException(CommonResultCode.INSUFFICIENT_STOCK.getCode(), CommonResultCode.INSUFFICIENT_STOCK.getMessage());
         }
     }
 
@@ -125,7 +125,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("库存增加失败，skuId: {}, count: {}", skuId, count);
-            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
+            throw new ProductException(CommonResultCode.STOCK_OPERATION_FAILED.getCode(), CommonResultCode.STOCK_OPERATION_FAILED.getMessage());
         }
     }
 
@@ -162,7 +162,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("批量扣减库存失败");
-            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
+            throw new ProductException(CommonResultCode.STOCK_OPERATION_FAILED.getCode(), CommonResultCode.STOCK_OPERATION_FAILED.getMessage());
         }
     }
 
@@ -177,7 +177,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("批量增加库存失败");
-            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
+            throw new ProductException(CommonResultCode.STOCK_OPERATION_FAILED.getCode(), CommonResultCode.STOCK_OPERATION_FAILED.getMessage());
         }
     }
 }

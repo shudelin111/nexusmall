@@ -42,7 +42,7 @@ public class RocketMQProducer {
             log.info("订单取消延迟消息发送成功，orderId: {}", orderId);
         } catch (Exception e) {
             log.error("发送订单取消延迟消息失败，orderId: {}", orderId, e);
-            throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "发送订单取消延迟消息失败", e);
+            throw new OrderException(CommonResultCode.MQ_SEND_FAILED.getCode(), CommonResultCode.MQ_SEND_FAILED.getMessage(), e);
         }
     }
 

@@ -39,11 +39,18 @@ public class DistributedLockUtil {
             if (isLocked) {
                 return action.get();
             } else {
-                throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁失败：" + lockKey);
+                throw new NexusmallException(
+                    CommonResultCode.LOCK_FAILED.getCode(), 
+                    CommonResultCode.LOCK_FAILED.getMessage() + ": " + lockKey
+                );
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁被中断", e);
+            throw new NexusmallException(
+                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
+                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
+                e
+            );
         } finally {
             if (isLocked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -83,11 +90,18 @@ public class DistributedLockUtil {
             if (isLocked) {
                 return action.get();
             } else {
-                throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁失败：" + lockKey);
+                throw new NexusmallException(
+                    CommonResultCode.LOCK_FAILED.getCode(), 
+                    CommonResultCode.LOCK_FAILED.getMessage() + ": " + lockKey
+                );
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁被中断", e);
+            throw new NexusmallException(
+                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
+                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
+                e
+            );
         } finally {
             if (isLocked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
