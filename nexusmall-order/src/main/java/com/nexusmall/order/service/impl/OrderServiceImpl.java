@@ -192,6 +192,10 @@ public class OrderServiceImpl implements OrderService {
         
         // 5. 发送延迟消息（30 分钟后检查支付状态）
         rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), MQConstants.Order.DELAY_LEVEL_30MIN);
+
+        if(true){
+            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getErrorCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
+        }
         
         return order;
     }

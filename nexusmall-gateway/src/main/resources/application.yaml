@@ -52,6 +52,14 @@ spring:
       discovery:
         # Nacos 服务发现地址
         server-addr: 10.10.1.1:8848
+        # 命名空间
+        namespace: public
+        # 服务分组
+        group: DEFAULT_GROUP
+        # Nacos 用户名
+        username: nacos
+        # Nacos 密码
+        password: nacos
     
     gateway:
       # 服务发现相关配置

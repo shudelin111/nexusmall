@@ -144,6 +144,10 @@ spring:
         namespace: public
         # 服务分组
         group: DEFAULT_GROUP
+        # Nacos 用户名
+        username: nacos
+        # Nacos 密码
+        password: nacos
         
       # 配置中心配置
       config:
@@ -153,6 +157,10 @@ spring:
         namespace: ${spring.cloud.nacos.discovery.namespace}
         # 配置分组
         group: ${spring.cloud.nacos.discovery.group}
+        # Nacos 用户名
+        username: ${spring.cloud.nacos.discovery.username}
+        # Nacos 密码
+        password: ${spring.cloud.nacos.discovery.password}
         # 配置文件后缀名
         file-extension: yaml
 
@@ -215,15 +223,44 @@ seata:
     vgroup-mapping:
       # 将事务组映射到具体的 Seata Server 集群
       nexusmall-tx-group: default
-    # Seata Server 地址列表
-    grouplist:
-      default: 10.10.1.1:8091
   registry:
     # 注册中心类型
-    type: file
+    # file: 使用本地文件（开发环境）
+    # nacos: 使用 Nacos（生产环境推荐）
+    type: nacos
+    nacos:
+      # Nacos 服务器地址
+      server-addr: 10.10.1.1:8848
+      # 命名空间 ID（如果不填则使用 public 命名空间）
+      namespace: ""
+      # 分组名称
+      group: SEATA_GROUP
+      # 集群名称
+      cluster: default
+      # Nacos 用户名（如果启用了认证）
+      username: nacos
+      # Nacos 密码（如果启用了认证）
+      password: nacos
+      # Seata Server 在 Nacos 中的服务名
+      application: seata-server
   config:
     # 配置中心类型
-    type: file
+    # file: 使用本地文件（开发环境）
+    # nacos: 使用 Nacos（生产环境推荐）
+    type: nacos
+    nacos:
+      # Nacos 服务器地址
+      server-addr: 10.10.1.1:8848
+      # 命名空间 ID（如果不填则使用 public 命名空间）
+      namespace: ""
+      # 分组名称
+      group: SEATA_GROUP
+      # Nacos 用户名（如果启用了认证）
+      username: nacos
+      # Nacos 密码（如果启用了认证）
+      password: nacos
+      # 配置文件 Data ID（存储在 Nacos 中的配置文件名）
+      data-id: seataServer.properties
 
 # =====================================================
 # RocketMQ 消息队列配置

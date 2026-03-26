@@ -24,6 +24,7 @@ docker run -d \
 -e MYSQL_SERVICE_PASSWORD=123456 \
 -e NACOS_AUTH_IDENTITY_KEY=nacos \
 -e NACOS_AUTH_IDENTITY_VALUE=nacos \
+-e NACOS_AUTH_ENABLE=true \
 -e NACOS_AUTH_TOKEN=SecretKey012345678901234567890123456789012345678901234567890123456789 \
 -v /mnt/sata1-4/docker/nacos/logs:/home/nacos/logs \
 -v /mnt/sata1-4/docker/nacos/conf:/home/nacos/conf \
