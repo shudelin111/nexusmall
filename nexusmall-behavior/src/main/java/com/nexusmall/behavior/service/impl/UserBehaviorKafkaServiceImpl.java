@@ -1,6 +1,5 @@
 package com.nexusmall.behavior.service.impl;
 
-import cn.hutool.json.JSONUtil;
 import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.behavior.service.UserBehaviorKafkaService;
 import lombok.extern.slf4j.Slf4j;

@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import lombok.Getter;
+
 /**
  * Nexusmall 业务异常基类
  * <p>
@@ -8,6 +10,7 @@ package com.nexusmall.common.exception;
  *
  * @author nexusmall
  */
+@Getter
 public class NexusmallException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
@@ -15,10 +18,11 @@ public class NexusmallException extends RuntimeException {
     /**
      * 错误码（支持字符串和数字）
      */
-    private String code;
+    private final String code;
 
     public NexusmallException(String message) {
         super(message);
+        this.code = null;
     }
 
     public NexusmallException(Integer code, String message) {
@@ -33,6 +37,7 @@ public class NexusmallException extends RuntimeException {
 
     public NexusmallException(String message, Throwable cause) {
         super(message, cause);
+        this.code = null;
     }
 
     public NexusmallException(Integer code, String message, Throwable cause) {
@@ -42,14 +47,6 @@ public class NexusmallException extends RuntimeException {
 
     public NexusmallException(String code, String message, Throwable cause) {
         super(message, cause);
-        this.code = code;
-    }
-
-    public String getCode() {
-        return code;
-    }
-
-    public void setCode(String code) {
         this.code = code;
     }
 }

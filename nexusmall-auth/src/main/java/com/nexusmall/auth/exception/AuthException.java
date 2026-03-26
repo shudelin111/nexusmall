@@ -1,11 +1,15 @@
 package com.nexusmall.auth.exception;
 
+import lombok.Getter;
+
+@Getter
 public class AuthException extends RuntimeException {
     
-    private String code;
+    private final String code;
     
     public AuthException(String message) {
         super(message);
+        this.code = null;
     }
     
     public AuthException(Integer code, String message) {
@@ -20,6 +24,7 @@ public class AuthException extends RuntimeException {
     
     public AuthException(String message, Throwable cause) {
         super(message, cause);
+        this.code = null;
     }
     
     public AuthException(Integer code, String message, Throwable cause) {
@@ -30,9 +35,5 @@ public class AuthException extends RuntimeException {
     public AuthException(String code, String message, Throwable cause) {
         super(message, cause);
         this.code = code;
-    }
-    
-    public String getCode() {
-        return code;
     }
 }

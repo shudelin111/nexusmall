@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import lombok.Getter;
+
 /**
  * Sentinel 流控异常
  * <p>
@@ -9,6 +11,7 @@ package com.nexusmall.common.exception;
  * @author shudl
  * @since 2026-03-26
  */
+@Getter
 public class SentinelFlowException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
@@ -16,10 +19,11 @@ public class SentinelFlowException extends NexusmallException {
     /**
      * 资源名称
      */
-    private String resourceName;
+    private final String resourceName;
 
     public SentinelFlowException(String message) {
         super(message);
+        this.resourceName = null;
     }
 
     public SentinelFlowException(String resourceName, String message) {
@@ -29,14 +33,6 @@ public class SentinelFlowException extends NexusmallException {
 
     public SentinelFlowException(String resourceName, String message, Throwable cause) {
         super(message, cause);
-        this.resourceName = resourceName;
-    }
-
-    public String getResourceName() {
-        return resourceName;
-    }
-
-    public void setResourceName(String resourceName) {
         this.resourceName = resourceName;
     }
 }
