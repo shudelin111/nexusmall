@@ -6,6 +6,7 @@ import com.nexusmall.auth.dao.UserMapper;
 import com.nexusmall.auth.entity.Permission;
 import com.nexusmall.auth.entity.Role;
 import com.nexusmall.auth.entity.User;
+import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -33,10 +34,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userMapper.findByUsername(username);
         if (user == null) {
-            throw new UsernameNotFoundException(CommonResultCode.USER_NOT_FOUND.getMessage() + ": " + username);
+            throw new UsernameNotFoundException(ErrorMessageConstants.Auth.USER_NOT_FOUND_WITH_USERNAME + username);
         }
         if (user.getStatus() != 1) {
-            throw new UsernameNotFoundException(CommonResultCode.USER_DISABLED.getMessage() + ": " + username);
+            throw new UsernameNotFoundException(ErrorMessageConstants.Auth.USER_DISABLED_WITH_USERNAME + username);
         }
 
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

@@ -20,11 +20,19 @@ public class AuthException extends NexusmallException {
         super(code, message);
     }
 
+    public AuthException(String code, String message) {
+        super(code, message);
+    }
+
     public AuthException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public AuthException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
+    public AuthException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
 }

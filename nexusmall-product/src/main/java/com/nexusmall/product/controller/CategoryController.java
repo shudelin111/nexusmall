@@ -1,5 +1,6 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.service.CategoryService;
@@ -57,7 +58,7 @@ public class CategoryController {
     @PostMapping("/save")
     public Result<Integer> save(@RequestBody CategoryVO categoryVO) {
         int result = categoryService.save(categoryVO);
-        return result > 0 ? Result.success("分类添加成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "分类添加失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.ADD_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -66,7 +67,7 @@ public class CategoryController {
     @PutMapping("/update")
     public Result<Integer> update(@RequestBody CategoryVO categoryVO) {
         int result = categoryService.updateById(categoryVO);
-        return result > 0 ? Result.success("分类更新成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "分类更新失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.UPDATE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -75,7 +76,7 @@ public class CategoryController {
     @DeleteMapping("/delete/{id}")
     public Result<Integer> delete(@PathVariable Long id) {
         int result = categoryService.deleteById(id);
-        return result > 0 ? Result.success("分类删除成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "分类删除失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.DELETE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.service.BrandService;
@@ -49,7 +50,7 @@ public class BrandController {
     @PostMapping("/save")
     public Result<Integer> save(@RequestBody BrandVO brandVO) {
         int result = brandService.save(brandVO);
-        return result > 0 ? Result.success("品牌添加成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "品牌添加失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.ADD_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -58,7 +59,7 @@ public class BrandController {
     @PutMapping("/update")
     public Result<Integer> update(@RequestBody BrandVO brandVO) {
         int result = brandService.updateById(brandVO);
-        return result > 0 ? Result.success("品牌更新成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "品牌更新失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.UPDATE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -67,7 +68,7 @@ public class BrandController {
     @DeleteMapping("/delete/{id}")
     public Result<Integer> delete(@PathVariable Long id) {
         int result = brandService.deleteById(id);
-        return result > 0 ? Result.success("品牌删除成功", result) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "品牌删除失败");
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.DELETE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**

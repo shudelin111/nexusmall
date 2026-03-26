@@ -20,11 +20,19 @@ public class OrderException extends NexusmallException {
         super(code, message);
     }
 
+    public OrderException(String code, String message) {
+        super(code, message);
+    }
+
     public OrderException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public OrderException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
+    public OrderException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
 }

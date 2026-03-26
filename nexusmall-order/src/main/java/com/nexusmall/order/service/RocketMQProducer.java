@@ -1,6 +1,7 @@
 package com.nexusmall.order.service;
 
 import com.nexusmall.common.constant.MQConstants;
+import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.exception.OrderException;
 import lombok.extern.slf4j.Slf4j;
@@ -42,7 +43,7 @@ public class RocketMQProducer {
             log.info("订单取消延迟消息发送成功，orderId: {}", orderId);
         } catch (Exception e) {
             log.error("发送订单取消延迟消息失败，orderId: {}", orderId, e);
-            throw new OrderException(CommonResultCode.MQ_SEND_FAILED.getCode(), CommonResultCode.MQ_SEND_FAILED.getMessage(), e);
+            throw new OrderException(CommonResultCode.MQ_SEND_FAILED.getErrorCode(), CommonResultCode.MQ_SEND_FAILED.getMessage(), e);
         }
     }
 
@@ -63,7 +64,8 @@ public class RocketMQProducer {
             log.info("普通消息发送成功，topic: {}, tag: {}", topic, tag);
         } catch (Exception e) {
             log.error("发送普通消息失败，topic: {}, tag: {}", topic, tag, e);
-            throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "发送普通消息失败", e);
+            throw new OrderException(CommonResultCode.SYSTEM_ERROR.getErrorCode(), 
+                    ErrorMessageConstants.Order.MQ_SEND_MESSAGE_FAILED, e);
         }
     }
 

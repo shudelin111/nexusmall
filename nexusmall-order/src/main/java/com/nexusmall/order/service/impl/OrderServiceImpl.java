@@ -127,7 +127,7 @@ public class OrderServiceImpl implements OrderService {
         Result<Boolean> stockResult = productFeignService.decreaseStock(request.getProductId(), request.getCount());
         if (!stockResult.isSuccess() || !stockResult.getData()) {
             log.error("库存扣减失败：{}", stockResult.getMessage());
-            throw new OrderException(CommonResultCode.INSUFFICIENT_STOCK.getCode(), CommonResultCode.INSUFFICIENT_STOCK.getMessage());
+            throw new OrderException(CommonResultCode.INSUFFICIENT_STOCK.getErrorCode(), CommonResultCode.INSUFFICIENT_STOCK.getMessage());
         }
 
         // 3. 创建订单主表
@@ -151,7 +151,7 @@ public class OrderServiceImpl implements OrderService {
         int insertResult = orderMapper.insert(order);
         if (insertResult <= 0) {
             log.error("创建订单失败，插入主表数据为 0");
-            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
+            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getErrorCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
         }
 
         // 4. 创建订单项
@@ -168,7 +168,7 @@ public class OrderServiceImpl implements OrderService {
         int itemInsertResult = orderItemMapper.insert(orderItem);
         if (itemInsertResult <= 0) {
             log.error("创建订单失败，插入订单项数据为 0");
-            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
+            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getErrorCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
         }
 
         log.info("订单创建成功，订单号：{}", orderSn);

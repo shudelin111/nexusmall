@@ -1,5 +1,7 @@
 package com.nexusmall.order.controller;
 
+import com.nexusmall.common.constant.LogMessageConstants;
+import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.order.entity.Order;
@@ -54,11 +56,11 @@ public class OrderController {
         }
         Order order = orderService.getById(id);
         if (order != null) {
-            log.info("订单查询成功，orderId: {}, orderSn: {}", id, order.getOrderSn());
+            log.info(LogMessageConstants.Order.ORDER_QUERIED, id, order.getOrderSn());
             return Result.success(order);
         } else {
             log.warn("订单不存在，orderId: {}", id);
-            return Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+            return Result.failure(CommonResultCode.NOT_FOUND);
         }
     }
 
@@ -70,11 +72,11 @@ public class OrderController {
         log.info("查询订单，orderSn: {}", orderSn);
         Order order = orderService.getByOrderSn(orderSn);
         if (order != null) {
-            log.info("订单查询成功，orderSn: {}, orderId: {}", orderSn, order.getId());
+            log.info(LogMessageConstants.Order.ORDER_QUERIED_BY_SN, orderSn, order.getId());
             return Result.success(order);
         } else {
             log.warn("订单不存在，orderSn: {}", orderSn);
-            return Result.failure(CommonResultCode.NOT_FOUND.getCode(), "订单不存在");
+            return Result.failure(CommonResultCode.NOT_FOUND);
         }
     }
 
@@ -132,8 +134,8 @@ public class OrderController {
                 request.getMemberId(), request.getProductId(), request.getCount());
         
         Order order = orderService.createOrder(request);
-        log.info("订单创建成功，orderId: {}, orderSn: {}", order.getId(), order.getOrderSn());
-        return Result.success("订单创建成功", order);
+        log.info(LogMessageConstants.Order.ORDER_CREATED, order.getId(), order.getOrderSn());
+        return Result.success(ResponseMessageConstants.Order.CREATE_SUCCESS, order);
     }
 
     /**
@@ -145,11 +147,11 @@ public class OrderController {
         order.setId(id);
         boolean result = orderService.updateById(order);
         if (result) {
-            log.info("订单更新成功，orderId: {}", id);
-            return Result.success("订单更新成功", true);
+            log.info(LogMessageConstants.Order.ORDER_UPDATED, id);
+            return Result.success(ResponseMessageConstants.Order.UPDATE_SUCCESS, true);
         } else {
             log.error("订单更新失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单更新失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -161,11 +163,11 @@ public class OrderController {
         log.info("删除订单，orderId: {}", id);
         boolean result = orderService.deleteById(id);
         if (result) {
-            log.info("订单删除成功，orderId: {}", id);
-            return Result.success("订单删除成功", true);
+            log.info(LogMessageConstants.Order.ORDER_DELETED, id);
+            return Result.success(ResponseMessageConstants.Order.DELETE_SUCCESS, true);
         } else {
             log.error("订单删除失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单删除失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -177,11 +179,11 @@ public class OrderController {
         log.info("批量删除订单，ids: {}", ids);
         boolean result = orderService.batchDelete(ids);
         if (result) {
-            log.info("批量删除成功，count: {}", ids.size());
-            return Result.success("批量删除成功", true);
+            log.info(LogMessageConstants.Order.BATCH_DELETED, ids.size());
+            return Result.success(ResponseMessageConstants.Order.BATCH_DELETE_SUCCESS, true);
         } else {
             log.error("批量删除失败，ids: {}", ids);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量删除失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -195,11 +197,11 @@ public class OrderController {
         log.info("支付订单，orderId: {}, paymentType: {}", id, paymentType);
         boolean result = orderService.payOrder(id, paymentType);
         if (result) {
-            log.info("订单支付成功，orderId: {}", id);
-            return Result.success("支付成功", true);
+            log.info(LogMessageConstants.Order.ORDER_PAID, id);
+            return Result.success(ResponseMessageConstants.Order.PAY_SUCCESS, true);
         } else {
             log.error("订单支付失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "支付失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -211,11 +213,11 @@ public class OrderController {
         log.info("订单发货，orderId: {}", id);
         boolean result = orderService.deliveryOrder(id);
         if (result) {
-            log.info("订单发货成功，orderId: {}", id);
-            return Result.success("发货成功", true);
+            log.info(LogMessageConstants.Order.ORDER_DELIVERED, id);
+            return Result.success(ResponseMessageConstants.Order.DELIVER_SUCCESS, true);
         } else {
             log.error("订单发货失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "发货失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -227,11 +229,11 @@ public class OrderController {
         log.info("确认收货，orderId: {}", id);
         boolean result = orderService.receiveOrder(id);
         if (result) {
-            log.info("订单确认收货成功，orderId: {}", id);
-            return Result.success("确认收货成功", true);
+            log.info(LogMessageConstants.Order.ORDER_RECEIVED, id);
+            return Result.success(ResponseMessageConstants.Order.RECEIVE_SUCCESS, true);
         } else {
             log.error("订单确认收货失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "确认收货失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -243,11 +245,11 @@ public class OrderController {
         log.info("取消订单，orderId: {}", id);
         boolean result = orderService.cancelOrder(id);
         if (result) {
-            log.info("订单取消成功，orderId: {}", id);
-            return Result.success("订单取消成功", true);
+            log.info(LogMessageConstants.Order.ORDER_CANCELLED, id);
+            return Result.success(ResponseMessageConstants.Order.CANCEL_SUCCESS, true);
         } else {
             log.error("订单取消失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "订单取消失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 }

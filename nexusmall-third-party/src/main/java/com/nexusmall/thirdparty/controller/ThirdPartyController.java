@@ -40,7 +40,7 @@ public class ThirdPartyController {
     @PostMapping("/sms/send")
     public SmsSendResponse sendSms(@RequestBody @Valid SmsSendRequest request) {
         if (smsService == null) {
-            throw new ThirdPartyException(CommonResultCode.SMS_SERVICE_ERROR.getCode(), CommonResultCode.SMS_SERVICE_ERROR.getMessage());
+            throw new ThirdPartyException(CommonResultCode.SMS_SERVICE_ERROR.getErrorCode(), CommonResultCode.SMS_SERVICE_ERROR.getMessage());
         }
         return smsService.sendSms(request);
     }
@@ -52,7 +52,7 @@ public class ThirdPartyController {
     public OssUploadResponse upload(@RequestPart("file") MultipartFile file,
                                     @RequestParam(value = "dir", required = false) String dir) {
         if (ossService == null) {
-            throw new ThirdPartyException(CommonResultCode.OSS_CONFIG_ERROR.getCode(), CommonResultCode.OSS_CONFIG_ERROR.getMessage());
+            throw new ThirdPartyException(CommonResultCode.OSS_CONFIG_ERROR.getErrorCode(), CommonResultCode.OSS_CONFIG_ERROR.getMessage());
         }
         return ossService.upload(file, dir);
     }

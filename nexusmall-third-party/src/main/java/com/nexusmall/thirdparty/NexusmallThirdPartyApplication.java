@@ -9,6 +9,15 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
+/**
+ * 第三方服务启动类
+ * <p>
+ * 负责 OSS 文件存储、短信发送等第三方服务集成
+ * </p>
+ *
+ * @author shudl
+ * @since 2026-03-26
+ */
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients

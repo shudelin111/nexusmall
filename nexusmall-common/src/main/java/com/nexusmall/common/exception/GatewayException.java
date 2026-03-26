@@ -20,11 +20,19 @@ public class GatewayException extends NexusmallException {
         super(code, message);
     }
 
+    public GatewayException(String code, String message) {
+        super(code, message);
+    }
+
     public GatewayException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public GatewayException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
+    public GatewayException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
 }

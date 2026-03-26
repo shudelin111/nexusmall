@@ -51,14 +51,14 @@ public class SentinelBlockExceptionHandler implements BlockExceptionHandler {
         // 根据阻断类型返回对应的响应
         Result<Void> result;
         if (blockType != null) {
-            // 使用枚举中定义的错误码和消息
+            // 使用枚举中定义的业务错误码和消息
             result = Result.failure(
-                blockType.getResultCode().getCode(), 
+                blockType.getResultCode().getErrorCode(), 
                 blockType.getResultCode().getMessage()
             );
         } else {
             // 未知类型，使用默认错误码
-            result = Result.failure(CommonResultCode.SENTINEL_UNKNOWN);
+            result = Result.failure(CommonResultCode.SENTINEL_UNKNOWN.getErrorCode(), CommonResultCode.SENTINEL_UNKNOWN.getMessage());
         }
         
         // 返回 JSON 响应

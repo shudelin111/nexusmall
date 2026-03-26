@@ -20,11 +20,19 @@ public class ProductException extends NexusmallException {
         super(code, message);
     }
 
+    public ProductException(String code, String message) {
+        super(code, message);
+    }
+
     public ProductException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public ProductException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
+    public ProductException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
 }

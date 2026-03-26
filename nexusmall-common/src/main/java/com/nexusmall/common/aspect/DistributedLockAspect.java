@@ -70,14 +70,14 @@ public class DistributedLockAspect {
             } else {
                 // 获取锁失败
                 throw new NexusmallException(
-                    CommonResultCode.LOCK_FAILED.getCode(), 
+                    CommonResultCode.LOCK_FAILED.getErrorCode(), 
                     CommonResultCode.LOCK_FAILED.getMessage() + ERROR_MESSAGE_SEPARATOR + lockKey
                 );
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             throw new NexusmallException(
-                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
+                CommonResultCode.LOCK_INTERRUPTED.getErrorCode(), 
                 CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
                 e
             );

@@ -20,11 +20,19 @@ public class ThirdPartyException extends NexusmallException {
         super(code, message);
     }
 
+    public ThirdPartyException(String code, String message) {
+        super(code, message);
+    }
+
     public ThirdPartyException(String message, Throwable cause) {
         super(message, cause);
     }
 
     public ThirdPartyException(Integer code, String message, Throwable cause) {
+        super(code, message, cause);
+    }
+
+    public ThirdPartyException(String code, String message, Throwable cause) {
         super(code, message, cause);
     }
 }

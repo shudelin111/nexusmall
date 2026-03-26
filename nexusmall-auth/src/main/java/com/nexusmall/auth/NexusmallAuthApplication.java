@@ -9,6 +9,15 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
+/**
+ * 认证服务启动类
+ * <p>
+ * 负责用户认证、Token 生成与验证
+ * </p>
+ *
+ * @author shudl
+ * @since 2026-03-26
+ */
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients

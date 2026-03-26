@@ -11,6 +11,7 @@ import com.nexusmall.auth.service.AuthService;
 import com.nexusmall.auth.util.JwtUtil;
 import com.nexusmall.auth.vo.AuthRequest;
 import com.nexusmall.auth.vo.AuthResponse;
+import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +48,12 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.findByUsername(request.getUsername());
         if (user == null || user.getStatus() != 1) {
             log.warn("用户不存在或已禁用，username: {}", request.getUsername());
-            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
+            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getErrorCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("密码不匹配，username: {}", request.getUsername());
-            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
+            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getErrorCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
         }
 
         List<Role> roles = roleMapper.findByUserId(user.getId());
@@ -103,7 +104,7 @@ public class AuthServiceImpl implements AuthService {
         // 1. 检查用户名是否已存在
         User existingUser = userMapper.findByUsername(user.getUsername());
         if (existingUser != null) {
-            throw new AuthException(CommonResultCode.USER_ALREADY_EXISTS.getCode(), CommonResultCode.USER_ALREADY_EXISTS.getMessage());
+            throw new AuthException(CommonResultCode.USER_ALREADY_EXISTS.getErrorCode(), CommonResultCode.USER_ALREADY_EXISTS.getMessage());
         }
         
         // 2. 加密密码
@@ -113,7 +114,7 @@ public class AuthServiceImpl implements AuthService {
         // 3. 插入用户
         int result = userMapper.insert(user);
         if (result <= 0) {
-            throw new AuthException(CommonResultCode.USER_REGISTRATION_FAILED.getCode(), CommonResultCode.USER_REGISTRATION_FAILED.getMessage());
+            throw new AuthException(CommonResultCode.USER_REGISTRATION_FAILED.getErrorCode(), CommonResultCode.USER_REGISTRATION_FAILED.getMessage());
         }
         
         // 4. 分配角色（如果有）
@@ -137,7 +138,7 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(user.getId());
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
         }
         
         // 如果修改了密码，需要加密
@@ -159,7 +160,7 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
         }
         
         // 先删除用户角色关联
@@ -178,7 +179,7 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
         }
         
         // 删除原有的角色关联
@@ -189,7 +190,8 @@ public class AuthServiceImpl implements AuthService {
             for (Long roleId : roleIds) {
                 Role role = roleMapper.selectById(roleId);
                 if (role == null) {
-                    throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getCode(), CommonResultCode.ROLE_NOT_FOUND.getMessage() + ": " + roleId);
+                    throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getErrorCode(), 
+                            ErrorMessageConstants.Auth.ROLE_NOT_FOUND_WITH_ID + roleId);
                 }
                 com.nexusmall.auth.entity.UserRole userRole = new com.nexusmall.auth.entity.UserRole();
                 userRole.setUserId(userId);
@@ -209,7 +211,7 @@ public class AuthServiceImpl implements AuthService {
         
         Role existingRole = roleMapper.selectById(roleId);
         if (existingRole == null) {
-            throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getCode(), CommonResultCode.ROLE_NOT_FOUND.getMessage());
+            throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getErrorCode(), CommonResultCode.ROLE_NOT_FOUND.getMessage());
         }
         
         // 删除原有的权限关联
@@ -220,7 +222,8 @@ public class AuthServiceImpl implements AuthService {
             for (Long permissionId : permissionIds) {
                 Permission permission = permissionMapper.selectById(permissionId);
                 if (permission == null) {
-                    throw new AuthException(CommonResultCode.PERMISSION_NOT_FOUND.getCode(), CommonResultCode.PERMISSION_NOT_FOUND.getMessage() + ": " + permissionId);
+                    throw new AuthException(CommonResultCode.PERMISSION_NOT_FOUND.getErrorCode(), 
+                            ErrorMessageConstants.Auth.PERMISSION_NOT_FOUND_WITH_ID + permissionId);
                 }
                 com.nexusmall.auth.entity.RolePermission rolePermission = new com.nexusmall.auth.entity.RolePermission();
                 rolePermission.setRoleId(roleId);

@@ -1,5 +1,7 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.constant.LogMessageConstants;
+import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
 import com.nexusmall.common.util.RedisUtils;
@@ -146,11 +148,11 @@ public class ProductController {
         log.info("新增商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
         int result = productService.save(productVO);
         if (result > 0) {
-            log.info("商品添加成功，result: {}", result);
-            return Result.success("商品添加成功", result);
+            log.info(LogMessageConstants.Product.PRODUCT_ADDED, result);
+            return Result.success(ResponseMessageConstants.Product.ADD_SUCCESS, result);
         } else {
             log.error("商品添加失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品添加失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -162,11 +164,11 @@ public class ProductController {
         log.info("更新商品，skuId: {}, productName: {}", productVO.getSkuId(), productVO.getSkuName());
         int result = productService.updateById(productVO);
         if (result > 0) {
-            log.info("商品更新成功，result: {}", result);
-            return Result.success("商品更新成功", result);
+            log.info(LogMessageConstants.Product.PRODUCT_UPDATED, result);
+            return Result.success(ResponseMessageConstants.Product.UPDATE_SUCCESS, result);
         } else {
             log.error("商品更新失败，skuId: {}", productVO.getSkuId());
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品更新失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -178,11 +180,11 @@ public class ProductController {
         log.info("删除商品，skuId: {}", skuId);
         int result = productService.deleteById(skuId);
         if (result > 0) {
-            log.info("商品删除成功，skuId: {}", skuId);
-            return Result.success("商品删除成功", result);
+            log.info(LogMessageConstants.Product.PRODUCT_DELETED, skuId);
+            return Result.success(ResponseMessageConstants.Product.DELETE_SUCCESS, result);
         } else {
             log.error("商品删除失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品删除失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -197,12 +199,12 @@ public class ProductController {
         String xid = RootContext.getXID();
         log.info("====== Product 服务接收到 Feign 调用，XID: {}, productId: {}, count: {} ======", xid, productId, count);
         if (xid != null && !xid.isEmpty()) {
-            log.info("✓ Product 服务成功接收到 XID: {}", xid);
+            log.info(LogMessageConstants.Product.XID_RECEIVED_SUCCESS, xid);
         } else {
-            log.error("✗ Product 服务未接收到 XID！");
+            log.error(LogMessageConstants.Product.XID_NOT_RECEIVED);
         }
         boolean result = productService.decreaseStock(productId, count);
-        return result ? Result.success("库存扣减成功", true) : Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存扣减失败");
+        return result ? Result.success(ResponseMessageConstants.Product.STOCK_DECREASE_SUCCESS, true) : Result.failure(CommonResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -215,11 +217,11 @@ public class ProductController {
         log.info("增加库存，productId: {}, count: {}", productId, count);
         boolean result = productService.increaseStock(productId, count);
         if (result) {
-            log.info("库存增加成功，productId: {}, count: {}", productId, count);
-            return Result.success("库存增加成功", true);
+            log.info(LogMessageConstants.Product.STOCK_INCREASED, productId, count);
+            return Result.success(ResponseMessageConstants.Product.STOCK_INCREASE_SUCCESS, true);
         } else {
             log.error("库存增加失败，productId: {}, count: {}", productId, count);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -232,7 +234,7 @@ public class ProductController {
             @RequestParam("count") Integer count) {
         log.info("检查库存，productId: {}, count: {}", productId, count);
         boolean result = productService.checkStock(productId, count);
-        log.info("库存检查结果：{}", result ? "充足" : "不足");
+        log.info(result ? LogMessageConstants.Product.STOCK_CHECKED_SUFFICIENT : LogMessageConstants.Product.STOCK_CHECKED_INSUFFICIENT);
         return Result.success(result);
     }
 
@@ -244,11 +246,11 @@ public class ProductController {
         log.info("商品上架，skuId: {}", skuId);
         boolean result = productService.putOnSale(skuId);
         if (result) {
-            log.info("商品上架成功，skuId: {}", skuId);
-            return Result.success("商品上架成功", true);
+            log.info(LogMessageConstants.Product.PRODUCT_PUT_ON_SALE, skuId);
+            return Result.success(ResponseMessageConstants.Product.PUT_ON_SALE_SUCCESS, true);
         } else {
             log.error("商品上架失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品上架失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -260,11 +262,11 @@ public class ProductController {
         log.info("商品下架，skuId: {}", skuId);
         boolean result = productService.putOffSale(skuId);
         if (result) {
-            log.info("商品下架成功，skuId: {}", skuId);
-            return Result.success("商品下架成功", true);
+            log.info(LogMessageConstants.Product.PRODUCT_PUT_OFF_SALE, skuId);
+            return Result.success(ResponseMessageConstants.Product.PUT_OFF_SALE_SUCCESS, true);
         } else {
             log.error("商品下架失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "商品下架失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -276,11 +278,11 @@ public class ProductController {
         log.info("批量扣减库存，stockDTOS size: {}", stockDTOS.size());
         boolean result = productService.batchDecreaseStock(stockDTOS);
         if (result) {
-            log.info("批量扣减库存成功");
-            return Result.success("批量扣减库存成功", true);
+            log.info(LogMessageConstants.Product.BATCH_STOCK_DECREASED);
+            return Result.success(ResponseMessageConstants.Product.BATCH_DECREASE_STOCK_SUCCESS, true);
         } else {
             log.error("批量扣减库存失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -292,11 +294,11 @@ public class ProductController {
         log.info("批量增加库存，stockDTOS size: {}", stockDTOS.size());
         boolean result = productService.batchIncreaseStock(stockDTOS);
         if (result) {
-            log.info("批量增加库存成功");
-            return Result.success("批量增加库存成功", true);
+            log.info(LogMessageConstants.Product.BATCH_STOCK_INCREASED);
+            return Result.success(ResponseMessageConstants.Product.BATCH_INCREASE_STOCK_SUCCESS, true);
         } else {
             log.error("批量增加库存失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
+            return Result.failure(CommonResultCode.SYSTEM_ERROR);
         }
     }
 }

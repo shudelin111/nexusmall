@@ -18,11 +18,14 @@ import java.io.IOException;
  * Seata XID 过滤器（全局）
  * 用于从 HTTP Header 中提取 XID 并绑定到 RootContext
  * 
- * 使用 OncePerRequestFilter 确保每个请求只执行一次
- * 自动被 Spring Boot 扫描并注册，无需手动配置 WebConfig
+ * 执行顺序说明：
+ * 1. CorsFilter (-101) - 最先执行，处理跨域
+ * 2. Spring Security (-100) - 第二个执行，进行身份认证
+ * 3. SeataXidFilter (-1000) - 第三个执行，绑定 XID
+ * 4. 其他业务 Filter (0+) - 最后执行
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE + 1) // 高优先级，确保在 Spring Security 等 Filter 之前执行
+@Order(Ordered.HIGHEST_PRECEDENCE + 1000) // 在 CORS 和 Spring Security 之后，业务 Filter 之前执行
 public class SeataXidFilter extends OncePerRequestFilter {
 
     private static final Logger log = LoggerFactory.getLogger(SeataXidFilter.class);

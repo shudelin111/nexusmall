@@ -13,15 +13,20 @@ public class NexusmallException extends RuntimeException {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 错误码
+     * 错误码（支持字符串和数字）
      */
-    private Integer code;
+    private String code;
 
     public NexusmallException(String message) {
         super(message);
     }
 
     public NexusmallException(Integer code, String message) {
+        super(message);
+        this.code = String.valueOf(code);
+    }
+
+    public NexusmallException(String code, String message) {
         super(message);
         this.code = code;
     }
@@ -32,14 +37,19 @@ public class NexusmallException extends RuntimeException {
 
     public NexusmallException(Integer code, String message, Throwable cause) {
         super(message, cause);
+        this.code = String.valueOf(code);
+    }
+
+    public NexusmallException(String code, String message, Throwable cause) {
+        super(message, cause);
         this.code = code;
     }
 
-    public Integer getCode() {
+    public String getCode() {
         return code;
     }
 
-    public void setCode(Integer code) {
+    public void setCode(String code) {
         this.code = code;
     }
 }

@@ -6,6 +6,7 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.config.ThirdPartyProperties;
@@ -54,7 +55,7 @@ public class AliyunSmsServiceImpl implements SmsService {
             } catch (JsonProcessingException e) {
                 log.error("短信模板参数序列化失败，phone: {}, 参数：{}, 错误：{}", 
                          request.getPhoneNumber(), request.getTemplateParam(), e.getMessage(), e);
-                throw new ThirdPartyException(CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getCode(), CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getMessage(), e);
+                throw new ThirdPartyException(CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getErrorCode(), CommonResultCode.SMS_TEMPLATE_PARSE_FAILED.getMessage(), e);
             }
         }
 
@@ -72,7 +73,8 @@ public class AliyunSmsServiceImpl implements SmsService {
         } catch (ClientException e) {
             log.error("调用阿里云短信接口失败，phone: {}, 错误码：{}, 错误：{}", 
                      request.getPhoneNumber(), e.getErrCode(), e.getErrMsg(), e);
-            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "调用阿里云短信接口失败：" + e.getErrMsg(), e);
+            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getErrorCode(), 
+                    ErrorMessageConstants.ThirdParty.ALIYUN_SMS_API_CALL_FAILED + e.getErrMsg(), e);
         }
     }
 }
