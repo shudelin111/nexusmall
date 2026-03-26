@@ -8,6 +8,7 @@ import com.nexusmall.common.vo.UserBehaviorVO;
 import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.service.ProductService;
+import com.nexusmall.product.vo.ProductQueryRequest;
 import com.nexusmall.product.vo.ProductVO;
 import io.seata.core.context.RootContext;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
@@ -106,19 +107,15 @@ public class ProductController {
      * 根据条件查询商品列表
      */
     @GetMapping("/listByCondition")
-    public Result<List<ProductVO>> listByCondition(
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) Long userId,
-            @RequestParam(required = false) String userName) {
+    public Result<List<ProductVO>> listByCondition(@ModelAttribute ProductQueryRequest request) {
         log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
-                keyword, categoryId, brandId, status);
-        List<ProductVO> products = productService.listByCondition(keyword, categoryId, brandId, status);
+                request.getKeyword(), request.getCategoryId(), request.getBrandId(), request.getStatus());
+        List<ProductVO> products = productService.listByCondition(request);
         log.info("查询到{}条商品数据", products.size());
         
         // 发送用户搜索行为到 RocketMQ（仅当有搜索关键词且传了 userId 时）
+        Long userId = request.getUserId();
+        String keyword = request.getKeyword();
         if (userId != null && keyword != null && !keyword.trim().isEmpty()) {
             try {
                 UserBehaviorVO behaviorVO = UserBehaviorVO.builder()

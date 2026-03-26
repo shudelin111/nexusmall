@@ -6,6 +6,8 @@ import com.aliyuncs.dysmsapi.model.v20170525.SendSmsResponse;
 import com.aliyuncs.exceptions.ClientException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.config.ThirdPartyProperties;
 import com.nexusmall.thirdparty.service.SmsService;
 import com.nexusmall.thirdparty.vo.SmsSendRequest;
@@ -52,7 +54,7 @@ public class AliyunSmsServiceImpl implements SmsService {
             } catch (JsonProcessingException e) {
                 log.error("短信模板参数序列化失败，phone: {}, 参数：{}, 错误：{}", 
                          request.getPhoneNumber(), request.getTemplateParam(), e.getMessage(), e);
-                throw new IllegalArgumentException("短信模板参数无法序列化为 JSON", e);
+                throw new ThirdPartyException(CommonResultCode.PARAM_INVALID.getCode(), "短信模板参数无法序列化为 JSON", e);
             }
         }
 
@@ -70,7 +72,7 @@ public class AliyunSmsServiceImpl implements SmsService {
         } catch (ClientException e) {
             log.error("调用阿里云短信接口失败，phone: {}, 错误码：{}, 错误：{}", 
                      request.getPhoneNumber(), e.getErrCode(), e.getErrMsg(), e);
-            throw new RuntimeException("调用阿里云短信接口失败：" + e.getErrMsg(), e);
+            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "调用阿里云短信接口失败：" + e.getErrMsg(), e);
         }
     }
 }

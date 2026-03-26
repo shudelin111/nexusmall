@@ -1,5 +1,7 @@
 package com.nexusmall.thirdparty.controller;
 
+import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.service.OssService;
 import com.nexusmall.thirdparty.service.SmsService;
 import com.nexusmall.thirdparty.vo.OssUploadResponse;
@@ -38,7 +40,7 @@ public class ThirdPartyController {
     @PostMapping("/sms/send")
     public SmsSendResponse sendSms(@RequestBody @Valid SmsSendRequest request) {
         if (smsService == null) {
-            throw new IllegalStateException("短信服务未启用或未正确配置");
+            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "短信服务未启用或未正确配置");
         }
         return smsService.sendSms(request);
     }
@@ -50,7 +52,7 @@ public class ThirdPartyController {
     public OssUploadResponse upload(@RequestPart("file") MultipartFile file,
                                     @RequestParam(value = "dir", required = false) String dir) {
         if (ossService == null) {
-            throw new IllegalStateException("OSS服务未启用或未正确配置");
+            throw new ThirdPartyException(CommonResultCode.SYSTEM_ERROR.getCode(), "OSS 服务未启用或未正确配置");
         }
         return ossService.upload(file, dir);
     }

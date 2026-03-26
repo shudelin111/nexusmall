@@ -5,6 +5,7 @@ import com.nexusmall.common.vo.Result;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.vo.OrderCreateRequest;
+import com.nexusmall.order.vo.OrderQueryRequest;
 import io.seata.spring.annotation.GlobalTransactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,14 +110,10 @@ public class OrderController {
      * 条件查询订单列表
      */
     @GetMapping("/search")
-    public Result<List<Order>> searchOrders(
-            @RequestParam(required = false) Long memberId,
-            @RequestParam(required = false) Integer status,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startTime,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endTime) {
+    public Result<List<Order>> searchOrders(@ModelAttribute OrderQueryRequest request) {
         log.info("条件查询订单，memberId: {}, status: {}, startTime: {}, endTime: {}", 
-                memberId, status, startTime, endTime);
-        List<Order> orders = orderService.listByCondition(memberId, status, startTime, endTime);
+                request.getMemberId(), request.getStatus(), request.getStartTime(), request.getEndTime());
+        List<Order> orders = orderService.listByCondition(request);
         log.info("条件查询到{}条订单", orders.size());
         return Result.success(orders);
     }
@@ -128,14 +125,10 @@ public class OrderController {
     public Result<Order> createOrder(@Valid @RequestBody OrderCreateRequest request) {
         log.info("收到创建订单请求，userId: {}, productId: {}, count: {}", 
                 request.getMemberId(), request.getProductId(), request.getCount());
-        try {
-            Order order = orderService.createOrder(request);
-            log.info("订单创建成功，orderId: {}, orderSn: {}", order.getId(), order.getOrderSn());
-            return Result.success("订单创建成功", order);
-        } catch (Exception e) {
-            log.error("订单创建失败，userId: {}, 错误：{}", request.getMemberId(), e.getMessage(), e);
-            throw e;
-        }
+        
+        Order order = orderService.createOrder(request);
+        log.info("订单创建成功，orderId: {}, orderSn: {}", order.getId(), order.getOrderSn());
+        return Result.success("订单创建成功", order);
     }
 
     /**

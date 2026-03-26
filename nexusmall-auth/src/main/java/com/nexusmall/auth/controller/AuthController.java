@@ -36,14 +36,10 @@ public class AuthController {
     @PostMapping("/login")
     public Result<AuthResponse> login(@RequestBody AuthRequest request) {
         log.info("收到登录请求，username: {}", request.getUsername());
-        try {
-            AuthResponse response = authService.login(request);
-            log.info("用户登录成功，username: {}", request.getUsername());
-            return Result.success(response);
-        } catch (Exception e) {
-            log.error("用户登录失败，username: {}, 错误：{}", request.getUsername(), e.getMessage(), e);
-            throw e;
-        }
+        
+        AuthResponse response = authService.login(request);
+        log.info("用户登录成功，username: {}", request.getUsername());
+        return Result.success(response);
     }
 
     @PostMapping("/logout")

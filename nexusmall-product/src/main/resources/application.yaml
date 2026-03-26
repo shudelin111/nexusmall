@@ -193,7 +193,7 @@ rocketmq:
 # =====================================================
 seata:
   # 是否启用 Seata
-  enabled: false
+  enabled: true
   # 应用 ID（用于标识事务发起方）
   application-id: nexusmall-product
   # 事务服务组名称

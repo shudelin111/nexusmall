@@ -1,6 +1,8 @@
 package com.nexusmall.common.aspect;
 
 import com.nexusmall.common.annotation.DistributedLock;
+import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.exception.NexusmallException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -62,11 +64,11 @@ public class DistributedLockAspect {
                 return joinPoint.proceed();
             } else {
                 // 获取锁失败
-                throw new RuntimeException("获取分布式锁失败：" + lockKey);
+                throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁失败：" + lockKey);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new RuntimeException("获取分布式锁被中断", e);
+            throw new NexusmallException(CommonResultCode.SYSTEM_ERROR.getCode(), "获取分布式锁被中断", e);
         } finally {
             // 释放锁
             if (isLocked && lock.isHeldByCurrentThread()) {

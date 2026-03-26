@@ -1,13 +1,18 @@
 package com.nexusmall.product.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.nexusmall.common.annotation.DistributedLock;
+import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.exception.ProductException;
 import com.nexusmall.product.dao.ProductMapper;
 import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
 import com.nexusmall.product.exception.ProductNotFoundException;
 import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.service.RocketMQProducer;
+import com.nexusmall.product.vo.ProductQueryRequest;
 import com.nexusmall.product.vo.ProductVO;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,10 +52,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductVO> listByCondition(String keyword, Long categoryId, Long brandId, Integer status) {
+    public List<ProductVO> listByCondition(ProductQueryRequest request) {
         log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
-                keyword, categoryId, brandId, status);
-        List<Product> products = productMapper.listByCondition(keyword, categoryId, brandId, status);
+                request.getKeyword(), request.getCategoryId(), request.getBrandId(), request.getStatus());
+        List<Product> products = productMapper.listByCondition(
+                request.getKeyword(), 
+                request.getCategoryId(), 
+                request.getBrandId(), 
+                request.getStatus());
         List<ProductVO> result = products.stream().map(p -> BeanUtil.copyProperties(p, ProductVO.class)).collect(Collectors.toList());
         log.info("查询到{}条商品数据", result.size());
         return result;
@@ -87,6 +96,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @SentinelResource(
+        value = "decreaseStock",
+        fallback = "decreaseStockFallback",
+        blockHandler = "decreaseStockBlock"
+    )
     @DistributedLock(key = "'stock:decrease:' + #skuId", waitTime = 5, leaseTime = 30)
     @Transactional(rollbackFor = Exception.class)
     public boolean decreaseStock(Long skuId, Integer count) {
@@ -101,8 +115,24 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("库存扣减失败，skuId: {}, count: {}，库存不足", skuId, count);
-            throw new RuntimeException("库存不足");
+            throw new ProductException(CommonResultCode.PARAM_INVALID.getCode(), "库存不足");
         }
+    }
+
+    /**
+     * decreaseStock 的降级处理方法
+     */
+    public boolean decreaseStockFallback(Long skuId, Integer count, Throwable ex) {
+        log.error("扣减库存失败，已触发降级，skuId: {}, count: {}", skuId, count, ex);
+        throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "库存服务暂时不可用，请稍后再试");
+    }
+
+    /**
+     * decreaseStock 的限流处理方法
+     */
+    public boolean decreaseStockBlock(Long skuId, Integer count, BlockException ex) {
+        log.warn("扣减库存被限流，skuId: {}, count: {}", skuId, count);
+        throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "系统繁忙，请稍后再试");
     }
 
     @Override
@@ -116,7 +146,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("库存增加失败，skuId: {}, count: {}", skuId, count);
-            throw new RuntimeException("库存增加失败");
+            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "库存增加失败");
         }
     }
 
@@ -153,7 +183,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("批量扣减库存失败");
-            throw new RuntimeException("批量扣减库存失败");
+            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "批量扣减库存失败");
         }
     }
 
@@ -168,7 +198,7 @@ public class ProductServiceImpl implements ProductService {
             return true;
         } else {
             log.error("批量增加库存失败");
-            throw new RuntimeException("批量增加库存失败");
+            throw new ProductException(CommonResultCode.SYSTEM_ERROR.getCode(), "批量增加库存失败");
         }
     }
 }

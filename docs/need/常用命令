@@ -1,0 +1,9 @@
+#查看文件及其权限
+ls -lh /mnt/sata1-4/docker/rocketmq/broker/conf/broker.conf
+#修改权限
+chmod -R 777 /mnt/sata1-4/docker/rocketmq
+#查看当前目录下的文件
+ls /mnt/sata1-4/docker/nacos/conf
+
+#将docker.m.daocloud.io/apacherocketmq/rocketmq-dashboard:1.0.0改为apacherocketmq/rocketmq-dashboard:1.0.0
+docker tag docker.m.daocloud.io/apacherocketmq/rocketmq-dashboard:1.0.0 apacherocketmq/rocketmq-dashboard:1.0.0

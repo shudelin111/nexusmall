@@ -1,16 +1,22 @@
 package com.nexusmall.order.service.impl;
 
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
+import com.nexusmall.common.exception.OrderException;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.common.vo.UserBehaviorVO;
 import com.nexusmall.order.dao.OrderItemMapper;
 import com.nexusmall.order.dao.OrderMapper;
+import com.nexusmall.order.constant.RocketMQConstants;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.entity.OrderItem;
 import com.nexusmall.order.feign.ProductFeignService;
 import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.service.RocketMQProducer;
 import com.nexusmall.order.vo.OrderCreateRequest;
+import com.nexusmall.order.vo.OrderQueryRequest;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
 import java.time.LocalDateTime;
@@ -46,6 +52,11 @@ public class OrderServiceImpl implements OrderService {
     private RocketMQTemplate rocketMQTemplate;
 
     @Override
+    @SentinelResource(
+        value = "getOrderById",
+        fallback = "getOrderByIdFallback",
+        blockHandler = "getOrderByIdBlock"
+    )
     public Order getById(Long id) {
         log.debug("根据 ID 查询订单，orderId: {}", id);
         Order order = orderMapper.selectById(id);
@@ -55,6 +66,23 @@ public class OrderServiceImpl implements OrderService {
             log.warn("订单不存在，orderId: {}", id);
         }
         return order;
+    }
+
+    /**
+     * getOrderById 的降级处理方法
+     */
+    public Order getOrderByIdFallback(Long id, Throwable ex) {
+        log.error("查询订单失败，已触发降级，orderId: {}", id, ex);
+        // 可以返回缓存数据或 null
+        return null;
+    }
+
+    /**
+     * getOrderById 的限流处理方法
+     */
+    public Order getOrderByIdBlock(Long id, BlockException ex) {
+        log.warn("查询订单被限流，orderId: {}", id);
+        return null;
     }
 
     @Override
@@ -94,16 +122,25 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<Order> listByCondition(Long memberId, Integer status, LocalDateTime startTime, LocalDateTime endTime) {
+    public List<Order> listByCondition(OrderQueryRequest request) {
         log.debug("条件查询订单，memberId: {}, status: {}, startTime: {}, endTime: {}", 
-                memberId, status, startTime, endTime);
-        List<Order> orders = orderMapper.listByCondition(memberId, status, startTime, endTime);
+                request.getMemberId(), request.getStatus(), request.getStartTime(), request.getEndTime());
+        List<Order> orders = orderMapper.listByCondition(
+                request.getMemberId(), 
+                request.getStatus(), 
+                request.getStartTime(), 
+                request.getEndTime());
         log.info("条件查询到{}条订单", orders.size());
         return orders;
     }
 
     @Override
     @GlobalTransactional(name = "nexusmall-create-order-tx", rollbackFor = Exception.class)
+    @SentinelResource(
+        value = "createOrder",
+        fallback = "createOrderFallback",
+        blockHandler = "createOrderBlock"
+    )
     public Order createOrder(OrderCreateRequest request) {
         log.info("开始创建订单，请求参数：{}", request);
 
@@ -119,7 +156,7 @@ public class OrderServiceImpl implements OrderService {
         Result<Boolean> stockResult = productFeignService.decreaseStock(request.getProductId(), request.getCount());
         if (!stockResult.isSuccess() || !stockResult.getData()) {
             log.error("库存扣减失败：{}", stockResult.getMessage());
-            throw new RuntimeException("库存不足");
+            throw new OrderException(CommonResultCode.PARAM_INVALID.getCode(), "库存不足");
         }
 
         // 3. 创建订单主表
@@ -143,7 +180,7 @@ public class OrderServiceImpl implements OrderService {
         int insertResult = orderMapper.insert(order);
         if (insertResult <= 0) {
             log.error("创建订单失败，插入主表数据为 0");
-            throw new RuntimeException("创建订单失败");
+            throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "创建订单失败");
         }
 
         // 4. 创建订单项
@@ -160,7 +197,7 @@ public class OrderServiceImpl implements OrderService {
         int itemInsertResult = orderItemMapper.insert(orderItem);
         if (itemInsertResult <= 0) {
             log.error("创建订单失败，插入订单项数据为 0");
-            throw new RuntimeException("创建订单失败");
+            throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "创建订单失败");
         }
 
         log.info("订单创建成功，订单号：{}", orderSn);
@@ -183,9 +220,27 @@ public class OrderServiceImpl implements OrderService {
         }
         
         // 5. 发送延迟消息（30 分钟后检查支付状态）
-        rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), 17); // 17 表示 30 分钟延迟
+        rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), RocketMQConstants.DELAY_LEVEL_30MIN);
         
         return order;
+    }
+
+    /**
+     * createOrder 的降级处理方法
+     */
+    public Order createOrderFallback(OrderCreateRequest request, Throwable ex) {
+        log.error("创建订单失败，已触发降级，userId: {}, productId: {}", 
+                request.getMemberId(), request.getProductId(), ex);
+        throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "订单服务暂时不可用，请稍后再试");
+    }
+
+    /**
+     * createOrder 的限流处理方法
+     */
+    public Order createOrderBlock(OrderCreateRequest request, BlockException ex) {
+        log.warn("创建订单被限流，userId: {}, productId: {}", 
+                request.getMemberId(), request.getProductId());
+        throw new OrderException(CommonResultCode.SYSTEM_ERROR.getCode(), "系统繁忙，请稍后再试");
     }
 
     @Override

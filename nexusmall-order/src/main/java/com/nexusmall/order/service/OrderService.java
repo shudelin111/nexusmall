@@ -2,6 +2,7 @@ package com.nexusmall.order.service;
 
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.vo.OrderCreateRequest;
+import com.nexusmall.order.vo.OrderQueryRequest;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -39,7 +40,7 @@ public interface OrderService {
     /**
      * 条件查询订单列表
      */
-    List<Order> listByCondition(Long memberId, Integer status, LocalDateTime startTime, LocalDateTime endTime);
+    List<Order> listByCondition(OrderQueryRequest request);
 
     /**
      * 创建订单

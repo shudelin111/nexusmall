@@ -1,5 +1,7 @@
 package com.nexusmall.gateway.config;
 
+import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.exception.GatewayException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -86,7 +88,7 @@ public class JwtAuthenticationWebFilter implements WebFilter {
         } catch (Exception ex) {
             log.error("Gateway Token 验证失败，path: {}, token: {}, 错误：{}", 
                      exchange.getRequest().getPath(), token, ex.getMessage(), ex);
-            return Mono.error(new RuntimeException("Token 验证失败：" + ex.getMessage(), ex));
+            return Mono.error(new GatewayException(CommonResultCode.UNAUTHORIZED.getCode(), "Token 验证失败：" + ex.getMessage(), ex));
         }
     }
 

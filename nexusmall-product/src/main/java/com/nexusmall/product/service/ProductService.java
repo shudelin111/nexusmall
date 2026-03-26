@@ -2,6 +2,7 @@ package com.nexusmall.product.service;
 
 import com.nexusmall.product.dao.ProductStockDTO;
 import com.nexusmall.product.entity.Product;
+import com.nexusmall.product.vo.ProductQueryRequest;
 import com.nexusmall.product.vo.ProductVO;
 
 import java.util.List;
@@ -21,7 +22,7 @@ public interface ProductService {
     /**
      * 根据条件查询商品列表
      */
-    List<ProductVO> listByCondition(String keyword, Long categoryId, Long brandId, Integer status);
+    List<ProductVO> listByCondition(ProductQueryRequest request);
 
     /**
      * 新增商品
