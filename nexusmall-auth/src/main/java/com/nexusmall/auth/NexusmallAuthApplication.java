@@ -1,6 +1,9 @@
 package com.nexusmall.auth;
 
+import com.nexusmall.common.config.GlobalFeignConfig;
 import com.nexusmall.common.config.RedisConfig;
+import com.nexusmall.common.config.RedissonConfig;
+import com.nexusmall.common.config.SeataDataSourceConfig;
 import com.nexusmall.common.util.RedisUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -21,7 +24,7 @@ import org.springframework.context.annotation.Import;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@Import(RedisConfig.class)
+@Import({RedisConfig.class, RedissonConfig.class, SeataDataSourceConfig.class, GlobalFeignConfig.class}) // 导入配置类，加载 Redis、Redisson、Seata 和 Feign 全局配置
 @ComponentScan(basePackageClasses = {NexusmallAuthApplication.class, RedisUtils.class})
 public class NexusmallAuthApplication {
 

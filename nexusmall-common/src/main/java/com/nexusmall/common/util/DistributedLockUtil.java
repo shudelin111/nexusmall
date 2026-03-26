@@ -5,6 +5,7 @@ import com.nexusmall.common.exception.NexusmallException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
@@ -12,10 +13,12 @@ import java.util.function.Supplier;
 
 /**
  * Redisson 分布式锁工具类
+ * 仅在 classpath 中存在 RedissonClient 时生效
  * 
  * @author shudl
  */
 @Component
+@ConditionalOnClass(RedissonClient.class)
 public class DistributedLockUtil {
 
     @Autowired

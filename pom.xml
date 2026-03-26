@@ -163,6 +163,24 @@
                 <artifactId>sentinel-datasource-nacos</artifactId>
                 <version>1.8.6</version>
             </dependency>
+            <!-- Kryo 4.0.2 for Seata 1.5.2 -->
+            <dependency>
+                <groupId>com.esotericsoftware</groupId>
+                <artifactId>kryo</artifactId>
+                <version>4.0.2</version>
+            </dependency>
+            <!-- Kryo serializers for Seata -->
+            <dependency>
+                <groupId>de.javakaffee</groupId>
+                <artifactId>kryo-serializers</artifactId>
+                <version>0.42</version>
+            </dependency>
+            <!-- FST for Redisson (used by FstCodec) -->
+            <dependency>
+                <groupId>de.ruedigermoeller</groupId>
+                <artifactId>fst</artifactId>
+                <version>2.57</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

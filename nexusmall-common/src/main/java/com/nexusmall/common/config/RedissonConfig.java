@@ -1,18 +1,21 @@
 package com.nexusmall.common.config;
 
-import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
+import org.redisson.codec.FstCodec;
 import org.redisson.config.Config;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Redisson 分布式锁配置
+ * 仅在 classpath 中存在 RedissonClient 时生效
  * 
  * @author shudl
  */
 @Configuration
+@ConditionalOnClass(RedissonClient.class)
 public class RedissonConfig {
 
     @Value("${spring.redis.host:10.10.1.1}")
@@ -30,10 +33,15 @@ public class RedissonConfig {
     /**
      * 创建 RedissonClient 实例
      * 用于实现分布式锁、限流等功能
+     * 显式配置使用 FST 编解码器，避免与 Kryo 版本冲突
      */
     @Bean
     public RedissonClient redissonClient() {
         Config config = new Config();
+        
+        // 关键：显式设置使用 FST 编解码器
+        // 这会在 Redisson 初始化时生效，避免其自动检测并使用 Kryo5Codec
+        config.setCodec(new FstCodec());
         
         // 使用单节点模式（生产环境可使用集群或哨兵模式）
         String address = String.format("redis://%s:%d", redisHost, redisPort);
@@ -47,6 +55,6 @@ public class RedissonConfig {
                 .setConnectTimeout(10000)             // 连接超时时间
                 .setTimeout(3000);                    // 命令等待超时时间
         
-        return Redisson.create(config);
+        return org.redisson.Redisson.create(config);
     }
 }

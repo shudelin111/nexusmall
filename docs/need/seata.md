@@ -97,3 +97,50 @@ Group: SEATA_GROUP (或者 DEFAULT_GROUP)
 配置内容: default
 
 这样你的 Java 项目配置 tx-service-group: default_tx_group 时，才能找到 Seata 服务端。
+
+
+
+cat <<EOF > /mnt/sata1-4/docker/seata/config/registry.conf
+registry {
+type = "nacos"
+nacos {
+application = "seata-server"
+serverAddr = "10.10.1.1:8848"
+group = "SEATA_GROUP"
+username = "nacos"
+password = "nacos"
+namespace = ""
+cluster = "default"
+}
+}
+config {
+type = "nacos"
+nacos {
+serverAddr = "10.10.1.1:8848"
+username = "nacos"
+password = "nacos"
+namespace = ""
+group = "SEATA_GROUP"
+dataId = "seataServer.properties"
+}
+}
+EOF
+
+
+docker run -d \
+--name seata-server \
+--network rocketmq \
+--restart=always \
+-p 8091:8091 \
+--memory 512m \
+-e SEATA_IP=10.10.1.1 \
+-e SEATA_PORT=8091 \
+-e STORE_MODE=db \
+-e DB_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver \
+-e DB_URL="jdbc:mysql://10.10.1.1:3306/seata?useUnicode=true&rewriteBatchedStatements=true&useSSL=false" \
+-e DB_USER=root \
+-e DB_PASSWORD=123456 \
+-v /mnt/sata1-4/docker/seata/config/registry.conf:/seata-server/resources/registry.conf \
+-v /mnt/sata1-4/docker/seata/logs:/root/logs \
+-e JAVA_OPTS="-Xms128M -Xmx384M -Xmn128M -XX:MaxDirectMemorySize=64M -XX:+UseG1GC" \
+seataio/seata-server:1.4.2
