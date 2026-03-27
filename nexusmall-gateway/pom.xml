@@ -95,6 +95,18 @@
 			<!-- 版本由父工程 dependencyManagement 统一管理 -->
 		</dependency>
 
+		<!-- Spring Cloud Sleuth 链路追踪 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+
+		<!-- Zipkin 链路追踪可视化 -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+
 		<!-- 公共模块 -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>

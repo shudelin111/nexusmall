@@ -21,15 +21,17 @@
     <!-- 格式说明：
          %d{yyyy-MM-dd HH:mm:ss.SSS} - 时间戳（精确到毫秒）
          [%thread]                   - 线程名
+         [%X{traceId:-},%X{spanId:-}] - 链路追踪 ID（Sleuth 自动注入，如果没有则为空）
          %-5level                    - 日志级别（左对齐，占 5 字符）
          %logger{50}                 - 类名（最多显示 50 个字符）
          %msg                        - 日志消息
          %n                          - 换行符
          
          示例输出：
-         2026-03-25 14:30:00.123 [main] INFO  c.n.auth.controller.LoginController - 用户登录成功
+         2026-03-25 14:30:00.123 [main] [abc123def456,789xyz] INFO  c.n.auth.controller.LoginController - 用户登录成功
+         2026-03-25 14:30:00.123 [main] [,] INFO  c.n.auth.controller.LoginController - 启动阶段无 traceId
     -->
-    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-},%X{spanId:-}] %-5level %logger{50} - %msg%n"/>
 
     <!-- 从 application.yaml 中读取日志路径配置 -->
     <!-- 

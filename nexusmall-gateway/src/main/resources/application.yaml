@@ -135,9 +135,48 @@ spring:
           # true: 服务名自动转为小写（避免大小写不一致问题）
           lower-case-service-id: true
       
+      # ===============================
+      # Spring Cloud Sleuth 链路追踪配置
+      # ===============================
+      sleuth:
+        # 1. 启用链路追踪
+        enabled: true
+        # 2. 采样率（开发环境 100%，生产环境建议 0.1）
+        sampler:
+          probability: 1.0
+        # 3. 日志配置
+        log:
+          # 启用日志中的链路追踪信息
+          enabled: true
+          # SLF4J MDC 白名单（让 traceId 显示在日志中）
+          slf4j:
+            whitelisted-mdc-keys:
+              - traceId
+              - spanId
+              - user-id
+        # 4. WebFlux 配置（Gateway 必须启用）
+        web:
+          enabled: true
+        # 5. 传播类型（支持 B3 和 W3C 标准）
+        propagation:
+          type: B3,W3C
+        # 6. Baggage 配置（自定义传递字段）
+        baggage-keys:
+          - user-id
+          - request-id
+      
+      # Zipkin 链路追踪可视化配置
+      zipkin:
+        # Zipkin Server 地址
+        base-url: http://localhost:9411
+        # 启用 Zipkin
+        enabled: true
+        # 发送方式
+        sender:
+          type: web
+      
       # 路由规则配置（核心功能）
       routes:
-        # ===============================
         # 路由 1：认证服务
         # ===============================
         - id: auth-service
@@ -256,6 +295,12 @@ logging:
     org.springframework.http.server.reactive: DEBUG
     # Spring Security 安全框架日志
     org.springframework.security: DEBUG
+    # Sleuth 链路追踪日志
+    org.springframework.cloud.sleuth: DEBUG
+    # Brave（Sleuth 底层库）日志
+    brave: DEBUG
+  # 注意：日志格式已在 nexusmall-common 的 logback-spring.xml 中统一配置
+  # 包含 traceId 和 spanId，所有微服务自动继承
 
 # =====================================================
 # 应用元信息配置
