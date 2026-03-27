@@ -118,6 +118,12 @@
 			<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
 		</dependency>
 
+		<!-- Sentinel Nacos 数据源 -->
+		<dependency>
+			<groupId>com.alibaba.csp</groupId>
+			<artifactId>sentinel-datasource-nacos</artifactId>
+		</dependency>
+
 		<!-- 公共模块 -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>

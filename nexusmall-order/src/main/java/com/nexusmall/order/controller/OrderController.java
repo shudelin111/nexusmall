@@ -49,11 +49,6 @@ public class OrderController {
     @GetMapping("/{id}")
     public Result<Order> getOrderById(@PathVariable("id") Long id) {
         log.info("查询订单，orderId: {}", id);
-        try {
-            Thread.sleep(5000L);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
         Order order = orderService.getById(id);
         if (order != null) {
             log.info(LogMessageConstants.Order.ORDER_QUERIED, id, order.getOrderSn());

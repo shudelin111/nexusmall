@@ -66,8 +66,9 @@ spring:
         ds1:
           nacos:
             server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
             dataId: ${spring.application.name}-sentinel
-            groupId: DEFAULT_GROUP
+            groupId: ${spring.cloud.nacos.discovery.group}
             rule-type: flow
   
   profiles:

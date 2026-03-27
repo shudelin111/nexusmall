@@ -125,6 +125,42 @@ spring:
         dashboard: 10.10.1.1:8858
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
+      datasource:
+        # ===============================
+        # 流控规则数据源（控制 QPS 或并发数）
+        # ===============================
+        ds1:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-order-flow-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: flow
+            data-type: json
+
+        # ===============================
+        # 熔断降级规则数据源（异常比例/慢调用）
+        # ===============================
+        ds2:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-order-degrade-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: degrade
+            data-type: json
+
+        # ===============================
+        # 系统自适应保护规则数据源
+        # ===============================
+        ds3:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-order-system-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: system
+            data-type: json
 
 # =====================================================
 # 服务器配置
