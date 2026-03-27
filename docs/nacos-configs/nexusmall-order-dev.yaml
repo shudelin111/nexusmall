@@ -1,0 +1,89 @@
+# =====================================================
+# NexusMall 订单服务 - 开发环境配置
+# =====================================================
+# Data ID: nexusmall-order-dev.yaml
+# Group: DEFAULT_GROUP
+# Profile: dev
+# 用途：开发环境专属配置（优先级高于 nexusmall-order.yaml）
+# 说明：
+# - 此文件仅包含开发环境特有的差异化配置
+# - 共享配置已在 nexusmall-common.yaml 和 nexusmall-datasource.yaml 中定义
+# - 业务通用配置已在 nexusmall-order.yaml 中定义
+# =====================================================
+
+# ===============================
+# 数据库连接配置（开发环境）
+# ===============================
+spring:
+  datasource:
+    # JDBC 连接 URL（开发环境数据库）
+    url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
+    # 数据库用户名
+    username: root
+    # 数据库密码
+    password: "123456"
+  
+  # Redis 配置（开发环境）
+  redis:
+    # Redis 服务器地址
+    host: ${REDIS_HOST:10.10.1.1}
+    # Redis 端口
+    port: ${REDIS_PORT:6379}
+    # 使用的数据库编号
+    database: ${REDIS_DATABASE:0}
+    # Redis 密码
+    password: ${REDIS_PASSWORD:123456}
+
+# ===============================
+# RocketMQ 配置（开发环境）
+# ===============================
+rocketmq:
+  # NameServer 地址
+  name-server: 10.10.1.1:9876
+  # 生产者配置
+  producer:
+    group: order-producer-group-dev
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+
+# ===============================
+# Seata 分布式事务配置（开发环境）
+# ===============================
+seata:
+  enabled: true
+  application-id: nexusmall-order
+  tx-service-group: nexusmall-tx-group
+  service:
+    vgroup-mapping:
+      nexusmall-tx-group: default
+  registry:
+    type: nacos
+    nacos:
+      server-addr: 10.10.1.1:8848
+      namespace: ""
+      group: SEATA_GROUP
+      cluster: default
+      username: nacos
+      password: nacos
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      server-addr: 10.10.1.1:8848
+      namespace: ""
+      group: SEATA_GROUP
+      username: nacos
+      password: nacos
+      data-id: seataServer.properties
+
+# ===============================
+# 业务特定配置（开发环境）
+# ===============================
+order:
+  # 订单超时自动取消时间（分钟）
+  timeout-cancel: 30
+  # 订单号前缀
+  order-no-prefix: "ORD-DEV"
+  # 最大购买数量
+  max-purchase-quantity: 100

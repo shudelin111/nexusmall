@@ -1,0 +1,164 @@
+# =====================================================
+# NexusMall 平台公共配置（所有服务共享）
+# =====================================================
+# 用途：存放所有微服务共用的基础配置
+# 包含：日志、Actuator、Swagger、基础组件等
+# =====================================================
+
+# ===============================
+# 日志配置
+# ===============================
+logging:
+  level:
+    root: INFO
+    # Spring 框架日志
+    org.springframework: WARN
+    org.springframework.web: INFO
+    # MyBatis-Plus 日志
+    com.baomidou.mybatisplus: DEBUG
+    # 连接池日志
+    com.zaxxer.hikari: WARN
+    # Redis 日志
+    org.springframework.data.redis: WARN
+    # RocketMQ 日志
+    org.apache.rocketmq: INFO
+    # Kafka 日志
+    org.springframework.kafka: WARN
+    # Sentinel 日志
+    com.alibaba.csp.sentinel: INFO
+    # Seata 分布式事务日志
+    io.seata: INFO
+    # Nacos 客户端日志
+    com.alibaba.nacos: WARN
+
+  # 日志文件配置
+  file:
+    # 日志文件路径
+    path: ${LOG_PATH:./logs}
+  pattern:
+    # 控制台日志格式
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+    # 文件日志格式
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+management:
+  # 端点暴露配置
+  endpoints:
+    web:
+      # 暴露的端点列表
+      # 开发环境：暴露所有端点
+      # 生产环境：只暴露 health,info,prometheus
+      exposure:
+        include: "*"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 显示健康检查详情
+      show-details: always
+    info:
+      # 启用 info 端点
+      enabled: true
+  # 环境变量配置
+  info:
+    env:
+      # 在 info 端点中显示环境变量
+      enabled: true
+  # 健康检查配置
+  health:
+    # 数据库健康检查
+    db:
+      enabled: true
+    # Redis 健康检查
+    redis:
+      enabled: true
+    # 磁盘空间健康检查
+    disk-space:
+      enabled: true
+      # 磁盘空间阈值（字节）
+      threshold: 10485760  # 10MB
+
+# ===============================
+# Swagger/Knife4j API 文档配置
+# ===============================
+springdoc:
+  # 是否启用 Swagger
+  api-docs:
+    enabled: true
+  # API 文档路径
+  paths-to-match: /**
+  swagger-ui:
+    # 启用 Swagger UI
+    enabled: true
+    # Swagger UI 路径
+    path: /swagger-ui.html
+    # 文档标题
+    title: NexusMall API 文档
+    # 文档描述
+    description: NexusMall 微服务 API 接口文档
+    # 文档版本
+    version: 1.0.0
+    # 联系人信息
+    contact:
+      name: NexusMall Team
+      email: support@nexusmall.com
+
+# ===============================
+# Spring 相关配置（Jackson、文件上传）
+# ===============================
+spring:
+  # Jackson 序列化配置
+  jackson:
+    # 时间格式化
+    time-zone: GMT+8
+    # 日期格式化
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 序列化配置
+    serialization:
+      # 格式化输出
+      indent-output: true
+      # 写入单值数组（使用正确的枚举值）
+      write-single-elem-arrays-unwrapped: false
+      # 写入空 bean
+      write-empty-json-objects: true
+    # 反序列化配置
+    deserialization:
+      # 允许未知属性
+      fail-on-unknown-properties: false
+      # 接受单值作为数组
+      accept-single-value-as-array: true
+    # 时区
+    locale: zh_CN
+  
+  # 文件上传配置
+  servlet:
+    multipart:
+      # 是否启用文件上传
+      enabled: true
+      # 单个文件最大大小
+      max-file-size: 10MB
+      # 请求最大大小
+      max-request-size: 100MB
+      # 文件大小阈值（超过此值写入临时文件）
+      file-size-threshold: 1MB
+
+# ===============================
+# HTTP 配置
+# ===============================
+server:
+  # 监听所有网络接口
+  address: 0.0.0.0
+  # Tomcat 配置
+  tomcat:
+    # URI 编码
+    uri-encoding: UTF-8
+    # 最大线程数
+    max-threads: 200
+    # 最小空闲线程数
+    min-spare-threads: 10
+    # 最大连接数
+    max-connections: 8192
+    # 连接超时时间（毫秒）
+    connection-timeout: 20000
