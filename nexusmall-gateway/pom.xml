@@ -17,6 +17,12 @@
 		<java.version>8</java.version>
 	</properties>
 	<dependencies>
+		<!-- Bootstrap 启动器（Spring Cloud 2020.x 必需） -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-bootstrap</artifactId>
+		</dependency>
+
 		<!-- Lombok -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
