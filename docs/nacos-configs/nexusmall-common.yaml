@@ -30,16 +30,16 @@ logging:
     io.seata: INFO
     # Nacos 客户端日志
     com.alibaba.nacos: WARN
+    # Sleuth 链路追踪日志
+    org.springframework.cloud.sleuth: DEBUG
+    # Brave（Sleuth 底层库）日志
+    brave: DEBUG
 
   # 日志文件配置
   file:
     # 日志文件路径
     path: ${LOG_PATH:./logs}
-  pattern:
-    # 控制台日志格式
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
-    # 文件日志格式
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{50} - %msg%n"
+  # 注意：日志格式已在 logback-spring.xml 中统一配置，此处不需要重复配置
 
 # ===============================
 # Spring Boot Actuator 监控配置
@@ -129,7 +129,7 @@ spring:
       accept-single-value-as-array: true
     # 时区
     locale: zh_CN
-  
+
   # 文件上传配置
   servlet:
     multipart:
@@ -141,6 +141,33 @@ spring:
       max-request-size: 100MB
       # 文件大小阈值（超过此值写入临时文件）
       file-size-threshold: 1MB
+
+  # Spring Cloud 配置
+  cloud:
+    # Sleuth 链路追踪配置
+    sleuth:
+      # 1. 启用链路追踪
+      enabled: true
+      # 2. 采样率（开发环境 100%，生产环境建议 0.1）
+      sampler:
+        probability: 1.0
+      # 3. 日志配置
+      log:
+        # 启用日志中的链路追踪信息
+        enabled: true
+        # SLF4J MDC 白名单（让 traceId 显示在日志中）
+        slf4j:
+          whitelisted-mdc-keys:
+            - traceId
+            - spanId
+            - user-id
+      # 4. 传播类型（支持 B3 和 W3C 标准）
+      propagation:
+        type: B3,W3C
+      # 5. Baggage 配置（自定义传递字段）
+      baggage-keys:
+        - user-id
+        - request-id
 
 # ===============================
 # HTTP 配置
