@@ -91,7 +91,8 @@ spring:
         # Nacos 服务器地址
         server-addr: 10.10.1.1:8848
         # 命名空间（用于环境隔离）
-        namespace: public
+        # 注意：public 命名空间在 API 调用时应传空字符串
+        namespace: ""
         # 服务分组
         group: DEFAULT_GROUP
         # Nacos 用户名
@@ -137,6 +138,9 @@ spring:
             groupId: ${spring.cloud.nacos.discovery.group}
             rule-type: flow
             data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
 
         # ===============================
         # 熔断降级规则数据源（异常比例/慢调用）
@@ -149,6 +153,9 @@ spring:
             groupId: ${spring.cloud.nacos.discovery.group}
             rule-type: degrade
             data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
 
         # ===============================
         # 系统自适应保护规则数据源
@@ -161,6 +168,14 @@ spring:
             groupId: ${spring.cloud.nacos.discovery.group}
             rule-type: system
             data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+
+      # Sentinel 日志配置
+      log:
+        # 日志级别：DEBUG, INFO, WARN, ERROR
+        level: DEBUG
 
 # =====================================================
 # 服务器配置

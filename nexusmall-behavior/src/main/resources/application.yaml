@@ -141,7 +141,8 @@ spring:
         # Nacos 服务器地址
         server-addr: 10.10.1.1:8848
         # 命名空间（用于环境隔离）
-        namespace: public
+        # 注意：public 命名空间在 API 调用时应传空字符串
+        namespace: ""
         # 服务分组
         group: DEFAULT_GROUP
         # Nacos 用户名
@@ -163,6 +164,68 @@ spring:
         password: ${spring.cloud.nacos.discovery.password}
         # 配置文件后缀名
         file-extension: yaml
+    
+    # Sentinel 熔断限流配置
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # 控制台地址（生产环境改为实际 IP）
+      transport:
+        dashboard: 10.10.1.1:8858
+        # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
+        port: 8719
+      datasource:
+        # ===============================
+        # 流控规则数据源（控制 QPS 或并发数）
+        # ===============================
+        ds1:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-behavior-flow-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: flow
+            data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+
+        # ===============================
+        # 熔断降级规则数据源（异常比例/慢调用）
+        # ===============================
+        ds2:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-behavior-degrade-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: degrade
+            data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+
+        # ===============================
+        # 系统自适应保护规则数据源
+        # ===============================
+        ds3:
+          nacos:
+            server-addr: ${spring.cloud.nacos.discovery.server-addr}
+            namespace: ${spring.cloud.nacos.discovery.namespace}
+            dataId: nexusmall-behavior-system-rule.json
+            groupId: ${spring.cloud.nacos.discovery.group}
+            rule-type: system
+            data-type: json
+            # Nacos 认证配置
+            username: ${spring.cloud.nacos.discovery.username}
+            password: ${spring.cloud.nacos.discovery.password}
+
+      # Sentinel 日志配置
+      log:
+        # 日志级别：DEBUG, INFO, WARN, ERROR
+        level: DEBUG
 
 # =====================================================
 # 服务器配置

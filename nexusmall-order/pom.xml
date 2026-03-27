@@ -159,6 +159,11 @@
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>
+                    <!-- 添加 JVM 参数用于 Debug -->
+                    <jvmArguments>
+                        -Dproject.name=nexusmall-order
+                        -Dcsp.sentinel.log.level=DEBUG
+                    </jvmArguments>
                 </configuration>
             </plugin>
         </plugins>
