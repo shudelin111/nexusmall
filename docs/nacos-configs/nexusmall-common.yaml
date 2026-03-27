@@ -168,6 +168,18 @@ spring:
       baggage-keys:
         - user-id
         - request-id
+    
+    # Zipkin 链路追踪可视化配置
+    zipkin:
+      # 是否启用 Zipkin
+      # true: 发送追踪数据到 Zipkin Server（需要 Zipkin 运行）
+      # false: 禁用 Zipkin，不发送数据（开发环境推荐）
+      enabled: false
+      # Zipkin Server 地址（当 enabled=true 时生效）
+      base-url: http://localhost:9411
+      # 发送方式
+      sender:
+        type: web
 
 # ===============================
 # HTTP 配置
