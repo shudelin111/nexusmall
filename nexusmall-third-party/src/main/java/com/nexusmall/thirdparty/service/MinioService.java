@@ -1,5 +1,6 @@
 package com.nexusmall.thirdparty.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.minio.*;
 import io.minio.errors.*;
 import io.minio.http.Method;
@@ -31,6 +32,7 @@ import java.util.*;
 public class MinioService {
 
     private final MinioClient minioClient;
+    private final ObjectMapper objectMapper = new ObjectMapper();
     
     @Value("${minio.bucket-name}")
     private String bucketName;
@@ -67,15 +69,7 @@ public class MinioService {
                 
                 // 设置存储桶为公共读（开发环境方便访问）
                 // 生产环境建议使用私有桶 + 预签名 URL
-                String jsonPolicy = "{\n" +
-                        "  \"Version\": \"2012-10-17\",\n" +
-                        "  \"Statement\": [{\n" +
-                        "    \"Effect\": \"Allow\",\n" +
-                        "    \"Principal\": {\"AWS\": [\"*\"]},\n" +
-                        "    \"Action\": [\"s3:GetObject\"],\n" +
-                        "    \"Resource\": [\"arn:aws:s3:::" + bucketName + "/*\"]\n" +
-                        "  }]\n" +
-                        "}";
+                String jsonPolicy = buildPublicReadPolicy(bucketName);
                 minioClient.setBucketPolicy(SetBucketPolicyArgs.builder()
                         .bucket(bucketName)
                         .config(jsonPolicy)
@@ -88,6 +82,36 @@ public class MinioService {
             log.error("初始化 MinIO 存储桶失败：{}", bucketName, e);
             throw new RuntimeException("初始化 MinIO 存储桶失败：" + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 构建公共读策略（业界标准做法）
+     * 
+     * 使用 Jackson ObjectMapper 构建 JSON，避免手动拼接字符串
+     * 优点：
+     * 1. 类型安全，编译时可检查
+     * 2. 可读性强，易于维护
+     * 3. 自动转义特殊字符
+     * 4. 符合业界最佳实践
+     * 
+     * @param bucketName 存储桶名称
+     * @return JSON 格式的策略文档
+     */
+    private String buildPublicReadPolicy(String bucketName) throws Exception {
+        Map<String, Object> policy = new LinkedHashMap<>();
+        policy.put("Version", "2012-10-17");
+        
+        List<Map<String, Object>> statements = new ArrayList<>();
+        Map<String, Object> statement = new LinkedHashMap<>();
+        statement.put("Effect", "Allow");
+        statement.put("Principal", Collections.singletonMap("AWS", Collections.singletonList("*")));
+        statement.put("Action", Collections.singletonList("s3:GetObject"));
+        statement.put("Resource", Collections.singletonList("arn:aws:s3:::" + bucketName + "/*"));
+        
+        statements.add(statement);
+        policy.put("Statement", statements);
+        
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(policy);
     }
 
     /**
@@ -186,29 +210,87 @@ public class MinioService {
     /**
      * 生成预签名 URL（临时访问权限）
      * 
-     * 业界最佳实践：
+     * 业界标准做法：
      * 1. 用于私有桶的临时访问
      * 2. 可设置过期时间（如 5 分钟、1 小时）
-     * 3. 适用于需要权限控制的场景
+     * 3. 适用于需要权限控制的场景（订单合同、用户隐私文件等）
+     * 4. 支持多种 HTTP 方法（GET、PUT、DELETE）
      * 
      * @param objectName 对象名称
      * @param expirySeconds 过期时间（秒），默认 3600 秒（1 小时）
      * @return 预签名 URL
      */
     public String getPresignedObjectUrl(String objectName, Integer expirySeconds) {
+        return getPresignedObjectUrl(objectName, expirySeconds, Method.GET);
+    }
+
+    /**
+     * 生成预签名 URL（支持指定 HTTP 方法）
+     * 
+     * 应用场景：
+     * - GET: 下载/查看文件
+     * - PUT: 上传文件（直传 MinIO）
+     * - DELETE: 删除文件
+     * 
+     * @param objectName 对象名称
+     * @param expirySeconds 过期时间（秒）
+     * @param method HTTP 方法
+     * @return 预签名 URL
+     */
+    public String getPresignedObjectUrl(String objectName, Integer expirySeconds, Method method) {
         try {
+            // 生产环境建议：最长不超过 7 天（604800 秒）
             int expiry = (expirySeconds != null && expirySeconds > 0) ? expirySeconds : 3600;
+            if (expiry > 604800) {
+                log.warn("预签名 URL 过期时间过长：{}秒，建议不超过 7 天", expiry);
+                expiry = 604800;  // 限制最长 7 天
+            }
             
-            return minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
-                    .method(Method.GET)
+            String url = minioClient.getPresignedObjectUrl(GetPresignedObjectUrlArgs.builder()
+                    .method(method)
                     .bucket(bucketName)
                     .object(objectName)
                     .expiry(expiry)
                     .build());
+            
+            log.info("生成预签名 URL [{}]: {} (有效期：{}秒)", method, objectName, expiry);
+            return url;
+            
         } catch (Exception e) {
             log.error("生成预签名 URL 失败：{}", objectName, e);
             throw new RuntimeException("生成预签名 URL 失败：" + e.getMessage(), e);
         }
+    }
+
+    /**
+     * 生成上传用的预签名 URL（用于前端直传 MinIO）
+     * 
+     * 业界最佳实践：
+     * 1. 减轻服务器带宽压力
+     * 2. 提高上传速度（客户端直连 MinIO）
+     * 3. 适用于大文件上传场景
+     * 
+     * @param objectName 对象名称
+     * @param expirySeconds 过期时间（秒）
+     * @return 上传用的预签名 URL
+     */
+    public String getPresignedPutUrl(String objectName, Integer expirySeconds) {
+        return getPresignedObjectUrl(objectName, expirySeconds, Method.PUT);
+    }
+
+    /**
+     * 生成删除用的预签名 URL
+     * 
+     * 应用场景：
+     * - 管理员后台删除文件
+     * - 定时任务清理过期文件
+     * 
+     * @param objectName 对象名称
+     * @param expirySeconds 过期时间（秒）
+     * @return 删除用的预签名 URL
+     */
+    public String getPresignedDeleteUrl(String objectName, Integer expirySeconds) {
+        return getPresignedObjectUrl(objectName, expirySeconds, Method.DELETE);
     }
 
     /**

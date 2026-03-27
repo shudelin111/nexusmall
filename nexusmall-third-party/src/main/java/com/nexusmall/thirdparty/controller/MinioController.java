@@ -150,4 +150,120 @@ public class MinioController {
             return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "批量上传失败：" + e.getMessage());
         }
     }
+
+    /**
+     * 生成文件访问链接（私有桶模式）
+     * 
+     * 业界标准做法：
+     * 1. 适用于私有桶的文件访问
+     * 2. 返回带签名的临时访问 URL
+     * 3. 可自定义过期时间
+     * 
+     * @param objectName 对象名称或完整 URL
+     * @param expirySeconds 过期时间（秒），默认 3600 秒
+     * @return 预签名 URL
+     */
+    @PostMapping("/presigned-url")
+    @Operation(summary = "生成预签名 URL", description = "为私有桶文件生成临时访问链接")
+    public Result<Map<String, String>> getPresignedUrl(
+            @Parameter(description = "对象名称或文件 URL", required = true)
+            @RequestParam("objectName") String objectName,
+            @Parameter(description = "过期时间（秒），默认 3600", required = false)
+            @RequestParam(value = "expirySeconds", defaultValue = "3600") Integer expirySeconds) {
+        try {
+            // 如果是完整 URL，提取对象名
+            if (objectName.startsWith("http")) {
+                objectName = extractObjectName(objectName);
+            }
+            
+            String url = minioService.getPresignedObjectUrl(objectName, expirySeconds);
+            
+            Map<String, String> result = new HashMap<>();
+            result.put("url", url);
+            result.put("objectName", objectName);
+            result.put("expirySeconds", String.valueOf(expirySeconds));
+            
+            log.info("生成预签名 URL 成功：{} (有效期：{}秒)", objectName, expirySeconds);
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("生成预签名 URL 失败：{}", objectName, e);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "生成预签名 URL 失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 生成上传用的预签名 URL（前端直传 MinIO）
+     * 
+     * 业界最佳实践：
+     * 1. 减轻服务器带宽压力
+     * 2. 提高上传速度
+     * 3. 适用于大文件上传场景
+     * 
+     * @param objectName 对象名称
+     * @param type 文件类型（product、avatar、order 等）
+     * @param expirySeconds 过期时间（秒）
+     * @return 上传用的预签名 URL
+     */
+    @PostMapping("/presigned-upload-url")
+    @Operation(summary = "生成上传预签名 URL", description = "生成用于前端直传 MinIO 的预签名 URL")
+    public Result<Map<String, String>> getPresignedUploadUrl(
+            @Parameter(description = "对象名称", required = true)
+            @RequestParam("objectName") String objectName,
+            @Parameter(description = "文件类型：product-商品、avatar-头像、order-订单等", required = true)
+            @RequestParam("type") String type,
+            @Parameter(description = "过期时间（秒），默认 300", required = false)
+            @RequestParam(value = "expirySeconds", defaultValue = "300") Integer expirySeconds) {
+        try {
+            // 生成完整的对象路径
+            String datePath = generateDatePath();
+            String extension = objectName.substring(objectName.lastIndexOf("."));
+            String uuid = java.util.UUID.randomUUID().toString().replace("-", "");
+            String fullObjectName = type + "/" + datePath + "/" + uuid + extension;
+            
+            String url = minioService.getPresignedPutUrl(fullObjectName, expirySeconds);
+            
+            Map<String, String> result = new HashMap<>();
+            result.put("uploadUrl", url);
+            result.put("objectName", fullObjectName);
+            result.put("accessUrl", minioService.getFileUrl(fullObjectName));
+            result.put("expirySeconds", String.valueOf(expirySeconds));
+            
+            log.info("生成上传预签名 URL 成功：{} (有效期：{}秒)", fullObjectName, expirySeconds);
+            return Result.success(result);
+        } catch (Exception e) {
+            log.error("生成上传预签名 URL 失败：{}", objectName, e);
+            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "生成上传预签名 URL 失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 从 URL 中提取对象名称（工具方法）
+     */
+    private String extractObjectName(String fileUrl) {
+        if (fileUrl.startsWith("http")) {
+            String[] parts = fileUrl.split("/");
+            if (parts.length > 4) {
+                StringBuilder objectName = new StringBuilder();
+                for (int i = 5; i < parts.length; i++) {
+                    objectName.append(parts[i]);
+                    if (i < parts.length - 1) {
+                        objectName.append("/");
+                    }
+                }
+                return objectName.toString();
+            }
+        }
+        return fileUrl;
+    }
+
+    /**
+     * 生成日期路径
+     */
+    private String generateDatePath() {
+        java.time.ZonedDateTime now = java.time.ZonedDateTime.now();
+        return String.format("%d/%02d/%02d", 
+                now.getYear(), 
+                now.getMonthValue(), 
+                now.getDayOfMonth());
+    }
 }

@@ -41,4 +41,30 @@ public interface MinioFeignClient {
      */
     @DeleteMapping("/minio/delete")
     Result<Void> deleteFile(@RequestParam("url") String url);
+
+    /**
+     * 生成预签名 URL（私有桶访问）
+     * 
+     * @param objectName 对象名称
+     * @param expirySeconds 过期时间（秒）
+     * @return 预签名 URL
+     */
+    @PostMapping("/minio/presigned-url")
+    Result<Map<String, String>> getPresignedUrl(
+            @RequestParam("objectName") String objectName,
+            @RequestParam(value = "expirySeconds", defaultValue = "3600") Integer expirySeconds);
+
+    /**
+     * 生成上传预签名 URL（前端直传）
+     * 
+     * @param objectName 对象名称
+     * @param type 文件类型
+     * @param expirySeconds 过期时间（秒）
+     * @return 上传预签名 URL
+     */
+    @PostMapping("/minio/presigned-upload-url")
+    Result<Map<String, String>> getPresignedUploadUrl(
+            @RequestParam("objectName") String objectName,
+            @RequestParam("type") String type,
+            @RequestParam(value = "expirySeconds", defaultValue = "300") Integer expirySeconds);
 }
