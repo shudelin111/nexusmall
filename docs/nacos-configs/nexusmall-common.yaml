@@ -119,10 +119,8 @@ spring:
     serialization:
       # 格式化输出
       indent-output: true
-      # 写入单值数组（使用正确的枚举值）
+      # 写入单值数组时 unwrapped（使用正确的枚举值）
       write-single-elem-arrays-unwrapped: false
-      # 写入空 bean
-      write-empty-json-objects: true
     # 反序列化配置
     deserialization:
       # 允许未知属性
