@@ -16,13 +16,15 @@ docker tag docker.m.daocloud.io/apacherocketmq/rocketmq-dashboard:1.0.0 apachero
 
 链路追踪 SkyWalking
 
-
 搜索与聚合分析 (Search Engine) —— Elasticsearch + Logstash + Kibana (ELK)
-
-对象存储 (Object Storage) —— MinIO
 
 
 最标准的做法：
 Sentinel 暴露 Metrics 接口。
 Prometheus 去拉取数据。
 Grafana 展现漂亮的实时流量大屏。
+
+
+哪些文件在 Unversioned Files 中
+git status
+好的，我看到了 Untracked files（未版本化的文件）。这些文件还没有被 Git 跟踪。如果你想把这些文件从 Git 控制中移除（即忽略它们），最佳实践是将它们添加到 .gitignore 文件中

@@ -8,6 +8,16 @@
 # 4. 用户行为数据分析与统计
 # =====================================================
 
+# ===============================
+# 统一日志路径配置
+# ===============================
+nexusmall:
+  logging:
+    # 统一日志根路径（所有微服务共享）
+    # 最终日志路径：${nexusmall.logging.path}/${spring.application.name}/
+    # 示例：D:/IdeaProjects/nexusmall/logs/nexusmall-behavior/
+    path: D:/IdeaProjects/nexusmall/logs
+
 spring:
   # ------------------------------
   # 配置导入（从 Nacos 加载配置）

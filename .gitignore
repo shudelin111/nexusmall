@@ -32,3 +32,38 @@ build/
 ### VS Code ###
 .vscode/
 /nexusmall-common/src/test/java/com/nexusmall/TestResult.java
+
+### Deployment Scripts ###
+ROCKETMQ-STANDARD-DEPLOYMENT.txt
+rocketmq-server-deploy.txt
+deploy-minio-docker-compose.yml
+deploy-sentinel-dashboard.ps1
+
+### Test Scripts ###
+test-order-api.ps1
+test-seata.ps1
+test-sentinel.ps1
+test-sentinel-flow.ps1
+create-stock-topic.ps1
+
+### Diagnostic Scripts ###
+check-seata-structure.sql
+check-seata-tables.sql
+check-undo-log.ps1
+cleanup-test-data.sql
+diagnose-seata.ps1
+
+### Documentation ###
+SENTINEL-INTEGRATION-GUIDE.md
+docs/NACOS-CONFIG-DEPLOYMENT-GUIDE.md
+docs/NACOS-CONFIG-QUICKSTART.md
+
+### Nacos Configs ###
+docs/nacos-configs/nexusmall-third-party.yaml
+
+### SQL Files ###
+nexusmall-common/sql/
+
+### Verify Logs ###
+nexusmall-third-party/verify-run.err.log
+nexusmall-third-party/verify-run.out.log
