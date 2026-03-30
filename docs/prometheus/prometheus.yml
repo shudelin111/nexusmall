@@ -1,0 +1,161 @@
+# =====================================================
+# Prometheus 配置文件
+# =====================================================
+# 用途：定义 Prometheus 从哪些微服务拉取监控指标数据
+# 部署说明：
+#   1. 本地开发环境：修改 targets 为 localhost 和各服务实际端口
+#   2. 生产环境：修改 targets 为服务器实际 IP 地址
+#   3. 重启 Prometheus 使配置生效
+# =====================================================
+
+# Prometheus 全局配置
+global:
+  # 数据抓取间隔（每 15 秒从目标服务拉取一次指标）
+  scrape_interval: 15s
+  # 评估规则间隔（每 15 秒评估一次告警规则）
+  evaluation_interval: 15s
+  # 外部标签（添加到所有采集的数据中）
+  external_labels:
+    monitor: 'nexusmall-monitor'
+    environment: 'development'
+
+# 告警配置（可选，后续集成 Alertmanager）
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets:
+#             - alertmanager:9093
+
+# 规则文件配置（可选，用于预定义告警规则）
+# rule_files:
+#   - "nexusmall-alerting-rules.yml"
+
+# 数据抓取配置
+scrape_configs:
+  # =====================================================
+  # 任务 1：Prometheus 自身监控
+  # =====================================================
+  - job_name: 'prometheus'
+    # 静态配置目标
+    static_configs:
+      # Prometheus 自身的监控端点
+      - targets: ['localhost:9090']
+        # 标签（用于区分不同的监控目标）
+        labels:
+          service: 'prometheus'
+          group: 'monitoring'
+
+  # =====================================================
+  # 任务 2：NexusMall 微服务监控（核心配置）
+  # =====================================================
+  - job_name: 'nexusmall-microservices'
+    # 指标路径（Spring Boot Actuator 暴露的 Prometheus 端点）
+    metrics_path: '/actuator/prometheus'
+    
+    # 抓取间隔（可针对微服务单独设置）
+    scrape_interval: 10s
+    # 抓取超时时间
+    scrape_timeout: 5s
+    
+    # 静态配置目标（所有微服务实例）
+    static_configs:
+      # 网关服务
+      - targets: ['localhost:8080']
+        labels:
+          service: 'nexusmall-gateway'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+      
+      # 认证服务
+      - targets: ['localhost:8000']
+        labels:
+          service: 'nexusmall-auth'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+      
+      # 商品服务
+      - targets: ['localhost:10000']
+        labels:
+          service: 'nexusmall-product'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+      
+      # 订单服务（已配置完成）
+      - targets: ['localhost:11000']
+        labels:
+          service: 'nexusmall-order'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+      
+      # 第三方服务
+      - targets: ['localhost:13000']
+        labels:
+          service: 'nexusmall-third-party'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+      
+      # 行为服务
+      - targets: ['localhost:12000']
+        labels:
+          service: 'nexusmall-behavior'
+          group: 'DEFAULT_GROUP'
+          env: 'dev'
+    
+    # 指标重新标记配置
+    relabel_configs:
+      # 添加微服务名称标签
+      - source_labels: [service]
+        target_label: application
+      # 添加环境标签
+      - source_labels: [env]
+        target_label: environment
+
+  # =====================================================
+  # 任务 3：Nacos 配置中心监控（可选）
+  # =====================================================
+  - job_name: 'nacos'
+    metrics_path: '/nacos/actuator/prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['10.10.1.1:8848']
+        labels:
+          service: 'nacos'
+          group: 'infrastructure'
+          env: 'prod'
+
+  # =====================================================
+  # 任务 4：Sentinel Dashboard 监控（可选）
+  # =====================================================
+  - job_name: 'sentinel-dashboard'
+    metrics_path: '/actuator/prometheus'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['10.10.1.1:8858']
+        labels:
+          service: 'sentinel-dashboard'
+          group: 'infrastructure'
+          env: 'prod'
+
+  # =====================================================
+  # 任务 5：MySQL 数据库监控（可选，需要 MySQL Exporter）
+  # =====================================================
+  - job_name: 'mysql'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['10.10.1.1:9104']  # MySQL Exporter 端口
+        labels:
+          service: 'mysql'
+          group: 'database'
+          env: 'prod'
+
+  # =====================================================
+  # 任务 6：Redis 监控（可选，需要 Redis Exporter）
+  # =====================================================
+  - job_name: 'redis'
+    scrape_interval: 30s
+    static_configs:
+      - targets: ['10.10.1.1:9121']  # Redis Exporter 端口
+        labels:
+          service: 'redis'
+          group: 'cache'
+          env: 'prod'

@@ -67,3 +67,4 @@ nexusmall-common/sql/
 ### Verify Logs ###
 nexusmall-third-party/verify-run.err.log
 nexusmall-third-party/verify-run.out.log
+/logs/**

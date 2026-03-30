@@ -18,6 +18,42 @@ nexusmall:
     # 示例：D:/IdeaProjects/nexusmall/logs/nexusmall-behavior/
     path: D:/IdeaProjects/nexusmall/logs
 
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+# 业界标准配置：暴露 Prometheus 监控端点
+management:
+  endpoints:
+    web:
+      # 暴露所有端点（生产环境建议只暴露 health,info,prometheus）
+      exposure:
+        include: "*"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 显示健康检查详情
+      show-details: always
+    info:
+      # 启用 info 端点
+      enabled: true
+    prometheus:
+      # 启用 Prometheus 端点（必需）
+      enabled: true
+  # 指标监控配置
+  metrics:
+    # 启用指标收集
+    enabled: true
+    # 标签配置（用于区分不同微服务）
+    tags:
+      # 应用名称标签（Prometheus 中通过此标签区分服务）
+      application: ${spring.application.name}
+    # 导出配置
+    export:
+      # Prometheus 导出配置
+      prometheus:
+        # 启用 Prometheus 导出（必需）
+        enabled: true
+
 spring:
   # ------------------------------
   # 配置导入（从 Nacos 加载配置）
@@ -352,27 +388,6 @@ rocketmq:
     retry-times-when-send-failed: 2
     # 异步发送失败重试次数
     retry-times-when-send-async-failed: 2
-
-# =====================================================
-# Actuator 监控端点配置
-# =====================================================
-management:
-  endpoints:
-    web:
-      exposure:
-        # 暴露的端点列表
-        include: "*"
-  endpoint:
-    health:
-      # 健康检查详情显示级别
-      show-details: always
-    info:
-      # 是否启用 info 端点
-      enabled: true
-  info:
-    env:
-      # 是否在 info 端点中显示环境变量
-      enabled: true
 
 # =====================================================
 # 日志级别配置

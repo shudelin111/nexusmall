@@ -19,6 +19,45 @@ nexusmall:
     # 示例：D:/IdeaProjects/nexusmall/logs/nexusmall-gateway/
     path: D:/IdeaProjects/nexusmall/logs
 
+# =====================================================
+# Actuator 监控端点配置
+# =====================================================
+management:
+  endpoints:
+    web:
+      # 暴露所有端点（生产环境建议只暴露 health,info,prometheus,gateway）
+      exposure:
+        include: "*"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 健康检查详情显示级别
+      show-details: always  # 显示详细信息
+    info:
+      # 是否启用 info 端点
+      enabled: true  # 显示应用信息
+    prometheus:
+      # 启用 Prometheus 端点（必需）
+      enabled: true
+  # 指标监控配置
+  metrics:
+    # 启用指标收集
+    enabled: true
+    # 标签配置（用于区分不同微服务）
+    tags:
+      # 应用名称标签（Prometheus 中通过此标签区分服务）
+      application: ${spring.application.name}
+    # 导出配置
+    export:
+      # Prometheus 导出配置
+      prometheus:
+        # 启用 Prometheus 导出（必需）
+        enabled: true
+  info:
+    env:
+      # 是否在 info 端点中显示环境变量
+      enabled: true
+
 spring:
   profiles:
     # 当前运行环境：dev(开发) / test(测试) / prod(生产)
@@ -268,29 +307,6 @@ security:
     secret-key: mySecretKeyForJWTGenerationAndValidation
     # Token 过期时间（毫秒）
     expire-time-in-ms: 86400000
-
-# =====================================================
-# Actuator 监控端点配置
-# =====================================================
-management:
-  endpoints:
-    web:
-      exposure:
-        # 暴露的端点列表
-        # "*": 暴露所有端点（开发环境方便调试）
-        # ⚠️ 生产环境建议只暴露：health,info,gateway
-        include: "*"
-  endpoint:
-    health:
-      # 健康检查详情显示级别
-      show-details: always  # 显示详细信息
-    info:
-      # 是否启用 info 端点
-      enabled: true  # 显示应用信息
-  info:
-    env:
-      # 是否在 info 端点中显示环境变量
-      enabled: true
 
 # =====================================================
 # 日志级别配置

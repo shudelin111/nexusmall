@@ -20,6 +20,42 @@ nexusmall:
     path: D:/IdeaProjects/nexusmall/logs
 
 # ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+# 业界标准配置：暴露 Prometheus 监控端点
+management:
+  endpoints:
+    web:
+      # 暴露所有端点（生产环境建议只暴露 health,info,prometheus）
+      exposure:
+        include: "*"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 显示健康检查详情
+      show-details: always
+    info:
+      # 启用 info 端点
+      enabled: true
+    prometheus:
+      # 启用 Prometheus 端点（必需）
+      enabled: true
+  # 指标监控配置
+  metrics:
+    # 启用指标收集
+    enabled: true
+    # 标签配置（用于区分不同微服务）
+    tags:
+      # 应用名称标签（Prometheus 中通过此标签区分服务）
+      application: ${spring.application.name}
+    # 导出配置
+    export:
+      # Prometheus 导出配置
+      prometheus:
+        # 启用 Prometheus 导出（必需）
+        enabled: true
+
+# ===============================
 # 基础 Spring 配置
 # ===============================
 spring:
@@ -203,6 +239,62 @@ spring:
         file-extension: yaml
 
 # ===============================
+# MinIO 对象存储配置
+# ===============================
+minio:
+  # MinIO 服务访问地址
+  # 💡 格式：http://host:port
+  # 💡 开发环境默认值：http://localhost:9000
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  
+  # MinIO 访问凭证
+  # 💡 AccessKey（类似用户名）
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  # 💡 SecretKey（类似密码）
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+  
+  # 默认存储桶名称
+  bucket-name: ${MINIO_BUCKET:nexusmall}
+  
+  # 是否自动创建存储桶
+  # 💡 true: 开发环境方便调试
+  # 💡 false: 生产环境提高安全性
+  # ⚠️ 注意：如果 MinIO 未部署，请设置为 false
+  auto-create-bucket: false
+  
+  # 文件上传最大大小（字节）
+  # 💡 默认：104857600 (100MB)
+  max-file-size: 104857600
+  
+  # 允许上传的文件后缀名列表
+  # 💡 用于安全校验，防止上传危险文件
+  allowed-extensions:
+    - .jpg
+    - .jpeg
+    - .png
+    - .gif
+    - .bmp
+    - .webp
+    - .svg
+    - .pdf
+    - .doc
+    - .docx
+    - .xls
+    - .xlsx
+    - .ppt
+    - .pptx
+    - .txt
+    - .md
+    - .zip
+    - .rar
+    - .7z
+    - .mp3
+    - .wav
+    - .mp4
+    - .avi
+    - .mov
+
+# ===============================
 # 服务器监听端口
 # ===============================
 server:
@@ -287,11 +379,28 @@ third-party:
   storage:
     # 是否启用对象存储能力
     # 💡 false 时不会装配存储客户端
-    enabled: true
+    # ⚠️ 如果 MinIO 未部署，请设置为 false
+    enabled: false
     
     # 存储服务商
-    # 💡 可选值：qiniu（七牛云）/ aliyun-oss（阿里云 OSS）/ tencent-cos（腾讯云 COS）
-    provider: aliyun-oss
+    # 💡 可选值：qiniu（七牛云）/ aliyun-oss（阿里云 OSS）/ tencent-cos（腾讯云 COS）/ minio（MinIO）
+    provider: minio
+    
+    # MinIO 对象存储参数（provider=minio 时使用）
+    minio:
+      # MinIO 服务访问地址
+      # 💡 格式：http://host:port
+      # 💡 开发环境默认值：http://localhost:9000
+      endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+      
+      # MinIO 访问凭证
+      # 💡 AccessKey（类似用户名）
+      access-key: ${MINIO_ACCESS_KEY:minioadmin}
+      # 💡 SecretKey（类似密码）
+      secret-key: ${MINIO_SECRET_KEY:minioadmin}
+      
+      # 默认 Bucket 名称
+      bucket-name: ${MINIO_BUCKET:nexusmall}
     
     # 阿里云 OSS 参数（provider=aliyun-oss 时使用）
     aliyun-oss:
@@ -307,34 +416,6 @@ third-party:
       # Bucket 名称（存储空间名称）
       # 💡 全局唯一，类似域名命名规则
       bucket-name: ${ALIYUN_OSS_BUCKET:}
-
-# ===============================
-# 运维与监控
-# ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        # 暴露的端点列表
-        # 💡 开发环境："*" 暴露所有端点（方便调试）
-        # 💡 生产环境建议：health,info,prometheus
-        #   - health: 健康检查
-        #   - info: 应用信息
-        #   - prometheus: Prometheus 监控指标
-        include: "*"
-  
-  endpoint:
-    health:
-      # 健康检查详情显示级别
-      show-details: always  # 显示详细信息
-    info:
-      # 是否启用 info 端点
-      enabled: true
-  
-  info:
-    env:
-      # 是否在 info 端点中显示环境变量
-      enabled: true
 
 # ===============================
 # 日志级别配置

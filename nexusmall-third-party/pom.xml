@@ -107,11 +107,11 @@
 			<version>8.5.7</version>
 		</dependency>
 
-		<!-- SpringDoc OpenAPI (Swagger) -->
+		<!-- SpringDoc OpenAPI (Swagger) - Java 8 兼容版本 -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>2.1.0</version>
+			<artifactId>springdoc-openapi-ui</artifactId>
+			<version>1.7.0</version>
 		</dependency>
 
 		<!-- 阿里云短信 -->
@@ -153,6 +153,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
 			<!-- 版本由父工程 dependencyManagement 统一管理 -->
+		</dependency>
+
+		<!-- Micrometer Prometheus 注册器（用于暴露 Prometheus 监控指标） -->
+		<!-- 业界标准：将 Spring Boot Actuator 指标导出到 Prometheus -->
+		<dependency>
+			<groupId>io.micrometer</groupId>
+			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 
 		<!-- Lombok -->

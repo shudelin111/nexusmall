@@ -120,6 +120,13 @@
             <artifactId>sentinel-datasource-nacos</artifactId>
         </dependency>
 
+        <!-- Micrometer Prometheus 注册器（用于暴露 Prometheus 监控指标） -->
+        <!-- 业界标准：将 Spring Boot Actuator 指标导出到 Prometheus -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
+
         <!-- Spring Cloud Sleuth 链路追踪 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
