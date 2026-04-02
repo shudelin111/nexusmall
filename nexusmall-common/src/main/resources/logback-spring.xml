@@ -237,9 +237,10 @@
         <producerConfig>batch.size=16384</producerConfig>
         <producerConfig>linger.ms=100</producerConfig>
         <producerConfig>buffer.memory=33554432</producerConfig>
-        <!-- 序列化配置 -->
+        <!-- 序列化配置：使用 ByteArraySerializer 匹配 Encoder 的输出 -->
+        <!-- 📚 原因：PatternLayoutEncoder 返回 byte[]，需要使用对应的 Serializer -->
         <producerConfig>key.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
-        <producerConfig>value.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
+        <producerConfig>value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
         <!-- 安全协议：PLAINTEXT（明文传输） -->
         <producerConfig>security.protocol=PLAINTEXT</producerConfig>
         <!-- 连接超时配置 -->
