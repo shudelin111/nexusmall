@@ -214,7 +214,7 @@
         <topic>app-logs</topic>
         
         <!-- 生产者配置 -->
-        <producerConfig>bootstrap.servers=10.10.1.40:32477</producerConfig>
+        <producerConfig>bootstrap.servers=10.10.1.40:31000</producerConfig>
         <producerConfig>acks=1</producerConfig>
         <producerConfig>retries=3</producerConfig>
         <producerConfig>batch.size=16384</producerConfig>
@@ -231,11 +231,6 @@
             <pattern>${LOG_PATTERN}</pattern>
             <charset>UTF-8</charset>
         </encoder>
-        
-        <!-- 只发送 WARN 和 ERROR 级别的日志到 Kafka（节省资源） -->
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level>
-        </filter>
     </appender>
 
     <!-- ===============================
@@ -284,7 +279,7 @@
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
             <!-- 开发环境暂不发送到 Kafka，避免干扰调试 -->
-            <!-- <appender-ref ref="kafka"/> -->
+            <appender-ref ref="kafka"/>
         </root>
     </springProfile>
 

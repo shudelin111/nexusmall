@@ -157,7 +157,7 @@ spring:
   # Kafka 配置
   # ------------------------------
   kafka:
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:10.10.1.1:9092}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:10.10.1.1:31000}
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.StringSerializer

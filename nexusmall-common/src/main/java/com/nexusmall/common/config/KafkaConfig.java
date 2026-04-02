@@ -32,7 +32,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:10.10.1.1:9092}")
+    @Value("${spring.kafka.bootstrap-servers:10.10.1.1:31000}")
     private String bootstrapServers;
 
     @Value("${spring.kafka.consumer.group-id:log-consumer-group}")

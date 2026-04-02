@@ -33,3 +33,30 @@ git status
 
 
 mall-kafka-kafka-bootstrap.kafka.svc:9092
+
+
+1. 经典架构：ELK (Logstash 模式)
+这是最老牌、功能最全的方案。
+
+流程：Java 微服务 -> Kafka -> Logstash -> Elasticsearch -> Kibana
+
+Logstash 的角色：它会订阅 Kafka 的 Topic，把杂乱的日志解析成结构化的 JSON（比如提取出 userId、orderId），然后塞进 ES。
+
+缺点：Logstash 是个“内存大户”，对你这台 4GB 内存 的虚拟机压力极大。
+
+
+
+2. 轻量化架构：Filebeat 模式
+如果你担心内存不够，这是首选。
+
+流程：Java 微服务 -> Kafka -> Filebeat -> Elasticsearch
+
+Filebeat 的角色：它是轻量级的 Go 语言写的，占用资源极少，专门负责把 Kafka 里的消息原封不动地搬到 ES。、
+
+
+3. Java 开发者最爱：Kafka Connect
+利用 Kafka 原生的连接器。
+
+流程：Kafka -> Elasticsearch Sink Connector -> ES
+
+优势：不需要写代码，也不需要额外装 Logstash，直接在 Kafka 层面通过配置就能把数据同步到 ES。
