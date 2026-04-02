@@ -207,30 +207,78 @@
         </rollingPolicy>
     </appender>
 
-    <!-- Kafka 日志收集 Appender -->
+    <!-- ===============================
+         Kafka 日志收集 Appender
+         =============================== -->
     <!-- 💡 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
+    <!-- 📚 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
-        <!-- Kafka Broker 地址 -->
+        <!-- Kafka Topic -->
         <topic>app-logs</topic>
         
-        <!-- 生产者配置 -->
+        <!-- 分区策略：不使用 key，随机分配到分区 -->
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
+        
+        <!-- 投递策略：异步投递，不阻塞业务线程 -->
+        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+        
+        <!-- Kafka Producer 配置（最标准配置） -->
+        <!-- 📚 官方文档：https://kafka.apache.org/documentation/#producerconfigs -->
+        <!-- 必需的参数：bootstrap.servers -->
         <producerConfig>bootstrap.servers=10.10.1.40:31000</producerConfig>
+        <!-- DNS 查询配置：使用所有 DNS IP 地址 -->
+        <producerConfig>client.dns.lookup=use_all_dns_ips</producerConfig>
+        <!-- ACK 配置：1 表示 leader 确认即可 -->
         <producerConfig>acks=1</producerConfig>
-        <producerConfig>retries=3</producerConfig>
+        <!-- 重试配置 -->
+        <producerConfig>retries=2147483647</producerConfig>
+        <producerConfig>retry.backoff.ms=100</producerConfig>
+        <!-- 批量配置 -->
         <producerConfig>batch.size=16384</producerConfig>
         <producerConfig>linger.ms=100</producerConfig>
         <producerConfig>buffer.memory=33554432</producerConfig>
+        <!-- 序列化配置 -->
         <producerConfig>key.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
         <producerConfig>value.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
-        
-        <!-- 使用异步发送，不阻塞业务线程 -->
-        <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy"/>
+        <!-- 安全协议：PLAINTEXT（明文传输） -->
+        <producerConfig>security.protocol=PLAINTEXT</producerConfig>
+        <!-- 连接超时配置 -->
+        <producerConfig>request.timeout.ms=30000</producerConfig>
+        <producerConfig>delivery.timeout.ms=120000</producerConfig>
+        <producerConfig>max.block.ms=60000</producerConfig>
+        <!-- 元数据获取配置 -->
+        <producerConfig>metadata.max.age.ms=300000</producerConfig>
+        <producerConfig>connections.max.idle.ms=540000</producerConfig>
+        <!-- 重连配置 -->
+        <producerConfig>reconnect.backoff.ms=50</producerConfig>
+        <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
         
         <!-- 编码器：定义发送到 Kafka 的日志格式 -->
-        <encoder>
-            <pattern>${LOG_PATTERN}</pattern>
+        <!-- 📚 logback-kafka-appender 标准配置 -->
+        <!-- 💡 使用 PatternLayoutEncoder 并明确指定 charset -->
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
             <charset>UTF-8</charset>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId},%X{spanId}] %-5level %logger{36} - %msg%n</pattern>
         </encoder>
+        
+        <!-- Kafka 不可用时的降级策略：输出到控制台 -->
+        <appender-ref ref="console"/>
+    </appender>
+    
+    <!-- 使用 AsyncAppender 包装 KafkaAppender，避免阻塞主程序 -->
+    <!-- 📚 官方建议：https://github.com/danielwegener/logback-kafka-appender#note-on-broker-outages -->
+    <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 队列大小：512 条日志（应对启动阶段峰值） -->
+        <queueSize>512</queueSize>
+        <!-- 丢弃阈值：20% = 当队列剩余空间低于 20% 时开始丢弃 TRACE/DEBUG 日志 -->
+        <!-- 📚 Logback 官方建议：保留 INFO 及以上级别的重要日志 -->
+        <discardingThreshold>20</discardingThreshold>
+        <!-- 是否包含调用者信息（false 提升性能） -->
+        <includeCallerData>false</includeCallerData>
+        <!-- 永不阻塞（队列满时配合 discardingThreshold 策略） -->
+        <neverBlock>true</neverBlock>
+        <!-- 引用实际的 Kafka Appender -->
+        <appender-ref ref="kafka"/>
     </appender>
 
     <!-- ===============================
@@ -278,8 +326,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <!-- 开发环境暂不发送到 Kafka，避免干扰调试 -->
-            <appender-ref ref="kafka"/>
+            <appender-ref ref="async_kafka"/>       <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 
@@ -299,7 +346,7 @@
             <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <appender-ref ref="kafka"/>              <!-- 输出到 Kafka（集中收集） -->
+            <appender-ref ref="async_kafka"/>        <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 </configuration>
