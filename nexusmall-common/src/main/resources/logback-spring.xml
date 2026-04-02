@@ -216,8 +216,15 @@
         <!-- Kafka Topic -->
         <topic>app-logs</topic>
         
-        <!-- 分区策略：不使用 key，随机分配到分区 -->
-        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.NoKeyKeyingStrategy" />
+        <!-- 分区策略：使用应用名作为 key，实现按服务分区 -->
+        <!-- 📚 可选策略：
+             - NoKeyKeyingStrategy: 不使用 key，随机分配到分区（默认）
+             - TopicNameKeyingStrategy: 使用 topic 名称作为 key
+             - HostNameKeyingStrategy: 使用主机名作为 key
+             - 自定义 KeyingStrategy: 实现 com.github.danielwegener.logback.kafka.keying.KeyingStrategy 接口
+        -->
+        <!-- 💡 使用 HostNameKeyingStrategy 可以按服务器分区，方便排查问题 -->
+        <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
         
         <!-- 投递策略：异步投递，不阻塞业务线程 -->
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
@@ -239,7 +246,8 @@
         <producerConfig>buffer.memory=33554432</producerConfig>
         <!-- 序列化配置：使用 ByteArraySerializer 匹配 Encoder 的输出 -->
         <!-- 📚 原因：PatternLayoutEncoder 返回 byte[]，需要使用对应的 Serializer -->
-        <producerConfig>key.serializer=org.apache.kafka.common.serialization.StringSerializer</producerConfig>
+        <!-- 💡 key 和 value 都使用 ByteArraySerializer，因为 KafkaAppender 内部都会转为 byte[] -->
+        <producerConfig>key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
         <producerConfig>value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
         <!-- 安全协议：PLAINTEXT（明文传输） -->
         <producerConfig>security.protocol=PLAINTEXT</producerConfig>
