@@ -286,7 +286,8 @@ jobs:
       - name: Update image tag in deployment.yaml
         run: |
           echo "更新 Product 服务镜像标签..."
-          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:latest"
+          # 使用 sha 标签而非 latest，确保版本可追溯
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:sha-${{ github.sha }}"
           echo "新镜像：${NEW_IMAGE}"
           
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/product-service/deployment.yaml
@@ -491,7 +492,8 @@ jobs:
       - name: Update image tag in deployment.yaml
         run: |
           echo "更新 Order 服务镜像标签..."
-          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:latest"
+          # 使用 sha 标签而非 latest，确保版本可追溯
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}"
           echo "新镜像：${NEW_IMAGE}"
           
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
