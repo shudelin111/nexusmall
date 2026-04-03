@@ -1,7 +1,7 @@
 # =====================================================
-# Kubernetes Service 配置 - NexusMall Order Service
+# Kubernetes Service 配置 - NexusMall Product Service
 # =====================================================
-# 用途：定义 Order 服务的网络访问策略
+# 用途：定义 Product 服务的网络访问策略
 # 功能：
 #   1. 提供服务发现（DNS 名称）
 #   2. 负载均衡（多个 Pod 实例）
@@ -12,11 +12,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: nexusmall-order
+  name: nexusmall-product
   namespace: nexusmall  # 与 Deployment 在同一命名空间
   labels:
-    app: nexusmall-order
-    app.kubernetes.io/name: nexusmall-order
+    app: nexusmall-product
+    app.kubernetes.io/name: nexusmall-product
     app.kubernetes.io/part-of: nexusmall
 spec:
   # ========================================
@@ -34,7 +34,7 @@ spec:
   # 作用：选择具有这些 labels 的 Pod
   # 必须与 Deployment 中的 labels 完全一致
   selector:
-    app: nexusmall-order
+    app: nexusmall-product
   
   # ========================================
   # 端口配置
@@ -42,8 +42,8 @@ spec:
   ports:
     - name: http              # 端口名称（用于多端口服务）
       protocol: TCP           # 协议：TCP 或 UDP
-      port: 11000             # Service 端口（集群内部访问）
-      targetPort: 11000       # 容器端口（Pod 中的端口）
+      port: 12000             # Service 端口（集群内部访问）
+      targetPort: 12000       # 容器端口（Pod 中的端口）
       # nodePort: 30000       # 如果是 NodePort 类型，需指定此字段（范围：30000-32767）
   
   # ========================================
@@ -52,24 +52,55 @@ spec:
   # None: 不启用会话保持（默认，负载均衡）
   # ClientIP: 基于客户端 IP 的会话保持（同一客户端总是访问同一 Pod）
   sessionAffinity: None
+  
+  # ========================================
+  # 健康检查配置（可选，增强可用性）
+  # ========================================
+  # 如果 Pod 未通过健康检查，会自动从 Service 中移除
+  # 注意：这不会重启 Pod，只是暂时不转发流量
+  
+  # ========================================
+  # 其他配置（高级用法）
+  # ========================================
+  # clusterIP: 10.96.100.100  # 手动指定 ClusterIP（通常由 K8s 自动分配）
+  # externalIPs: []           # 外部 IP（可通过这些 IP 访问）
+  # loadBalancerIP: ""        # LoadBalancer 类型的 IP
+  # loadBalancerSourceRanges: []  # 限制访问来源 IP 范围
 
 # =====================================================
 # 服务发现说明
 # =====================================================
-# 在 K8s 集群内部，其他服务可以通过以下方式访问 Order 服务：
+# 在 K8s 集群内部，其他服务可以通过以下方式访问 Product 服务：
 #
 # 1. 短域名（推荐）：
-#    http://nexusmall-order:11000
+#    http://nexusmall-product:12000
 #
 # 2. 完整域名：
-#    http://nexusmall-order.nexusmall.svc.cluster.local:11000
+#    http://nexusmall-product.nexusmall.svc.cluster.local:12000
 #
 # 3. 在同一个命名空间中：
-#    http://nexusmall-order:11000
+#    http://nexusmall-product:12000
 #
-# 示例：Gateway 调用 Order 服务
+# 示例：Gateway 调用 Product 服务
 #    Gateway 配置：
 #      upstream:
-#        service: nexusmall-order
-#        port: 11000
+#        service: nexusmall-product
+#        port: 12000
+# =====================================================
+
+# =====================================================
+# 端口选择建议
+# =====================================================
+# 方案 1：统一端口（推荐）
+#   port: 12000
+#   targetPort: 12000
+#   优点：配置简单，易于理解和调试
+#
+# 方案 2：标准 HTTP 端口
+#   port: 80
+#   targetPort: 12000
+#   优点：符合 HTTP 标准，便于记忆
+#   缺点：需要额外记忆映射关系
+#
+# 本配置采用方案 1，保持与应用端口一致
 # =====================================================
