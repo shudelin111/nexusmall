@@ -22,14 +22,14 @@ name: NexusMall CI/CD
 # ========================================
 on:
   push:
-    branches: [ master, develop ]
+    branches: [ master, dev ]  # master 用于生产，dev 用于开发
     tags: [ 'v*' ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
   pull_request:
-    branches: [ master, develop ]
+    branches: [ master, dev ]  # master 用于生产，dev 用于开发
   workflow_dispatch:  # 允许手动触发
 
 # ========================================
@@ -216,9 +216,11 @@ jobs:
         with:
           images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=semver,pattern={{version}}
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
             type=sha,prefix=sha-,format=long
       
       - name: Build and Push Docker Image
@@ -422,9 +424,11 @@ jobs:
         with:
           images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
-            type=semver,pattern={{version}}
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
             type=sha,prefix=sha-,format=long
       
       - name: Build and Push Docker Image
