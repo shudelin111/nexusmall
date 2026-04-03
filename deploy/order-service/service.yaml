@@ -7,6 +7,6 @@ spec:
     app: nexusmall-order # 必须和上面 Deployment 里的 labels 一致
   ports:
     - protocol: TCP
-      port: 11000       # 集群内部访问的端口
+      port: 80       # 集群内部访问的端口
       targetPort: 11000 # 对应容器里的 Spring Boot 端口
   type: ClusterIP # 内部微服务调用选这个；如果是网关需要外网访问，可以改成 NodePort
