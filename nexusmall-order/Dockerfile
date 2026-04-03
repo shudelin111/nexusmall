@@ -7,6 +7,7 @@
 # 3. 非 root 用户运行 - 安全合规
 # 4. JVM 容器感知参数 - 防止 OOM
 # 5. 优雅关闭支持 - SIGTERM 信号处理
+# 6. 时区设置 - Asia/Shanghai
 # =====================================================
 
 # ===============================
@@ -54,7 +55,7 @@ RUN mvn clean package -f nexusmall-order/pom.xml \
 # ===============================
 # 阶段 2: 运行阶段 (Runtime Stage)
 # ===============================
-# 使用 Eclipse Temurin 11 JRE 镜像（OpenJDK 8 已弃用，Temurin 是业界标准替代方案）
+# 使用 Eclipse Temurin 8 JRE 镜像（与项目 JDK 8 保持一致）
 # 参考：https://hub.docker.com/_/eclipse-temurin
 FROM eclipse-temurin:8-jre
 
@@ -65,8 +66,8 @@ LABEL org.opencontainers.image.title="NexusMall Order Service"
 LABEL org.opencontainers.image.description="NexusMall 订单服务 - 微服务架构"
 LABEL org.opencontainers.image.vendor="NexusMall Team"
 LABEL org.opencontainers.image.version="0.0.1-SNAPSHOT"
-LABEL org.opencontainers.image.source="https://github.com/nexusmall/nexusmall"
-LABEL maintainer="NexusMall Team <support@nexusmall.com>"
+LABEL org.opencontainers.image.source="https://github.com/shudelin111/nexusmall"
+LABEL maintainer="NexusMall Team"
 
 # ========================================
 # 环境变量配置 (生产环境可调优)
@@ -77,6 +78,7 @@ ENV TZ=Asia/Shanghai
 # JVM 内存配置 (根据容器限制自动调整)
 # MaxRAMPercentage: JVM 最大使用容器内存的百分比 (默认 25%)
 # InitialRAMPercentage: JVM 初始使用容器内存的百分比 (默认 1%)
+# 注意：K8s 中已设置资源限制，JVM 会自动适配
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
                -XX:InitialRAMPercentage=50.0 \
                -XX:+UseContainerSupport \
@@ -92,6 +94,7 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
                -XX:+UnlockExperimentalVMOptions"
 
 # Spring Boot 配置
+# 注意：实际使用哪个 profile 由 K8s 环境变量或 Nacos 配置决定
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV SERVER_PORT=11000
 ENV MANAGEMENT_SERVER_PORT=11001
