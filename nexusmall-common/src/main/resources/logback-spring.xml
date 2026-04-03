@@ -208,11 +208,10 @@
     </appender>
 
     <!-- ===============================
-         Kafka 日志收集 Appender（已暂时禁用）
+         Kafka 日志收集 Appender
          =============================== -->
     <!-- 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
     <!-- 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
-    <!-- 
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <topic>app-logs</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
@@ -268,10 +267,9 @@
         </encoder>
         <appender-ref ref="console"/>
     </appender>
-    -->
 
     <!-- 使用 AsyncAppender 包装 KafkaAppender，避免阻塞主程序 -->
-    <!--
+    <!-- 参考官方建议：https://github.com/danielwegener/logback-kafka-appender#note-on-broker-outages -->
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
         <discardingThreshold>20</discardingThreshold>
@@ -279,7 +277,6 @@
         <neverBlock>true</neverBlock>
         <appender-ref ref="kafka"/>
     </appender>
-    -->
 
     <!-- ===============================
          分环境日志配置（Spring Profile）
@@ -326,7 +323,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <!-- Deleted: <appender-ref ref="async_kafka"/> -->
+            <appender-ref ref="async_kafka"/>       <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 
@@ -342,11 +339,11 @@
              5. 所有文件日志均使用异步 Appender 提升性能
         -->
         <root level="INFO">
-            <!--            <appender-ref ref="async_file_info"/>    &lt;!&ndash; 输出 INFO 日志（异步） &ndash;&gt;-->
+            <!-- <appender-ref ref="async_file_info"/> 输出 INFO 日志（异步） -->
             <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <!-- Deleted: <appender-ref ref="async_kafka"/> -->
+            <appender-ref ref="async_kafka"/>        <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 </configuration>
