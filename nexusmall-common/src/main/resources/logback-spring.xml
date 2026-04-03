@@ -262,12 +262,46 @@
         <producerConfig>reconnect.backoff.ms=50</producerConfig>
         <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
         
-        <!-- 编码器：定义发送到 Kafka 的日志格式 -->
-        <!-- 📚 logback-kafka-appender 标准配置 -->
-        <!-- 💡 使用 PatternLayoutEncoder 并明确指定 charset -->
-        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <charset>UTF-8</charset>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId},%X{spanId}] %-5level %logger{36} - %msg%n</pattern>
+        <!-- 编码器：定义发送到 Kafka 的日志格式（JSON 格式） -->
+        <!-- 📚 使用 Logstash Logback Encoder 输出结构化 JSON 日志 -->
+        <!-- 💡 官方文档：https://github.com/logfellow/logstash-logback-encoder -->
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <!-- 时间戳 -->
+                <timestamp>
+                    <timeZone>Asia/Shanghai</timeZone>
+                    <fieldName>timestamp</fieldName>
+                </timestamp>
+                
+                <!-- 日志级别和其他字段 -->
+                <pattern>
+                    <pattern>
+                        {
+                            "level": "%level",
+                            "service": "${APP_NAME:-unknown}",
+                            "traceId": "%X{traceId:-}",
+                            "spanId": "%X{spanId:-}",
+                            "thread": "%thread",
+                            "logger": "%logger{36}",
+                            "host": "${HOSTNAME:-unknown}"
+                        }
+                    </pattern>
+                </pattern>
+                
+                <!-- 日志消息 -->
+                <message />
+                
+                <!-- 堆栈信息（仅 ERROR 日志） -->
+                <stackTrace>
+                    <fieldName>stackTrace</fieldName>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <maxLength>2048</maxLength>
+                        <shortenedClassNameLength>20</shortenedClassNameLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
         </encoder>
         
         <!-- Kafka 不可用时的降级策略：输出到控制台 -->

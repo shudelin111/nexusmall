@@ -92,6 +92,15 @@
             <artifactId>logback-kafka-appender</artifactId>
         </dependency>
 
+        <!-- Logstash Logback Encoder（用于 JSON 格式日志） -->
+        <!-- 📚 版本兼容性：https://github.com/logfellow/logstash-logback-encoder#version-compatibility -->
+        <!-- 💡 Logback 1.2.x (Spring Boot 2.7.x) 需要使用 7.0.1 版本 -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.0.1</version>
+        </dependency>
+
         <!-- Seata 分布式事务 -->
         <dependency>
             <groupId>io.seata</groupId>
