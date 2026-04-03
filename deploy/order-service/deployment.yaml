@@ -29,7 +29,7 @@ spec:
         - name: nexusmall-order
           # 镜像标签由 GitHub Actions 自动更新
           # master 分支：latest + sha-{commit-hash}
-          image: docker.io/shudlsys/nexusmall-order:sha-c03b82760dc071620c690ef0f160137f595f2874
+          image: docker.io/shudlsys/nexusmall-order:latest
           ports:
             - containerPort: 11000
           resources:
