@@ -52,6 +52,12 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
+      # 步骤 2.5: 先安装 Common 模块到本地仓库（多模块项目必需）
+      - name: Install Common Module
+        run: |
+          echo "====== 安装 Common 模块 ======"
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
       # 步骤 3: 编译项目（跳过测试，因为测试在下一步单独运行）
       - name: Compile with Maven
         run: |
