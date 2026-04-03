@@ -21,24 +21,21 @@ WORKDIR /build
 # 复制父工程 pom.xml (利用 Docker 缓存层)
 COPY ../pom.xml .
 
+# 复制公共模块 pom.xml 和源码
+COPY ../nexusmall-common/pom.xml nexusmall-common/
+COPY ../nexusmall-common/src nexusmall-common/src
+
+# 先安装 common 模块到本地仓库（关键步骤！）
+# 这样 order 模块才能找到 common:0.0.1-SNAPSHOT
+RUN mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+
 # 复制 order 模块 pom.xml
 COPY ../nexusmall-order/pom.xml nexusmall-order/pom.xml
 
-# 复制公共模块 pom.xml (为安装 common 模块做准备)
-COPY ../nexusmall-common/pom.xml nexusmall-common/
-
-# 预下载依赖 (先安装 common 模块，再下载依赖，确保依赖解析成功)
-# 顺序：安装父 POM → 安装 common → 下载 order 依赖
+# 现在下载 order 的依赖（common 已安装，可以成功解析）
 RUN mvn dependency:go-offline -B \
-    -f nexusmall-common/pom.xml \
-    -DskipTests && \
-    mvn dependency:go-offline -B \
     -f nexusmall-order/pom.xml \
     -DskipTests
-
-# 复制公共模块源码并安装到本地仓库
-COPY ../nexusmall-common/src nexusmall-common/src
-RUN mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
 
 # 复制 order 模块源码
 COPY ../nexusmall-order/src nexusmall-order/src
