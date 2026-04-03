@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexusmall-order  # 建议与模块名一致
+  # 这里不写 namespace，由 ArgoCD 界面统一控制
+spec:
+  replicas: 1 # 个人练习建议 1 个，公司项目一般 2-3 个实现高可用
+  selector:
+    matchLabels:
+      app: nexusmall-order
+  template:
+    metadata:
+      labels:
+        app: nexusmall-order
+    spec:
+      containers:
+        - name: nexusmall-order
+          # 注意：这里的镜像地址一定要和 Docker Hub 上的保持一致
+          # 后面的标签会被 GitHub Actions 自动更新
+          image: shudlsys/nexusmall:latest
+          ports:
+            - containerPort: 11000 # 你的 Spring Boot 项目运行端口
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "200m"
+            limits:
+              memory: "256Mi" # 限制最大内存，防止 Java 内存泄漏撑爆服务器
+              cpu: "500m"
