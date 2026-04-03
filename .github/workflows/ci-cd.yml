@@ -76,17 +76,26 @@ jobs:
             order: 
               - 'nexusmall-order/**'
               - 'nexusmall-common/**'  # common 变更也会影响 order
+              - 'pom.xml'  # 根 pom.xml 变更影响所有模块
+              - 'nexusmall-common/pom.xml'  # 父 POM 变更也影响所有模块
             product:
               - 'nexusmall-product/**'
               - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
             auth:
               - 'nexusmall-auth/**'
               - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
             gateway:
               - 'nexusmall-gateway/**'
               - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
             common:
               - 'nexusmall-common/**'
+              - 'pom.xml'  # 根 pom.xml 变更影响 common 模块
 
   # ========== 阶段 1: 编译与测试 - Order 模块 ==========
   build-order:
