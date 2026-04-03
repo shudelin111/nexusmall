@@ -79,6 +79,7 @@ ENV TZ=Asia/Shanghai
 # MaxRAMPercentage: JVM 最大使用容器内存的百分比 (默认 25%)
 # InitialRAMPercentage: JVM 初始使用容器内存的百分比 (默认 1%)
 # 注意：K8s 中已设置资源限制，JVM 会自动适配
+# GC 日志配置：JDK 8 使用 -XX:+PrintGC，JDK 9+ 使用 -Xlog:gc*
 ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
                -XX:InitialRAMPercentage=50.0 \
                -XX:+UseContainerSupport \
@@ -87,7 +88,14 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
                -XX:+HeapDumpOnOutOfMemoryError \
                -XX:HeapDumpPath=/tmp/logs/heap_dump.hprof \
                -XX:ErrorFile=/tmp/logs/crash_pid_%p.log \
-               -Xlog:gc*:file=/tmp/logs/gc.log:time,uptime:filecount=5,filesize=10M \
+               -XX:+PrintGC \
+               -XX:+PrintGCDetails \
+               -XX:+PrintGCDateStamps \
+               -XX:+PrintGCTimeStamps \
+               -Xloggc:/tmp/logs/gc.log \
+               -XX:+UseGCLogFileRotation \
+               -XX:NumberOfGCLogFiles=5 \
+               -XX:GCLogFileSize=10M \
                -Djava.security.egd=file:/dev/./urandom \
                -Duser.timezone=Asia/Shanghai \
                -Dfile.encoding=UTF-8 \
