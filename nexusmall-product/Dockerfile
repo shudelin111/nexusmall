@@ -10,9 +10,9 @@
 # =====================================================
 # 阶段 1: Builder 阶段（编译打包）
 # =====================================================
-# 使用 Eclipse Temurin 8 JDK 镜像（与项目 JDK 8 保持一致）
-# Temurin 是 Eclipse 基金会维护的开源 JDK，业界标准选择
-FROM eclipse-temurin:8-jdk AS builder
+# 使用 Maven 3.8 + OpenJDK 8 镜像（包含 Maven 工具）
+# 注意：必须使用 maven 镜像，eclipse-temurin 只包含 JDK 不包含 Maven
+FROM maven:3.8-openjdk-8 AS builder
 
 # 设置工作目录
 WORKDIR /app
