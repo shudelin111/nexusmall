@@ -32,6 +32,10 @@ spec:
           image: docker.io/shudlsys/nexusmall-order:latest
           ports:
             - containerPort: 11000
+          # Spring Profile 配置（指定运行环境）
+          env:
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"  # 可选值：dev, test, prod
           resources:
             requests:
               memory: "128Mi"
