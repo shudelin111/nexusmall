@@ -21,6 +21,7 @@ on:
     tags: [ 'v*' ]
   pull_request:
     branches: [ master, develop ]
+  workflow_dispatch:  # 允许手动触发
 
 # ========================================
 # 权限配置（修复 CodeQL 权限错误）
