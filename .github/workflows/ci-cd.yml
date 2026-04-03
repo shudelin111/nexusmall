@@ -27,7 +27,7 @@ on:
 # 权限配置（修复 CodeQL 权限错误）
 # ========================================
 permissions:
-  contents: read
+  contents: write  # 需要写入权限才能推送代码
   security-events: write
   actions: read
 
