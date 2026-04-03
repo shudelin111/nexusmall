@@ -104,6 +104,211 @@ jobs:
               - 'nexusmall-common/**'
               - 'pom.xml'  # 根 pom.xml 变更影响 common 模块
 
+  # ========== 阶段 1: 编译与测试 - Product 模块 ==========
+  build-product:
+    name: Build & Test - Product Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.product-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Product Module
+        run: |
+          echo "====== 编译 Product 模块 ======"
+          mvn clean compile -f nexusmall-product/pom.xml -B
+      
+      - name: Run Product Module Tests
+        run: |
+          echo "====== 单元测试阶段 ======"
+          if [ -d "nexusmall-product/src/test/java" ] && [ "$(find nexusmall-product/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            mvn test -f nexusmall-product/pom.xml -Dtest=*Test
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+          fi
+        continue-on-error: true
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-test-results
+          path: nexusmall-product/target/surefire-reports/
+        continue-on-error: true
+      
+      - name: Check Code Coverage
+        run: |
+          echo "生成覆盖率报告..."
+          mvn jacoco:report -f nexusmall-product/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+
+  # ========== 阶段 2: 代码质量检查 - Product 模块 ==========
+  quality-check-product:
+    name: Quality Check - Product Service
+    runs-on: ubuntu-latest
+    needs: [build-product]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-product/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-product/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-product/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Product 模块 ==========
+  build-docker-product:
+    name: Build Docker Image - Product Service
+    runs-on: ubuntu-latest
+    needs: [build-product]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.product-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            type=semver,pattern={{version}}
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-product/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Product 模块 ==========
+  security-scan-product:
+    name: Security Scan - Product Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-product]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-product-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-product-results.sarif'
+          category: 'trivy-product-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Product 模块 ==========
+  update-manifest-product:
+    name: Update K8s Manifest - Product Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-product]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Product 服务镜像标签..."
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:latest"
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/product-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/product-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          if ! git diff --quiet deploy/product-service/deployment.yaml; then
+            echo "检测到变更，提交..."
+            git add deploy/product-service/deployment.yaml
+            git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
+            git push origin master
+            echo "✅ Manifest 更新成功！"
+          else
+            echo "⚠️ 没有检测到变更，跳过提交"
+          fi
+
   # ========== 阶段 1: 编译与测试 - Order 模块 ==========
   build-order:
     name: Build & Test - Order Service
