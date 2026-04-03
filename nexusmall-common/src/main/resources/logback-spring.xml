@@ -210,8 +210,8 @@
     <!-- ===============================
          Kafka 日志收集 Appender（已暂时禁用）
          =============================== -->
-    <!-- 💡 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
-    <!-- 📚 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
+    <!-- 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
+    <!-- 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
     <!-- 
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <topic>app-logs</topic>
@@ -271,7 +271,6 @@
     -->
 
     <!-- 使用 AsyncAppender 包装 KafkaAppender，避免阻塞主程序 -->
-    <!-- 📚 官方建议：https://github.com/danielwegener/logback-kafka-appender#note-on-broker-outages -->
     <!--
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
