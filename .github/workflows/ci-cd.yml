@@ -52,13 +52,14 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      # 步骤 2.5: 先安装 Common 模块到本地仓库（多模块项目必需）
-      - name: Install Common Module
+      # 步骤 2.5: 安装父项目和所有模块到本地仓库（多模块项目标准做法）
+      - name: Install Parent POM and All Modules
         run: |
-          echo "====== 安装 Common 模块 ======"
-          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+          echo "====== 安装父项目和公共模块 ======"
+          # 从项目根目录执行 mvn install，会自动安装父 POM 和所有子模块
+          mvn clean install -DskipTests -B
       
-      # 步骤 3: 编译项目（跳过测试，因为测试在下一步单独运行）
+      # 步骤 3: 编译 Order 模块（现在所有依赖都已安装）
       - name: Compile with Maven
         run: |
           echo "====== 编译阶段 ======"
