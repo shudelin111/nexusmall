@@ -49,8 +49,9 @@ RUN mvn clean package -f nexusmall-order/pom.xml \
 # ===============================
 # 阶段 2: 运行阶段 (Runtime Stage)
 # ===============================
-# 使用 OpenJDK 8 JRE 精简镜像
-FROM openjdk:8-jre-slim
+# 使用 Eclipse Temurin 11 JRE 镜像（OpenJDK 8 已弃用，Temurin 是业界标准替代方案）
+# 参考：https://hub.docker.com/_/eclipse-temurin
+FROM eclipse-temurin:8-jre
 
 # ========================================
 # 元数据标注 (OCI Image Spec)
