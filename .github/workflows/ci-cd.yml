@@ -1,0 +1,282 @@
+# =====================================================
+# GitHub Actions CI/CD Pipeline - NexusMall Order Service
+# =====================================================
+# 工作流程:
+# 1. 代码提交/PR 触发
+# 2. 自动编译 + 单元测试
+# 3. 构建 Docker 镜像
+# 4. 推送到 Docker Hub
+# 5. 部署到 Kubernetes (可选)
+# =====================================================
+
+name: NexusMall Order CI/CD
+
+# ========================================
+# 触发条件
+# ========================================
+on:
+  push:
+    branches: [ main, develop ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, develop ]
+
+# ========================================
+# 环境变量
+# ========================================
+env:
+  APP_NAME: nexusmall-order
+  IMAGE_REGISTRY: docker.io
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+# ========================================
+# 工作任务
+# ========================================
+jobs:
+  # ========== 阶段 1: 编译与测试 ==========
+  build-and-test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 步骤 1: 检出代码
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 步骤 2: 设置 Java 环境
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      # 步骤 3: 编译项目
+      - name: Compile with Maven
+        run: |
+          echo "====== 编译阶段 ======"
+          mvn clean compile -f nexusmall-order/pom.xml -B
+      
+      # 步骤 4: 运行单元测试
+      - name: Run Unit Tests
+        run: |
+          echo "====== 单元测试阶段 ======"
+          mvn test -f nexusmall-order/pom.xml -Dtest=*Test
+      
+      # 步骤 5: 上传测试报告
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: nexusmall-order/target/surefire-reports/
+      
+      # 步骤 6: 代码覆盖率检查
+      - name: Check Code Coverage
+        run: |
+          mvn jacoco:report -f nexusmall-order/pom.xml
+          echo "覆盖率报告生成完成"
+
+  # ========== 阶段 2: 代码质量检查 ==========
+  quality-check:
+    name: Quality Check
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 ==========
+  build-docker:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    needs: [build-and-test]
+    if: github.event_name == 'push'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 设置 Docker Buildx (支持多平台构建)
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      # 登录 Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      # 生成镜像标签
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern={{version}}
+            type=sha,prefix=sha-
+      
+      # 构建并推送
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-order/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64,linux/arm64
+      
+      # 输出镜像信息
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 ==========
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 使用 Trivy 进行镜像漏洞扫描
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+          severity: 'CRITICAL,HIGH'
+      
+      # 上传扫描结果到 GitHub Security
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # ========== 阶段 5: 部署到开发环境 ==========
+  deploy-dev:
+    name: Deploy to Dev Environment
+    runs-on: ubuntu-latest
+    needs: [build-docker]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    environment: development
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      # 配置 kubectl
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+      
+      # 配置 Kubeconfig (从 GitHub Secrets 读取)
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+      
+      # 更新 Deployment 镜像
+      - name: Update Deployment
+        run: |
+          kubectl set image deployment/${{ env.APP_NAME }}-dev \
+            ${{ env.APP_NAME }}=${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }} \
+            -n nexusmall-dev
+      
+      # 等待部署完成
+      - name: Wait for rollout
+        run: |
+          kubectl rollout status deployment/${{ env.APP_NAME }}-dev -n nexusmall-dev --timeout=300s
+      
+      # 健康检查
+      - name: Health Check
+        run: |
+          kubectl wait --for=condition=available deployment/${{ env.APP_NAME }}-dev -n nexusmall-dev --timeout=300s
+
+  # ========== 阶段 6: 部署到生产环境 (手动触发) ==========
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build-docker, security-scan]
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    environment: production
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'v1.28.0'
+      
+      - name: Configure Kubeconfig
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBE_CONFIG_PROD }}" > ~/.kube/config
+      
+      # 蓝绿部署脚本
+      - name: Blue-Green Deployment
+        run: |
+          echo "开始蓝绿部署..."
+          
+          # 部署到蓝色环境
+          kubectl set image deployment/${{ env.APP_NAME }}-blue \
+            ${{ env.APP_NAME }}=${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ github.ref_name }} \
+            -n nexusmall-prod
+          
+          # 等待蓝色环境就绪
+          kubectl rollout status deployment/${{ env.APP_NAME }}-blue -n nexusmall-prod --timeout=600s
+          
+          # 健康检查
+          kubectl wait --for=condition=available deployment/${{ env.APP_NAME }}-blue -n nexusmall-prod --timeout=300s
+          
+          # 切换流量到蓝色环境
+          kubectl patch service ${{ env.APP_NAME }}-prod \
+            -p '{"spec":{"selector":{"version":"blue"}}}' \
+            -n nexusmall-prod
+          
+          # 清理绿色环境
+          kubectl delete deployment ${{ env.APP_NAME }}-green -n nexusmall-prod --ignore-not-found=true
+          
+          echo "✅ 生产环境部署完成！版本：${{ github.ref_name }}"
+      
+      # 发送部署通知
+      - name: Send Deployment Notification
+        if: always()
+        run: |
+          echo "发送部署通知到钉钉/企业微信..."
+          # 这里可以添加 Webhook 调用
