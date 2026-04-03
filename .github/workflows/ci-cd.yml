@@ -279,7 +279,7 @@ jobs:
       - name: Update image tag in deployment.yaml
         run: |
           echo "更新 Order 服务镜像标签..."
-          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}"
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:latest"
           echo "新镜像：${NEW_IMAGE}"
           
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
