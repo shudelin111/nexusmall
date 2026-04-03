@@ -38,10 +38,10 @@ spec:
               value: "dev"  # 可选值：dev, test, prod
           resources:
             requests:
-              memory: "128Mi"
+              memory: "256Mi"
               cpu: "200m"
             limits:
-              memory: "256Mi"
+              memory: "512Mi"
               cpu: "500m"
           # 健康检查
           livenessProbe:
