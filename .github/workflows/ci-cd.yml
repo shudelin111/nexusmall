@@ -28,7 +28,7 @@ on:
 env:
   APP_NAME: nexusmall-order
   IMAGE_REGISTRY: docker.io
-  DOCKER_USERNAME: shudlsys
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 # ========================================
