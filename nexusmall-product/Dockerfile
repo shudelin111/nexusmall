@@ -17,26 +17,28 @@ FROM maven:3.8-openjdk-8 AS builder
 # 设置工作目录
 WORKDIR /app
 
-# 复制 Maven 配置文件（用于依赖缓存）
-# 先复制 pom.xml 可以充分利用 Docker 缓存层
-COPY nexusmall-common/pom.xml ./nexusmall-common/
-COPY nexusmall-product/pom.xml ./nexusmall-product/
+# ========================================
+# 第 1 步：复制父 POM 并安装
+# ========================================
+# 所有子模块都依赖父 POM，必须先安装
 COPY pom.xml ./
+RUN mvn clean install -N -B
 
-# 复制公共模块源代码
+# ========================================
+# 第 2 步：复制并安装 common 模块
+# ========================================
+# common 模块是 product 的依赖，必须先安装到本地仓库
+COPY nexusmall-common/pom.xml ./nexusmall-common/
 COPY nexusmall-common/src ./nexusmall-common/src
+RUN mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
 
-# 复制 Product 模块源代码
+# ========================================
+# 第 3 步：复制 product 模块并打包
+# ========================================
+# 现在 common 已安装，可以成功解析依赖
+COPY nexusmall-product/pom.xml ./nexusmall-product/
 COPY nexusmall-product/src ./nexusmall-product/src
-
-# 执行 Maven 打包
-# -N: 跳过非子模块项目（只构建父 POM）
-# -f: 指定 pom.xml 文件
-# -DskipTests: 跳过测试（CI 流程中已测试过）
-# -B: 批处理模式（减少日志输出）
-RUN mvn clean package -N -B && \
-    mvn clean install -f nexusmall-common/pom.xml -DskipTests -B && \
-    mvn clean package -f nexusmall-product/pom.xml -DskipTests -B
+RUN mvn clean package -f nexusmall-product/pom.xml -DskipTests -B
 
 # =====================================================
 # 阶段 2: Runtime 阶段（运行环境）
