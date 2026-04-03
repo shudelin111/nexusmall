@@ -21,12 +21,16 @@ WORKDIR /build
 # 复制父工程 pom.xml (利用 Docker 缓存层)
 COPY ../pom.xml .
 
+# 关键：先安装父 POM 到本地仓库！
+# 所有子模块都依赖父 POM，所以必须先安装
+RUN mvn clean install -N -B
+#    ↑ -N 参数表示只在当前目录安装 POM，不递归编译子模块
+
 # 复制公共模块 pom.xml 和源码
 COPY ../nexusmall-common/pom.xml nexusmall-common/
 COPY ../nexusmall-common/src nexusmall-common/src
 
-# 先安装 common 模块到本地仓库（关键步骤！）
-# 这样 order 模块才能找到 common:0.0.1-SNAPSHOT
+# 现在安装 common 模块（父 POM 已安装，不会报错）
 RUN mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
 
 # 复制 order 模块 pom.xml
