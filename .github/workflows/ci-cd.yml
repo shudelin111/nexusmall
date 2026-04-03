@@ -1,24 +1,33 @@
 # =====================================================
-# GitHub Actions CI/CD Pipeline - NexusMall Order Service
+# GitHub Actions CI/CD Pipeline - NexusMall Multi-Module
 # =====================================================
 # GitOps 工作流程:
-# 1. 代码提交触发
+# 1. 基于文件变更智能触发（路径过滤）
 # 2. 自动编译 + 单元测试 + 代码质量检查
 # 3. 构建 Docker 镜像并推送到 Docker Hub
 # 4. Trivy 安全扫描
 # 5. 更新 Kubernetes Manifest
 # 6. ArgoCD 自动同步到 K8s 集群
+#
+# 业界标准实践：
+# - 路径过滤：只构建变更的模块
+# - 并行构建：多个模块同时构建
+# - 增量构建：只编译变更的代码
 # =====================================================
 
-name: NexusMall Order CI/CD
+name: NexusMall CI/CD
 
 # ========================================
-# 触发条件
+# 触发条件（支持路径过滤）
 # ========================================
 on:
   push:
     branches: [ master, develop ]
     tags: [ 'v*' ]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
   pull_request:
     branches: [ master, develop ]
   workflow_dispatch:  # 允许手动触发
@@ -35,26 +44,63 @@ permissions:
 # 环境变量
 # ========================================
 env:
-  APP_NAME: nexusmall-order
-  IMAGE_REGISTRY: docker.io
+  DEFAULT_REGISTRY: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 # ========================================
-# 工作任务
+# 工作矩阵配置（业界标准做法）
 # ========================================
+# 定义要构建的模块及其路径映射
 jobs:
-  # ========== 阶段 1: 编译与测试 ==========
-  build-and-test:
-    name: Build & Test
+  # ========== 阶段 0: 检测变更模块 ==========
+  detect-changes:
+    name: Detect Changed Modules
     runs-on: ubuntu-latest
-    
+    outputs:
+      order-changed: ${{ steps.filter.outputs.order }}
+      product-changed: ${{ steps.filter.outputs.product }}
+      auth-changed: ${{ steps.filter.outputs.auth }}
+      gateway-changed: ${{ steps.filter.outputs.gateway }}
+      common-changed: ${{ steps.filter.outputs.common }}
     steps:
-      # 步骤 1: 检出代码
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 步骤 2: 设置 Java 环境
+      # 使用 paths-filter 检测变更（业界标准工具）
+      - name: Detect changed modules
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            order: 
+              - 'nexusmall-order/**'
+              - 'nexusmall-common/**'  # common 变更也会影响 order
+            product:
+              - 'nexusmall-product/**'
+              - 'nexusmall-common/**'
+            auth:
+              - 'nexusmall-auth/**'
+              - 'nexusmall-common/**'
+            gateway:
+              - 'nexusmall-gateway/**'
+              - 'nexusmall-common/**'
+            common:
+              - 'nexusmall-common/**'
+
+  # ========== 阶段 1: 编译与测试 - Order 模块 ==========
+  build-order:
+    name: Build & Test - Order Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.order-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
       - name: Set up JDK 8
         uses: actions/setup-java@v4
         with:
@@ -62,21 +108,18 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      # 步骤 2.5: 安装父项目和所有模块到本地仓库（多模块项目标准做法）
-      - name: Install Parent POM and All Modules
+      - name: Install Parent and Common
         run: |
           echo "====== 安装父项目和公共模块 ======"
-          # 从项目根目录执行 mvn install，会自动安装父 POM 和所有子模块
-          mvn clean install -DskipTests -B
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
       
-      # 步骤 3: 编译 Order 模块（现在所有依赖都已安装）
-      - name: Compile with Maven
+      - name: Compile Order Module
         run: |
-          echo "====== 编译阶段 ======"
+          echo "====== 编译 Order 模块 ======"
           mvn clean compile -f nexusmall-order/pom.xml -B
       
-      # 步骤 4: 运行单元测试（仅当存在测试时）
-      - name: Run Unit Tests
+      - name: Run Order Module Tests
         run: |
           echo "====== 单元测试阶段 ======"
           if [ -d "nexusmall-order/src/test/java" ] && [ "$(find nexusmall-order/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
@@ -86,26 +129,24 @@ jobs:
           fi
         continue-on-error: true
       
-      # 步骤 5: 上传测试报告（仅当测试执行时）
       - name: Upload Test Results
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: test-results
+          name: order-test-results
           path: nexusmall-order/target/surefire-reports/
         continue-on-error: true
       
-      # 步骤 6: 代码覆盖率检查（仅当有测试时）
       - name: Check Code Coverage
         run: |
           echo "生成覆盖率报告..."
-          mvn jacoco:report -f nexusmall-order/pom.xml || echo "⚠️ 覆盖率报告生成失败（可能是没有测试）"
+          mvn jacoco:report -f nexusmall-order/pom.xml || echo "⚠️ 覆盖率报告生成失败"
 
-  # ========== 阶段 2: 代码质量检查 ==========
-  quality-check:
-    name: Quality Check
+  # ========== 阶段 2: 代码质量检查 - Order 模块 ==========
+  quality-check-order:
+    name: Quality Check - Order Service
     runs-on: ubuntu-latest
-    needs: [build-and-test]
+    needs: [build-order]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
@@ -131,45 +172,39 @@ jobs:
         run: mvn spotbugs:check -f nexusmall-order/pom.xml
         continue-on-error: true
 
-  # ========== 阶段 3: 构建 Docker 镜像 ==========
-  build-docker:
-    name: Build Docker Image
+  # ========== 阶段 3: 构建 Docker 镜像 - Order 模块 ==========
+  build-docker-order:
+    name: Build Docker Image - Order Service
     runs-on: ubuntu-latest
-    needs: [build-and-test]
-    if: github.event_name == 'push'
+    needs: [build-order]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.order-changed == 'true'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 设置 Docker Buildx (支持多平台构建)
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       
-      # 登录 Docker Hub
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       
-      # 生成镜像标签（最标准的标签策略）
       - name: Generate image tags
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order
           tags: |
-            # master 分支：同时推送 latest 和 sha-xxx
             type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
-            # develop 分支：推送 develop 标签
             type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
-            # 版本标签：推送 v1.0.0 等
             type=semver,pattern={{version}}
-            # SHA 标签：始终推送 sha-xxx
             type=sha,prefix=sha-,format=long
       
-      # 构建并推送
       - name: Build and Push Docker Image
         id: build
         uses: docker/build-push-action@v5
@@ -183,53 +218,47 @@ jobs:
           cache-to: type=gha,mode=max
           platforms: linux/amd64
       
-      # 输出镜像信息
       - name: Image digest
         run: echo ${{ steps.build.outputs.digest }}
 
-  # ========== 阶段 4: 安全扫描 ==========
-  security-scan:
-    name: Security Scan
+  # ========== 阶段 4: 安全扫描 - Order 模块 ==========
+  security-scan-order:
+    name: Security Scan - Order Service
     runs-on: ubuntu-latest
-    needs: [build-docker]
+    needs: [build-docker-order]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 登录 Docker Hub（Trivy 需要认证才能扫描私有镜像）
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       
-      # 使用 Trivy 直接扫描 Docker Hub 上的镜像（最标准做法）
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          # 直接指定远程镜像，Trivy 会自动拉取并扫描
-          image-ref: '${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}'
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}'
           format: 'sarif'
-          output: 'trivy-results.sarif'
+          output: 'trivy-order-results.sarif'
           severity: 'CRITICAL,HIGH,MEDIUM'
           ignore-unfixed: true
           vuln-type: 'os,library'
       
-      # 上传扫描结果到 GitHub Security（使用 v4 版本）
       - name: Upload Trivy scan results to GitHub Security tab
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: 'trivy-results.sarif'
-          # 可选：指定类别以便区分不同的扫描
-          category: 'trivy-security-scan'
+          sarif_file: 'trivy-order-results.sarif'
+          category: 'trivy-order-scan'
 
-  # ========== 阶段 5: 更新 Kubernetes Manifest (GitOps 核心) ==========
-  update-manifest:
-    name: Update Kubernetes Manifest
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Order 模块 ==========
+  update-manifest-order:
+    name: Update K8s Manifest - Order Service
     runs-on: ubuntu-latest
-    needs: [security-scan]
+    needs: [security-scan-order]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
@@ -238,31 +267,26 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       
-      # 更新 deployment.yaml 中的镜像标签
       - name: Update image tag in deployment.yaml
         run: |
-          echo "更新镜像标签..."
-          NEW_IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}"
+          echo "更新 Order 服务镜像标签..."
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}"
           echo "新镜像：${NEW_IMAGE}"
           
-          # 使用 sed 替换镜像标签
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
           
-          # 显示变更
           echo "=== 变更后的配置 ==="
           grep -A 2 "image:" deploy/order-service/deployment.yaml
       
-      # 提交并推送 manifest 变更
       - name: Commit and push changes
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 检查是否有变更
           if ! git diff --quiet deploy/order-service/deployment.yaml; then
             echo "检测到变更，提交..."
             git add deploy/order-service/deployment.yaml
-            git commit -m "chore(deploy): update ${APP_NAME} image to sha-${{ github.sha }} [skip ci]"
+            git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
             git push origin master
             echo "✅ Manifest 更新成功！"
           else
