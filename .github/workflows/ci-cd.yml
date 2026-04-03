@@ -183,18 +183,20 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 登录 Docker Hub（Trivy 需要认证才能拉取私有镜像）
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+      # 设置 up Docker Buildx（复用构建阶段的缓存）
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       
-      # 使用 Trivy 进行镜像漏洞扫描
+      # 从 Docker Hub 拉取镜像到本地（使用完整镜像名）
+      - name: Pull Docker image
+        run: |
+          docker pull ${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}
+      
+      # 使用 Trivy 进行镜像漏洞扫描（扫描本地镜像）
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          # 使用镜像名称（现在已登录，可以拉取）
+          # 使用本地已拉取的镜像
           image-ref: '${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
