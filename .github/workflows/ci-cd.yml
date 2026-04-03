@@ -1,12 +1,13 @@
 # =====================================================
 # GitHub Actions CI/CD Pipeline - NexusMall Order Service
 # =====================================================
-# 工作流程:
-# 1. 代码提交/PR 触发
-# 2. 自动编译 + 单元测试
-# 3. 构建 Docker 镜像
-# 4. 推送到 Docker Hub
-# 5. 部署到 Kubernetes (可选)
+# GitOps 工作流程:
+# 1. 代码提交触发
+# 2. 自动编译 + 单元测试 + 代码质量检查
+# 3. 构建 Docker 镜像并推送到 Docker Hub
+# 4. Trivy 安全扫描
+# 5. 更新 Kubernetes Manifest
+# 6. ArgoCD 自动同步到 K8s 集群
 # =====================================================
 
 name: NexusMall Order CI/CD
@@ -27,7 +28,7 @@ on:
 env:
   APP_NAME: nexusmall-order
   IMAGE_REGISTRY: docker.io
-  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_USERNAME: shudlsys
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 # ========================================
@@ -153,7 +154,7 @@ jobs:
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern={{version}}
-            type=sha,prefix=sha-
+            type=sha,prefix=sha-,format=long
       
       # 构建并推送
       - name: Build and Push Docker Image
@@ -167,7 +168,6 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-          # 暂时只构建 amd64 平台（Trivy 扫描需要）
           platforms: linux/amd64
       
       # 输出镜像信息
@@ -190,13 +190,13 @@ jobs:
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          password: ${{ env.DOCKER_PASSWORD }}
       
-      # 使用 Trivy 直接扫描 Docker Hub 上的镜像（不需要手动 pull）
+      # 使用 Trivy 直接扫描 Docker Hub 上的镜像（最标准做法）
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          # 直接指定远程镜像
+          # 直接指定远程镜像，Trivy 会自动拉取并扫描
           image-ref: '${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}'
           format: 'sarif'
           output: 'trivy-results.sarif'
@@ -210,98 +210,50 @@ jobs:
         with:
           sarif_file: 'trivy-results.sarif'
 
-  # ========== 阶段 5: 部署到开发环境 ==========
-  deploy-dev:
-    name: Deploy to Dev Environment
+  # ========== 阶段 5: 更新 Kubernetes Manifest (GitOps 核心) ==========
+  update-manifest:
+    name: Update Kubernetes Manifest
     runs-on: ubuntu-latest
-    needs: [build-docker]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
-    environment: development
+    needs: [security-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      # 配置 kubectl
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
         with:
-          version: 'v1.28.0'
+          token: ${{ secrets.GITHUB_TOKEN }}
       
-      # 配置 Kubeconfig (从 GitHub Secrets 读取)
-      - name: Configure Kubeconfig
+      # 更新 deployment.yaml 中的镜像标签
+      - name: Update image tag in deployment.yaml
         run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG }}" > ~/.kube/config
+          echo "更新镜像标签..."
+          NEW_IMAGE="${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }}"
+          echo "新镜像：${NEW_IMAGE}"
+          
+          # 使用 sed 替换镜像标签
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
+          
+          # 显示变更
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/order-service/deployment.yaml
       
-      # 更新 Deployment 镜像
-      - name: Update Deployment
+      # 提交并推送 manifest 变更
+      - name: Commit and push changes
         run: |
-          kubectl set image deployment/${{ env.APP_NAME }}-dev \
-            ${{ env.APP_NAME }}=${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:sha-${{ github.sha }} \
-            -n nexusmall-dev
-      
-      # 等待部署完成
-      - name: Wait for rollout
-        run: |
-          kubectl rollout status deployment/${{ env.APP_NAME }}-dev -n nexusmall-dev --timeout=300s
-      
-      # 健康检查
-      - name: Health Check
-        run: |
-          kubectl wait --for=condition=available deployment/${{ env.APP_NAME }}-dev -n nexusmall-dev --timeout=300s
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 检查是否有变更
+          if ! git diff --quiet deploy/order-service/deployment.yaml; then
+            echo "检测到变更，提交..."
+            git add deploy/order-service/deployment.yaml
+            git commit -m "chore(deploy): update ${APP_NAME} image to sha-${{ github.sha }} [skip ci]"
+            git push origin master
+            echo "✅ Manifest 更新成功！"
+          else
+            echo "⚠️ 没有检测到变更，跳过提交"
+          fi
 
-  # ========== 阶段 6: 部署到生产环境 (手动触发) ==========
-  deploy-prod:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [build-docker, security-scan]
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-    environment: production
-    
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Set up kubectl
-        uses: azure/setup-kubectl@v3
-        with:
-          version: 'v1.28.0'
-      
-      - name: Configure Kubeconfig
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ secrets.KUBE_CONFIG_PROD }}" > ~/.kube/config
-      
-      # 蓝绿部署脚本
-      - name: Blue-Green Deployment
-        run: |
-          echo "开始蓝绿部署..."
-          
-          # 部署到蓝色环境
-          kubectl set image deployment/${{ env.APP_NAME }}-blue \
-            ${{ env.APP_NAME }}=${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}:${{ github.ref_name }} \
-            -n nexusmall-prod
-          
-          # 等待蓝色环境就绪
-          kubectl rollout status deployment/${{ env.APP_NAME }}-blue -n nexusmall-prod --timeout=600s
-          
-          # 健康检查
-          kubectl wait --for=condition=available deployment/${{ env.APP_NAME }}-blue -n nexusmall-prod --timeout=300s
-          
-          # 切换流量到蓝色环境
-          kubectl patch service ${{ env.APP_NAME }}-prod \
-            -p '{"spec":{"selector":{"version":"blue"}}}' \
-            -n nexusmall-prod
-          
-          # 清理绿色环境
-          kubectl delete deployment ${{ env.APP_NAME }}-green -n nexusmall-prod --ignore-not-found=true
-          
-          echo "✅ 生产环境部署完成！版本：${{ github.ref_name }}"
-      
-      # 发送部署通知
-      - name: Send Deployment Notification
-        if: always()
-        run: |
-          echo "发送部署通知到钉钉/企业微信..."
-          # 这里可以添加 Webhook 调用
+  # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
+  # 注意：不再需要手动部署步骤，ArgoCD 会自动同步 manifest 变更
+  # 如果需要手动审批，可以使用 ArgoCD 的 manual sync 功能

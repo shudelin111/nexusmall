@@ -1,10 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nexusmall-order  # 建议与模块名一致
-  # 这里不写 namespace，由 ArgoCD 界面统一控制
+  name: nexusmall-order
+  namespace: nexusmall  # ArgoCD 部署的目标命名空间
+  annotations:
+    # ArgoCD 自动同步配置
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/hook: "PostSync"
+    # 镜像更新通知
+    argocd-image-updater.argoproj.io/image-list: "nexusmall-order=docker.io/shudlsys/nexusmall-order"
+    argocd-image-updater.argoproj.io/nexusmall-order.update-strategy: "latest"
+  labels:
+    app: nexusmall-order
+    app.kubernetes.io/name: nexusmall-order
+    app.kubernetes.io/part-of: nexusmall
 spec:
-  replicas: 1 # 个人练习建议 1 个，公司项目一般 2-3 个实现高可用
+  replicas: 1
   selector:
     matchLabels:
       app: nexusmall-order
@@ -12,18 +23,41 @@ spec:
     metadata:
       labels:
         app: nexusmall-order
+        app.kubernetes.io/name: nexusmall-order
     spec:
       containers:
         - name: nexusmall-order
-          # 注意：这里的镜像地址一定要和 Docker Hub 上的保持一致
-          # 后面的标签会被 GitHub Actions 自动更新
-          image: shudlsys/nexusmall-order:latest
+          # 镜像标签由 GitHub Actions 自动更新
+          image: docker.io/shudlsys/nexusmall-order:sha-latest
           ports:
-            - containerPort: 11000 # 你的 Spring Boot 项目运行端口
+            - containerPort: 11000
           resources:
             requests:
               memory: "128Mi"
               cpu: "200m"
             limits:
-              memory: "256Mi" # 限制最大内存，防止 Java 内存泄漏撑爆服务器
+              memory: "256Mi"
               cpu: "500m"
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 11000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 11000
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+          # 优雅关闭
+          lifecycle:
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          terminationGracePeriodSeconds: 30
