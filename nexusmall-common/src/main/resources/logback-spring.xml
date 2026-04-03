@@ -232,7 +232,7 @@
         <!-- Kafka Producer 配置（最标准配置） -->
         <!-- 📚 官方文档：https://kafka.apache.org/documentation/#producerconfigs -->
         <!-- 必需的参数：bootstrap.servers -->
-        <producerConfig>bootstrap.servers=10.10.1.40:31000</producerConfig>
+        <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
         <!-- DNS 查询配置：使用所有 DNS IP 地址 -->
         <producerConfig>client.dns.lookup=use_all_dns_ips</producerConfig>
         <!-- ACK 配置：1 表示 leader 确认即可 -->
