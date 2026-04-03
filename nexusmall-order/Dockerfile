@@ -24,16 +24,20 @@ COPY ../pom.xml .
 # 复制 order 模块 pom.xml
 COPY ../nexusmall-order/pom.xml nexusmall-order/pom.xml
 
-# 预下载依赖 (如果 pom.xml 未变化，使用缓存层)
+# 复制公共模块 pom.xml (为安装 common 模块做准备)
+COPY ../nexusmall-common/pom.xml nexusmall-common/
+
+# 预下载依赖 (先安装 common 模块，再下载依赖，确保依赖解析成功)
+# 顺序：安装父 POM → 安装 common → 下载 order 依赖
 RUN mvn dependency:go-offline -B \
+    -f nexusmall-common/pom.xml \
+    -DskipTests && \
+    mvn dependency:go-offline -B \
     -f nexusmall-order/pom.xml \
     -DskipTests
 
-# 复制公共模块源码 (order 依赖 common 模块)
+# 复制公共模块源码并安装到本地仓库
 COPY ../nexusmall-common/src nexusmall-common/src
-COPY ../nexusmall-common/pom.xml nexusmall-common/
-
-# 安装 common 模块到本地仓库
 RUN mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
 
 # 复制 order 模块源码
