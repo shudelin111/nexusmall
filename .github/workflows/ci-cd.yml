@@ -23,6 +23,14 @@ on:
     branches: [ master, develop ]
 
 # ========================================
+# 权限配置（修复 CodeQL 权限错误）
+# ========================================
+permissions:
+  contents: read
+  security-events: write
+  actions: read
+
+# ========================================
 # 环境变量
 # ========================================
 env:
@@ -144,16 +152,20 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       
-      # 生成镜像标签
+      # 生成镜像标签（最标准的标签策略）
       - name: Generate image tags
         id: meta
         uses: docker/metadata-action@v5
         with:
           images: ${{ env.IMAGE_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ env.APP_NAME }}
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
+            # master 分支：同时推送 latest 和 sha-xxx
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/master' }}
+            # develop 分支：推送 develop 标签
+            type=raw,value=develop,enable=${{ github.ref == 'refs/heads/develop' }}
+            # 版本标签：推送 v1.0.0 等
             type=semver,pattern={{version}}
+            # SHA 标签：始终推送 sha-xxx
             type=sha,prefix=sha-,format=long
       
       # 构建并推送
