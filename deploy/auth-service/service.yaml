@@ -1,0 +1,45 @@
+# =====================================================
+# NexusMall Auth Service - Kubernetes Service
+# =====================================================
+# 用途：为 Auth Pod 提供稳定的访问入口
+# 类型：ClusterIP（集群内部访问，通过 Gateway 暴露）
+# 端口：8000
+# =====================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexusmall-auth
+  namespace: nexusmall
+  labels:
+    app: nexusmall-auth
+    app.kubernetes.io/name: nexusmall-auth
+spec:
+  # 服务类型：ClusterIP（仅集群内部访问，生产环境推荐）
+  type: ClusterIP
+  
+  # 选择器：匹配带有这些标签的 Pod
+  selector:
+    app: nexusmall-auth
+  
+  # 端口配置
+  ports:
+    - name: http
+      protocol: TCP
+      port: 8000          # 集群内部访问端口
+      targetPort: 8000    # 容器内应用端口
+
+# =====================================================
+# 访问方式说明
+# =====================================================
+# 1. 集群内部访问（其他微服务通过 Feign 调用）：
+#    http://nexusmall-auth.nexusmall.svc.cluster.local:8000
+#
+# 2. 本地端口转发（调试用）：
+#    kubectl port-forward svc/nexusmall-auth 8000:8000 -n nexusmall
+#    然后访问：http://localhost:8000
+#
+# 3. 外部访问：
+#    通过 Gateway 网关路由到 Auth 服务
+#    例如：http://gateway:9000/auth/login
+# =====================================================
