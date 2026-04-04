@@ -119,11 +119,11 @@ spec:
             httpGet:
               path: /actuator/health/liveness  # Spring Boot Actuator 健康检查端点
               port: 12000
-            initialDelaySeconds: 240  # 容器启动后 240 秒开始检查（给足启动时间）
-            periodSeconds: 10         # 每 10 秒检查一次
-            timeoutSeconds: 5         # 超时 5 秒
-            failureThreshold: 5       # 失败 5 次后重启容器
-            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康（默认值）
+            initialDelaySeconds: 300            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即重启
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康
           
           # Readiness Probe（就绪探针）
           # 作用：检测容器是否准备好接收流量，失败会从 Service 中移除
