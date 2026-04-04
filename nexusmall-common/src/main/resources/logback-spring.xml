@@ -245,11 +245,6 @@
         <producerConfig>connections.max.idle.ms=540000</producerConfig>
         <producerConfig>reconnect.backoff.ms=50</producerConfig>
         <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
-        <!-- 关键：启用 Kafka Producer 的优雅关闭
-             通过 producerConfig 配置关闭超时
-             官方建议：设置为 1000-5000ms，避免消息丢失
-        -->
-        <producerConfig>close.timeout.ms=1000</producerConfig>
             
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
