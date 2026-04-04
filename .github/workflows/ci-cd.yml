@@ -163,7 +163,8 @@ jobs:
     name: Quality Check - Product Service
     runs-on: ubuntu-latest
     needs: [build-product]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # 修改：dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -371,7 +372,8 @@ jobs:
     name: Quality Check - Order Service
     runs-on: ubuntu-latest
     needs: [build-order]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    # 修改：dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
