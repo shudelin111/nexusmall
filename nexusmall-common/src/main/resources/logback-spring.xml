@@ -208,66 +208,40 @@
     </appender>
 
     <!-- ===============================
-         Kafka 日志收集 Appender
+         Kafka 日志收集 Appender（已禁用）
          =============================== -->
-    <!-- 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
-    <!-- 参考官方文档：https://github.com/danielwegener.logback-kafka-appender -->
     <!-- 
-         生产者配置说明：
-         1. bootstrap.servers: Kafka Broker 地址列表
-         2. acks=1: Leader 确认即成功（平衡可靠性和性能）
-         3. retries=Integer.MAX_VALUE: 无限重试（确保不丢失日志）
-         4. delivery.timeout.ms: 消息总超时时间（120 秒）
-         5. max.block.ms: 发送阻塞最大时间（60 秒）
-         6. linger.ms: 批处理等待时间（100ms，提升吞吐量）
-         7. **关键**：request.timeout.ms=5000 - 请求超时快速失败，避免启动阻塞
-         8. **关键**：metadata.max.age.ms=60000 - 元数据快速刷新
+        ⚠️ 警告：Kafka Appender 会在应用启动时立即连接 Kafka Broker
+        如果 Kafka 不可用，会导致 Logback 配置错误并终止应用启动
+        
+        当前状态：已禁用（避免阻塞启动）
+        
+        启用方法：
+        1. 确保 Kafka Broker 已启动且网络连通
+        2. 取消下面整个 <appender name="kafka"> 块的注释
+        3. 在 root 配置中添加 <appender-ref ref="async_kafka"/>
+        
+        官方文档：https://github.com/danielwegener/logback-kafka-appender
     -->
+    <!--
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <topic>app-logs</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
-                
-        <!-- Kafka Producer 核心配置 -->
+            
         <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
-        <producerConfig>client.dns.lookup=use_all_dns_ips</producerConfig>
         <producerConfig>acks=1</producerConfig>
         <producerConfig>retries=2147483647</producerConfig>
-        <producerConfig>retry.backoff.ms=100</producerConfig>
         <producerConfig>batch.size=16384</producerConfig>
         <producerConfig>linger.ms=100</producerConfig>
-        <producerConfig>buffer.memory=33554432</producerConfig>
-        <producerConfig>key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
-        <producerConfig>value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
-        <producerConfig>security.protocol=PLAINTEXT</producerConfig>
-        <!-- 关键：缩短请求超时时间，快速失败不阻塞启动 -->
         <producerConfig>request.timeout.ms=5000</producerConfig>
-        <!-- 关键：连接超时设置 -->
-        <producerConfig>connections.max.idle.ms=30000</producerConfig>
-        <producerConfig>metadata.max.age.ms=60000</producerConfig>
-        <producerConfig>delivery.timeout.ms=120000</producerConfig>
         <producerConfig>max.block.ms=5000</producerConfig>
-        <producerConfig>reconnect.backoff.ms=50</producerConfig>
-        <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
-                
+        
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
-                <timestamp>
-                    <timeZone>Asia/Shanghai</timeZone>
-                    <fieldName>timestamp</fieldName>
-                </timestamp>
+                <timestamp><timeZone>Asia/Shanghai</timeZone></timestamp>
                 <pattern>
-                    <pattern>
-                        {
-                        "level": "%level",
-                        "service": "${APP_NAME:-unknown}",
-                        "traceId": "%X{traceId:-}",
-                        "spanId": "%X{spanId:-}",
-                        "thread": "%thread",
-                        "logger": "%logger{36}",
-                        "host": "${HOSTNAME:-unknown}"
-                        }
-                    </pattern>
+                    <pattern>{"level": "%level","service": "${APP_NAME:-unknown}","traceId": "%X{traceId:-}","spanId": "%X{spanId:-}","thread": "%thread","logger": "%logger{36}","host": "${HOSTNAME:-unknown}"}</pattern>
                 </pattern>
                 <message />
                 <stackTrace>
@@ -275,7 +249,6 @@
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
                         <maxDepthPerThrowable>30</maxDepthPerThrowable>
                         <maxLength>2048</maxLength>
-                        <shortenedClassNameLength>20</shortenedClassNameLength>
                         <rootCauseFirst>true</rootCauseFirst>
                     </throwableConverter>
                 </stackTrace>
@@ -283,28 +256,15 @@
         </encoder>
         <appender-ref ref="console"/>
     </appender>
-
-    <!-- 使用 AsyncAppender 包装 KafkaAppender，避免阻塞主程序 -->
-    <!-- 参考官方建议：https://github.com/danielwegener/logback-kafka-appender#note-on-broker-outages -->
-    <!-- 
-         关键参数说明：
-         1. queueSize: 队列大小，设置为 512（默认值）
-         2. discardingThreshold: 丢弃阈值，20% 时开始丢弃非关键日志
-         3. neverBlock: 永不阻塞业务线程（true=推荐设置）
-         4. maxFlushTime: 最大刷新时间（毫秒），应用关闭时等待日志发送完成的时间
-            - 官方建议：设置为 0-1000ms，避免长时间阻塞
-            - 作用：在应用关闭时给 Kafka Producer 时间完成消息发送
-         5. includeCallerData: 不包含调用者数据（提升性能）
-    -->
+    
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
         <discardingThreshold>20</discardingThreshold>
-        <includeCallerData>false</includeCallerData>
         <neverBlock>true</neverBlock>
-        <!-- 关键：设置合理的刷新时间，避免关闭时抛出 InterruptedException -->
         <maxFlushTime>500</maxFlushTime>
         <appender-ref ref="kafka"/>
     </appender>
+    -->
 
     <!-- ===============================
          分环境日志配置（Spring Profile）
@@ -351,7 +311,11 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>       <!-- 发送到 Kafka（通过 AsyncAppender） -->
+            <!-- 
+                暂时禁用 Kafka 日志收集，避免 Kafka Broker 不可用时阻塞启动
+                待 Kafka 服务正常后，取消下面这行的注释即可启用
+                <appender-ref ref="async_kafka"/>
+            -->
         </root>
     </springProfile>
 
@@ -371,7 +335,11 @@
             <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>        <!-- 发送到 Kafka（通过 AsyncAppender） -->
+            <!-- 
+                暂时禁用 Kafka 日志收集，避免 Kafka Broker 不可用时阻塞启动
+                待 Kafka 服务正常后，取消下面这行的注释即可启用
+                <appender-ref ref="async_kafka"/>
+            -->
         </root>
     </springProfile>
 </configuration>
