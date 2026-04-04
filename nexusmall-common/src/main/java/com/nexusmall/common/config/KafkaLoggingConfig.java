@@ -7,7 +7,7 @@ import ch.qos.logback.core.spi.AppenderAttachable;
 import com.github.danielwegener.logback.kafka.KafkaAppender;
 import com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy;
 import com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy;
-import net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder;
+import net.logstash.logback.encoder.LogstashEncoder;
 import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -122,9 +122,14 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
         kafkaAppender.addProducerConfig("metadata.max.age.ms=300000");
         kafkaAppender.addProducerConfig("client.id=" + appName + "-logback-kafka-" + getHostname());
         
-        // 设置 JSON 编码器
-        LoggingEventCompositeJsonEncoder encoder = createJsonEncoder(loggerContext);
-        kafkaAppender.setEncoder(encoder);
+        // 【关键】从 LoggerContext 中获取 encoder 或创建默认的 encoder
+        LogstashEncoder encoder = getEncoderFromXmlConfig(loggerContext);
+        if (encoder != null) {
+            kafkaAppender.setEncoder(encoder);
+        } else {
+            // 如果获取失败，创建默认 encoder
+            kafkaAppender.setEncoder(createDefaultJsonEncoder(loggerContext));
+        }
         
         // 启动 Appender
         kafkaAppender.start();
@@ -162,23 +167,29 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
     }
 
     /**
-     * 创建 JSON 编码器
+     * 从 XML 配置中获取 encoder
+     * 由于 encoder 是在 appender 内部定义的，这里我们直接创建完整的 encoder 配置
      */
-    private LoggingEventCompositeJsonEncoder createJsonEncoder(LoggerContext loggerContext) {
-        LoggingEventCompositeJsonEncoder encoder = new LoggingEventCompositeJsonEncoder();
+    private LogstashEncoder getEncoderFromXmlConfig(LoggerContext loggerContext) {
+        // 直接创建完整的 encoder 配置
+        return createDefaultJsonEncoder(loggerContext);
+    }
+
+    /**
+     * 创建 JSON 编码器
+     * 使用 LogstashEncoder，它是预配置好的 JSON 编码器，包含所有标准字段：
+     * - @timestamp: 时间戳
+     * - level: 日志级别
+     * - thread: 线程名
+     * - logger: 日志器名
+     * - message: 日志消息
+     * - stack_trace: 异常堆栈
+     * - context: MDC 上下文
+     */
+    private LogstashEncoder createDefaultJsonEncoder(LoggerContext loggerContext) {
+        LogstashEncoder encoder = new LogstashEncoder();
         encoder.setContext(loggerContext);
-        
-        // 配置异常堆栈转换器
-        ShortenedThrowableConverter throwableConverter = new ShortenedThrowableConverter();
-        throwableConverter.setMaxDepthPerThrowable(30);
-        throwableConverter.setMaxLength(4096);
-        throwableConverter.setRootCauseFirst(true);
-        throwableConverter.setShortenedClassNameLength(20);
-        throwableConverter.start();
-        
-        // 注意：这里简化了编码器配置，实际使用时可能需要更详细的配置
-        // 如果需要完整的 JSON 格式，建议在 logback-spring.xml 中保留 encoder 定义
-        
+        encoder.setTimeZone("Asia/Shanghai");
         encoder.start();
         
         return encoder;
