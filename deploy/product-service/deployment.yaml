@@ -75,7 +75,7 @@ spec:
           # master 分支：latest（开发环境使用）
           # develop 分支：develop
           # 语义化版本：v1.0.0, v1.2.3 等（生产环境使用）
-          image: docker.io/shudlsys/nexusmall-product:sha-bfd608a840fd8e7e09dea99917166c709b0d57f9
+          image: docker.io/shudlsys/nexusmall-product:sha-caffbf71893f75d17568580cae902e1dd85ac925
           
           # ========================================
           # 端口配置
