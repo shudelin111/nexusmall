@@ -240,7 +240,8 @@
         <!-- Kafka Producer 配置 - 高可靠版本 -->
         <!-- 【关键】多 Broker 地址 - 提高可用性（生产环境至少配置 3 个节点） -->
         <!-- 格式：host1:port1,host2:port2,host3:port3 -->
-        <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092,mall-kafka-ok-kafka-1.kafka.svc.cluster.local:9092,mall-kafka-ok-kafka-2.kafka.svc.cluster.local:9092</producerConfig>
+        <!-- 注意：本地开发时可能无法解析 K8s 域名，可通过环境变量 KAFKA_SERVERS 覆盖 -->
+        <producerConfig>bootstrap.servers=${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092}</producerConfig>
         
         <!-- 【关键】acks=all - 确保所有 ISR 副本都写入成功才确认 -->
         <!-- 选项：0=不确认，1=leader 确认，all/all=-1=所有 ISR 副本确认 -->
