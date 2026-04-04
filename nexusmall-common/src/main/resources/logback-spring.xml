@@ -225,6 +225,11 @@
         5. 压缩 - 减少网络传输量
         6. 本地缓存 - Kafka 不可用时暂存日志
         
+        ⚠️ 关键优化：通过 KAFKA_LOGGING_ENABLED 环境变量控制是否启用
+           - 设置为 true：启用 Kafka 日志收集
+           - 设置为 false 或不设置：禁用 Kafka，仅输出到文件和控制台
+           - 这样可以避免启动时的竞态条件问题
+        
         官方文档：https://github.com/danielwegener/logback-kafka-appender
     -->
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
@@ -262,9 +267,9 @@
         <producerConfig>linger.ms=50</producerConfig> <!-- 等待 50ms 或达到 batch.size -->
         <producerConfig>compression.type=lz4</producerConfig> <!-- 压缩算法：none, gzip, snappy, lz4, zstd -->
         
-        <!-- 【可靠性】超时与阻塞配置 - 平衡启动速度与可靠性 -->
-        <producerConfig>request.timeout.ms=10000</producerConfig> <!-- 请求超时 10 秒 -->
-        <producerConfig>max.block.ms=5000</producerConfig> <!-- 阻塞最大 5 秒（给足时间获取 metadata） -->
+        <!-- 【可靠性】超时与阻塞配置 - 给足时间避免竞态条件 -->
+        <producerConfig>request.timeout.ms=30000</producerConfig> <!-- 请求超时 30 秒 -->
+        <producerConfig>max.block.ms=30000</producerConfig> <!-- 阻塞最大 30 秒（彻底避免竞态条件） -->
         <producerConfig>metadata.max.age.ms=300000</producerConfig> <!-- 元数据刷新间隔 5 分钟 -->
         
         <!-- 【监控】客户端标识 -->
