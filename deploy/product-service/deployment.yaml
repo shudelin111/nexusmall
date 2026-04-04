@@ -84,7 +84,6 @@ spec:
           # 暴露容器端口（与 Dockerfile 中的 EXPOSE 一致）
           ports:
             - containerPort: 12000
-              name: http
               protocol: TCP
           
           # ========================================
@@ -124,6 +123,7 @@ spec:
             periodSeconds: 10         # 每 10 秒检查一次
             timeoutSeconds: 5         # 超时 5 秒
             failureThreshold: 5       # 失败 5 次后重启容器
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康（默认值）
           
           # Readiness Probe（就绪探针）
           # 作用：检测容器是否准备好接收流量，失败会从 Service 中移除
@@ -136,6 +136,7 @@ spec:
             periodSeconds: 5          # 每 5 秒检查一次
             timeoutSeconds: 3         # 超时 3 秒
             failureThreshold: 3       # 失败 3 次后标记为未就绪
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
           
           # ========================================
           # 生命周期钩子
