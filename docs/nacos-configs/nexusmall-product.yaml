@@ -6,12 +6,6 @@
 # =====================================================
 
 # ===============================
-# 服务器配置
-# ===============================
-server:
-  port: 10000
-
-# ===============================
 # Spring 应用配置
 # ===============================
 spring:
@@ -116,6 +110,17 @@ spring:
             data-type: json
             username: nacos
             password: nacos
+    
+    # Kafka 配置（用于日志收集）
+    kafka:
+      bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
+      producer:
+        acks: 1
+        retries: 3
+        batch-size: 16384
+        buffer-memory: 33554432
+        key-serializer: org.apache.kafka.common.serialization.StringSerializer
+        value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 # ===============================
 # MyBatis-Plus ORM 配置
@@ -144,20 +149,6 @@ rocketmq:
     send-message-timeout: 3000
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
-
-# ===============================
-# Kafka 配置（用于日志收集）
-# ===============================
-spring:
-  kafka:
-    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-    producer:
-      acks: 1
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
 
 # ===============================
 # Seata 分布式事务配置
