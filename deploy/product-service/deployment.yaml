@@ -76,7 +76,7 @@ spec:
           #   - dev 分支：latest（开发环境，自动拉取最新）
           #   - master 分支：sha-{commit}（生产环境，版本可追溯）
           #   - 语义化版本：v1.0.0, v1.2.3 等（发布版本使用）
-          image: docker.io/shudlsys/nexusmall-product:latest
+          image: docker.io/shudlsys/nexusmall-product:sha-82f736e580bd75abf868f1bcb55b1dc018e9fdf0
           
           # ========================================
           # 端口配置
