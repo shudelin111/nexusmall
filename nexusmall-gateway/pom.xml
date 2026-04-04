@@ -41,25 +41,10 @@
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 		</dependency>
 
-		<!-- Seata 分布式事务（可选，用于网关透传 XID） -->
+		<!-- Spring Cloud LoadBalancer（必需，用于 lb:// 负载均衡） -->
 		<dependency>
-			<groupId>io.seata</groupId>
-			<artifactId>seata-spring-boot-starter</artifactId>
-		</dependency>
-
-		<!-- Kryo 4.0.2 for Seata 1.5.2 -->
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.javakaffee</groupId>
-			<artifactId>kryo-serializers</artifactId>
-		</dependency>
-		<!-- FST for Redisson Codec -->
-		<dependency>
-			<groupId>de.ruedigermoeller</groupId>
-			<artifactId>fst</artifactId>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
 		</dependency>
 
 		<dependency>
@@ -118,6 +103,15 @@
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+
+		<!-- ========================================
+		     Knife4j Gateway API 文档聚合 (业界标准)
+		     官方文档: https://doc.xiaominfo.com/
+		     ======================================== -->
+		<dependency>
+			<groupId>com.github.xiaoymin</groupId>
+			<artifactId>knife4j-gateway-spring-boot-starter</artifactId>
 		</dependency>
 
 		<!-- 公共模块 -->

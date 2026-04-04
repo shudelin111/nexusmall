@@ -23,7 +23,20 @@ public class SecurityConfig {
                 .csrf(ServerHttpSecurity.CsrfSpec::disable).formLogin(ServerHttpSecurity.FormLoginSpec::disable)
                 .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable).authorizeExchange(exchanges -> exchanges
                         // 允许公开访问的路径
-                        .pathMatchers("/actuator/**", "/auth/ping").permitAll().pathMatchers("/auth/login", "/auth/register")
+                        .pathMatchers("/actuator/**", "/auth/ping").permitAll()
+                        
+                        // ========================================
+                        // Swagger/Knife4j 文档路径白名单 (无需认证)
+                        // ========================================
+                        .pathMatchers("/doc.html").permitAll()
+                        .pathMatchers("/swagger-ui.html").permitAll()
+                        .pathMatchers("/swagger-ui/**").permitAll()
+                        .pathMatchers("/v3/api-docs/**").permitAll()
+                        .pathMatchers("/swagger-resources/**").permitAll()
+                        .pathMatchers("/webjars/**").permitAll()
+                        .pathMatchers("/*/v3/api-docs/**").permitAll()  // 微服务文档路径
+                        
+                        .pathMatchers("/auth/login", "/auth/register")
                         .permitAll().pathMatchers("/auth/validate").authenticated().pathMatchers("/auth/**")
                         .hasAnyRole("ADMIN")
 

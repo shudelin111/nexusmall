@@ -184,89 +184,40 @@ spring:
           # true: 服务名自动转为小写（避免大小写不一致问题）
           lower-case-service-id: true
       
-      # ===============================
-      # Spring Cloud Sleuth 链路追踪配置
-      # ===============================
-      sleuth:
-        # 1. 启用链路追踪
-        enabled: true
-        # 2. 采样率（开发环境 100%，生产环境建议 0.1）
-        sampler:
-          probability: 1.0
-        # 3. 日志配置
-        log:
-          # 启用日志中的链路追踪信息
-          enabled: true
-          # SLF4J MDC 白名单（让 traceId 显示在日志中）
-          slf4j:
-            whitelisted-mdc-keys:
-              - traceId
-              - spanId
-              - user-id
-        # 4. WebFlux 配置（Gateway 必须启用）
-        web:
-          enabled: true
-        # 5. 传播类型（支持 B3 和 W3C 标准）
-        propagation:
-          type: B3,W3C
-        # 6. Baggage 配置（自定义传递字段）
-        baggage-keys:
-          - user-id
-          - request-id
-      
-      # Zipkin 链路追踪可视化配置
-      zipkin:
-        # Zipkin Server 地址
-        base-url: http://localhost:9411
-        # 启用 Zipkin
-        # true: 发送追踪数据到 Zipkin Server（需要 Zipkin 运行）
-        # false: 禁用 Zipkin，不发送数据（开发环境推荐）
-        enabled: false
-        # 发送方式
-        sender:
-          type: web
-      
       # 路由规则配置（核心功能）
+      # ===============================
       routes:
-        # 路由 1：认证服务
-        # ===============================
-        - id: auth-service
-          # 目标服务地址
-          # 方式 1：直接指定 URL（当前使用）
-          # 方式 2：lb://nexusmall-auth（通过 Nacos 负载均衡调用）
-          uri: http://localhost:8000
-          predicates:
-            # 断言：匹配请求路径
-            # Path=/auth/**: 匹配所有以 /auth 开头的请求
-            # 示例：/auth/login、/auth/register
-            - Path=/auth/**
-          filters:
-            # 过滤器：保留原始 Host 头
-            # 作用：后端服务可以获取到原始的域名信息
-            - PreserveHostHeader
-        
-        # ===============================
-        # 路由 2：商品服务
-        # ===============================
-        - id: product-service
-          uri: http://localhost:10000
-          predicates:
-            # 匹配路径：/product/**
-            # 示例：/product/list、/product/detail/1
-            - Path=/product/**
-          filters:
-            - PreserveHostHeader
-        
-        # ===============================
-        # 路由 3：订单服务
+        # 路由 1：订单服务（使用 Nacos 服务发现）
         # ===============================
         - id: order-service
-          uri: http://localhost:11000
+          uri: lb://nexusmall-order  # 通过 Nacos 负载均衡
           predicates:
-            # 匹配路径：/order/**
-            # 示例：/order/create、/order/list
             - Path=/order/**
           filters:
+            # 路径重写：去掉 /order 前缀
+            # /order/v3/api-docs -> /v3/api-docs
+            - RewritePath=/order/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+
+        # 路由 2：认证服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: auth-service
+          uri: lb://nexusmall-auth  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/auth/**
+          filters:
+            - PreserveHostHeader
+        
+        # 路由 3：商品服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: product-service
+          uri: lb://nexusmall-product  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/product/**
+          filters:
+            # 路径重写：去掉 /product 前缀
+            # /product/v3/api-docs -> /v3/api-docs
+            - RewritePath=/product/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
@@ -288,6 +239,47 @@ spring:
             # true: 允许（适用于需要登录的场景）
             # false: 不允许（适用于公开 API）
             allowCredentials: true
+
+  # =====================================================
+  # Spring Cloud Sleuth 链路追踪配置
+  # =====================================================
+  # 官方文档: https://docs.spring.io/spring-cloud-sleuth/docs/3.1.x/reference/html/
+  # 注意：Sleuth 配置在 spring 级别（不是 spring.cloud 下）
+  sleuth:
+    # 启用链路追踪
+    enabled: true
+    # 采样率（开发环境 100%，生产环境建议 0.1）
+    sampler:
+      probability: 1.0
+    # Baggage 配置（自定义传递字段）
+    # 注意：使用 baggage.remote-fields 而不是 baggage-keys
+    baggage:
+      # 远程传播字段（跨服务传递 HTTP Header）
+      remote-fields:
+        - user-id
+        - request-id
+      # 日志关联字段（在 MDC 中显示，方便日志检索）
+      correlation-fields:
+        - user-id
+        - request-id
+    # 传播类型（支持 B3 和 W3C 标准）
+    propagation:
+      type: B3,W3C
+
+  # =====================================================
+  # Zipkin 链路追踪可视化配置
+  # =====================================================
+  # 注意：Zipkin 配置也在 spring 级别（不是 spring.cloud 下）
+  zipkin:
+    # Zipkin Server 地址
+    base-url: http://localhost:9411
+    # 启用 Zipkin
+    # true: 发送追踪数据到 Zipkin Server（需要 Zipkin 运行）
+    # false: 禁用 Zipkin，不发送数据（开发环境推荐）
+    enabled: false
+    # 发送方式
+    sender:
+      type: web
 
 # =====================================================
 # 服务器配置
@@ -343,3 +335,26 @@ info:
     version: 0.0.1-SNAPSHOT
   # Java 版本
   java.version: 1.8
+
+# ===============================
+# Knife4j Gateway 聚合配置
+# ===============================
+# 官方文档: https://doc.xiaominfo.com/docs/guides/microservice/spring-cloud-gateway/
+# 版本: knife4j-gateway-spring-boot-starter 4.3.0
+knife4j:
+  # 启用 Gateway 聚合模式
+  gateway:
+    enabled: true
+    # 策略：discover - 从 Nacos 自动发现服务并聚合
+    strategy: discover
+    # Discover 策略配置（官方标准格式）
+    discover:
+      # 开启服务发现
+      enabled: true
+      # 文档版本（必须指定）
+      version: openapi3
+      # 排除的服务（排除没有 Swagger 的服务和 Gateway 自身）
+      # 注意：excluded-services 必须是逗号分隔的字符串，不能是 YAML 数组
+      excluded-services: nexusmall-gateway,nexusmall-auth
+  # 生产环境关闭文档(安全考虑)
+  production: false
