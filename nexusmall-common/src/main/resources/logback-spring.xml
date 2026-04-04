@@ -261,9 +261,9 @@
         <producerConfig>linger.ms=50</producerConfig> <!-- 等待 50ms 或达到 batch.size -->
         <producerConfig>compression.type=lz4</producerConfig> <!-- 压缩算法：none, gzip, snappy, lz4, zstd -->
         
-        <!-- 【可靠性】超时与阻塞配置 -->
-        <producerConfig>request.timeout.ms=30000</producerConfig> <!-- 请求超时 30 秒 -->
-        <producerConfig>max.block.ms=60000</producerConfig> <!-- 阻塞最大 60 秒 -->
+        <!-- 【可靠性】超时与阻塞配置 - 避免启动时阻塞 -->
+        <producerConfig>request.timeout.ms=5000</producerConfig> <!-- 请求超时 5 秒（快速失败） -->
+        <producerConfig>max.block.ms=1000</producerConfig> <!-- 阻塞最大 1 秒（避免阻塞启动） -->
         <producerConfig>metadata.max.age.ms=300000</producerConfig> <!-- 元数据刷新间隔 5 分钟 -->
         
         <!-- 【监控】客户端标识 -->
