@@ -185,11 +185,16 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
      * - message: 日志消息
      * - stack_trace: 异常堆栈
      * - context: MDC 上下文
+     * - service: 应用名称（自定义字段）
      */
     private LogstashEncoder createDefaultJsonEncoder(LoggerContext loggerContext) {
         LogstashEncoder encoder = new LogstashEncoder();
         encoder.setContext(loggerContext);
         encoder.setTimeZone("Asia/Shanghai");
+        
+        // 添加自定义字段 service（应用名称）
+        // LogstashEncoder 直接支持 setCustomFields 方法，传入 JSON 格式字符串即可
+        encoder.setCustomFields("{\"service\":\"" + appName + "\"}");
         encoder.start();
         
         return encoder;
