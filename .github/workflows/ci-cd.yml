@@ -558,6 +558,233 @@ jobs:
             echo "⚠️ 没有检测到变更，跳过提交"
           fi
 
+  # ========== 阶段 1: 编译与测试 - Gateway 模块 ==========
+  build-gateway:
+    name: Build & Test - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.gateway-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Gateway Module
+        run: |
+          echo "====== 编译 Gateway 模块 ======"
+          mvn clean compile -f nexusmall-gateway/pom.xml -B
+      
+      - name: Run Gateway Module Tests
+        run: |
+          echo "====== 单元测试阶段 ======"
+          if [ -d "nexusmall-gateway/src/test/java" ] && [ "$(find nexusmall-gateway/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            mvn test -f nexusmall-gateway/pom.xml -Dtest=*Test
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+          fi
+        continue-on-error: true
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gateway-test-results
+          path: nexusmall-gateway/target/surefire-reports/
+        continue-on-error: true
+      
+      - name: Check Code Coverage
+        run: |
+          echo "生成覆盖率报告..."
+          mvn jacoco:report -f nexusmall-gateway/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+
+  # ========== 阶段 2: 代码质量检查 - Gateway 模块 ==========
+  quality-check-gateway:
+    name: Quality Check - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-gateway]
+    # dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Gateway 模块 ==========
+  build-docker-gateway:
+    name: Build Docker Image - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-gateway]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.gateway-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-gateway/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Gateway 模块 ==========
+  security-scan-gateway:
+    name: Security Scan - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-gateway]
+    # dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-gateway-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-gateway-results.sarif'
+          category: 'trivy-gateway-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Gateway 模块 ==========
+  update-manifest-gateway:
+    name: Update K8s Manifest - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-gateway]
+    # dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Gateway 服务镜像标签..."
+          # 根据分支选择标签策略
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:sha-${{ github.sha }}"
+          else
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:latest"
+          fi
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/gateway-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/gateway-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
+            echo "检测到变更，提交..."
+            git add deploy/gateway-service/deployment.yaml
+            # 根据分支使用不同的提交信息
+            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+              git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
+            else
+              git commit -m "chore(deploy): update gateway image to latest [skip ci]"
+            fi
+            # 根据分支推送到不同分支
+            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+              git push origin master
+            else
+              git push origin dev
+            fi
+            echo "✅ Manifest 更新成功！"
+          else
+            echo "⚠️ 没有检测到变更，跳过提交"
+          fi
+
   # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
   # 注意：不再需要手动部署步骤，ArgoCD 会自动同步 manifest 变更
   # 如果需要手动审批，可以使用 ArgoCD 的 manual sync 功能

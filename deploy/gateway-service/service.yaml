@@ -1,0 +1,45 @@
+# =====================================================
+# NexusMall Gateway Service - Kubernetes Service
+# =====================================================
+# 用途：为 Gateway Pod 提供稳定的访问入口
+# 类型：NodePort（外部可通过节点 IP + 端口访问）
+# 端口映射：9000（容器） → 30000（NodePort）
+# =====================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexusmall-gateway
+  namespace: nexusmall
+  labels:
+    app: nexusmall-gateway
+    app.kubernetes.io/name: nexusmall-gateway
+spec:
+  # 服务类型：NodePort（生产环境建议使用 LoadBalancer 或 Ingress）
+  type: NodePort
+  
+  # 选择器：匹配带有这些标签的 Pod
+  selector:
+    app: nexusmall-gateway
+  
+  # 端口配置
+  ports:
+    - name: http
+      protocol: TCP
+      port: 9000          # 集群内部访问端口
+      targetPort: 9000    # 容器内应用端口
+      nodePort: 30000     # 节点外部访问端口（范围：30000-32767）
+
+# =====================================================
+# 访问方式说明
+# =====================================================
+# 1. 集群内部访问：
+#    http://nexusmall-gateway.nexusmall.svc.cluster.local:9000
+#
+# 2. 节点外部访问：
+#    http://<任意节点IP>:30000
+#
+# 3. 本地端口转发（调试用）：
+#    kubectl port-forward svc/nexusmall-gateway 9000:9000 -n nexusmall
+#    然后访问：http://localhost:9000
+# =====================================================

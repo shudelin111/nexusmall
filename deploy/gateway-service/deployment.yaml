@@ -1,0 +1,149 @@
+# =====================================================
+# NexusMall Gateway Service - Kubernetes Deployment
+# =====================================================
+# 用途：在 Kubernetes 集群中部署 Gateway 服务
+# 端口：9000（HTTP）
+# 副本数：2（高可用）
+# =====================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexusmall-gateway
+  namespace: nexusmall
+  labels:
+    app: nexusmall-gateway
+    app.kubernetes.io/name: nexusmall-gateway
+spec:
+  # 副本数量（生产环境建议 >= 2）
+  replicas: 2
+  
+  # 滚动更新策略（零停机部署）
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1           # 最多额外创建 1 个 Pod
+      maxUnavailable: 0     # 保证至少所有旧 Pod 都正常运行
+  
+  # Pod 选择器
+  selector:
+    matchLabels:
+      app: nexusmall-gateway
+  
+  # Pod 模板
+  template:
+    metadata:
+      labels:
+        app: nexusmall-gateway
+        app.kubernetes.io/name: nexusmall-gateway
+    spec:
+      # ========================================
+      # 容器定义
+      # ========================================
+      containers:
+        - name: nexusmall-gateway
+          # Docker 镜像（使用 latest 标签，生产环境建议使用具体版本号）
+          image: docker.io/shudlsys/nexusmall-gateway:latest
+          imagePullPolicy: Always  # 总是拉取最新镜像
+          
+          # ========================================
+          # 端口配置
+          # ========================================
+          ports:
+            - name: http
+              containerPort: 9000
+              protocol: TCP
+          
+          # ========================================
+          # 环境变量
+          # ========================================
+          env:
+            # Spring Profile（由 Nacos 配置决定）
+            - name: SPRING_PROFILES_ACTIVE
+              value: "dev"
+          
+          # ========================================
+          # 资源配额（Requests & Limits）
+          # ========================================
+          resources:
+            requests:
+              cpu: 500m       # 请求 0.5 核 CPU
+              memory: 2Gi     # 请求 2GB 内存
+            limits:
+              cpu: 1          # 限制 1 核 CPU
+              memory: 4Gi     # 限制 4GB 内存
+          
+          # ========================================
+          # 健康检查配置
+          # ========================================
+          
+          # Liveness Probe（存活探针）
+          # 作用：检测容器是否存活，失败会重启容器
+          # 用于检测死锁、线程阻塞等无法自愈的问题
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness  # Spring Boot Actuator 健康检查端点
+              port: 9000
+            initialDelaySeconds: 120            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即重启
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康
+          
+          # Readiness Probe（就绪探针）
+          # 作用：检测容器是否准备好接收流量，失败会从 Service 中移除
+          # 用于检测依赖服务未就绪、配置加载失败等临时问题
+          # 
+          # 💡 关键优化：
+          # - initialDelaySeconds: 300 秒（5 分钟），给 Kafka 延迟初始化留足时间
+          # - periodSeconds: 10 秒，降低检查频率，减少启动压力
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 9000
+            initialDelaySeconds: 120            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
+          
+          # ========================================
+          # 生命周期钩子
+          # ========================================
+          lifecycle:
+            # preStop: 容器停止前执行的命令
+            # 作用：优雅关闭，给服务足够时间处理完剩余请求
+            preStop:
+              exec:
+                command: ["sh", "-c", "sleep 10"]
+          
+          # ========================================
+          # 优雅关闭配置
+          # ========================================
+          # terminationGracePeriodSeconds: Pod 终止的宽限期
+          # 流程：
+          # 1. K8s 发送 SIGTERM 信号
+          # 2. 执行 preStop 钩子（sleep 10 秒）
+          # 3. Spring Boot 执行优雅关闭（处理剩余请求）
+          # 4. 宽限期结束后发送 SIGKILL 强制终止
+          terminationGracePeriodSeconds: 30
+
+# =====================================================
+# 部署策略说明
+# =====================================================
+# 滚动更新（RollingUpdate）：
+# 1. 启动新的 Pod
+# 2. 等待新 Pod 通过 Readiness Probe
+# 3. 终止旧的 Pod
+# 4. 确保服务始终可用（零停机部署）
+#
+# 资源配额说明：
+# - requests: K8s 调度时保证的资源
+# - limits: 容器能使用的资源上限
+# - 超过 limits 会被限制（CPU 可超卖，内存超限会被 OOM Kill）
+#
+# 健康检查说明：
+# - Liveness Probe: 检测是否存活，失败 → 重启
+# - Readiness Probe: 检测是否就绪，失败 → 从 Service 移除
+# - Startup Probe: 检测是否启动（慢启动服务使用）
+# =====================================================
