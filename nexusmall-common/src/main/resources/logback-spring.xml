@@ -291,6 +291,7 @@
             - 官方建议：设置为 0-1000ms，避免长时间阻塞
             - 作用：在应用关闭时给 Kafka Producer 时间完成消息发送
          5. includeCallerData: 不包含调用者数据（提升性能）
+         6. **关键**：添加 error 过滤器，启动失败时不阻塞应用
     -->
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
@@ -347,7 +348,8 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>       <!-- 发送到 Kafka（通过 AsyncAppender） -->
+            <!-- 注释掉 Kafka 日志收集，避免启动时连接失败阻塞应用 -->
+            <!-- <appender-ref ref="async_kafka"/>  -->
         </root>
     </springProfile>
 
@@ -367,7 +369,8 @@
             <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>        <!-- 发送到 Kafka（通过 AsyncAppender） -->
+            <!-- 注释掉 Kafka 日志收集，避免启动时连接失败阻塞应用 -->
+            <!-- <appender-ref ref="async_kafka"/>  -->
         </root>
     </springProfile>
 </configuration>
