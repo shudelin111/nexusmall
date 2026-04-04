@@ -212,10 +212,21 @@
          =============================== -->
     <!-- 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
     <!-- 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
+    <!-- 
+         生产者配置说明：
+         1. bootstrap.servers: Kafka Broker 地址列表
+         2. acks=1: Leader 确认即成功（平衡可靠性和性能）
+         3. retries=Integer.MAX_VALUE: 无限重试（确保不丢失日志）
+         4. delivery.timeout.ms: 消息总超时时间（120 秒）
+         5. max.block.ms: 发送阻塞最大时间（60 秒）
+         6. linger.ms: 批处理等待时间（100ms，提升吞吐量）
+    -->
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <topic>app-logs</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
+            
+        <!-- Kafka Producer 核心配置 -->
         <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
         <producerConfig>client.dns.lookup=use_all_dns_ips</producerConfig>
         <producerConfig>acks=1</producerConfig>
@@ -234,6 +245,13 @@
         <producerConfig>connections.max.idle.ms=540000</producerConfig>
         <producerConfig>reconnect.backoff.ms=50</producerConfig>
         <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
+            
+        <!-- 关键：启用 Kafka Producer 的优雅关闭
+             closeTimeout: 关闭 Producer 时等待消息发送完成的最大时间
+             官方建议：设置为 1000-5000ms，避免消息丢失
+        -->
+        <closeTimeout>1000</closeTimeout>
+            
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp>
@@ -270,11 +288,23 @@
 
     <!-- 使用 AsyncAppender 包装 KafkaAppender，避免阻塞主程序 -->
     <!-- 参考官方建议：https://github.com/danielwegener/logback-kafka-appender#note-on-broker-outages -->
+    <!-- 
+         关键参数说明：
+         1. queueSize: 队列大小，设置为 512（默认值）
+         2. discardingThreshold: 丢弃阈值，20% 时开始丢弃非关键日志
+         3. neverBlock: 永不阻塞业务线程（true=推荐设置）
+         4. maxFlushTime: 最大刷新时间（毫秒），应用关闭时等待日志发送完成的时间
+            - 官方建议：设置为 0-1000ms，避免长时间阻塞
+            - 作用：在应用关闭时给 Kafka Producer 时间完成消息发送
+         5. includeCallerData: 不包含调用者数据（提升性能）
+    -->
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
         <discardingThreshold>20</discardingThreshold>
         <includeCallerData>false</includeCallerData>
         <neverBlock>true</neverBlock>
+        <!-- 关键：设置合理的刷新时间，避免关闭时抛出 InterruptedException -->
+        <maxFlushTime>500</maxFlushTime>
         <appender-ref ref="kafka"/>
     </appender>
 

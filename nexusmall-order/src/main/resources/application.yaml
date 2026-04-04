@@ -60,6 +60,7 @@ management:
 # ===============================
 server:
   port: 11000
+  shutdown: graceful  # 启用优雅关闭模式
 
 # ===============================
 # 应用元信息配置
@@ -74,3 +75,21 @@ info:
     version: 0.0.1-SNAPSHOT
   # Java 版本
   java.version: 1.8
+
+# ===============================
+# Spring Boot 优雅关闭配置
+# ===============================
+# 用途：确保应用关闭时完成以下操作
+# 1. 等待在请求处理完成
+# 2. Kafka Producer 完成消息发送
+# 3. 数据库连接正常释放
+# 4. Nacos 客户端正常注销
+# 
+# 官方文档：https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#web.graceful-shutdown
+spring:
+  lifecycle:
+    # 优雅关闭超时时间
+    # 作用：超过此时间后强制关闭应用
+    # 建议值：30-60 秒（给日志发送留足时间）
+    timeout: 30s
+
