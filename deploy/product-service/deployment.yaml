@@ -101,11 +101,11 @@ spec:
           resources:
             requests:
               # 请求资源（Pod 启动所需的最小资源）
-              memory: "1Gi"   # 内存请求：1GB
+              memory: "2Gi"   # 内存请求：1GB
               cpu: "500m"     # CPU 请求：0.5 核
             limits:
               # 限制资源（Pod 能使用的最大资源）
-              memory: "2Gi"   # 内存限制：2GB
+              memory: "4Gi"   # 内存限制：2GB
               cpu: "1000m"    # CPU 限制：1 核
           
           # ========================================

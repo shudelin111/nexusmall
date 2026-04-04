@@ -1,68 +1,176 @@
-apiVersion: apps/v1
-kind: Deployment
+# ==============================================================================
+# NexusMall Order Service Deployment Configuration
+# NexusMall 订单服务 Kubernetes 部署配置
+# ==============================================================================
+# 文件用途：定义订单服务在 Kubernetes 集群中的部署规格
+# 维护团队：平台架构组
+# 更新频率：随版本发布更新
+# ==============================================================================
+
+apiVersion: apps/v1  # Kubernetes API 版本，使用稳定的 apps/v1
+kind: Deployment     # 资源类型：无状态应用部署控制器
 metadata:
+  # 部署资源名称，全局唯一标识符
   name: nexusmall-order
-  namespace: nexusmall  # ArgoCD 部署的目标命名空间
+  
+  # 命名空间配置：将资源隔离在 nexusmall 命名空间中
+  # ArgoCD 持续部署目标命名空间，所有微服务统一在此命名空间下管理
+  namespace: nexusmall
+  
+  # 元数据注解：配置自动化工具的行为参数
   annotations:
-    # ArgoCD 自动同步配置
+    # -------------------------------------------------------------------------
+    # ArgoCD 同步控制配置
+    # -------------------------------------------------------------------------
+    # 同步波次设置："0" 表示优先部署此资源（数值越小优先级越高）
+    # 应用场景：确保基础服务先于依赖服务启动
     argocd.argoproj.io/sync-wave: "0"
+    
+    # 钩子类型：PostSync 表示在主同步完成后执行
+    # 典型用途：部署后任务，如数据迁移、配置验证等
     argocd.argoproj.io/hook: "PostSync"
-    # 镜像更新通知
+    
+    # -------------------------------------------------------------------------
+    # ArgoCD 镜像自动更新器配置
+    # -------------------------------------------------------------------------
+    # 镜像更新列表：指定需要监控和更新的容器镜像
+    # 格式：<alias>=<image-url>，支持多个镜像逗号分隔
     argocd-image-updater.argoproj.io/image-list: "nexusmall-order=docker.io/shudlsys/nexusmall-order"
+    
+    # 更新策略：latest 表示跟踪 latest 标签的最新镜像
+    # 可选策略：semver (语义化版本)、name (按名称排序)、digest (按摘要)
     argocd-image-updater.argoproj.io/nexusmall-order.update-strategy: "latest"
+  
+  # 资源标签：用于资源分类、选择和监控
   labels:
+    # 应用标识：简洁的应用名称
     app: nexusmall-order
-    app.kubernetes.io/name: nexusmall-order
-    app.kubernetes.io/part-of: nexusmall
+    # Kubernetes 推荐标签规范 (app.kubernetes.io/*)
+    app.kubernetes.io/name: nexusmall-order           # 应用名称
+    app.kubernetes.io/part-of: nexusmall              # 所属项目/系统
+
 spec:
+  # ---------------------------------------------------------------------------
+  # 副本数配置：生产环境建议根据负载设置多副本实现高可用
+  # ---------------------------------------------------------------------------
+  # 当前设置：1 副本（适用于开发/测试环境）
+  # 生产环境建议：3+ 副本配合 HPA (水平 Pod 自动伸缩)
   replicas: 1
+  
+  # 选择器：定义如何识别属于此 Deployment 的 Pod
   selector:
     matchLabels:
+      # 必须与 Pod template 中的 labels 完全匹配
       app: nexusmall-order
+  
+  # Pod 模板：定义新创建的 Pod 的规格
   template:
     metadata:
+      # Pod 标签：用于服务发现、监控和日志收集
       labels:
         app: nexusmall-order
         app.kubernetes.io/name: nexusmall-order
+    
     spec:
+      # 容器定义列表：一个 Pod 可包含多个容器（主容器 + 辅助容器）
       containers:
-        - name: nexusmall-order
-          # 镜像标签由 GitHub Actions 自动更新
-          # master 分支：latest + sha-{commit-hash}
+        - name: nexusmall-order  # 容器名称，在同一 Pod 内必须唯一
+          
+          # -------------------------------------------------------------------
+          # 容器镜像配置
+          # -------------------------------------------------------------------
+          # 镜像来源：Docker Hub (docker.io)
+          # 标签策略：使用 latest 标签配合 SHA 校验（由 GitHub Actions 自动管理）
+          # 分支策略：
+          #   - master 分支：latest + sha-{commit-hash}
+          #   - release 分支：语义化版本号 (如 v1.2.3)
+          # 最佳实践：生产环境应使用固定版本号而非 latest
           image: docker.io/shudlsys/nexusmall-order:latest
+          
+          # 端口暴露：声明容器运行时监听的端口
           ports:
-            - containerPort: 11000
-          # Spring Profile 配置（指定运行环境）
+            - containerPort: 11000  # Spring Boot 应用默认端口
+              protocol: TCP         # 协议类型（默认为 TCP，可省略）
+          
+          # -------------------------------------------------------------------
+          # 环境变量配置：向容器注入运行时配置参数
+          # -------------------------------------------------------------------
           env:
+            # Spring Boot 激活的 Profile
+            # 作用：加载对应环境的配置文件（如 application-dev.yml）
+            # 可选值：dev (开发), test (测试), prod (生产)
+            # 安全建议：敏感信息应使用 Secret 或 ConfigMap 注入
             - name: SPRING_PROFILES_ACTIVE
-              value: "dev"  # 可选值：dev, test, prod
+              value: "dev"
+          
+          # -------------------------------------------------------------------
+          # 资源配额管理：防止资源争抢，保障集群稳定性
+          # -------------------------------------------------------------------
+          # requests：Pod 调度时的最小资源保证值
+          # limits：容器允许使用的资源上限（超出可能被 OOM Kill）
+          # 容量规划参考：
+          #   - Java 应用建议预留堆外内存（通常堆内存的 25%-50%）
+          #   - CPU 限制需考虑应用峰值负载的 1.5-2 倍余量
           resources:
             requests:
-              memory: "1Gi"
-              cpu: "500m"
+              memory: "2Gi"   # 申请内存：1 GiB（调度依据）
+              cpu: "500m"     # 申请 CPU：500 毫核（0.5 核）
             limits:
-              memory: "2Gi"
-              cpu: "1000m"
-          # 健康检查
+              memory: "4Gi"   # 内存上限：2 GiB（超出触发 OOMKilled）
+              cpu: "1000m"    # CPU 上限：1000 毫核（1 核，可突发）
+          
+          # -------------------------------------------------------------------
+          # 健康检查探针：保障服务可用性和自愈能力
+          # -------------------------------------------------------------------
+          
+          # 存活探针 (Liveness Probe)
+          # 作用：检测应用是否处于正常运行状态
+          # 失败后果：kubelet 将重启容器（不修复 Bug，仅恢复服务）
+          # 适用场景：死锁、线程池耗尽、内存泄漏等不可恢复错误
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: /actuator/health/liveness  # Spring Actuator 端点
               port: 11000
-            initialDelaySeconds: 240
-            periodSeconds: 10
-            timeoutSeconds: 5
-            failureThreshold: 5
+              scheme: HTTP                      # HTTP 协议（也可用 HTTPS）
+            initialDelaySeconds: 240            # 初始延迟：240 秒（给 JVM 启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败判定为不健康
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康（默认值）
+          
+          # 就绪探针 (Readiness Probe)
+          # 作用：检测应用是否准备好接收流量
+          # 失败后果：从 Service 的 Endpoints 中移除，不再转发流量
+          # 适用场景：启动未完成、依赖服务未就绪、临时过载等可恢复状态
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 11000
-            initialDelaySeconds: 200
-            periodSeconds: 5
-            timeoutSeconds: 3
-            failureThreshold: 3
-          # 优雅关闭
+              scheme: HTTP
+            initialDelaySeconds: 200            # 初始延迟：200 秒（略短于 liveness）
+            periodSeconds: 5                    # 检查间隔：5 秒（更频繁以快速响应）
+            timeoutSeconds: 3                   # 超时时间：3 秒
+            failureThreshold: 3                 # 失败阈值：连续 3 次失败即下线
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
+          
+          # -------------------------------------------------------------------
+          # 生命周期钩子：在容器状态变化时执行特定操作
+          # -------------------------------------------------------------------
           lifecycle:
+            # preStop 钩子：容器停止前执行的命令
+            # 核心用途：实现优雅关闭，配合 terminationGracePeriodSeconds
+            # 执行时机：收到 SIGTERM 信号后、容器停止前
+            # 典型场景：
+            #   - 等待在请求处理完成
+            #   - 从注册中心注销
+            #   - 刷新本地缓存到持久化存储
             preStop:
               exec:
+                # 延迟 10 秒再关闭，配合 Spring Boot 的优雅关闭配置
+                # 目的：让负载均衡层有时间更新路由规则，避免流量损失
                 command: ["sh", "-c", "sleep 10"]
+          
+          # 优雅终止宽限期：从发送 SIGTERM 到强制 SIGKILL 的等待时间
+          # 计算逻辑：preStop 执行时间 + 应用关闭钩子时间 + 安全余量
+          # 默认值：30 秒；长时间任务建议延长至 60-120 秒
           terminationGracePeriodSeconds: 30
