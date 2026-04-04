@@ -208,63 +208,100 @@
     </appender>
 
     <!-- ===============================
-         Kafka 日志收集 Appender（已禁用）
+         Kafka 日志收集 Appender（生产环境启用）
          =============================== -->
     <!-- 
-        ⚠️ 警告：Kafka Appender 会在应用启动时立即连接 Kafka Broker
-        如果 Kafka 不可用，会导致 Logback 配置错误并终止应用启动
-        
-        当前状态：已禁用（避免阻塞启动）
-        
-        启用方法：
-        1. 确保 Kafka Broker 已启动且网络连通
-        2. 取消下面整个 <appender name="kafka"> 块的注释
-        3. 在 root 配置中添加 <appender-ref ref="async_kafka"/>
+        📌 生产环境配置说明：
+        1. Kafka Appender 会在应用启动时尝试连接 Kafka Broker
+        2. 使用 AsynchronousDeliveryStrategy 异步发送，不阻塞业务线程
+        3. 如果 Kafka 不可用，会降级到 console appender（不会终止应用）
+        4. 生产环境必须确保 Kafka 服务可用
         
         官方文档：https://github.com/danielwegener/logback-kafka-appender
     -->
-    <!--
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
+        <!-- 日志发送到 Kafka 的 topic -->
         <topic>app-logs</topic>
+        
+        <!-- Key 策略：按主机名分区，确保同一服务的日志发送到同一 partition -->
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
+        
+        <!-- 发送策略：异步非阻塞发送 -->
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
             
+        <!-- Kafka Producer 配置 -->
+        <!-- bootstrap.servers: Kafka Broker 地址列表（多个地址用逗号分隔） -->
         <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
+        <!-- acks=1: Leader 副本写入成功即确认 -->
         <producerConfig>acks=1</producerConfig>
+        <!-- retries=MAX_VALUE: 无限重试（配合 max.in.flight.requests.per.connection=5 保证有序性） -->
         <producerConfig>retries=2147483647</producerConfig>
+        <!-- batch.size=16384: 批处理大小（16KB） -->
         <producerConfig>batch.size=16384</producerConfig>
+        <!-- linger.ms=100: 等待更多消息加入批次（提升吞吐量） -->
         <producerConfig>linger.ms=100</producerConfig>
-        <producerConfig>request.timeout.ms=5000</producerConfig>
-        <producerConfig>max.block.ms=5000</producerConfig>
+        <!-- request.timeout.ms=30000: 请求超时时间（30 秒） -->
+        <producerConfig>request.timeout.ms=30000</producerConfig>
+        <!-- max.block.ms=60000: Producer 阻塞最大时间（60 秒） -->
+        <producerConfig>max.block.ms=60000</producerConfig>
+        <!-- client.id: 客户端 ID（便于监控和排查问题） -->
+        <producerConfig>client.id=${APP_NAME:-unknown}-logback-kafka</producerConfig>
         
+        <!-- JSON 编码器：将日志编码为 JSON 格式，便于 ELK/EFK 解析 -->
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
+                <!-- 时间戳字段 -->
                 <timestamp><timeZone>Asia/Shanghai</timeZone></timestamp>
+                
+                <!-- 自定义字段：日志级别、服务名、链路追踪 ID 等 -->
                 <pattern>
-                    <pattern>{"level": "%level","service": "${APP_NAME:-unknown}","traceId": "%X{traceId:-}","spanId": "%X{spanId:-}","thread": "%thread","logger": "%logger{36}","host": "${HOSTNAME:-unknown}"}</pattern>
+                    <pattern>{
+                        "level": "%level",
+                        "service": "${APP_NAME:-unknown}",
+                        "traceId": "%X{traceId:-}",
+                        "spanId": "%X{spanId:-}",
+                        "thread": "%thread",
+                        "logger": "%logger{36}",
+                        "host": "${HOSTNAME:-unknown}"
+                    }</pattern>
                 </pattern>
+                
+                <!-- 日志消息内容 -->
                 <message />
+                
+                <!-- 异常堆栈信息 -->
                 <stackTrace>
                     <fieldName>stackTrace</fieldName>
                     <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <!-- 最大递归深度：30 层 -->
                         <maxDepthPerThrowable>30</maxDepthPerThrowable>
+                        <!-- 最大长度：2048 字符（避免过长） -->
                         <maxLength>2048</maxLength>
+                        <!-- 根本原因优先显示 -->
                         <rootCauseFirst>true</rootCauseFirst>
                     </throwableConverter>
                 </stackTrace>
             </providers>
         </encoder>
+        
+        <!-- Kafka 发送失败时的降级策略：输出到控制台 -->
         <appender-ref ref="console"/>
     </appender>
     
+    <!-- 异步 Kafka Appender（包装器） -->
+    <!-- 💡 用途：异步发送 Kafka 日志，不阻塞业务线程 -->
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
+        <!-- 队列大小：512 -->
         <queueSize>512</queueSize>
+        <!-- 丢弃策略阈值：20%（队列剩余空间低于 20% 时开始丢弃低级别日志） -->
         <discardingThreshold>20</discardingThreshold>
+        <!-- 永不阻塞：避免因队列满而阻塞业务线程 -->
         <neverBlock>true</neverBlock>
-        <maxFlushTime>500</maxFlushTime>
+        <!-- 最大刷新时间：应用关闭时等待日志发送完成的时间 -->
+        <maxFlushTime>5000</maxFlushTime>
+        <!-- 引用实际的 Kafka Appender -->
         <appender-ref ref="kafka"/>
     </appender>
-    -->
 
     <!-- ===============================
          分环境日志配置（Spring Profile）
@@ -304,6 +341,11 @@
         <!--
              level="DEBUG": 开发环境输出 DEBUG 及以上级别的日志
              appender-ref: 引用上面定义的输出目标
+             
+             💡 开发环境启用 Kafka 日志收集：
+             1. 用于本地调试和日志集中收集
+             2. 确保本地 Kafka 服务可用
+             3. 如果 Kafka 不可用，会降级到 console（不会阻塞启动）
         -->
         <root level="DEBUG">
             <appender-ref ref="console"/>           <!-- 输出到控制台 -->
@@ -311,35 +353,59 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <!-- 
-                暂时禁用 Kafka 日志收集，避免 Kafka Broker 不可用时阻塞启动
-                待 Kafka 服务正常后，取消下面这行的注释即可启用
-                <appender-ref ref="async_kafka"/>
-            -->
+            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
         </root>
     </springProfile>
 
-    <!-- 生产/测试环境（prod, test）配置 -->
-    <springProfile name="prod,test">
+    <!-- ===============================
+         生产环境（prod）配置
+         =============================== -->
+    <springProfile name="prod">
         <!-- 根日志配置 -->
         <!--
-             💡 生产环境注意事项：
-             1. 输出到文件和控制台
-             2. 日志级别为 INFO（不输出 DEBUG 详细日志）
-             3. Seata 等框架日志建议调整为 INFO 或 WARN
-             4. 开启 Kafka 日志收集（仅 WARN 和 ERROR）
-             5. 所有文件日志均使用异步 Appender 提升性能
+             💡 生产环境配置要点：
+             1. 日志级别为 INFO（不输出 DEBUG 详细日志）
+             2. 必须开启 Kafka 日志收集（集中式日志管理）
+             3. 所有文件日志均使用异步 Appender 提升性能
+             4. Seata、Nacos 等框架日志调整为 INFO 或 WARN
+             5. 确保 Kafka 服务可用，否则日志会降级到 console
         -->
+            
+        <!-- 生产环境建议的日志级别 -->
+        <logger name="io.seata" level="INFO"/>
+        <logger name="com.alibaba.nacos" level="WARN"/>
+        <logger name="com.alibaba.druid.pool" level="INFO"/>
+            
         <root level="INFO">
-            <!-- <appender-ref ref="async_file_info"/> 输出 INFO 日志（异步） -->
-            <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
-            <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
-            <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <!-- 
-                暂时禁用 Kafka 日志收集，避免 Kafka Broker 不可用时阻塞启动
-                待 Kafka 服务正常后，取消下面这行的注释即可启用
-                <appender-ref ref="async_kafka"/>
-            -->
+            <appender-ref ref="async_file_info"/>   <!-- 输出 INFO 日志（异步） -->
+            <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
+            <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
+            <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
+            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
+        </root>
+    </springProfile>
+        
+    <!-- ===============================
+         测试环境（test）配置
+         =============================== -->
+    <springProfile name="test">
+        <!-- 根日志配置 -->
+        <!--
+             💡 测试环境配置要点：
+             1. 日志级别为 INFO（与生产环境一致）
+             2. 启用 Kafka 日志收集
+             3. 保留完整的文件日志用于问题排查
+        -->
+            
+        <logger name="io.seata" level="INFO"/>
+        <logger name="com.alibaba.nacos" level="INFO"/>
+            
+        <root level="INFO">
+            <appender-ref ref="async_file_info"/>   <!-- 输出 INFO 日志（异步） -->
+            <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
+            <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
+            <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
+            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
         </root>
     </springProfile>
 </configuration>

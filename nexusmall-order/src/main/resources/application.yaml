@@ -92,7 +92,4 @@ spring:
     # 作用：超过此时间后强制关闭应用
     # 建议值：30-60 秒（给日志发送留足时间）
     timeout: 30s
-  # 指定开发环境使用无 Kafka 的日志配置
-  config:
-    import: optional:logback-dev.xml
 
