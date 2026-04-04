@@ -20,15 +20,15 @@ global:
     environment: 'development'
 
 # 告警配置（可选，后续集成 Alertmanager）
-# alerting:
-#   alertmanagers:
-#     - static_configs:
-#         - targets:
-#             - alertmanager:9093
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+            - 'localhost:9093'
 
 # 规则文件配置（可选，用于预定义告警规则）
-# rule_files:
-#   - "nexusmall-alerting-rules.yml"
+rule_files:
+  - "alert_rules.yml"
 
 # 数据抓取配置
 scrape_configs:

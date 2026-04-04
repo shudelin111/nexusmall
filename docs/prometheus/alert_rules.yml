@@ -1,0 +1,52 @@
+groups:
+  - name: nexusmall_alerts
+    rules:
+      # 1. 服务实例宕机告警
+      - alert: ServiceInstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "服务实例 {{ $labels.instance }} 已宕机"
+          description: "{{ $labels.job }} 的实例 {{ $labels.instance }} 已经停止响应超过 1 分钟。"
+
+      # 2. JVM 内存使用率过高告警 (>85%)
+      - alert: JvmMemoryHigh
+        expr: jvm_memory_used_bytes{area="heap"} / jvm_memory_max_bytes{area="heap"} > 0.85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "JVM 堆内存使用率过高"
+          description: "实例 {{ $labels.instance }} 的堆内存使用率已超过 85% (当前值: {{ $value | humanizePercentage }})。"
+
+      # 3. HTTP 5xx 错误率过高告警
+      - alert: HighHttpErrorRate
+        expr: rate(http_server_requests_seconds_count{status=~"5.."}[5m]) / rate(http_server_requests_seconds_count[5m]) > 0.05
+        for: 3m
+        labels:
+          severity: critical
+        annotations:
+          summary: "HTTP 5xx 错误率过高"
+          description: "服务 {{ $labels.job }} 的 5xx 错误率在过去 5 分钟内超过了 5% (当前值: {{ $value | humanizePercentage }})。"
+
+      # 4. 接口响应时间过长告警 (P95 > 2s)
+      - alert: HighRequestLatency
+        expr: histogram_quantile(0.95, rate(http_server_requests_seconds_bucket[5m])) > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "接口响应延迟过高"
+          description: "服务 {{ $labels.job }} 的 P95 响应时间超过 2 秒 (当前值: {{ $value }}s)。"
+
+      # 5. Gateway 路由转发失败告警
+      - alert: GatewayRouteFailure
+        expr: rate(gateway_requests_seconds_count{outcome="SERVER_ERROR"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Gateway 路由转发频繁失败"
+          description: "Gateway 在过去 5 分钟内每秒产生超过 0.1 个服务器错误。"

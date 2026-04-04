@@ -1,0 +1,24 @@
+global:
+  resolve_timeout: 5m
+
+# 路由配置：将告警分发到不同的接收器
+route:
+  group_by: ['alertname', 'job']
+  group_wait: 10s
+  group_interval: 10s
+  repeat_interval: 1h
+  receiver: 'console-alert'
+
+receivers:
+  - name: 'console-alert'
+    webhook_configs:
+      - url: 'http://localhost:9093/console-webhook' # 示例：实际使用时可替换为钉钉/企业微信/邮件
+
+# 抑制规则：如果服务已经宕机，就不要再报内存高的警了
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+      alertname: ServiceInstanceDown
+    target_match:
+      severity: 'warning'
+    equal: ['instance', 'job']
