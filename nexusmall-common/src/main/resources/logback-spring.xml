@@ -243,7 +243,7 @@
         <!-- request.timeout.ms=500: 请求超时时间（30 秒） -->
         <producerConfig>request.timeout.ms=500</producerConfig>
         <!-- max.block.ms=100: Producer 阻塞最大时间（60 秒） -->
-        <producerConfig>max.block.ms=100</producerConfig>
+        <producerConfig>max.block.ms=2000</producerConfig>
         <producerConfig>metadata.max.age.ms=1000</producerConfig>
         <!-- client.id: 客户端 ID（便于监控和排查问题） -->
         <producerConfig>client.id=${APP_NAME:-unknown}-logback-kafka</producerConfig>
