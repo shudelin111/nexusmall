@@ -72,8 +72,10 @@ spec:
           # Docker 镜像配置
           # ========================================
           # 镜像标签由 GitHub Actions 自动更新
-          # dev/master 分支：latest（自动拉取最新镜像）
-          # 语义化版本：v1.0.0, v1.2.3 等（生产环境使用）
+          # 分支策略：
+          #   - dev 分支：latest（开发环境，自动拉取最新）
+          #   - master 分支：sha-{commit}（生产环境，版本可追溯）
+          #   - 语义化版本：v1.0.0, v1.2.3 等（发布版本使用）
           image: docker.io/shudlsys/nexusmall-product:latest
           
           # ========================================

@@ -80,10 +80,10 @@ spec:
           # 容器镜像配置
           # -------------------------------------------------------------------
           # 镜像来源：Docker Hub (docker.io)
-          # 标签策略：使用 latest 标签配合 SHA 校验（由 GitHub Actions 自动管理）
           # 分支策略：
-          #   - master 分支：latest + sha-{commit-hash}
-          #   - release 分支：语义化版本号 (如 v1.2.3)
+          #   - dev 分支：latest（开发环境，自动拉取最新）
+          #   - master 分支：sha-{commit}（生产环境，版本可追溯）
+          #   - 语义化版本：v1.0.0, v1.2.3 等（发布版本使用）
           # 最佳实践：生产环境应使用固定版本号而非 latest
           image: docker.io/shudlsys/nexusmall-order:latest
           
