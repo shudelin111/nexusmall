@@ -73,7 +73,16 @@ P0 - 立即实施 (生产必备)
 ✅ 添加 Dockerfile 和 docker-compose.yml
 ✅ 配置 CI/CD 流水线
 ✅ 添加 Swagger/Knife4j API 文档
-✅ 配置告警规则 (Prometheus Alertmanager)
+✅ 配置告警规则 (Prometheus Alertmanager)  docs/prometheus
+# 1. 启动 Alertmanager (默认端口 9093)
+.\alertmanager.exe --config.file=docs\prometheus\alertmanager.yml
+# 2. 重启 Prometheus (它会重新加载规则文件)
+# 或者在 Prometheus UI (http://localhost:9090) 点击 "Reload"
+配置完成后，你可以在 Prometheus UI 的 "Alerts" 标签页中看到这些规则的状态（Inactive/Pending/Firing）。需要我帮你把这些配置文件也提交到 Git 吗？
+
+
+
+
 P1 - 短期实施 (1-2 个月)
 ✅ 引入 Resilience4j 增强容错能力
 ✅ 实现多级缓存架构
@@ -86,6 +95,9 @@ P2 - 中期实施 (3-6 个月)
 ✅ 读写分离与分库分表
 ✅ 全链路压测
 ✅ 业务监控指标体系建设
+
+
+
 
 🎯 总结
 您的项目在微服务基础架构方面已经做得很不错，核心的中间件 (Nacos, Sentinel, Seata, RocketMQ) 都已集成。但在以下方面与业界最标准做法还有较大差距:
