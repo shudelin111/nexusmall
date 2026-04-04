@@ -128,14 +128,18 @@ spec:
           # Readiness Probe（就绪探针）
           # 作用：检测容器是否准备好接收流量，失败会从 Service 中移除
           # 用于检测依赖服务未就绪、配置加载失败等临时问题
+          # 
+          # 💡 关键优化：
+          # - initialDelaySeconds: 300 秒（5 分钟），给 Kafka 延迟初始化留足时间
+          # - periodSeconds: 10 秒，降低检查频率，减少启动压力
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 12000
-            initialDelaySeconds: 200  # 容器启动后 200 秒开始检查
-            periodSeconds: 5          # 每 5 秒检查一次
-            timeoutSeconds: 3         # 超时 3 秒
-            failureThreshold: 3       # 失败 3 次后标记为未就绪
+            initialDelaySeconds: 300            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
             successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
           
           # ========================================
