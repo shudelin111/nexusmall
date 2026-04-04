@@ -211,7 +211,7 @@
          Kafka 日志收集 Appender
          =============================== -->
     <!-- 用途：将日志异步发送到 Kafka，用于集中收集和分析 -->
-    <!-- 参考官方文档：https://github.com/danielwegener/logback-kafka-appender -->
+    <!-- 参考官方文档：https://github.com/danielwegener.logback-kafka-appender -->
     <!-- 
          生产者配置说明：
          1. bootstrap.servers: Kafka Broker 地址列表
@@ -220,12 +220,14 @@
          4. delivery.timeout.ms: 消息总超时时间（120 秒）
          5. max.block.ms: 发送阻塞最大时间（60 秒）
          6. linger.ms: 批处理等待时间（100ms，提升吞吐量）
+         7. **关键**：request.timeout.ms=5000 - 请求超时快速失败，避免启动阻塞
+         8. **关键**：metadata.max.age.ms=60000 - 元数据快速刷新
     -->
     <appender name="kafka" class="com.github.danielwegener.logback.kafka.KafkaAppender">
         <topic>app-logs</topic>
         <keyingStrategy class="com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy" />
         <deliveryStrategy class="com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy" />
-            
+                
         <!-- Kafka Producer 核心配置 -->
         <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
         <producerConfig>client.dns.lookup=use_all_dns_ips</producerConfig>
@@ -238,14 +240,16 @@
         <producerConfig>key.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
         <producerConfig>value.serializer=org.apache.kafka.common.serialization.ByteArraySerializer</producerConfig>
         <producerConfig>security.protocol=PLAINTEXT</producerConfig>
-        <producerConfig>request.timeout.ms=30000</producerConfig>
+        <!-- 关键：缩短请求超时时间，快速失败不阻塞启动 -->
+        <producerConfig>request.timeout.ms=5000</producerConfig>
+        <!-- 关键：连接超时设置 -->
+        <producerConfig>connections.max.idle.ms=30000</producerConfig>
+        <producerConfig>metadata.max.age.ms=60000</producerConfig>
         <producerConfig>delivery.timeout.ms=120000</producerConfig>
-        <producerConfig>max.block.ms=60000</producerConfig>
-        <producerConfig>metadata.max.age.ms=300000</producerConfig>
-        <producerConfig>connections.max.idle.ms=540000</producerConfig>
+        <producerConfig>max.block.ms=5000</producerConfig>
         <producerConfig>reconnect.backoff.ms=50</producerConfig>
         <producerConfig>reconnect.backoff.max.ms=1000</producerConfig>
-            
+                
         <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
             <providers>
                 <timestamp>
@@ -291,7 +295,6 @@
             - 官方建议：设置为 0-1000ms，避免长时间阻塞
             - 作用：在应用关闭时给 Kafka Producer 时间完成消息发送
          5. includeCallerData: 不包含调用者数据（提升性能）
-         6. **关键**：添加 error 过滤器，启动失败时不阻塞应用
     -->
     <appender name="async_kafka" class="ch.qos.logback.classic.AsyncAppender">
         <queueSize>512</queueSize>
@@ -348,8 +351,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <!-- 注释掉 Kafka 日志收集，避免启动时连接失败阻塞应用 -->
-            <!-- <appender-ref ref="async_kafka"/>  -->
+            <appender-ref ref="async_kafka"/>       <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 
@@ -369,8 +371,7 @@
             <appender-ref ref="async_file_warn"/>    <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>   <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>           <!-- 输出全部日志（同步） -->
-            <!-- 注释掉 Kafka 日志收集，避免启动时连接失败阻塞应用 -->
-            <!-- <appender-ref ref="async_kafka"/>  -->
+            <appender-ref ref="async_kafka"/>        <!-- 发送到 Kafka（通过 AsyncAppender） -->
         </root>
     </springProfile>
 </configuration>
