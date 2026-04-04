@@ -1,6 +1,8 @@
 package com.nexusmall.order;
 
+import com.nexusmall.common.aspect.SentinelBlockExceptionHandler;
 import com.nexusmall.common.config.GlobalFeignConfig;
+import com.nexusmall.common.config.KafkaLoggingConfig;
 import com.nexusmall.common.config.RedisConfig;
 import com.nexusmall.common.config.RedissonConfig;
 import com.nexusmall.common.config.SeataDataSourceConfig;
@@ -25,7 +27,8 @@ import org.springframework.context.annotation.Import;
         NexusmallOrderApplication.class, 
         RedisUtils.class, 
         SeataXidFilter.class,
-        com.nexusmall.common.aspect.SentinelBlockExceptionHandler.class // 扫描 Sentinel 全局异常处理器
+        SentinelBlockExceptionHandler.class, // 扫描 Sentinel 全局异常处理器
+        KafkaLoggingConfig.class // 扫描 Kafka 日志配置（延迟初始化）
 })
 public class NexusmallOrderApplication {
 
