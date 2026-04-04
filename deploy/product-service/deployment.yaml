@@ -119,7 +119,7 @@ spec:
             httpGet:
               path: /actuator/health/liveness  # Spring Boot Actuator 健康检查端点
               port: 12000
-            initialDelaySeconds: 300            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            initialDelaySeconds: 120            # 初始延迟：300 秒（5 分钟，给启动留足时间）
             periodSeconds: 10                   # 检查间隔：10 秒
             timeoutSeconds: 5                   # 超时时间：5 秒
             failureThreshold: 5                 # 失败阈值：连续 5 次失败即重启
@@ -136,7 +136,7 @@ spec:
             httpGet:
               path: /actuator/health/readiness
               port: 12000
-            initialDelaySeconds: 300            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            initialDelaySeconds: 100            # 初始延迟：300 秒（5 分钟，给启动留足时间）
             periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
             timeoutSeconds: 5                   # 超时时间：5 秒
             failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
