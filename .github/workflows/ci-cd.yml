@@ -291,8 +291,8 @@ jobs:
       - name: Update image tag in deployment.yaml
         run: |
           echo "更新 Product 服务镜像标签..."
-          # 使用 sha 标签而非 latest，确保版本可追溯
-          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:sha-${{ github.sha }}"
+          # dev 分支：使用 latest 标签，自动拉取最新镜像
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:latest"
           echo "新镜像：${NEW_IMAGE}"
           
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/product-service/deployment.yaml
@@ -308,7 +308,7 @@ jobs:
           if ! git diff --quiet deploy/product-service/deployment.yaml; then
             echo "检测到变更，提交..."
             git add deploy/product-service/deployment.yaml
-            git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
+            git commit -m "chore(deploy): update product image to latest [skip ci]"
             # 根据分支推送到不同分支
             if [ "${{ github.ref }}" == "refs/heads/master" ]; then
               git push origin master
@@ -507,8 +507,8 @@ jobs:
       - name: Update image tag in deployment.yaml
         run: |
           echo "更新 Order 服务镜像标签..."
-          # 使用 sha 标签而非 latest，确保版本可追溯
-          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}"
+          # dev 分支：使用 latest 标签，自动拉取最新镜像
+          NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:latest"
           echo "新镜像：${NEW_IMAGE}"
           
           sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
@@ -524,7 +524,7 @@ jobs:
           if ! git diff --quiet deploy/order-service/deployment.yaml; then
             echo "检测到变更，提交..."
             git add deploy/order-service/deployment.yaml
-            git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
+            git commit -m "chore(deploy): update order image to latest [skip ci]"
             # 根据分支推送到不同分支
             if [ "${{ github.ref }}" == "refs/heads/master" ]; then
               git push origin master
