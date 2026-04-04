@@ -34,6 +34,8 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <spring-cloud-alibaba.version>2021.0.5.0</spring-cloud-alibaba.version>
         <spring-cloud.version>2021.0.5</spring-cloud.version>
+        <!-- Nacos Client 版本 (解决 gRPC PerfMark 报错) -->
+        <nacos-client.version>2.3.0</nacos-client.version>
         <!-- 日志配置 -->
         <log.path>D:/IdeaProjects/nexusmall/logs</log.path>
         <log.level>INFO</log.level>
@@ -59,6 +61,12 @@
                 <version>${spring-cloud-alibaba.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <!-- 强制指定 Nacos Client 版本以修复 gRPC PerfMark 报错 -->
+            <dependency>
+                <groupId>com.alibaba.nacos</groupId>
+                <artifactId>nacos-client</artifactId>
+                <version>${nacos-client.version}</version>
             </dependency>
             <!-- Seata 分布式事务 -->
             <dependency>
