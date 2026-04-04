@@ -262,9 +262,6 @@
         <producerConfig>linger.ms=50</producerConfig> <!-- 等待 50ms 或达到 batch.size -->
         <producerConfig>compression.type=lz4</producerConfig> <!-- 压缩算法：none, gzip, snappy, lz4, zstd -->
         
-        <!-- 【关键】防止缓冲区满阻塞 - 避免启动时阻塞 -->
-        <producerConfig>block.on.buffer.full=false</producerConfig> <!-- 缓冲区满时不阻塞，直接降级 -->
-        
         <!-- 【可靠性】超时与阻塞配置 - 避免启动时阻塞 -->
         <producerConfig>request.timeout.ms=5000</producerConfig> <!-- 请求超时 5 秒（快速失败） -->
         <producerConfig>max.block.ms=1000</producerConfig> <!-- 阻塞最大 1 秒（避免阻塞启动） -->
