@@ -105,7 +105,6 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
 # 注意：实际使用哪个 profile 由 K8s 环境变量或 Nacos 配置决定
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV SERVER_PORT=11000
-ENV MANAGEMENT_SERVER_PORT=11001
 
 # 应用目录
 ENV APP_HOME=/app

@@ -58,6 +58,9 @@ management:
     health:
       # 显示健康检查详情
       show-details: always
+      # 【关键】启用 K8s 健康检查探针端点（/actuator/health/readiness 和 /actuator/health/liveness）
+      probes:
+        enabled: true
     info:
       # 启用 info 端点
       enabled: true
@@ -68,6 +71,12 @@ management:
       enabled: true
   # 健康检查配置
   health:
+    # 【关键】启用 K8s 存活状态检查
+    livenessState:
+      enabled: true
+    # 【关键】启用 K8s 就绪状态检查
+    readinessState:
+      enabled: true
     # 数据库健康检查
     db:
       enabled: true
