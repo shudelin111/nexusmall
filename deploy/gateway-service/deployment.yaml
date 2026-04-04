@@ -16,7 +16,7 @@ metadata:
     app.kubernetes.io/name: nexusmall-gateway
 spec:
   # 副本数量（生产环境建议 >= 2）
-  replicas: 2
+  replicas: 1
   
   # 滚动更新策略（零停机部署）
   strategy:
