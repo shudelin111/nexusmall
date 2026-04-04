@@ -316,13 +316,6 @@
         <!-- Kafka 发送失败时的降级策略：输出到控制台 -->
         <appender-ref ref="console"/>
     </appender>
-        
-        <!-- Kafka 发送失败时的多重降级策略 -->
-        <!-- 第一级降级：输出到控制台 -->
-        <appender-ref ref="console"/>
-        <!-- 第二级降级：输出到文件（即使 Kafka 不可用也要保留日志） -->
-        <!-- <appender-ref ref="file_all"/> -->
-    </appender>
     
     <!-- 异步 Kafka Appender（包装器）- 增强可靠性版本 -->
     <!-- 💡 用途：异步发送 Kafka 日志，不阻塞业务线程 -->
