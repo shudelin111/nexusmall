@@ -72,10 +72,10 @@ spec:
           # Docker 镜像配置
           # ========================================
           # 镜像标签由 GitHub Actions 自动更新
-          # master 分支：latest + sha-{commit-hash}
+          # master 分支：latest（开发环境使用）
           # develop 分支：develop
-          # 语义化版本：v1.0.0, v1.2.3 等
-          image: docker.io/shudlsys/nexusmall-product:sha-1ec2530f3af55bc583ad5686f193a8e9f904af61
+          # 语义化版本：v1.0.0, v1.2.3 等（生产环境使用）
+          image: docker.io/shudlsys/nexusmall-product:latest
           
           # ========================================
           # 端口配置
