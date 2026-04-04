@@ -68,7 +68,18 @@ spring:
         min-idle: 0
         # 获取连接的最大等待时间（毫秒）
         max-wait: 1000ms  # 1 秒
-  
+  # ===============================
+  # Kafka 配置（用于日志收集）
+  # ===============================
+  kafka:
+    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
+    producer:
+      acks: 1
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   # Spring Cloud 配置
   cloud:
     # OpenFeign 服务调用配置
@@ -181,19 +192,7 @@ rocketmq:
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
 
-# ===============================
-# Kafka 配置（用于日志收集）
-# ===============================
-spring:
-  kafka:
-    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-    producer:
-      acks: 1
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
 
 # ===============================
 # Seata 分布式事务配置
@@ -236,10 +235,19 @@ management:
   endpoint:
     health:
       show-details: always
+      # 【关键】启用 liveness 和 readiness 健康组（K8s 探针必需）
+      probes:
+        enabled: true
     info:
       enabled: true
   info:
     env:
+      enabled: true
+  # 【关键】启用 JVM、DB 等详细健康检查
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
       enabled: true
 
 # ===============================

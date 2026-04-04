@@ -142,15 +142,19 @@ spec:
           # 作用：检测应用是否准备好接收流量
           # 失败后果：从 Service 的 Endpoints 中移除，不再转发流量
           # 适用场景：启动未完成、依赖服务未就绪、临时过载等可恢复状态
+          # 
+          # 💡 关键优化：
+          # - initialDelaySeconds: 300 秒（5 分钟），给 Kafka 延迟初始化留足时间
+          # - periodSeconds: 10 秒，降低检查频率，减少启动压力
           readinessProbe:
             httpGet:
               path: /actuator/health/readiness
               port: 11000
               scheme: HTTP
-            initialDelaySeconds: 200            # 初始延迟：200 秒（略短于 liveness）
-            periodSeconds: 5                    # 检查间隔：5 秒（更频繁以快速响应）
-            timeoutSeconds: 3                   # 超时时间：3 秒
-            failureThreshold: 3                 # 失败阈值：连续 3 次失败即下线
+            initialDelaySeconds: 300            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
             successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
           
           # -------------------------------------------------------------------
