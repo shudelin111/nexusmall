@@ -5,6 +5,7 @@ import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.service.BrandService;
 import com.nexusmall.product.vo.BrandVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/brand")
+@Tag(name = "品牌管理", description = "商品品牌的增删改查")
 public class BrandController {
 
     @Autowired

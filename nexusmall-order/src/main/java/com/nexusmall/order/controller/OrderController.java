@@ -9,6 +9,9 @@ import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.vo.OrderCreateRequest;
 import com.nexusmall.order.vo.OrderQueryRequest;
 import io.seata.spring.annotation.GlobalTransactional;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,6 +29,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/order")
+@Tag(name = "订单管理", description = "订单的创建、查询、更新、删除及业务流程操作")
 public class OrderController {
 
     @Autowired
@@ -35,6 +39,7 @@ public class OrderController {
      * 健康检查接口
      */
     @GetMapping("/ping")
+    @Operation(summary = "健康检查", description = "检查订单服务是否正常运行")
     public Result<Map<String, Object>> ping() {
         Map<String, Object> payload = new LinkedHashMap<>();
         payload.put("service", "nexusmall-order");
@@ -47,7 +52,10 @@ public class OrderController {
      * 根据 ID 查询订单
      */
     @GetMapping("/{id}")
-    public Result<Order> getOrderById(@PathVariable("id") Long id) {
+    @Operation(summary = "根据ID查询订单", description = "根据订单ID查询订单详细信息")
+    public Result<Order> getOrderById(
+            @Parameter(description = "订单ID", example = "1000", required = true)
+            @PathVariable("id") Long id) {
         log.info("查询订单，orderId: {}", id);
         Order order = orderService.getById(id);
         if (order != null) {
@@ -63,7 +71,10 @@ public class OrderController {
      * 根据订单号查询订单
      */
     @GetMapping("/sn/{orderSn}")
-    public Result<Order> getOrderByOrderSn(@PathVariable("orderSn") String orderSn) {
+    @Operation(summary = "根据订单号查询", description = "根据订单编号查询订单详细信息")
+    public Result<Order> getOrderByOrderSn(
+            @Parameter(description = "订单编号", example = "ORD202604040001", required = true)
+            @PathVariable("orderSn") String orderSn) {
         log.info("查询订单，orderSn: {}", orderSn);
         Order order = orderService.getByOrderSn(orderSn);
         if (order != null) {
@@ -124,7 +135,10 @@ public class OrderController {
      * 创建订单（带分布式事务）
      */
     @PostMapping("/create")
-    public Result<Order> createOrder(@Valid @RequestBody OrderCreateRequest request) {
+    @Operation(summary = "创建订单", description = "创建新订单，包含库存扣减和订单生成，使用 Seata 分布式事务保证数据一致性")
+    public Result<Order> createOrder(
+            @Parameter(description = "订单创建请求", required = true)
+            @Valid @RequestBody OrderCreateRequest request) {
         log.info("收到创建订单请求，userId: {}, productId: {}, count: {}", 
                 request.getMemberId(), request.getProductId(), request.getCount());
         

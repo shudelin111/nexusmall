@@ -5,6 +5,7 @@ import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.service.CategoryService;
 import com.nexusmall.product.vo.CategoryVO;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/category")
+@Tag(name = "分类管理", description = "商品分类的增删改查")
 public class CategoryController {
 
     @Autowired

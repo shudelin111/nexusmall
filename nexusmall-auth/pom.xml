@@ -141,6 +141,12 @@
 			<artifactId>sentinel-datasource-nacos</artifactId>
 		</dependency>
 
+		<!-- Knife4j Swagger 文档增强 -->
+		<dependency>
+			<groupId>com.github.xiaoymin</groupId>
+			<artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+		</dependency>
+
 		<!-- Micrometer Prometheus 注册器（用于暴露 Prometheus 监控指标） -->
 		<!-- 业界标准：将 Spring Boot Actuator 指标导出到 Prometheus -->
 		<dependency>

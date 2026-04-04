@@ -13,6 +13,7 @@ import com.nexusmall.product.service.ProductService;
 import com.nexusmall.product.vo.ProductQueryRequest;
 import com.nexusmall.product.vo.ProductVO;
 import io.seata.core.context.RootContext;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,6 +32,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/product")
+@Tag(name = "商品管理", description = "商品信息管理、库存管理")
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);

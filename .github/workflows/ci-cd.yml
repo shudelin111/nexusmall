@@ -135,28 +135,26 @@ jobs:
           echo "====== 编译 Product 模块 ======"
           mvn clean compile -f nexusmall-product/pom.xml -B
       
-      - name: Run Product Module Tests
+      - name: Run Product Module Tests with Coverage
         run: |
-          echo "====== 单元测试阶段 ======"
+          echo "====== 单元测试阶段 (带 JaCoCo 覆盖率检查) ======"
           if [ -d "nexusmall-product/src/test/java" ] && [ "$(find nexusmall-product/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
-            mvn test -f nexusmall-product/pom.xml -Dtest=*Test
+            # 执行测试并生成覆盖率报告,同时检查覆盖率阈值
+            mvn clean test jacoco:check -f nexusmall-product/pom.xml -B
           else
             echo "⚠️ 未找到测试文件，跳过测试"
+            echo "💡 提示：建议为业务模块编写单元测试以达到 50%+ 覆盖率要求"
           fi
-        continue-on-error: true
       
-      - name: Upload Test Results
+      - name: Upload Test Results and Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: product-test-results
-          path: nexusmall-product/target/surefire-reports/
-        continue-on-error: true
-      
-      - name: Check Code Coverage
-        run: |
-          echo "生成覆盖率报告..."
-          mvn jacoco:report -f nexusmall-product/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+          name: product-test-and-coverage
+          path: |
+            nexusmall-product/target/surefire-reports/
+            nexusmall-product/target/site/jacoco/
+          retention-days: 30
 
   # ========== 阶段 2: 代码质量检查 - Product 模块 ==========
   quality-check-product:
@@ -362,28 +360,26 @@ jobs:
           echo "====== 编译 Order 模块 ======"
           mvn clean compile -f nexusmall-order/pom.xml -B
       
-      - name: Run Order Module Tests
+      - name: Run Order Module Tests with Coverage
         run: |
-          echo "====== 单元测试阶段 ======"
+          echo "====== 单元测试阶段 (带 JaCoCo 覆盖率检查) ======"
           if [ -d "nexusmall-order/src/test/java" ] && [ "$(find nexusmall-order/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
-            mvn test -f nexusmall-order/pom.xml -Dtest=*Test
+            # 执行测试并生成覆盖率报告,同时检查覆盖率阈值
+            mvn clean test jacoco:check -f nexusmall-order/pom.xml -B
           else
             echo "⚠️ 未找到测试文件，跳过测试"
+            echo "💡 提示：建议为业务模块编写单元测试以达到 50%+ 覆盖率要求"
           fi
-        continue-on-error: true
       
-      - name: Upload Test Results
+      - name: Upload Test Results and Coverage Report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: order-test-results
-          path: nexusmall-order/target/surefire-reports/
-        continue-on-error: true
-      
-      - name: Check Code Coverage
-        run: |
-          echo "生成覆盖率报告..."
-          mvn jacoco:report -f nexusmall-order/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+          name: order-test-and-coverage
+          path: |
+            nexusmall-order/target/surefire-reports/
+            nexusmall-order/target/site/jacoco/
+          retention-days: 30
 
   # ========== 阶段 2: 代码质量检查 - Order 模块 ==========
   quality-check-order:

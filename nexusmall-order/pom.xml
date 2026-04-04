@@ -159,10 +159,21 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- ========================================
+             Knife4j OpenAPI 3 (API 文档 - Spring Boot 2.x)
+             官方文档: https://doc.xiaominfo.com/
+             注意：Gateway 聚合模式下，业务服务只需引入 micro starter（不含UI）
+             ======================================== -->
+        <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <!-- Spring Boot Maven Plugin -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
@@ -190,6 +201,15 @@
                         -Dcsp.sentinel.log.level=DEBUG
                     </jvmArguments>
                 </configuration>
+            </plugin>
+            
+            <!-- ========================================
+                 JaCoCo 代码覆盖率插件 (继承父 POM 配置)
+                 官方文档: https://www.jacoco.org/jacoco/trunk/doc/maven.html
+                 ======================================== -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
             </plugin>
         </plugins>
     </build>
