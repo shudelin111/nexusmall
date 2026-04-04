@@ -75,7 +75,7 @@ spec:
           # master 分支：latest + sha-{commit-hash}
           # develop 分支：develop
           # 语义化版本：v1.0.0, v1.2.3 等
-          image: docker.io/shudlsys/nexusmall-product:sha-ecc4957768de6f2dbd038f494174f6c87a6c970e
+          image: docker.io/shudlsys/nexusmall-product:sha-1ec2530f3af55bc583ad5686f193a8e9f904af61
           
           # ========================================
           # 端口配置
