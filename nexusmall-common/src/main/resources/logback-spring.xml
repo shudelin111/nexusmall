@@ -398,7 +398,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
+            <!-- 【动态添加】Kafka Appender 将在应用启动完成后通过代码动态添加 -->
         </root>
     </springProfile>
 
@@ -426,7 +426,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
+            <!-- 【动态添加】Kafka Appender 将在应用启动完成后通过代码动态添加 -->
         </root>
     </springProfile>
         
@@ -450,7 +450,7 @@
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
             <appender-ref ref="file_all"/>          <!-- 输出全部日志（同步） -->
-            <appender-ref ref="async_kafka"/>       <!-- 输出到 Kafka（异步） -->
+            <!-- 【动态添加】Kafka Appender 将在应用启动完成后通过代码动态添加 -->
         </root>
     </springProfile>
 </configuration>
