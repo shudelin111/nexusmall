@@ -231,7 +231,7 @@
             
         <!-- Kafka Producer 配置 -->
         <!-- bootstrap.servers: Kafka Broker 地址列表（多个地址用逗号分隔） -->
-        <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc:9092</producerConfig>
+        <producerConfig>bootstrap.servers=mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092</producerConfig>
         <!-- acks=1: Leader 副本写入成功即确认 -->
         <producerConfig>acks=1</producerConfig>
         <!-- retries=MAX_VALUE: 无限重试（配合 max.in.flight.requests.per.connection=5 保证有序性） -->

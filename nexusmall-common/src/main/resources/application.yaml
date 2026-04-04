@@ -25,7 +25,7 @@ spring:
   # Kafka 配置（用于日志收集）
   kafka:
     # Kafka Broker 地址
-    bootstrap-servers: ${KAFKA_SERVERS:10.10.1.40:32477}
+    bootstrap-servers: ${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092}
     # 消费者配置
     consumer:
       # 消费者组 ID（可用于负载均衡和广播模式切换）

@@ -182,6 +182,20 @@ rocketmq:
     retry-times-when-send-async-failed: 2
 
 # ===============================
+# Kafka 配置（用于日志收集）
+# ===============================
+spring:
+  kafka:
+    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
+    producer:
+      acks: 1
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+# ===============================
 # Seata 分布式事务配置
 # ===============================
 seata:
