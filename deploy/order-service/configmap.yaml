@@ -30,3 +30,30 @@ data:
   
   # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
   LOG_PATH: "/tmp/logs"
+  
+  # ========================================
+  # 中间件地址配置（生产环境）
+  # ========================================
+  # MySQL 数据库
+  MYSQL_HOST: "10.10.1.1"
+  MYSQL_PORT: "3306"
+  MYSQL_USERNAME: "root"
+  MYSQL_PASSWORD: "123456"  # 生产环境建议使用 K8s Secret
+  
+  # Redis
+  REDIS_HOST: "10.10.1.1"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "0"
+  REDIS_PASSWORD: "123456"  # 生产环境建议使用 K8s Secret
+  
+  # Nacos
+  NACOS_SERVER: "10.10.1.1:8848"
+  
+  # RocketMQ
+  ROCKETMQ_NAMESRV: "10.10.1.1:9876"
+  
+  # Sentinel
+  SENTINEL_DASHBOARD: "10.10.1.1:8858"
+  
+  # Seata
+  SEATA_SERVER: "10.10.1.1:8848"

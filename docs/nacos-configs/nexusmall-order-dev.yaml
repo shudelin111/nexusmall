@@ -23,11 +23,11 @@ spring:
     # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
     type: com.zaxxer.hikari.HikariDataSource
     # JDBC 连接 URL（订单服务专用数据库）
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
     # 数据库用户名
-    username: root
-    # 数据库密码（生产环境建议使用环境变量）
-    password: "123456"
+    username: ${MYSQL_USERNAME:root}
+    # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
+    password: "${MYSQL_PASSWORD:123456}"
     # HikariCP 连接池参数
     hikari:
       # 最小空闲连接数
@@ -59,20 +59,20 @@ spring:
     sentinel:
       transport:
         # Sentinel Dashboard 地址（开发环境）
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         port: 8719
       datasource:
         ds1:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
             namespace: dev
         ds2:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
             namespace: dev
         ds3:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
             namespace: dev
 
 # ===============================
@@ -81,7 +81,7 @@ spring:
 # ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-order.yaml 中定义
 rocketmq:
   # NameServer 地址
-  name-server: 10.10.1.1:9876
+  name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
   # 生产者配置
   producer:
     group: order-producer-group-dev
@@ -94,7 +94,7 @@ seata:
   registry:
     nacos:
       # Seata Server 地址（开发环境）
-      server-addr: 10.10.1.1:8848
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
       # Seata Server 注册的命名空间（通常为 public 或 ""）
       namespace: ""
       # Seata Server 所在的分组
@@ -102,7 +102,7 @@ seata:
   config:
     nacos:
       # Seata 配置中心地址（开发环境）
-      server-addr: 10.10.1.1:8848
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
       # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
       # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
       namespace: ""
