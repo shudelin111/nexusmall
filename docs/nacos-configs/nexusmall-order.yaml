@@ -18,19 +18,13 @@ spring:
   application:
     name: nexusmall-order
   
-  # 数据库连接配置（完整配置，符合业界标准）
+  # 数据库连接池配置（通用参数，所有环境共享）
   datasource:
     # JDBC 驱动类名
     driver-class-name: com.mysql.cj.jdbc.Driver
     # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
     type: com.zaxxer.hikari.HikariDataSource
-    # JDBC 连接 URL（订单服务专用数据库）
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    # 数据库用户名
-    username: root
-    # 数据库密码（生产环境建议使用环境变量）
-    password: "123456"
-    # HikariCP 连接池参数
+    # HikariCP 连接池参数（所有环境共享）
     hikari:
       # 最小空闲连接数
       minimum-idle: 5
@@ -45,16 +39,8 @@ spring:
       # 连接测试查询语句
       connection-test-query: SELECT 1
   
-  # Redis 配置
+  # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # Redis 服务器地址
-    host: ${REDIS_HOST:10.10.1.1}
-    # Redis 端口
-    port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
-    database: ${REDIS_DATABASE:0}
-    # Redis 密码
-    password: ${REDIS_PASSWORD:123456}
     # 连接超时时间（毫秒）
     timeout: 5000  # 5 秒
     # Lettuce 连接池配置
@@ -68,18 +54,6 @@ spring:
         min-idle: 0
         # 获取连接的最大等待时间（毫秒）
         max-wait: 1000ms  # 1 秒
-  # ===============================
-  # Kafka 配置（用于日志收集）
-  # ===============================
-  kafka:
-    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-    producer:
-      acks: 1
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
   # Spring Cloud 配置
   cloud:
     # OpenFeign 服务调用配置
