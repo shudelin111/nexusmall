@@ -1,0 +1,23 @@
+# =====================================================
+# NexusMall 订单服务 - 测试环境 Bootstrap 配置
+# =====================================================
+# 用途：覆盖主配置的 Nacos 连接信息，避免单元测试依赖 Nacos
+# =====================================================
+
+spring:
+  application:
+    name: nexusmall-order
+  
+  # 明确指定测试 Profile（确保 ${spring.profiles.active} 被解析）
+  profiles:
+    active: test
+  
+  cloud:
+    nacos:
+      discovery:
+        # 禁用 Nacos 服务注册（测试不需要）
+        enabled: false
+      
+      config:
+        # 完全禁用 Nacos 配置中心（测试使用本地配置）
+        enabled: false

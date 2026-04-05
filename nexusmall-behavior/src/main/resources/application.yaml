@@ -101,7 +101,7 @@ spring:
     # 数据库用户名
     username: root
     # 数据库密码
-    password: "${MYSQL_PASSWORD:123456}"
+    password: ${MYSQL_PASSWORD:123456}
     # 数据源类型：HikariCP
     type: com.zaxxer.hikari.HikariDataSource
     # HikariCP 连接池配置

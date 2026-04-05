@@ -27,7 +27,7 @@ spring:
     # 数据库用户名
     username: ${MYSQL_USERNAME:root}
     # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
-    password: "${MYSQL_PASSWORD:123456}"
+    password: ${MYSQL_PASSWORD:123456}
     # HikariCP 连接池参数
     hikari:
       # 最小空闲连接数
