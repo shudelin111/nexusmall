@@ -6,7 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 /**
- * 商品服务 Feign 降级处理
+ * @author shudl
+ * @create 2020-07-01 17:07
+ * @description 商品服务 Feign 降级处理
  */
 @Slf4j
 @Component
