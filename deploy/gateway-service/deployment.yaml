@@ -43,7 +43,7 @@ spec:
       containers:
         - name: nexusmall-gateway
           # Docker 镜像（使用 latest 标签，生产环境建议使用具体版本号）
-          image: docker.io/shudlsys/nexusmall-gateway:latest
+          image: docker.io/shudlsys/nexusmall-gateway:sha-9ee4c07a674564a78c61b36606764dc75f168f6b
           imagePullPolicy: Always  # 总是拉取最新镜像
           
           # ========================================
