@@ -10,52 +10,6 @@
 # =====================================================
 
 # ===============================
-# 统一日志路径配置
-# ===============================
-nexusmall:
-  logging:
-    # 统一日志根路径（所有微服务共享）
-    # 最终日志路径：${nexusmall.logging.path}/${spring.application.name}/
-    # 示例：D:/IdeaProjects/nexusmall/logs/nexusmall-order/
-    path: D:/IdeaProjects/nexusmall/logs
-
-# ===============================
-# Spring Boot Actuator 监控配置
-# ===============================
-# 业界标准配置：暴露 Prometheus 监控端点
-#management:
-#  endpoints:
-#    web:
-#      # 暴露所有端点（生产环境建议只暴露 health,info,prometheus）
-#      exposure:
-#        include: "*"
-#  # 端点详细配置
-#  endpoint:
-#    health:
-#      # 显示健康检查详情
-#      show-details: always
-#    info:
-#      # 启用 info 端点
-#      enabled: true
-#    prometheus:
-#      # 启用 Prometheus 端点（必需）
-#      enabled: true
-#  # 指标监控配置
-#  metrics:
-#    # 启用指标收集
-#    enabled: true
-#    # 标签配置（用于区分不同微服务）
-#    tags:
-#      # 应用名称标签（Prometheus 中通过此标签区分服务）
-#      application: ${spring.application.name}
-#    # 导出配置
-#    export:
-#      # Prometheus 导出配置
-#      prometheus:
-#        # 启用 Prometheus 导出（必需）
-#        enabled: true
-
-# ===============================
 # 服务器配置
 # ===============================
 server:
@@ -88,43 +42,7 @@ info:
 # 官方文档：https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#web.graceful-shutdown
 spring:
   lifecycle:
-    # 优雅关闭超时时间
+    # 每个关闭阶段的超时时间（Spring Boot 2.3+ 标准配置）
     # 作用：超过此时间后强制关闭应用
     # 建议值：30-60 秒（给日志发送留足时间）
-    timeout: 30s
-
-# ===============================
-# SpringDoc + Knife4j API 文档配置
-# ===============================
-# 官方文档: https://springdoc.org/ | https://doc.xiaominfo.com/
-springdoc:
-  # OpenAPI 文档路径
-  api-docs:
-    # 启用 API 文档 JSON
-    enabled: true
-    # 访问路径: http://localhost:11000/v3/api-docs
-    path: /v3/api-docs
-  # Swagger UI 配置
-  swagger-ui:
-    # 启用 Swagger UI
-    enabled: true
-    # 访问路径: http://localhost:11000/swagger-ui/index.html
-    path: /swagger-ui/index.html
-  # 扫描的包路径(可选,默认扫描所有 Controller)
-  packages-to-scan: com.nexusmall.order.controller
-  # 分组配置(微服务架构下推荐)
-  group-configs:
-    - group: 'default'
-      paths-to-match: '/**'
-      packages-to-scan: com.nexusmall.order.controller
-
-# Knife4j 增强配置
-knife4j:
-  # 启用 Knife4j 增强功能
-  enable: true
-  # 生产环境关闭文档(安全考虑)
-  production: false
-  # 设置文档语言
-  setting:
-    language: zh_cn
-
+    timeout-per-shutdown-phase: 30s

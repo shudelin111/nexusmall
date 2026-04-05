@@ -64,8 +64,8 @@ LABEL org.opencontainers.image.licenses="MIT"
 # 设置工作目录
 ENV WORK_DIR=/app
 
-# 设置日志目录（统一路径，方便挂载）
-ENV LOG_DIR=/tmp/logs
+# 日志路径配置（与 VOLUME 声明保持一致，业界标准变量名）
+ENV LOG_PATH=/tmp/logs
 
 # 设置时区为上海（中国标准时间）
 ENV TZ=Asia/Shanghai
@@ -104,13 +104,13 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
                -XX:+UseG1GC \
                -XX:MaxGCPauseMillis=200 \
                -XX:+HeapDumpOnOutOfMemoryError \
-               -XX:HeapDumpPath=${LOG_DIR}/heap_dump.hprof \
-               -XX:ErrorFile=${LOG_DIR}/crash_pid_%p.log \
+               -XX:HeapDumpPath=${LOG_PATH}/heap_dump.hprof \
+               -XX:ErrorFile=${LOG_PATH}/crash_pid_%p.log \
                -XX:+PrintGC \
                -XX:+PrintGCDetails \
                -XX:+PrintGCDateStamps \
                -XX:+PrintGCTimeStamps \
-               -Xloggc:${LOG_DIR}/gc.log \
+               -Xloggc:${LOG_PATH}/gc.log \
                -XX:+UseGCLogFileRotation \
                -XX:NumberOfGCLogFiles=5 \
                -XX:GCLogFileSize=10M \
@@ -127,8 +127,8 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
 WORKDIR ${WORK_DIR}
 
 # 创建日志目录（避免启动时权限问题）
-RUN mkdir -p ${LOG_DIR} && \
-    chmod 755 ${LOG_DIR}
+RUN mkdir -p ${LOG_PATH} && \
+    chmod 755 ${LOG_PATH}
 
 # =====================================================
 # 复制构建产物

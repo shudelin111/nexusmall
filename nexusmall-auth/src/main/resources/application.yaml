@@ -9,16 +9,6 @@
 # =====================================================
 
 # ===============================
-# 统一日志路径配置
-# ===============================
-nexusmall:
-  logging:
-    # 统一日志根路径（所有微服务共享）
-    # 最终日志路径：${nexusmall.logging.path}/${spring.application.name}/
-    # 示例：D:/IdeaProjects/nexusmall/logs/nexusmall-auth/
-    path: D:/IdeaProjects/nexusmall/logs
-
-# ===============================
 # Spring Boot Actuator 监控配置
 # ===============================
 # 业界标准配置：暴露 Prometheus 监控端点

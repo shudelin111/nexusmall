@@ -124,3 +124,21 @@ order:
   order-no-prefix: "ORD-DEV"
   # 最大购买数量
   max-purchase-quantity: 100
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（开发环境）
+# ===============================
+# ⚠️ 注意：API 文档通用配置（path、packages-to-scan、group-configs、language）在 nexusmall-order.yaml 中定义
+springdoc:
+  api-docs:
+    # 开发环境启用 API 文档
+    enabled: true
+  swagger-ui:
+    # 开发环境启用 Swagger UI
+    enabled: true
+
+knife4j:
+  # 开发环境启用 Knife4j
+  enable: true
+  # 开发环境非生产模式
+  production: false

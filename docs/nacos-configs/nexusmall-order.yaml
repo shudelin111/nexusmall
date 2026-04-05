@@ -168,6 +168,38 @@ seata:
       data-id: seataServer.properties
 
 # ===============================
+# SpringDoc + Knife4j API 文档配置（通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+# - springdoc.api-docs.enabled (API 文档启用开关)
+# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
+# - knife4j.enable (Knife4j 启用开关)
+# - knife4j.production (生产模式开关)
+springdoc:
+  # OpenAPI 文档路径
+  api-docs:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /v3/api-docs
+  # Swagger UI 配置
+  swagger-ui:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /swagger-ui/index.html
+  # 扫描的包路径(所有环境相同)
+  packages-to-scan: com.nexusmall.order.controller
+  # 分组配置(微服务架构下推荐)
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.nexusmall.order.controller
+
+# Knife4j 增强配置（通用参数）
+knife4j:
+  # ⚠️ 注意：enable 和 production 在环境特定配置中定义
+  # 设置文档语言（所有环境相同）
+  setting:
+    language: zh_cn
+
+# ===============================
 # 日志级别配置
 # ===============================
 logging:

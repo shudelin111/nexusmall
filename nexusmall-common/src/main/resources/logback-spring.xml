@@ -38,10 +38,12 @@
          springProperty: Spring Boot 提供的标签，可从配置文件中读取属性
          scope="context": 属性作用域为整个上下文
          name="LOG_PATH": 定义变量名
-         source="nexusmall.logging.path": 对应的配置文件属性
+         source="logging.file.path": Spring Boot 官方标准配置项
          defaultValue="./logs": 默认值（当配置文件中未设置时使用）
+         
+         参考：https://docs.spring.io/spring-boot/docs/current/reference/htmlsingle/#features.logging.file
     -->
-    <springProperty scope="context" name="LOG_PATH" source="nexusmall.logging.path" defaultValue="./logs"/>
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
 
     <!-- 读取应用名称（用于日志文件命名） -->
     <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="app"/>

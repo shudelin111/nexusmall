@@ -61,6 +61,11 @@ spec:
             # Spring Profile（由 Nacos 配置决定）
             - name: SPRING_PROFILES_ACTIVE
               value: "dev"
+            
+            # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
+            # 确保应用日志和 JVM 日志统一写入 /tmp/logs 目录
+            - name: LOG_PATH
+              value: "/tmp/logs"
           
           # ========================================
           # 资源配额（Requests & Limits）

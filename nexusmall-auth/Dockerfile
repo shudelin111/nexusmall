@@ -106,6 +106,9 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
 ENV SPRING_PROFILES_ACTIVE=prod
 ENV SERVER_PORT=8000
 
+# 日志路径配置（与 VOLUME 声明保持一致）
+ENV LOG_PATH=/tmp/logs
+
 # 应用目录
 ENV APP_HOME=/app
 
