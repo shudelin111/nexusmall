@@ -53,10 +53,34 @@ spring:
     database: ${REDIS_DATABASE:0}
     # Redis 密码
     password: ${REDIS_PASSWORD:123456}
+  
+  # Spring Cloud 配置（开发环境）
+  cloud:
+    # Sentinel 配置（开发环境）
+    # ⚠️ 注意：Sentinel 数据源规则定义（dataId、groupId、rule-type等）在 nexusmall-order.yaml 中定义
+    sentinel:
+      transport:
+        # Sentinel Dashboard 地址（开发环境）
+        dashboard: 10.10.1.1:8858
+        port: 8719
+      datasource:
+        ds1:
+          nacos:
+            server-addr: 10.10.1.1:8848
+            namespace: dev
+        ds2:
+          nacos:
+            server-addr: 10.10.1.1:8848
+            namespace: dev
+        ds3:
+          nacos:
+            server-addr: 10.10.1.1:8848
+            namespace: dev
 
 # ===============================
 # RocketMQ 配置（开发环境）
 # ===============================
+# ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-order.yaml 中定义
 rocketmq:
   # NameServer 地址
   name-server: 10.10.1.1:9876
@@ -70,33 +94,25 @@ rocketmq:
 # ===============================
 # Seata 分布式事务配置（开发环境）
 # ===============================
+# ⚠️ 注意：Seata 通用参数（enabled、tx-service-group、vgroup-mapping、type、cluster、username、password、application、data-id）在 nexusmall-order.yaml 中定义
 seata:
-  enabled: true
-  application-id: nexusmall-order
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
   registry:
-    type: nacos
     nacos:
+      # Seata Server 地址（开发环境）
       server-addr: 10.10.1.1:8848
       # Seata Server 注册的命名空间（通常为 public 或 ""）
       namespace: ""
+      # Seata Server 所在的分组
       group: SEATA_GROUP
-      cluster: default
-      username: nacos
-      password: nacos
-      application: seata-server
   config:
-    type: nacos
     nacos:
+      # Seata 配置中心地址（开发环境）
       server-addr: 10.10.1.1:8848
-      namespace: dev
+      # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
+      # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
+      namespace: ""
+      # Seata 配置所在的分组
       group: SEATA_GROUP
-      username: nacos
-      password: nacos
-      data-id: seataServer.properties
 
 # ===============================
 # 业务特定配置（开发环境）

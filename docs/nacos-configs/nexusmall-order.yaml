@@ -15,20 +15,10 @@
 # Spring 应用配置
 # ===============================
 spring:
-  # 应用名称
-  application:
-    name: nexusmall-order
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
   
-  # Redis 配置
+  # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # Redis 服务器地址
-    host: ${REDIS_HOST:10.10.1.1}
-    # Redis 端口
-    port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
-    database: ${REDIS_DATABASE:0}
-    # Redis 密码
-    password: ${REDIS_PASSWORD:123456}
     # 连接超时时间（毫秒）
     timeout: 5000  # 5 秒
     # Lettuce 连接池配置
@@ -64,21 +54,22 @@ spring:
         response:
           enabled: true
 
-    # Sentinel 熔断限流配置
+    # Sentinel 熔断限流配置（通用参数）
     sentinel:
       # 启用 Sentinel
       enabled: true
       # 取消控制台懒加载（启动时立即注册到 Dashboard）
       eager: true
-      transport:
-        dashboard: 10.10.1.1:8858
-        port: 8719
+      # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
+      # - spring.cloud.sentinel.transport.port (本地通信端口)
+      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
+      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: dev
+            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-order-{profile}.yaml 中定义
             dataId: nexusmall-order-flow-rule.json
             groupId: MALL_GROUP
             rule-type: flow
@@ -89,8 +80,6 @@ spring:
         # 熔断降级规则数据源
         ds2:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: dev
             dataId: nexusmall-order-degrade-rule.json
             groupId: MALL_GROUP
             rule-type: degrade
@@ -101,8 +90,6 @@ spring:
         # 系统自适应保护规则数据源
         ds3:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: dev
             dataId: nexusmall-order-system-rule.json
             groupId: MALL_GROUP
             rule-type: system
@@ -137,20 +124,20 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # ===============================
-# RocketMQ 配置
+# RocketMQ 配置（通用参数）
 # ===============================
 rocketmq:
-  # NameServer 地址
-  name-server: 10.10.1.1:9876
-  # 生产者配置
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+  # - rocketmq.name-server (NameServer 地址)
+  # - rocketmq.producer.group (生产者组名称)
+  # 生产者配置（通用参数）
   producer:
-    group: order-producer-group
     send-message-timeout: 3000
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
 
 # ===============================
-# Seata 分布式事务配置
+# Seata 分布式事务配置（通用参数）
 # ===============================
 seata:
   enabled: true
@@ -159,14 +146,16 @@ seata:
   service:
     vgroup-mapping:
       nexusmall-tx-group: default
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+  # - seata.registry.nacos.server-addr (Seata Server 地址)
+  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
+  # - seata.registry.nacos.group (Seata Server 所在分组)
+  # - seata.config.nacos.server-addr (Seata 配置中心地址)
+  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
+  # - seata.config.nacos.group (Seata 配置所在分组)
   registry:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
-      # Seata Server 注册的命名空间（通常为 public 或 ""）
-      # 注意：这里不是 dev，因为 Seata Server 通常部署在公共命名空间
-      namespace: ""
-      group: SEATA_GROUP
       cluster: default
       username: nacos
       password: nacos
@@ -174,29 +163,9 @@ seata:
   config:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
-      namespace: dev
-      group: SEATA_GROUP
       username: nacos
       password: nacos
       data-id: seataServer.properties
-
-# ===============================
-# Actuator 监控端点配置
-# ===============================
-# management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: "*"
-#   endpoint:
-#     health:
-#       show-details: always
-#     info:
-#       enabled: true
-#   info:
-#     env:
-#       enabled: true
 
 # ===============================
 # 日志级别配置
