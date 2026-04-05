@@ -1,0 +1,32 @@
+# ==============================================================================
+# NexusMall Order Service ConfigMap
+# NexusMall 订单服务 Kubernetes 配置映射
+# ==============================================================================
+# 文件用途：存储订单服务的环境变量配置
+# 维护团队：平台架构组
+# 更新频率：随环境配置变更更新
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # ConfigMap 名称
+  name: nexusmall-order-config
+  
+  # 命名空间：与 Deployment 保持一致
+  namespace: nexusmall
+  
+  # 资源标签
+  labels:
+    app: nexusmall-order
+    app.kubernetes.io/name: nexusmall-order
+    app.kubernetes.io/part-of: nexusmall
+
+# 配置数据
+data:
+  # Spring Boot 激活的 Profile
+  # 可选值：dev (开发), test (测试), prod (生产)
+  SPRING_PROFILES_ACTIVE: "prod"
+  
+  # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
+  LOG_PATH: "/tmp/logs"

@@ -87,17 +87,11 @@ spec:
               protocol: TCP
           
           # ========================================
-          # 环境变量配置
+          # 环境变量配置（从 ConfigMap 注入）
           # ========================================
-          # Spring Profile 配置（指定运行环境）
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "dev"  # 可选值：dev, test, prod
-
-            # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
-            # 确保应用日志和 JVM 日志统一写入 /tmp/logs 目录
-            - name: LOG_PATH
-              value: "/tmp/logs"
+          envFrom:
+            - configMapRef:
+                name: nexusmall-product-config
 
           # ========================================
           # 资源配额与限制

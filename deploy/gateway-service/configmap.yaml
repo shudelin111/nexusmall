@@ -1,0 +1,18 @@
+# ==============================================================================
+# NexusMall Gateway Service ConfigMap
+# NexusMall 网关服务 Kubernetes 配置映射
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexusmall-gateway-config
+  namespace: nexusmall
+  labels:
+    app: nexusmall-gateway
+    app.kubernetes.io/name: nexusmall-gateway
+    app.kubernetes.io/part-of: nexusmall
+
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOG_PATH: "/tmp/logs"

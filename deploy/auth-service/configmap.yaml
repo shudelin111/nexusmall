@@ -1,0 +1,18 @@
+# ==============================================================================
+# NexusMall Auth Service ConfigMap
+# NexusMall 认证服务 Kubernetes 配置映射
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexusmall-auth-config
+  namespace: nexusmall
+  labels:
+    app: nexusmall-auth
+    app.kubernetes.io/name: nexusmall-auth
+    app.kubernetes.io/part-of: nexusmall
+
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOG_PATH: "/tmp/logs"

@@ -1,0 +1,18 @@
+# ==============================================================================
+# NexusMall Product Service ConfigMap
+# NexusMall 商品服务 Kubernetes 配置映射
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nexusmall-product-config
+  namespace: nexusmall
+  labels:
+    app: nexusmall-product
+    app.kubernetes.io/name: nexusmall-product
+    app.kubernetes.io/part-of: nexusmall
+
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  LOG_PATH: "/tmp/logs"
