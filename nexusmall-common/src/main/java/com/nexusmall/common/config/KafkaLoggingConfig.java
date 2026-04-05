@@ -38,9 +38,9 @@ import org.springframework.stereotype.Component;
  * 
  * <p>配置说明：</p>
  * <ul>
- *   <li>默认禁用：KAFKA_LOGGING_ENABLED=false（或 unset）</li>
- *   <li>启用方式：设置环境变量 KAFKA_LOGGING_ENABLED=true</li>
- *   <li>适用场景：开发/测试环境禁用，生产环境根据需要启用</li>
+ *   <li>Nacos 配置：nexusmall.logging.kafka.enabled=false</li>
+ *   <li>环境变量：NERVOUSMALL_LOGGING_KAFKA_ENABLED=true（覆盖 Nacos）</li>
+ *   <li>默认值：false（开发/测试环境禁用，生产环境根据需要启用）</li>
  * </ul>
  * 
  * @author shudl
@@ -57,16 +57,20 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
     @Value("${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}")
     private String kafkaServers;
     
-    // 直接通过环境变量获取，避免 Nacos 占位符循环引用
-    private final boolean kafkaLoggingEnabled = Boolean.parseBoolean(
-        System.getenv().getOrDefault("KAFKA_LOGGING_ENABLED", "false")
-    );
+    private final KafkaLoggingProperties kafkaLoggingProperties;
+
+    /**
+     * 构造函数注入配置属性（Spring Boot 推荐方式）
+     */
+    public KafkaLoggingConfig(KafkaLoggingProperties kafkaLoggingProperties) {
+        this.kafkaLoggingProperties = kafkaLoggingProperties;
+    }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
         // 检查是否启用 Kafka 日志收集
-        if (!kafkaLoggingEnabled) {
-            System.out.println("ℹ️  Kafka logging is disabled (set KAFKA_LOGGING_ENABLED=true to enable)");
+        if (!kafkaLoggingProperties.isEnabled()) {
+            System.out.println("ℹ️  Kafka logging is disabled (set nexusmall.logging.kafka.enabled=true to enable)");
             return;
         }
         
