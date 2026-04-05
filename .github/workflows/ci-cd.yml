@@ -313,25 +313,40 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          if ! git diff --quiet deploy/product-service/deployment.yaml; then
-            echo "检测到变更，提交..."
-            git add deploy/product-service/deployment.yaml
-            # 根据分支使用不同的提交信息
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/product-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/product-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update product image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
             else
-              git commit -m "chore(deploy): update product image to latest [skip ci]"
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
             fi
-            # 根据分支推送到不同分支
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git push origin master
-            else
-              git push origin dev
-            fi
-            echo "✅ Manifest 更新成功！"
-          else
-            echo "⚠️ 没有检测到变更，跳过提交"
-          fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
 
   # ========== 阶段 1: 编译与测试 - Order 模块 ==========
   build-order:
@@ -541,25 +556,40 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          if ! git diff --quiet deploy/order-service/deployment.yaml; then
-            echo "检测到变更，提交..."
-            git add deploy/order-service/deployment.yaml
-            # 根据分支使用不同的提交信息
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/order-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/order-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update order image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
             else
-              git commit -m "chore(deploy): update order image to latest [skip ci]"
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
             fi
-            # 根据分支推送到不同分支
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git push origin master
-            else
-              git push origin dev
-            fi
-            echo "✅ Manifest 更新成功！"
-          else
-            echo "⚠️ 没有检测到变更，跳过提交"
-          fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
 
   # ========== 阶段 1: 编译与测试 - Gateway 模块 ==========
   build-gateway:
@@ -771,25 +801,40 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
-            echo "检测到变更，提交..."
-            git add deploy/gateway-service/deployment.yaml
-            # 根据分支使用不同的提交信息
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/gateway-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update gateway image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
             else
-              git commit -m "chore(deploy): update gateway image to latest [skip ci]"
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
             fi
-            # 根据分支推送到不同分支
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git push origin master
-            else
-              git push origin dev
-            fi
-            echo "✅ Manifest 更新成功！"
-          else
-            echo "⚠️ 没有检测到变更，跳过提交"
-          fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
 
   # ========== 阶段 1: 编译与测试 - Auth 模块 ==========
   build-auth:
@@ -1001,25 +1046,40 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          if ! git diff --quiet deploy/auth-service/deployment.yaml; then
-            echo "检测到变更，提交..."
-            git add deploy/auth-service/deployment.yaml
-            # 根据分支使用不同的提交信息
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git commit -m "chore(deploy): update auth image to sha-${{ github.sha }} [skip ci]"
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/auth-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/auth-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update auth image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update auth image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
             else
-              git commit -m "chore(deploy): update auth image to latest [skip ci]"
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
             fi
-            # 根据分支推送到不同分支
-            if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-              git push origin master
-            else
-              git push origin dev
-            fi
-            echo "✅ Manifest 更新成功！"
-          else
-            echo "⚠️ 没有检测到变更，跳过提交"
-          fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
 
   # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
   # 注意：不再需要手动部署步骤，ArgoCD 会自动同步 manifest 变更
