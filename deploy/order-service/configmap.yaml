@@ -47,8 +47,11 @@ data:
   REDIS_DATABASE: "0"
   # REDIS_PASSWORD 在 Secret 中定义
   
-  # Nacos
-  NACOS_SERVER: "10.10.1.1:8848"
+  # Nacos（非敏感配置）
+  NACOS_SERVER_ADDR: "10.10.1.1:8848"
+  NACOS_NAMESPACE: "prod"
+  NACOS_GROUP: "MALL_GROUP"
+  # NACOS_USERNAME 和 NACOS_PASSWORD 在 Secret 中定义
   
   # RocketMQ
   ROCKETMQ_NAMESRV: "10.10.1.1:9876"
