@@ -18,29 +18,16 @@ spring:
   application:
     name: nexusmall-order
   
-  # 数据库连接池配置（通用参数，所有环境共享）
-  datasource:
-    # JDBC 驱动类名
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
-    type: com.zaxxer.hikari.HikariDataSource
-    # HikariCP 连接池参数（所有环境共享）
-    hikari:
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 最大连接数
-      maximum-pool-size: 20
-      # 空闲连接超时时间（毫秒）
-      idle-timeout: 30000
-      # 连接最大生命周期（毫秒）
-      max-lifetime: 1800000
-      # 连接超时时间（毫秒）
-      connection-timeout: 30000
-      # 连接测试查询语句
-      connection-test-query: SELECT 1
-  
-  # Redis 连接池配置（通用参数，所有环境共享）
+  # Redis 配置
   redis:
+    # Redis 服务器地址
+    host: ${REDIS_HOST:10.10.1.1}
+    # Redis 端口
+    port: ${REDIS_PORT:6379}
+    # 使用的数据库编号
+    database: ${REDIS_DATABASE:0}
+    # Redis 密码
+    password: ${REDIS_PASSWORD:123456}
     # 连接超时时间（毫秒）
     timeout: 5000  # 5 秒
     # Lettuce 连接池配置
@@ -54,6 +41,7 @@ spring:
         min-idle: 0
         # 获取连接的最大等待时间（毫秒）
         max-wait: 1000ms  # 1 秒
+
   # Spring Cloud 配置
   cloud:
     # OpenFeign 服务调用配置
@@ -74,7 +62,7 @@ spring:
           enabled: true
         response:
           enabled: true
-    
+
     # Sentinel 熔断限流配置
     sentinel:
       # 启用 Sentinel
@@ -96,7 +84,7 @@ spring:
             data-type: json
             username: nacos
             password: nacos
-        
+
         # 熔断降级规则数据源
         ds2:
           nacos:
@@ -108,7 +96,7 @@ spring:
             data-type: json
             username: nacos
             password: nacos
-        
+
         # 系统自适应保护规则数据源
         ds3:
           nacos:
@@ -120,12 +108,6 @@ spring:
             data-type: json
             username: nacos
             password: nacos
-
-# ===============================
-# 服务端口配置
-# ===============================
-server:
-  port: 11000
 
 # ===============================
 # MyBatis-Plus 配置
@@ -166,8 +148,6 @@ rocketmq:
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
 
-
-
 # ===============================
 # Seata 分布式事务配置
 # ===============================
@@ -201,28 +181,19 @@ seata:
 # ===============================
 # Actuator 监控端点配置
 # ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-      # 【关键】启用 liveness 和 readiness 健康组（K8s 探针必需）
-      probes:
-        enabled: true
-    info:
-      enabled: true
-  info:
-    env:
-      enabled: true
-  # 【关键】启用 JVM、DB 等详细健康检查
-  health:
-    livenessState:
-      enabled: true
-    readinessState:
-      enabled: true
+# management:
+#   endpoints:
+#     web:
+#       exposure:
+#         include: "*"
+#   endpoint:
+#     health:
+#       show-details: always
+#     info:
+#       enabled: true
+#   info:
+#     env:
+#       enabled: true
 
 # ===============================
 # 日志级别配置
@@ -242,13 +213,3 @@ order:
   order-no-prefix: "ORD"
   # 最大购买数量
   max-purchase-quantity: 100
-
-# ===============================
-# Kafka 日志收集开关（Logback Appender）
-# ===============================
-# 说明：
-# - true: 启用 Logback Kafka Appender，将日志发送到 Kafka
-# - false: 禁用 Logback Kafka Appender，仅输出到文件和控制台
-# - 默认值：false（开发/测试环境禁用，生产环境根据需要启用）
-# - 适用场景：当环境中没有 Kafka 或不需要集中式日志时禁用
-KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}

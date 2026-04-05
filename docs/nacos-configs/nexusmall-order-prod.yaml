@@ -1,56 +1,73 @@
 # =====================================================
-# NexusMall 订单服务 - 生产环境配置
+# NexusMall 订单服务 - 开发环境配置
 # =====================================================
-# Data ID: nexusmall-order-prod.yaml
+# Data ID: nexusmall-order-dev.yaml
 # Group: DEFAULT_GROUP
-# Profile: prod
-# 用途：生产环境专属配置（优先级高于 nexusmall-order.yaml）
-# ⚠️ 警告：此配置文件包含敏感信息，请妥善保管
+# Profile: dev
+# 用途：开发环境专属配置（优先级高于 nexusmall-order.yaml）
 # 说明：
-# - 此文件仅包含生产环境特有的差异化配置
+# - 此文件仅包含开发环境特有的差异化配置
 # - 共享配置已在 nexusmall-common.yaml 和 nexusmall-datasource.yaml 中定义
 # - 业务通用配置已在 nexusmall-order.yaml 中定义
-# - 生产环境必须使用环境变量注入敏感信息
 # =====================================================
 
 # ===============================
-# 数据库连接配置（生产环境）
+# 数据库连接配置（开发环境）
 # ===============================
 spring:
+  # 数据库连接配置（完整配置，符合业界标准）
   datasource:
-    # JDBC 连接 URL（生产环境数据库）
-    url: jdbc:mysql://10.10.1.10:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    # 数据库用户名（生产环境必须使用环境变量）
-    username: ${DB_USERNAME:prod_user}
-    # 数据库密码（生产环境必须使用环境变量）
-    password: ${DB_PASSWORD:}
-  
-  # Redis 配置（生产环境）
+    # JDBC 驱动类名
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
+    type: com.zaxxer.hikari.HikariDataSource
+    # JDBC 连接 URL（订单服务专用数据库）
+    url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
+    # 数据库用户名
+    username: root
+    # 数据库密码（生产环境建议使用环境变量）
+    password: "123456"
+    # HikariCP 连接池参数
+    hikari:
+      # 最小空闲连接数
+      minimum-idle: 5
+      # 最大连接数
+      maximum-pool-size: 20
+      # 空闲连接超时时间（毫秒）
+      idle-timeout: 30000
+      # 连接最大生命周期（毫秒）
+      max-lifetime: 1800000
+      # 连接超时时间（毫秒）
+      connection-timeout: 30000
+      # 连接测试查询语句
+      connection-test-query: SELECT 1
+
+  # Redis 配置（开发环境）
   redis:
     # Redis 服务器地址
-    host: ${REDIS_HOST:10.10.1.10}
+    host: ${REDIS_HOST:10.10.1.1}
     # Redis 端口
     port: ${REDIS_PORT:6379}
     # 使用的数据库编号
     database: ${REDIS_DATABASE:0}
-    # Redis 密码（生产环境必须使用环境变量）
-    password: ${REDIS_PASSWORD:}
+    # Redis 密码
+    password: ${REDIS_PASSWORD:123456}
 
 # ===============================
-# RocketMQ 配置（生产环境）
+# RocketMQ 配置（开发环境）
 # ===============================
 rocketmq:
   # NameServer 地址
-  name-server: 10.10.1.10:9876
+  name-server: 10.10.1.1:9876
   # 生产者配置
   producer:
-    group: order-producer-group-prod
-    send-message-timeout: 5000
-    retry-times-when-send-failed: 3
-    retry-times-when-send-async-failed: 3
+    group: order-producer-group-dev
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
 
 # ===============================
-# Seata 分布式事务配置（生产环境）
+# Seata 分布式事务配置（开发环境）
 # ===============================
 seata:
   enabled: true
@@ -62,7 +79,7 @@ seata:
   registry:
     type: nacos
     nacos:
-      server-addr: 10.10.1.10:8848
+      server-addr: 10.10.1.1:8848
       namespace: ""
       group: SEATA_GROUP
       cluster: default
@@ -72,7 +89,7 @@ seata:
   config:
     type: nacos
     nacos:
-      server-addr: 10.10.1.10:8848
+      server-addr: 10.10.1.1:8848
       namespace: ""
       group: SEATA_GROUP
       username: nacos
@@ -80,12 +97,18 @@ seata:
       data-id: seataServer.properties
 
 # ===============================
-# 业务特定配置（生产环境）
+# 业务特定配置（开发环境）
 # ===============================
 order:
   # 订单超时自动取消时间（分钟）
   timeout-cancel: 30
   # 订单号前缀
-  order-no-prefix: "ORD"
+  order-no-prefix: "ORD-DEV"
   # 最大购买数量
-  max-purchase-quantity: 200
+  max-purchase-quantity: 100
+
+#是否启用kafka配置
+nexusmall:
+  logging:
+    kafka:
+      enabled: true
