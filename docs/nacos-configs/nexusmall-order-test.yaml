@@ -110,6 +110,18 @@ seata:
       group: SEATA_GROUP
 
 # ===============================
+# 日志级别配置（测试环境）
+# ===============================
+logging:
+  level:
+    root: INFO
+    io.seata: DEBUG
+    com.alibaba.csp.sentinel: DEBUG
+    com.nexusmall.order: DEBUG
+    com.nexusmall.common: DEBUG
+    com.nexusmall.order.dao: DEBUG
+
+# ===============================
 # 业务特定配置（测试环境）
 # ===============================
 order:
