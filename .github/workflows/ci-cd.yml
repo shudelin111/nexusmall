@@ -54,6 +54,7 @@ env:
   DEFAULT_REGISTRY: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"  # 统一设置 Java 编码为 UTF-8，避免 Nacos 配置解析乱码
 
 # ========================================
 # 工作矩阵配置（业界标准做法）

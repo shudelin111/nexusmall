@@ -1,13 +1,18 @@
-# OrderController 测试配置
-# 禁用数据源自动配置(使用 Mock Service,不需要真实数据库)
-spring.autoconfigure.exclude=\
-  org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,\
-  org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration,\
-  org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration
+# =====================================================
+# NexusMall 订单服务 - 测试环境本地配置
+# =====================================================
+# 说明：
+# - 此文件仅在 profile 为 test 时生效
+# - 与 bootstrap.yml 配合使用，bootstrap.yml 负责连接 Nacos
+# - Nacos 会加载 nexusmall-order-test.yaml（包含数据源等配置）
+# - 此文件用于覆盖或补充 Nacos 中没有的配置
+# =====================================================
 
-# 禁用 RocketMQ 自动配置
-rocketmq.name-server=127.0.0.1:9876
-rocketmq.producer.group=test-producer-group
-
-# 禁用 Actuator Metrics(避免 DataSource 依赖)
-management.metrics.export.simple.enabled=false
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+management:
+  metrics:
+    export:
+      simple:
+        enabled: false

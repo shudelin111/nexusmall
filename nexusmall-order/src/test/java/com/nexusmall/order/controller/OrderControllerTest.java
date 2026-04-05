@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -46,6 +47,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 @SpringBootTest(classes = com.nexusmall.order.NexusmallOrderApplication.class)
 @AutoConfigureMockMvc
+@ActiveProfiles("test")
 @TestPropertySource(locations = "classpath:application-test.yml")
 @DisplayName("订单控制器测试")
 class OrderControllerTest {
