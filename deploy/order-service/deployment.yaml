@@ -104,6 +104,7 @@ spec:
           
           # 敏感配置从 Secret 加载（密码、密钥等）
           env:
+            # MySQL 凭证
             - name: MYSQL_USERNAME
               valueFrom:
                 secretKeyRef:
@@ -114,11 +115,23 @@ spec:
                 secretKeyRef:
                   name: nexusmall-order-secret
                   key: MYSQL_PASSWORD
+            # Redis 凭证
             - name: REDIS_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: nexusmall-order-secret
                   key: REDIS_PASSWORD
+            # Nacos 凭证
+            - name: NACOS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-order-secret
+                  key: NACOS_USERNAME
+            - name: NACOS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-order-secret
+                  key: NACOS_PASSWORD
           
           # -------------------------------------------------------------------
           # 资源配额管理：防止资源争抢，保障集群稳定性
