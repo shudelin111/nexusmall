@@ -424,6 +424,7 @@
         <logger name="com.alibaba.druid.pool" level="INFO"/>
             
         <root level="INFO">
+            <appender-ref ref="console"/>           <!-- 输出到控制台（K8s 标准输出必需） -->
             <appender-ref ref="async_file_info"/>   <!-- 输出 INFO 日志（异步） -->
             <appender-ref ref="async_file_warn"/>   <!-- 输出 WARN 日志（异步） -->
             <appender-ref ref="async_file_error"/>  <!-- 输出 ERROR 日志（异步） -->
