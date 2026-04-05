@@ -163,7 +163,9 @@ seata:
     type: nacos
     nacos:
       server-addr: 10.10.1.1:8848
-      namespace: dev
+      # Seata Server 注册的命名空间（通常为 public 或 ""）
+      # 注意：这里不是 dev，因为 Seata Server 通常部署在公共命名空间
+      namespace: ""
       group: SEATA_GROUP
       cluster: default
       username: nacos
