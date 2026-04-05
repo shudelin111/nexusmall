@@ -57,8 +57,10 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
     @Value("${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}")
     private String kafkaServers;
     
-    @Value("${KAFKA_LOGGING_ENABLED:false}")
-    private boolean kafkaLoggingEnabled;
+    // 直接通过环境变量获取，避免 Nacos 占位符循环引用
+    private final boolean kafkaLoggingEnabled = Boolean.parseBoolean(
+        System.getenv().getOrDefault("KAFKA_LOGGING_ENABLED", "false")
+    );
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
