@@ -268,3 +268,13 @@ order:
   order-no-prefix: "ORD"
   # 最大购买数量
   max-purchase-quantity: 100
+
+# ===============================
+# Kafka 日志收集开关（Logback Appender）
+# ===============================
+# 说明：
+# - true: 启用 Logback Kafka Appender，将日志发送到 Kafka
+# - false: 禁用 Logback Kafka Appender，仅输出到文件和控制台
+# - 默认值：false（开发/测试环境禁用，生产环境根据需要启用）
+# - 适用场景：当环境中没有 Kafka 或不需要集中式日志时禁用
+KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
