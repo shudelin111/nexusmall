@@ -8,7 +8,6 @@ import com.github.danielwegener.logback.kafka.KafkaAppender;
 import com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy;
 import com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy;
 import net.logstash.logback.encoder.LogstashEncoder;
-import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
