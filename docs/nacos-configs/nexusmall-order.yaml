@@ -198,16 +198,8 @@ knife4j:
     language: zh_cn
 
 # ===============================
-# 日志级别配置
+# 业务特定配置（通用参数）
 # ===============================
-logging:
-  level:
-    root: INFO
-    io.seata: INFO
-    com.alibaba.csp.sentinel: DEBUG
-    com.nexusmall.order: DEBUG
-    com.nexusmall.common: DEBUG
-    com.nexusmall.order.dao: DEBUG
 order:
   # 订单超时自动取消时间（分钟）
   timeout-cancel: 30
