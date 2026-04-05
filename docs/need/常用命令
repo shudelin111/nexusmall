@@ -107,3 +107,33 @@ P2 - 中期实施 (3-6 个月)
 安全和规范待加强 (OAuth2, HTTPS, 代码质量工具)
 总体评分: 60/100 (基础架构完整，但生产就绪度不足)
 建议您按照上述优先级逐步完善，让项目真正达到生产级标准！
+
+
+
+✅ 密码不在 ConfigMap 中
+✅ 已完成
+已移至 Secret
+✅ Secret 文件不提交到 Git
+✅ 已完成
+已加入 .gitignore
+✅ 提供示例模板
+✅ 已完成
+secret.yaml.example
+⚠️ 启用 Encryption at Rest
+⚠️ 待实施
+需要修改 API Server 配置
+⚠️ 配置 RBAC 权限
+⚠️ 待实施
+限制 Secret 访问
+⚠️ 定期轮换密码
+⚠️ 待实施
+建立轮换流程
+❌ 使用 Sealed Secrets
+❌ 未实施
+推荐下一步升级
+❌ 使用 External Secrets
+❌ 未实施
+企业级方案
+短期：启用 Encryption at Rest + RBAC
+中期：迁移到 Sealed Secrets
+长期：如果有 Vault，使用 External Secrets Operator
