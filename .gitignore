@@ -71,3 +71,9 @@ nexusmall-third-party/verify-run.out.log
 
 ### Module Logs ###
 nexusmall-*/logs/
+
+### Kubernetes Secrets (Security) ###
+# Secret 文件包含敏感信息，不应提交到 Git
+# 使用 Sealed Secrets 或 External Secrets 管理生产环境密钥
+deploy/*/secret.yaml
+!deploy/*/secret.yaml.example

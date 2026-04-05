@@ -93,13 +93,31 @@ spec:
               protocol: TCP         # 协议类型（默认为 TCP，可省略）
           
           # -------------------------------------------------------------------
-          # 环境变量配置：从 ConfigMap 注入运行时配置参数
+          # 环境变量配置：从 ConfigMap 和 Secret 注入运行时配置参数
           # -------------------------------------------------------------------
           envFrom:
-            # 从 ConfigMap 加载所有键值对作为环境变量
+            # 从 ConfigMap 加载非敏感配置（地址、端口等）
             # 优势：配置与部署分离，便于多环境管理
             - configMapRef:
                 name: nexusmall-order-config
+          
+          # 敏感配置从 Secret 加载（密码、密钥等）
+          env:
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-order-secret
+                  key: MYSQL_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-order-secret
+                  key: MYSQL_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-order-secret
+                  key: REDIS_PASSWORD
           
           # -------------------------------------------------------------------
           # 资源配额管理：防止资源争抢，保障集群稳定性

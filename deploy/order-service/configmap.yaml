@@ -34,17 +34,18 @@ data:
   # ========================================
   # 中间件地址配置（生产环境）
   # ========================================
-  # MySQL 数据库
+  # ⚠️ 注意：敏感信息（密码、密钥）已移至 secret.yaml
+  
+  # MySQL 数据库（非敏感配置）
   MYSQL_HOST: "10.10.1.1"
   MYSQL_PORT: "3306"
-  MYSQL_USERNAME: "root"
-  MYSQL_PASSWORD: "123456"  # 生产环境建议使用 K8s Secret
+  # MYSQL_USERNAME 和 MYSQL_PASSWORD 在 Secret 中定义
   
-  # Redis
+  # Redis（非敏感配置）
   REDIS_HOST: "10.10.1.1"
   REDIS_PORT: "6379"
   REDIS_DATABASE: "0"
-  REDIS_PASSWORD: "123456"  # 生产环境建议使用 K8s Secret
+  # REDIS_PASSWORD 在 Secret 中定义
   
   # Nacos
   NACOS_SERVER: "10.10.1.1:8848"
