@@ -1,19 +1,19 @@
 # =====================================================
-# NexusMall 订单服务 - 开发环境配置
+# NexusMall 订单服务 - 生产环境配置
 # =====================================================
-# Data ID: nexusmall-order-dev.yaml
+# Data ID: nexusmall-order-prod.yaml
 # Group: MALL_GROUP
-# Namespace: dev
-# Profile: dev
-# 用途：开发环境专属配置（优先级高于 nexusmall-order.yaml）
+# Namespace: prod
+# Profile: prod
+# 用途：生产环境专属配置（优先级高于 nexusmall-order.yaml）
 # 说明：
-# - 此文件仅包含开发环境特有的差异化配置
+# - 此文件仅包含生产环境特有的差异化配置
 # - 共享配置已在 nexusmall-common.yaml 中定义
 # - 业务通用配置已在 nexusmall-order.yaml 中定义
 # =====================================================
 
 # ===============================
-# 数据库连接配置（开发环境）
+# 数据库连接配置（生产环境）
 # ===============================
 spring:
   # 数据库连接配置（完整配置，符合业界标准）
@@ -26,7 +26,7 @@ spring:
     url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
     # 数据库用户名
     username: root
-    # 数据库密码（生产环境建议使用环境变量）
+    # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
     password: "123456"
     # HikariCP 连接池参数
     hikari:
@@ -41,42 +41,42 @@ spring:
       # 连接超时时间（毫秒）
       connection-timeout: 30000
 
-  # Redis 配置（开发环境）
+  # Redis 配置（生产环境）
   redis:
     # Redis 服务器地址
     host: ${REDIS_HOST:10.10.1.1}
     # Redis 端口
     port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
+    # 使用的数据库编号（生产环境建议使用独立库）
     database: ${REDIS_DATABASE:0}
     # Redis 密码
     password: ${REDIS_PASSWORD:123456}
 
-  # Spring Cloud 配置（开发环境）
+  # Spring Cloud 配置（生产环境）
   cloud:
-    # Sentinel 配置（开发环境）
+    # Sentinel 配置（生产环境）
     # ⚠️ 注意：Sentinel 数据源规则定义（dataId、groupId、rule-type等）在 nexusmall-order.yaml 中定义
     sentinel:
       transport:
-        # Sentinel Dashboard 地址（开发环境）
+        # Sentinel Dashboard 地址（生产环境）
         dashboard: 10.10.1.1:8858
         port: 8719
       datasource:
         ds1:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: dev
+            namespace: prod
         ds2:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: dev
+            namespace: prod
         ds3:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: dev
+            namespace: prod
 
 # ===============================
-# RocketMQ 配置（开发环境）
+# RocketMQ 配置（生产环境）
 # ===============================
 # ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-order.yaml 中定义
 rocketmq:
@@ -84,16 +84,16 @@ rocketmq:
   name-server: 10.10.1.1:9876
   # 生产者配置
   producer:
-    group: order-producer-group-dev
+    group: order-producer-group-prod
 
 # ===============================
-# Seata 分布式事务配置（开发环境）
+# Seata 分布式事务配置（生产环境）
 # ===============================
 # ⚠️ 注意：Seata 通用参数（enabled、tx-service-group、vgroup-mapping、type、cluster、username、password、application、data-id）在 nexusmall-order.yaml 中定义
 seata:
   registry:
     nacos:
-      # Seata Server 地址（开发环境）
+      # Seata Server 地址（生产环境）
       server-addr: 10.10.1.1:8848
       # Seata Server 注册的命名空间（通常为 public 或 ""）
       namespace: ""
@@ -101,35 +101,35 @@ seata:
       group: SEATA_GROUP
   config:
     nacos:
-      # Seata 配置中心地址（开发环境）
+      # Seata 配置中心地址（生产环境）
       server-addr: 10.10.1.1:8848
       # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
-      # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
+      # 注意：如果 seataServer.properties 在 prod 命名空间，则改为 prod
       namespace: ""
       # Seata 配置所在的分组
       group: SEATA_GROUP
 
 # ===============================
-# 业务特定配置（开发环境）
+# 业务特定配置（生产环境）
 # ===============================
 order:
-  # 订单号前缀（开发环境标识）
-  order-no-prefix: "ORD-DEV"
+  # 订单号前缀（生产环境标识）
+  order-no-prefix: "ORD"
 
 # ===============================
-# SpringDoc + Knife4j API 文档配置（开发环境）
+# SpringDoc + Knife4j API 文档配置（生产环境）
 # ===============================
 # ⚠️ 注意：API 文档通用配置（path、packages-to-scan、group-configs、language）在 nexusmall-order.yaml 中定义
 springdoc:
   api-docs:
-    # 开发环境启用 API 文档
-    enabled: true
+    # 生产环境禁用 API 文档（安全考虑）
+    enabled: false
   swagger-ui:
-    # 开发环境启用 Swagger UI
-    enabled: true
+    # 生产环境禁用 Swagger UI（安全考虑）
+    enabled: false
 
 knife4j:
-  # 开发环境启用 Knife4j
-  enable: true
-  # 开发环境非生产模式
-  production: false
+  # 生产环境禁用 Knife4j（安全考虑）
+  enable: false
+  # 生产环境模式
+  production: true
