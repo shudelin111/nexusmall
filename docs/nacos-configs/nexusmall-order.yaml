@@ -2,7 +2,8 @@
 # NexusMall 订单服务配置
 # =====================================================
 # Data ID: nexusmall-order.yaml
-# Group: DEFAULT_GROUP
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
 # 用途：订单服务专属业务配置（所有环境共享）
 # 说明：
 # - 此文件存放所有环境共享的通用配置
@@ -14,47 +15,10 @@
 # Spring 应用配置
 # ===============================
 spring:
-  # 应用名称
-  application:
-    name: nexusmall-order
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
   
-  # 数据库连接配置（完整配置，符合业界标准）
-  datasource:
-    # JDBC 驱动类名
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
-    type: com.zaxxer.hikari.HikariDataSource
-    # JDBC 连接 URL（订单服务专用数据库）
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_order?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    # 数据库用户名
-    username: root
-    # 数据库密码（生产环境建议使用环境变量）
-    password: "123456"
-    # HikariCP 连接池参数
-    hikari:
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 最大连接数
-      maximum-pool-size: 20
-      # 空闲连接超时时间（毫秒）
-      idle-timeout: 30000
-      # 连接最大生命周期（毫秒）
-      max-lifetime: 1800000
-      # 连接超时时间（毫秒）
-      connection-timeout: 30000
-      # 连接测试查询语句
-      connection-test-query: SELECT 1
-  
-  # Redis 配置
+  # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # Redis 服务器地址
-    host: ${REDIS_HOST:10.10.1.1}
-    # Redis 端口
-    port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
-    database: ${REDIS_DATABASE:0}
-    # Redis 密码
-    password: ${REDIS_PASSWORD:123456}
     # 连接超时时间（毫秒）
     timeout: 5000  # 5 秒
     # Lettuce 连接池配置
@@ -68,18 +32,7 @@ spring:
         min-idle: 0
         # 获取连接的最大等待时间（毫秒）
         max-wait: 1000ms  # 1 秒
-  # ===============================
-  # Kafka 配置（用于日志收集）
-  # ===============================
-  kafka:
-    bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-    producer:
-      acks: 1
-      retries: 3
-      batch-size: 16384
-      buffer-memory: 33554432
-      key-serializer: org.apache.kafka.common.serialization.StringSerializer
-      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
   # Spring Cloud 配置
   cloud:
     # OpenFeign 服务调用配置
@@ -93,65 +46,54 @@ spring:
             connectTimeout: 5000
             # 读取超时
             readTimeout: 5000
-      httpclient:
-        enabled: true
       compression:
         request:
           enabled: true
         response:
           enabled: true
-    
-    # Sentinel 熔断限流配置
+
+    # Sentinel 熔断限流配置（通用参数）
     sentinel:
       # 启用 Sentinel
       enabled: true
       # 取消控制台懒加载（启动时立即注册到 Dashboard）
       eager: true
-      transport:
-        dashboard: 10.10.1.1:8858
-        port: 8719
+      # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
+      # - spring.cloud.sentinel.transport.port (本地通信端口)
+      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
+      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: ""
+            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-order-{profile}.yaml 中定义
             dataId: nexusmall-order-flow-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: flow
             data-type: json
             username: nacos
             password: nacos
-        
+
         # 熔断降级规则数据源
         ds2:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: ""
             dataId: nexusmall-order-degrade-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: degrade
             data-type: json
             username: nacos
             password: nacos
-        
+
         # 系统自适应保护规则数据源
         ds3:
           nacos:
-            server-addr: 10.10.1.1:8848
-            namespace: ""
             dataId: nexusmall-order-system-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: system
             data-type: json
             username: nacos
             password: nacos
-
-# ===============================
-# 服务端口配置
-# ===============================
-server:
-  port: 11000
 
 # ===============================
 # MyBatis-Plus 配置
@@ -180,22 +122,20 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # ===============================
-# RocketMQ 配置
+# RocketMQ 配置（通用参数）
 # ===============================
 rocketmq:
-  # NameServer 地址
-  name-server: 10.10.1.1:9876
-  # 生产者配置
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+  # - rocketmq.name-server (NameServer 地址)
+  # - rocketmq.producer.group (生产者组名称)
+  # 生产者配置（通用参数）
   producer:
-    group: order-producer-group
     send-message-timeout: 3000
     retry-times-when-send-failed: 2
     retry-times-when-send-async-failed: 2
 
-
-
 # ===============================
-# Seata 分布式事务配置
+# Seata 分布式事务配置（通用参数）
 # ===============================
 seata:
   enabled: true
@@ -204,12 +144,16 @@ seata:
   service:
     vgroup-mapping:
       nexusmall-tx-group: default
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+  # - seata.registry.nacos.server-addr (Seata Server 地址)
+  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
+  # - seata.registry.nacos.group (Seata Server 所在分组)
+  # - seata.config.nacos.server-addr (Seata 配置中心地址)
+  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
+  # - seata.config.nacos.group (Seata 配置所在分组)
   registry:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
-      namespace: ""
-      group: SEATA_GROUP
       cluster: default
       username: nacos
       password: nacos
@@ -217,38 +161,41 @@ seata:
   config:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
-      namespace: ""
-      group: SEATA_GROUP
       username: nacos
       password: nacos
       data-id: seataServer.properties
 
 # ===============================
-# Actuator 监控端点配置
+# SpringDoc + Knife4j API 文档配置（通用参数）
 # ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-      # 【关键】启用 liveness 和 readiness 健康组（K8s 探针必需）
-      probes:
-        enabled: true
-    info:
-      enabled: true
-  info:
-    env:
-      enabled: true
-  # 【关键】启用 JVM、DB 等详细健康检查
-  health:
-    livenessState:
-      enabled: true
-    readinessState:
-      enabled: true
+# ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
+# - springdoc.api-docs.enabled (API 文档启用开关)
+# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
+# - knife4j.enable (Knife4j 启用开关)
+# - knife4j.production (生产模式开关)
+springdoc:
+  # OpenAPI 文档路径
+  api-docs:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /v3/api-docs
+  # Swagger UI 配置
+  swagger-ui:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /swagger-ui/index.html
+  # 扫描的包路径(所有环境相同)
+  packages-to-scan: com.nexusmall.order.controller
+  # 分组配置(微服务架构下推荐)
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.nexusmall.order.controller
+
+# Knife4j 增强配置（通用参数）
+knife4j:
+  # ⚠️ 注意：enable 和 production 在环境特定配置中定义
+  # 设置文档语言（所有环境相同）
+  setting:
+    language: zh_cn
 
 # ===============================
 # 日志级别配置

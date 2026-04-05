@@ -8,7 +8,6 @@ import com.github.danielwegener.logback.kafka.KafkaAppender;
 import com.github.danielwegener.logback.kafka.delivery.AsynchronousDeliveryStrategy;
 import com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy;
 import net.logstash.logback.encoder.LogstashEncoder;
-import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
@@ -36,6 +35,13 @@ import org.springframework.stereotype.Component;
  *   <li>✅ 保持生产环境的 Kafka 日志收集能力</li>
  * </ul>
  * 
+ * <p>配置说明：</p>
+ * <ul>
+ *   <li>Nacos 配置：nexusmall.logging.kafka.enabled=false</li>
+ *   <li>环境变量：NERVOUSMALL_LOGGING_KAFKA_ENABLED=true（覆盖 Nacos）</li>
+ *   <li>默认值：false（开发/测试环境禁用，生产环境根据需要启用）</li>
+ * </ul>
+ * 
  * @author shudl
  * @since 2026-04-04
  */
@@ -49,9 +55,24 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
     
     @Value("${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}")
     private String kafkaServers;
+    
+    private final KafkaLoggingProperties kafkaLoggingProperties;
+
+    /**
+     * 构造函数注入配置属性（Spring Boot 推荐方式）
+     */
+    public KafkaLoggingConfig(KafkaLoggingProperties kafkaLoggingProperties) {
+        this.kafkaLoggingProperties = kafkaLoggingProperties;
+    }
 
     @Override
     public void onApplicationEvent(ApplicationReadyEvent event) {
+        // 检查是否启用 Kafka 日志收集
+        if (!kafkaLoggingProperties.isEnabled()) {
+            System.out.println("ℹ️  Kafka logging is disabled (set nexusmall.logging.kafka.enabled=true to enable)");
+            return;
+        }
+        
         try {
             initializeKafkaAppender();
         } catch (Exception e) {

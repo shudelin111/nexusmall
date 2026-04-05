@@ -200,6 +200,11 @@ logging:
     com.nexusmall.auth.dao: DEBUG
 
 # ===============================
+# Kafka 日志收集开关（Logback Appender）
+# ===============================
+KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
+
+# ===============================
 # 应用元信息配置
 # ===============================
 info:

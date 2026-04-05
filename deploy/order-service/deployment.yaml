@@ -102,6 +102,11 @@ spec:
             # 安全建议：敏感信息应使用 Secret 或 ConfigMap 注入
             - name: SPRING_PROFILES_ACTIVE
               value: "dev"
+            
+            # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
+            # 确保应用日志和 JVM 日志统一写入 /tmp/logs 目录
+            - name: LOG_PATH
+              value: "/tmp/logs"
           
           # -------------------------------------------------------------------
           # 资源配额管理：防止资源争抢，保障集群稳定性

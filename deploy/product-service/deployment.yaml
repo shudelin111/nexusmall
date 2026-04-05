@@ -93,7 +93,12 @@ spec:
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: "dev"  # 可选值：dev, test, prod
-          
+
+            # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
+            # 确保应用日志和 JVM 日志统一写入 /tmp/logs 目录
+            - name: LOG_PATH
+              value: "/tmp/logs"
+
           # ========================================
           # 资源配额与限制
           # ========================================
