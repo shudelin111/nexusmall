@@ -82,45 +82,45 @@ spring:
         # ===============================
         ds1:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-auth-flow-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: flow
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # ===============================
         # 熔断降级规则数据源（异常比例/慢调用）
         # ===============================
         ds2:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-auth-degrade-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: degrade
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # ===============================
         # 系统自适应保护规则数据源
         # ===============================
         ds3:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-auth-system-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: system
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
       # Sentinel 日志配置
       log:
@@ -326,17 +326,17 @@ seata:
     type: nacos
     nacos:
       # Nacos 服务器地址
-      server-addr: 10.10.1.1:8848
-      # 命名空间 ID（如果不填则使用 public 命名空间）
-      namespace: ""
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+      # 命名空间 ID
+      namespace: ${NACOS_NAMESPACE:prod}
       # 分组名称
       group: SEATA_GROUP
       # 集群名称
       cluster: default
       # Nacos 用户名（如果启用了认证）
-      username: nacos
+      username: ${NACOS_USERNAME:nacos}
       # Nacos 密码（如果启用了认证）
-      password: nacos
+      password: ${NACOS_PASSWORD:nacos}
       # Seata Server 在 Nacos 中的服务名
       application: seata-server
   config:
@@ -346,15 +346,15 @@ seata:
     type: nacos
     nacos:
       # Nacos 服务器地址
-      server-addr: 10.10.1.1:8848
-      # 命名空间 ID（如果不填则使用 public 命名空间）
-      namespace: ""
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+      # 命名空间 ID
+      namespace: ${NACOS_NAMESPACE:prod}
       # 分组名称
       group: SEATA_GROUP
       # Nacos 用户名（如果启用了认证）
-      username: nacos
+      username: ${NACOS_USERNAME:nacos}
       # Nacos 密码（如果启用了认证）
-      password: nacos
+      password: ${NACOS_PASSWORD:nacos}
       # 配置文件 Data ID（存储在 Nacos 中的配置文件名）
       data-id: seataServer.properties
 
