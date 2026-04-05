@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
+ * @author shudl
  * 创建订单请求
  */
 @Data
