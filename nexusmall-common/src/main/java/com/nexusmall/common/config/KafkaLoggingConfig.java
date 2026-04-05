@@ -11,7 +11,6 @@ import net.logstash.logback.encoder.LogstashEncoder;
 import net.logstash.logback.stacktrace.ShortenedThrowableConverter;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -41,14 +40,13 @@ import org.springframework.stereotype.Component;
  * <ul>
  *   <li>默认禁用：KAFKA_LOGGING_ENABLED=false（或 unset）</li>
  *   <li>启用方式：设置环境变量 KAFKA_LOGGING_ENABLED=true</li>
- *   <li>适用场景：开发/测试环境禁用，生产环境启用</li>
+ *   <li>适用场景：开发/测试环境禁用，生产环境根据需要启用</li>
  * </ul>
  * 
  * @author shudl
  * @since 2026-04-04
  */
 @Component
-@ConditionalOnProperty(name = "KAFKA_LOGGING_ENABLED", havingValue = "true", matchIfMissing = false)
 public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final String KAFKA_APPENDER_NAME = "async_kafka";
