@@ -86,7 +86,7 @@ spec:
           #   - master 分支：sha-{commit}（生产环境，版本可追溯）
           #   - 语义化版本：v1.0.0, v1.2.3 等（发布版本使用）
           # 最佳实践：生产环境应使用固定版本号而非 latest
-          image: docker.io/shudlsys/nexusmall-order:sha-e999e50b3477bb02b88f951872626f27a5f4a015
+          image: docker.io/shudlsys/nexusmall-order:sha-c3a56552bdbaffdb7d6c141c944e495f7259bced
           
           # 端口暴露：声明容器运行时监听的端口
           ports:
