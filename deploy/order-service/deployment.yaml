@@ -34,12 +34,13 @@ metadata:
     # ArgoCD 镜像自动更新器配置
     # -------------------------------------------------------------------------
     # 镜像更新列表：指定需要监控和更新的容器镜像
-    # 格式：<alias>=<image-url>，支持多个镜像逗号分隔
-    argocd-image-updater.argoproj.io/image-list: "nexusmall-order=docker.io/shudlsys/nexusmall-order"
+    # 过滤策略：~^sha- 表示只匹配以 sha- 开头的标签（对应 master 分支构建）
+    # 格式：<alias>=<image-url>:<tag-filter>
+    argocd-image-updater.argoproj.io/image-list: "nexusmall-order=docker.io/shudlsys/nexusmall-order:~^sha-"
     
-    # 更新策略：latest 表示跟踪 latest 标签的最新镜像
-    # 可选策略：semver (语义化版本)、name (按名称排序)、digest (按摘要)
-    argocd-image-updater.argoproj.io/nexusmall-order.update-strategy: "latest"
+    # 更新策略：name 表示按标签名称排序并取最新
+    # 生产环境实践：结合 sha- 标签，实现按提交顺序自动滚动更新
+    argocd-image-updater.argoproj.io/nexusmall-order.update-strategy: "name"
   
   # 资源标签：用于资源分类、选择和监控
   labels:

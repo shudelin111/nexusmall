@@ -17,8 +17,8 @@ spring:
       discovery:
         # Nacos 服务器地址
         server-addr: 10.10.1.1:8848
-        # 命名空间 ID（dev 环境）
-        namespace: dev
+        # 命名空间 ID（prod 环境）
+        namespace: prod
         # 服务分组（商城项目）
         group: MALL_GROUP
         # Nacos 用户名
@@ -38,8 +38,8 @@ spring:
         file-extension: yaml
         # 配置分组（商城项目）
         group: MALL_GROUP
-        # 命名空间（与注册中心保持一致，dev 环境）
-        namespace: dev
+        # 命名空间（与注册中心保持一致，prod 环境）
+        namespace: prod
         # Nacos 认证信息
         username: nacos
         password: nacos
