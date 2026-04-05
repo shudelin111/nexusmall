@@ -40,8 +40,6 @@ spring:
       max-lifetime: 1800000
       # 连接超时时间（毫秒）
       connection-timeout: 30000
-      # 连接测试查询语句
-      connection-test-query: SELECT 1
   
   # Redis 配置（开发环境）
   redis:
@@ -87,9 +85,6 @@ rocketmq:
   # 生产者配置
   producer:
     group: order-producer-group-dev
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
 
 # ===============================
 # Seata 分布式事务配置（开发环境）
@@ -118,12 +113,8 @@ seata:
 # 业务特定配置（开发环境）
 # ===============================
 order:
-  # 订单超时自动取消时间（分钟）
-  timeout-cancel: 30
-  # 订单号前缀
+  # 订单号前缀（开发环境标识）
   order-no-prefix: "ORD-DEV"
-  # 最大购买数量
-  max-purchase-quantity: 100
 
 # ===============================
 # SpringDoc + Knife4j API 文档配置（开发环境）
