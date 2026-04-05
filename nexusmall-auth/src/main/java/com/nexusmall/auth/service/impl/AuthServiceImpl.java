@@ -8,6 +8,8 @@ import com.nexusmall.auth.entity.Role;
 import com.nexusmall.auth.entity.User;
 import com.nexusmall.auth.exception.AuthException;
 import com.nexusmall.auth.service.AuthService;
+import com.nexusmall.auth.service.RefreshTokenService;
+import com.nexusmall.auth.service.TokenBlacklistService;
 import com.nexusmall.auth.util.JwtUtil;
 import com.nexusmall.auth.vo.AuthRequest;
 import com.nexusmall.auth.vo.AuthResponse;
@@ -42,6 +44,12 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private PermissionMapper permissionMapper;
 
+    @Autowired
+    private RefreshTokenService refreshTokenService;
+
+    @Autowired
+    private TokenBlacklistService blacklistService;
+
     @Override
     public AuthResponse login(AuthRequest request) {
         log.info("用户登录，username: {}", request.getUsername());
@@ -67,14 +75,23 @@ public class AuthServiceImpl implements AuthService {
                 .map(Permission::getPermissionCode)
                 .collect(Collectors.toList());
 
-        String token = jwtUtil.generateToken(user.getUsername(), roleCodes, permissionCodes);
+        // 生成 Access Token (RS256)
+        String accessToken = jwtUtil.generateAccessToken(user.getUsername(), roleCodes, permissionCodes);
+        
+        // 生成 Refresh Token
+        String refreshToken = jwtUtil.generateRefreshToken(user.getUsername());
+        String refreshJti = jwtUtil.getJtiFromToken(refreshToken);
+        
+        // 保存 Refresh Token 到数据库
+        refreshTokenService.saveRefreshToken(user, refreshToken, refreshJti, null, null);
         
         log.info("用户登录成功，username: {}, roles: {}, permissions: {}", 
                 user.getUsername(), roleCodes.size(), permissionCodes.size());
 
         AuthResponse response = new AuthResponse();
-        response.setToken(token);
-        response.setExpireTime(System.currentTimeMillis() + 86400000);
+        response.setToken(accessToken);
+        response.setRefreshToken(refreshToken); // 新增
+        response.setExpireTime(System.currentTimeMillis() + 1800000L); // 30分钟
         response.setUsername(user.getUsername());
         response.setRoles(roleCodes);
         response.setPermissions(permissionCodes);
@@ -83,17 +100,94 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void logout(String token) {
-        log.info("用户登出，token: {}...", token.length() > 20 ? token.substring(0, 20) : token);
-        // TODO: 可以将 token 加入黑名单（使用 Redis）
-        log.debug("用户登出处理完成");
+        log.info("用户登出");
+        
+        try {
+            // 1. 获取 Token JTI
+            String jti = jwtUtil.getJtiFromToken(token);
+            
+            // 2. 获取用户名
+            String username = jwtUtil.getUsernameFromToken(token);
+            User user = userMapper.findByUsername(username);
+            
+            if (user != null) {
+                // 3. 撤销该用户的所有 Refresh Token
+                refreshTokenService.revokeAllRefreshTokens(user.getId());
+            }
+            
+            // 4. 将 Access Token 加入黑名单
+            long remainingTime = jwtUtil.validateToken(token) ? 
+                    calculateRemainingTime(token) : 0;
+            if (remainingTime > 0) {
+                blacklistService.addToBlacklist(jti, remainingTime);
+            }
+            
+            log.info("用户登出成功，username: {}", username);
+        } catch (Exception e) {
+            log.error("用户登出失败", e);
+        }
+    }
+    
+    /**
+     * 计算 Token 剩余有效期
+     */
+    private long calculateRemainingTime(String token) {
+        try {
+            io.jsonwebtoken.Claims claims = io.jsonwebtoken.Jwts.parserBuilder()
+                    .setSigningKey(getPublicKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+            
+            long expirationTime = claims.getExpiration().getTime();
+            long currentTime = System.currentTimeMillis();
+            return Math.max(0, expirationTime - currentTime);
+        } catch (Exception e) {
+            return 0;
+        }
+    }
+    
+    /**
+     * 获取 RSA 公钥 (用于验证)
+     */
+    private java.security.PublicKey getPublicKey() {
+        try {
+            String publicKeyPEM = ""; // TODO: 从 RsaKeyProperties 获取
+            publicKeyPEM = publicKeyPEM
+                    .replace("-----BEGIN PUBLIC KEY-----", "")
+                    .replace("-----END PUBLIC KEY-----", "")
+                    .replaceAll("\\s", "");
+
+            byte[] keyBytes = java.util.Base64.getDecoder().decode(publicKeyPEM);
+            java.security.spec.X509EncodedKeySpec keySpec = new java.security.spec.X509EncodedKeySpec(keyBytes);
+            java.security.KeyFactory keyFactory = java.security.KeyFactory.getInstance("RSA");
+            return keyFactory.generatePublic(keySpec);
+        } catch (Exception e) {
+            throw new RuntimeException("加载 RSA 公钥失败", e);
+        }
     }
 
     @Override
     public boolean validateToken(String token) {
         log.debug("验证 Token: {}...", token.length() > 20 ? token.substring(0, 20) : token);
+        
+        // 1. 检查是否在黑名单中
+        String jti = jwtUtil.getJtiFromToken(token);
+        if (blacklistService.isBlacklisted(jti)) {
+            log.warn("Token 已在黑名单中，jti: {}", jti);
+            return false;
+        }
+        
+        // 2. 验证 Token 签名和过期时间
         boolean valid = jwtUtil.validateToken(token);
         log.info("Token 验证{}", valid ? "成功" : "失败");
         return valid;
+    }
+
+    @Override
+    public String refreshAccessToken(String refreshToken) {
+        log.info("刷新 Access Token");
+        return refreshTokenService.refreshAccessToken(refreshToken);
     }
 
     @Override

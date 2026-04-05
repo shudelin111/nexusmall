@@ -1,13 +1,16 @@
 # =====================================================
-# NexusMall 商品服务 - Bootstrap 配置
+# NexusMall 认证服务配置文件
 # =====================================================
-# 用途：配置 Nacos 连接信息（优先级最高，最先加载）
-# 说明：此文件仅包含 Nacos 连接相关配置
+# 模块职责：
+# 1. 用户注册、登录、登出
+# 2. JWT Token 生成与验证
+# 3. 用户权限管理
+# 4. OAuth2 第三方登录（预留）
 # =====================================================
 
 spring:
   application:
-    name: nexusmall-product
+    name: nexusmall-auth
   
   cloud:
     nacos:
@@ -63,11 +66,11 @@ spring:
         # 扩展配置（服务专属）
         # ===============================
         extension-configs:
-          # Product 服务通用配置（所有环境共享）
-          - data-id: nexusmall-product.yaml
+          # auth 服务通用配置（所有环境共享）
+          - data-id: nexusmall-auth.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # Product 服务环境特定配置（根据 Profile 动态加载）
-          - data-id: nexusmall-product-${spring.profiles.active}.yaml
+          # auth 服务环境特定配置（根据 Profile 动态加载）
+          - data-id: nexusmall-auth-${spring.profiles.active}.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true

@@ -31,7 +31,7 @@ import java.util.Map;
  * 商品控制器 - 处理所有商品相关请求
  */
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")  // RESTful 资源路径(复数),Gateway 已通过 /product/** 路由
 @Tag(name = "商品管理", description = "商品信息管理、库存管理")
 public class ProductController {
 

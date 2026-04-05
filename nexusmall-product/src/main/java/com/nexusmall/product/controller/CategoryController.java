@@ -15,7 +15,7 @@ import java.util.List;
  * 商品分类控制器
  */
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")  // RESTful 资源路径(复数),Gateway 已通过 /product/** 路由
 @Tag(name = "分类管理", description = "商品分类的增删改查")
 public class CategoryController {
 

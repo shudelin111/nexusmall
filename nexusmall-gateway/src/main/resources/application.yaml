@@ -151,17 +151,33 @@ spring:
     
     nacos:
       discovery:
-        # Nacos 服务发现地址
-        server-addr: 10.10.1.1:8848
-        # 命名空间
-        # 注意：public 命名空间在 API 调用时应传空字符串
-        namespace: ""
-        # 服务分组
-        group: DEFAULT_GROUP
-        # Nacos 用户名
-        username: nacos
-        # Nacos 密码
-        password: nacos
+        # Nacos 服务发现地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 命名空间（必须与微服务注册的命名空间一致）
+        # "" 表示 public 命名空间
+        # 如果微服务使用其他命名空间，需要填写对应的命名空间 ID
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 服务分组（必须与微服务注册的分组一致）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
+      
+      # 配置中心配置（从 Nacos 读取配置）
+      config:
+        # 配置中心地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 配置命名空间（来自 ConfigMap）
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 配置分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
+        # 配置文件后缀名
+        file-extension: yaml
     
     gateway:
       # 服务发现相关配置
@@ -184,7 +200,8 @@ spring:
           predicates:
             - Path=/order/**
           filters:
-            # 路径重写：去掉 /order 前缀
+            # 路径重写：去掉 /order 前缀，转发到下游服务
+            # /order/ping -> /ping
             # /order/v3/api-docs -> /v3/api-docs
             - RewritePath=/order/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
@@ -283,12 +300,41 @@ server:
 # =====================================================
 # 安全配置（JWT 相关）
 # =====================================================
+#security:
+#  jwt:
+#    # JWT 签名密钥
+#    secret-key: mySecretKeyForJWTGenerationAndValidation
+#    # Token 过期时间（毫秒）
+#    expire-time-in-ms: 86400000
+# =====================================================
+# NexusMall Gateway - JWT Configuration
+# =====================================================
+# 说明：
+# 1. 此配置应存入 Nacos 配置中心
+# 2. Data ID: nexusmall-gateway.yaml
+# 3. Group: DEFAULT_GROUP
+# =====================================================
+
 security:
   jwt:
-    # JWT 签名密钥
-    secret-key: mySecretKeyForJWTGenerationAndValidation
-    # Token 过期时间（毫秒）
-    expire-time-in-ms: 86400000
+    rsa:
+      # RSA 公钥 (PEM 格式) - 与 auth 服务的公钥一致
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCCkHxMtFQVXocqNfUal
+        vy6ra77FyJmK3jFKIlcBNlXvWjzoJr8zbPh2COrkxRNpxWg2v4Htsva/jTboop4M
+        8XOWb+16Fyjk+y/4be/UBaHB1NLqCkuHglihQHZMJjONAxIN66VyzkLgEymqxS57
+        3cZfbyUiFzhjXfoU50MPbT630qwWCuzWF9NPFShVaIhsEg2dtL6YSBlg56QIhlTT
+        RvN71nPnV97tUrdHALCrio0GIfnGT3VW3iZdkloGHzKdzA0O5r+uLsbPRDxuQyoh
+        T254rLgY1m1wcVyqqe397j45SW+JZz1XtU6fUNa7o9WjsMuTlR70vVxPqupETH5H
+        fwIDAQAB
+        -----END PUBLIC KEY-----
+
+      # JWT 签发者标识 (必须与 auth 服务一致)
+      issuer: nexusmall-auth
+
+      # JWT 受众标识 (必须与 auth 服务一致)
+      audience: nexusmall-services
 
 # =====================================================
 # 日志级别配置

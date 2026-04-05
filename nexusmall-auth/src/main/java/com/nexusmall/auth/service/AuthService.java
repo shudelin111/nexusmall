@@ -13,6 +13,14 @@ public interface AuthService {
     boolean validateToken(String token);
     
     /**
+     * 刷新 Access Token
+     *
+     * @param refreshToken Refresh Token
+     * @return 新的 Access Token
+     */
+    String refreshAccessToken(String refreshToken);
+    
+    /**
      * 用户注册
      */
     boolean register(User user, List<Long> roleIds);

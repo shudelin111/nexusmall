@@ -15,7 +15,7 @@ import java.util.List;
  * 商品品牌控制器
  */
 @RestController
-@RequestMapping("/brand")
+@RequestMapping("/brands")  // RESTful 资源路径(复数),Gateway 已通过 /product/** 路由
 @Tag(name = "品牌管理", description = "商品品牌的增删改查")
 public class BrandController {
 

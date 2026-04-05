@@ -34,7 +34,7 @@ import java.util.List;
  * @author shudl
  * @since 2026-03-26
  */
-@Component
+// @Component  // 已废弃：使用 JwtAuthGlobalFilter (RSA-256) 替代
 public class JwtAuthenticationWebFilter implements WebFilter {
 
     private static final Logger log = LoggerFactory.getLogger(JwtAuthenticationWebFilter.class);

@@ -193,10 +193,10 @@ spring:
     nacos:
       # 服务发现配置（注册到 Nacos）
       discovery:
-        # Nacos 服务器地址
-        server-addr: 10.10.1.1:8848
+        # Nacos 服务器地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
         
-        # Nacos 命名空间
+        # Nacos 命名空间（来自 ConfigMap 或 Profile）
         # 💡 用途：用于隔离不同环境或业务线
         # public: 默认命名空间
         # 💡 最佳实践：
@@ -204,34 +204,34 @@ spring:
         #   - 测试环境：test-namespace
         #   - 生产环境：prod-namespace
         # 注意：public 命名空间在 API 调用时应传空字符串
-        namespace: ""
+        namespace: ${NACOS_NAMESPACE:prod}
         
-        # 服务分组
+        # 服务分组（来自 ConfigMap）
         # 💡 用途：区分同一服务的不同版本或业务组
-        group: DEFAULT_GROUP
+        group: ${NACOS_GROUP:MALL_GROUP}
         
-        # Nacos 用户名
-        username: nacos
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
         
-        # Nacos 密码
-        password: nacos
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
       
       # 配置中心配置（从 Nacos 读取配置）
       config:
-        # 配置中心地址（默认复用 discovery 的地址）
-        server-addr: ${spring.cloud.nacos.discovery.server-addr}
+        # 配置中心地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
         
-        # 配置命名空间（默认复用 discovery 的命名空间）
-        namespace: ${spring.cloud.nacos.discovery.namespace}
+        # 配置命名空间（来自 ConfigMap）
+        namespace: ${NACOS_NAMESPACE:prod}
         
-        # 配置分组（默认复用 discovery 的分组）
-        group: ${spring.cloud.nacos.discovery.group}
+        # 配置分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
         
-        # Nacos 用户名
-        username: ${spring.cloud.nacos.discovery.username}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
         
-        # Nacos 密码
-        password: ${spring.cloud.nacos.discovery.password}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
         
         # 配置文件后缀名
         # 💡 dataId 格式：{应用名}.{后缀}

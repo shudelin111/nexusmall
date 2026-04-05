@@ -133,32 +133,31 @@ spring:
     nacos:
       # 服务发现配置（注册到 Nacos）
       discovery:
-        # Nacos 服务器地址
-        server-addr: 10.10.1.1:8848
-        # 命名空间（用于隔离不同环境或业务线）
-        # public: 默认命名空间
-        # 也可创建独立命名空间实现环境隔离
-        # 注意：public 命名空间在 API 调用时应传空字符串
-        namespace: ""
-        # 服务分组（用于区分同一服务的不同版本或业务组）
-        group: DEFAULT_GROUP
-        # Nacos 用户名
-        username: nacos
-        # Nacos 密码
-        password: nacos
+        # Nacos 服务器地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 命名空间（来自 ConfigMap 或 Profile）
+        # "" 表示 public 命名空间
+        # prod: 生产环境命名空间
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 服务分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
       
       # 配置中心配置（从 Nacos 读取配置）
       config:
-        # 配置中心地址（复用服务发现的地址）
-        server-addr: ${spring.cloud.nacos.discovery.server-addr}
-        # 配置命名空间（复用服务发现的命名空间）
-        namespace: ${spring.cloud.nacos.discovery.namespace}
-        # 配置分组（复用服务发现的分组）
-        group: ${spring.cloud.nacos.discovery.group}
-        # Nacos 用户名
-        username: ${spring.cloud.nacos.discovery.username}
-        # Nacos 密码
-        password: ${spring.cloud.nacos.discovery.password}
+        # 配置中心地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 配置命名空间（来自 ConfigMap）
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 配置分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
         # 配置文件后缀名
         # dataId 格式：{spring.application.name}.{file-extension}
         # 示例：nexusmall-auth.yaml
@@ -295,15 +294,15 @@ feign:
 # =====================================================
 # 安全配置（JWT 相关）
 # =====================================================
-security:
-  jwt:
-    # JWT 签名密钥（用于生成和验证 Token）
-    # ⚠️ 生产环境务必更换为复杂密钥，并妥善保管
-    secret-key: mySecretKeyForJWTGenerationAndValidation
-    # Token 过期时间（毫秒）
-    # 86400000ms = 24 小时
-    # 建议：根据业务安全要求调整（如 2 小时、7 天等）
-    expire-time-in-ms: 86400000
+#security:
+#  jwt:
+#    # JWT 签名密钥（用于生成和验证 Token）
+#    # ⚠️ 生产环境务必更换为复杂密钥，并妥善保管
+#    secret-key: mySecretKeyForJWTGenerationAndValidation
+#    # Token 过期时间（毫秒）
+#    # 86400000ms = 24 小时
+#    # 建议：根据业务安全要求调整（如 2 小时、7 天等）
+#    expire-time-in-ms: 86400000
 
 # =====================================================
 # Seata 分布式事务配置

@@ -12,7 +12,7 @@ import java.util.Map;
 
 @Slf4j
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/")  // Gateway 已通过 /auth/** 路由，此处不需要再加前缀
 public class AuthController {
 
     private final AuthService authService;
@@ -65,5 +65,31 @@ public class AuthController {
         }
         log.warn("无效的 Token 格式");
         return Result.success(false);
+    }
+
+    /**
+     * 刷新 Access Token
+     *
+     * @param request 包含 Refresh Token 的请求
+     * @return 新的 Access Token
+     */
+    @PostMapping("/refresh")
+    public Result<Map<String, Object>> refreshToken(@RequestBody Map<String, String> request) {
+        String refreshToken = request.get("refreshToken");
+        
+        if (refreshToken == null || refreshToken.isEmpty()) {
+            log.warn("Refresh Token 不能为空");
+            return Result.failure("400", "Refresh Token 不能为空");
+        }
+        
+        log.info("收到刷新 Token 请求");
+        String newAccessToken = authService.refreshAccessToken(refreshToken);
+        
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("accessToken", newAccessToken);
+        response.put("expireTime", System.currentTimeMillis() + 1800000L); // 30分钟
+        
+        log.info("Token 刷新成功");
+        return Result.success(response);
     }
 }

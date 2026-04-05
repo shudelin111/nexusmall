@@ -17,9 +17,16 @@ import java.util.List;
 public class AuthResponse {
 
     /**
-     * JWT Token
+     * Access Token (JWT)
+     * 用于 API 请求认证
      */
     private String token;
+
+    /**
+     * Refresh Token (JWT)
+     * 用于刷新 Access Token
+     */
+    private String refreshToken;
 
     /**
      * 过期时间（毫秒）

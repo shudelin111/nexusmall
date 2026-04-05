@@ -11,51 +11,24 @@ import org.springframework.security.web.server.context.NoOpServerSecurityContext
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthenticationWebFilter jwtAuthenticationWebFilter;
+    // 注意: JwtAuthenticationWebFilter 已废弃,使用 JwtAuthGlobalFilter (RSA-256) 替代
+    // private final JwtAuthenticationWebFilter jwtAuthenticationWebFilter;
 
-    public SecurityConfig(JwtAuthenticationWebFilter jwtAuthenticationWebFilter) {
-        this.jwtAuthenticationWebFilter = jwtAuthenticationWebFilter;
-    }
+    // public SecurityConfig(JwtAuthenticationWebFilter jwtAuthenticationWebFilter) {
+    //     this.jwtAuthenticationWebFilter = jwtAuthenticationWebFilter;
+    // }
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
         return http.securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-                .csrf(ServerHttpSecurity.CsrfSpec::disable).formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable).authorizeExchange(exchanges -> exchanges
-                        // 允许公开访问的路径
-                        .pathMatchers("/actuator/**", "/auth/ping").permitAll()
-                        
-                        // ========================================
-                        // Swagger/Knife4j 文档路径白名单 (无需认证)
-                        // ========================================
-                        .pathMatchers("/doc.html").permitAll()
-                        .pathMatchers("/swagger-ui.html").permitAll()
-                        .pathMatchers("/swagger-ui/**").permitAll()
-                        .pathMatchers("/v3/api-docs/**").permitAll()
-                        .pathMatchers("/swagger-resources/**").permitAll()
-                        .pathMatchers("/webjars/**").permitAll()
-                        .pathMatchers("/*/v3/api-docs/**").permitAll()  // 微服务文档路径
-                        
-                        .pathMatchers("/auth/login", "/auth/register")
-                        .permitAll().pathMatchers("/auth/validate").authenticated().pathMatchers("/auth/**")
-                        .hasAnyRole("ADMIN")
-
-                        // 商品服务路径
-                        .pathMatchers("/product/ping", "/product/list", "/product/view").permitAll().pathMatchers("/product/**")
-                        .hasAnyAuthority("product:list", "product:add", "product:edit", "product:delete")
-
-                        // 订单服务路径
-                        .pathMatchers("/order/ping").permitAll().pathMatchers("/order/**").authenticated()
-
-                        // 其他路径需要认证
-                        .anyExchange().authenticated())
-                .exceptionHandling(exceptions -> exceptions.authenticationEntryPoint((exchange, ex) -> {
-                    exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-                    return exchange.getResponse().setComplete();
-                }).accessDeniedHandler((exchange, ex) -> {
-                    exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
-                    return exchange.getResponse().setComplete();
-                })).addFilterAt(jwtAuthenticationWebFilter, SecurityWebFiltersOrder.AUTHENTICATION).build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                // 注意: 所有认证由 JwtAuthGlobalFilter 处理 (RS256)
+                // Spring Security 这里只做最基础的配置,不干预认证逻辑
+                .authorizeExchange(exchanges -> exchanges
+                        .anyExchange().permitAll())  // 允许所有请求,由 JwtAuthGlobalFilter 控制
+                .build();
     }
 
 }

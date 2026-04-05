@@ -56,7 +56,7 @@ spring:
         shared-configs:
           # 1. 平台公共配置
           - data-id: nexusmall-common.yaml
-            group: MALL_GROUP
+            group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
         
         # ===============================
@@ -65,9 +65,9 @@ spring:
         extension-configs:
           # Order 服务通用配置（所有环境共享）
           - data-id: nexusmall-order.yaml
-            group: MALL_GROUP
+            group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
           # Order 服务环境特定配置（根据 Profile 动态加载）
           - data-id: nexusmall-order-${spring.profiles.active}.yaml
-            group: MALL_GROUP
+            group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true

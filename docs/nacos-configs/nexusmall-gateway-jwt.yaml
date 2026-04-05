@@ -1,0 +1,29 @@
+# =====================================================
+# NexusMall Gateway - JWT Configuration
+# =====================================================
+# 说明：
+# 1. 此配置应存入 Nacos 配置中心
+# 2. Data ID: nexusmall-gateway.yaml
+# 3. Group: DEFAULT_GROUP
+# =====================================================
+
+security:
+  jwt:
+    rsa:
+      # RSA 公钥 (PEM 格式) - 与 auth 服务的公钥一致
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCCkHxMtFQVXocqNfUal
+        vy6ra77FyJmK3jFKIlcBNlXvWjzoJr8zbPh2COrkxRNpxWg2v4Htsva/jTboop4M
+        8XOWb+16Fyjk+y/4be/UBaHB1NLqCkuHglihQHZMJjONAxIN66VyzkLgEymqxS57
+        3cZfbyUiFzhjXfoU50MPbT630qwWCuzWF9NPFShVaIhsEg2dtL6YSBlg56QIhlTT
+        RvN71nPnV97tUrdHALCrio0GIfnGT3VW3iZdkloGHzKdzA0O5r+uLsbPRDxuQyoh
+        T254rLgY1m1wcVyqqe397j45SW+JZz1XtU6fUNa7o9WjsMuTlR70vVxPqupETH5H
+        fwIDAQAB
+        -----END PUBLIC KEY-----
+      
+      # JWT 签发者标识 (必须与 auth 服务一致)
+      issuer: nexusmall-auth
+      
+      # JWT 受众标识 (必须与 auth 服务一致)
+      audience: nexusmall-services

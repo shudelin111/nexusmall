@@ -28,7 +28,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/order")
+@RequestMapping("/")  // Gateway 已通过 /order/** 路由，此处不需要再加前缀
 @Tag(name = "订单管理", description = "订单的创建、查询、更新、删除及业务流程操作")
 public class OrderController {
 
