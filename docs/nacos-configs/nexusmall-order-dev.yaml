@@ -2,12 +2,13 @@
 # NexusMall 订单服务 - 开发环境配置
 # =====================================================
 # Data ID: nexusmall-order-dev.yaml
-# Group: DEFAULT_GROUP
+# Group: MALL_GROUP
+# Namespace: dev
 # Profile: dev
 # 用途：开发环境专属配置（优先级高于 nexusmall-order.yaml）
 # 说明：
 # - 此文件仅包含开发环境特有的差异化配置
-# - 共享配置已在 nexusmall-common.yaml 和 nexusmall-datasource.yaml 中定义
+# - 共享配置已在 nexusmall-common.yaml 中定义
 # - 业务通用配置已在 nexusmall-order.yaml 中定义
 # =====================================================
 
@@ -80,7 +81,7 @@ seata:
     type: nacos
     nacos:
       server-addr: 10.10.1.1:8848
-      namespace: ""
+      namespace: dev
       group: SEATA_GROUP
       cluster: default
       username: nacos
@@ -90,7 +91,7 @@ seata:
     type: nacos
     nacos:
       server-addr: 10.10.1.1:8848
-      namespace: ""
+      namespace: dev
       group: SEATA_GROUP
       username: nacos
       password: nacos

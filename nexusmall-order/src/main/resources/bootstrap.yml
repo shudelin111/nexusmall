@@ -17,10 +17,10 @@ spring:
       discovery:
         # Nacos 服务器地址
         server-addr: 10.10.1.1:8848
-        # 命名空间 ID（留空表示 public 命名空间）
-        namespace: ""
-        # 服务分组
-        group: DEFAULT_GROUP
+        # 命名空间 ID（dev 环境）
+        namespace: dev
+        # 服务分组（商城项目）
+        group: MALL_GROUP
         # Nacos 用户名
         username: nacos
         # Nacos 密码
@@ -36,10 +36,10 @@ spring:
         server-addr: 10.10.1.1:8848
         # 配置文件格式
         file-extension: yaml
-        # 配置分组
-        group: DEFAULT_GROUP
-        # 命名空间（与注册中心保持一致）
-        namespace: ""
+        # 配置分组（商城项目）
+        group: MALL_GROUP
+        # 命名空间（与注册中心保持一致，dev 环境）
+        namespace: dev
         # Nacos 认证信息
         username: nacos
         password: nacos
@@ -56,7 +56,7 @@ spring:
         shared-configs:
           # 1. 平台公共配置
           - data-id: nexusmall-common.yaml
-            group: DEFAULT_GROUP
+            group: MALL_GROUP
             refresh: true
         
         # ===============================
@@ -65,9 +65,9 @@ spring:
         extension-configs:
           # Order 服务通用配置（所有环境共享）
           - data-id: nexusmall-order.yaml
-            group: DEFAULT_GROUP
+            group: MALL_GROUP
             refresh: true
           # Order 服务环境特定配置（根据 Profile 动态加载）
           - data-id: nexusmall-order-${spring.profiles.active}.yaml
-            group: DEFAULT_GROUP
+            group: MALL_GROUP
             refresh: true

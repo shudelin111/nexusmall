@@ -2,7 +2,8 @@
 # NexusMall 订单服务配置
 # =====================================================
 # Data ID: nexusmall-order.yaml
-# Group: DEFAULT_GROUP
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
 # 用途：订单服务专属业务配置（所有环境共享）
 # 说明：
 # - 此文件存放所有环境共享的通用配置
@@ -77,9 +78,9 @@ spring:
         ds1:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: ""
+            namespace: dev
             dataId: nexusmall-order-flow-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: flow
             data-type: json
             username: nacos
@@ -89,9 +90,9 @@ spring:
         ds2:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: ""
+            namespace: dev
             dataId: nexusmall-order-degrade-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: degrade
             data-type: json
             username: nacos
@@ -101,9 +102,9 @@ spring:
         ds3:
           nacos:
             server-addr: 10.10.1.1:8848
-            namespace: ""
+            namespace: dev
             dataId: nexusmall-order-system-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: system
             data-type: json
             username: nacos
@@ -162,7 +163,7 @@ seata:
     type: nacos
     nacos:
       server-addr: 10.10.1.1:8848
-      namespace: ""
+      namespace: dev
       group: SEATA_GROUP
       cluster: default
       username: nacos
@@ -172,7 +173,7 @@ seata:
     type: nacos
     nacos:
       server-addr: 10.10.1.1:8848
-      namespace: ""
+      namespace: dev
       group: SEATA_GROUP
       username: nacos
       password: nacos

@@ -1,6 +1,9 @@
 # =====================================================
 # NexusMall 平台公共配置（所有服务共享）
 # =====================================================
+# Data ID: nexusmall-common.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
 # 用途：存放所有微服务共用的基础配置
 # 包含：日志、Actuator、Swagger、基础组件等
 # =====================================================
@@ -40,46 +43,6 @@ logging:
     # 日志文件路径
     path: ${LOG_PATH:./logs}
   # 注意：日志格式已在 logback-spring.xml 中统一配置，此处不需要重复配置
-
-# ===============================
-# Spring Boot Actuator 监控配置
-# ===============================
-# management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: health,info,metrics,prometheus,beans,conditions,configprops,env,heapdump,threaddump,loggers,httpexchanges
-#   endpoint:
-#     health:
-#       show-details: always
-#       probes:
-#         enabled: true
-# ===============================
-# Actuator 监控端点配置
-# ===============================
-# management:
-#   endpoints:
-#     web:
-#       exposure:
-#         include: "*"
-#   endpoint:
-#     health:
-#       show-details: always
-#       # 【关键】启用 liveness 和 readiness 健康组（K8s 探针必需）
-#       probes:
-#         enabled: true
-#     info:
-#       enabled: true
-#   info:
-#     env:
-#       enabled: true
-#   # 【关键】启用 JVM、DB 等详细健康检查
-#   health:
-#     livenessState:
-#       enabled: true
-#     readinessState:
-#       enabled: true
-
 
 # ===============================
 # Spring Boot Actuator 监控配置
