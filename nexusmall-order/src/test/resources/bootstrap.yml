@@ -1,23 +1,73 @@
 # =====================================================
-# NexusMall 订单服务 - 测试环境 Bootstrap 配置
+# NexusMall 订单服务 - Bootstrap 配置
 # =====================================================
-# 用途：覆盖主配置的 Nacos 连接信息，避免单元测试依赖 Nacos
+# 用途：配置 Nacos 连接信息（优先级最高，最先加载）
+# 说明：此文件仅包含 Nacos 连接相关配置
 # =====================================================
 
 spring:
   application:
     name: nexusmall-order
-  
-  # 明确指定测试 Profile（确保 ${spring.profiles.active} 被解析）
-  profiles:
-    active: test
-  
+
   cloud:
     nacos:
+      # ===============================
+      # 服务注册中心配置
+      # ===============================
       discovery:
-        # 禁用 Nacos 服务注册（测试不需要）
-        enabled: false
-      
+        # Nacos 服务器地址
+        server-addr: 10.10.1.1:8848
+        # 命名空间 ID（test 环境）
+        namespace: test
+        # 服务分组（商城项目）
+        group: MALL_GROUP
+        # Nacos 用户名
+        username: nacos
+        # Nacos 密码
+        password: nacos
+        # 是否启用临时实例（开发环境建议 true）
+        ephemeral: true
+
+      # ===============================
+      # 配置中心配置
+      # ===============================
       config:
-        # 完全禁用 Nacos 配置中心（测试使用本地配置）
-        enabled: false
+        # 配置中心地址（与服务注册中心相同）
+        server-addr: 10.10.1.1:8848
+        # 配置文件格式
+        file-extension: yaml
+        # 配置分组（商城项目）
+        group: MALL_GROUP
+        # 命名空间（与注册中心保持一致，test 环境）
+        namespace: test
+        # Nacos 认证信息
+        username: nacos
+        password: nacos
+        # 是否启用配置动态刷新
+        refresh-enabled: true
+        # 连接超时时间（毫秒）
+        timeout: 3000
+        # 最大重试次数
+        max-retry: 3
+
+        # ===============================
+        # 共享配置（所有服务共用）
+        # ===============================
+        shared-configs:
+          # 1. 平台公共配置
+          - data-id: nexusmall-common.yaml
+            group: MALL_GROUP
+            refresh: true
+
+        # ===============================
+        # 扩展配置（服务专属）
+        # ===============================
+        extension-configs:
+          # Order 服务通用配置（所有环境共享）
+          - data-id: nexusmall-order.yaml
+            group: MALL_GROUP
+            refresh: true
+          # Order 服务环境特定配置（根据 Profile 动态加载）
+          - data-id: nexusmall-order-${spring.profiles.active}.yaml
+            group: MALL_GROUP
+            refresh: true
