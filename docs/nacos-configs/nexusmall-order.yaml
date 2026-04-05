@@ -46,8 +46,6 @@ spring:
             connectTimeout: 5000
             # 读取超时
             readTimeout: 5000
-      httpclient:
-        enabled: true
       compression:
         request:
           enabled: true
