@@ -25,6 +25,7 @@
         <module>nexusmall-common</module>
         <module>nexusmall-third-party</module>
         <module>nexusmall-behavior</module>
+        <module>nexusmall-member</module>
     </modules>
 
     <!-- 统一的属性配置 -->

@@ -226,6 +226,19 @@ spring:
             # /product/v3/api-docs -> /v3/api-docs
             - RewritePath=/product/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
+        
+        # 路由 4：会员服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: member-service
+          uri: lb://nexusmall-member  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/member/**
+          filters:
+            # 路径重写：去掉 /member 前缀
+            # /member/info -> /info
+            # /member/addresses -> /addresses
+            - RewritePath=/member/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
       globalcors:

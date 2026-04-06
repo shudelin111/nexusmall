@@ -6,6 +6,7 @@ import com.nexusmall.auth.dao.UserMapper;
 import com.nexusmall.auth.entity.Permission;
 import com.nexusmall.auth.entity.Role;
 import com.nexusmall.auth.entity.User;
+import com.nexusmall.auth.event.UserRegisteredEvent;
 import com.nexusmall.auth.exception.AuthException;
 import com.nexusmall.auth.service.AuthService;
 import com.nexusmall.auth.service.RefreshTokenService;
@@ -16,6 +17,7 @@ import com.nexusmall.auth.vo.AuthResponse;
 import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,6 +51,9 @@ public class AuthServiceImpl implements AuthService {
 
     @Autowired
     private TokenBlacklistService blacklistService;
+    
+    @Autowired
+    private RocketMQTemplate rocketMQTemplate;
 
     @Override
     public AuthResponse login(AuthRequest request) {
@@ -219,6 +224,34 @@ public class AuthServiceImpl implements AuthService {
                 userRole.setRoleId(roleId);
                 userMapper.insertUserRole(userRole);
             }
+        } else {
+            // 5. 如果没有指定角色,自动分配 CUSTOMER 角色
+            Role customerRole = roleMapper.findByRoleCode("CUSTOMER");
+            if (customerRole != null) {
+                com.nexusmall.auth.entity.UserRole userRole = new com.nexusmall.auth.entity.UserRole();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(customerRole.getId());
+                userMapper.insertUserRole(userRole);
+                log.info("自动分配 CUSTOMER 角色给用户，userId: {}", user.getId());
+            }
+        }
+        
+        // 6. 发送用户注册事件到 RocketMQ（异步创建会员档案）
+        try {
+            UserRegisteredEvent event = UserRegisteredEvent.builder()
+                .userId(user.getId())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .email(user.getEmail())
+                .timestamp(System.currentTimeMillis())
+                .build();
+            
+            rocketMQTemplate.convertAndSend("USER_REGISTERED_TOPIC", event);
+            log.info("用户注册事件已发送，userId: {}", user.getId());
+        } catch (Exception e) {
+            log.error("发送用户注册事件失败，userId: {}", user.getId(), e);
+            // 注意：这里不抛出异常，避免影响注册流程
+            // Member 服务会通过重试机制最终处理
         }
         
         log.info("用户注册成功，userId: {}", user.getId());
