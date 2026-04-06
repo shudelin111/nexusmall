@@ -17,6 +17,16 @@ public class ApiVersionConstants {
     public static final String CURRENT_VERSION = "v1";
 
     /**
+     * API V1 版本
+     */
+    public static final String V1 = "v1";
+
+    /**
+     * API V2 版本
+     */
+    public static final String V2 = "v2";
+
+    /**
      * Header 名称：API 版本
      */
     public static final String HEADER_API_VERSION = "X-API-Version";

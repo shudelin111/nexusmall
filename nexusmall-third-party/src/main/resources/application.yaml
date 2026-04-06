@@ -136,7 +136,7 @@ spring:
       eager: true
       # 控制台地址（生产环境改为实际 IP）
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
       datasource:
@@ -310,7 +310,7 @@ server:
 rocketmq:
   # NameServer 地址
   # 💡 格式：ip:port;ip:port（支持集群，用分号分隔）
-  name-server: 10.10.1.1:9876
+  name-server: ${ROCKETMQ_NAME_SERVER:10.10.1.1:9876}
   
   # 生产者配置
   producer:

@@ -72,8 +72,8 @@ spring:
             groupId: MALL_GROUP
             rule-type: flow
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # 熔断降级规则数据源
         ds2:
@@ -82,8 +82,8 @@ spring:
             groupId: MALL_GROUP
             rule-type: degrade
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # 系统自适应保护规则数据源
         ds3:
@@ -92,8 +92,8 @@ spring:
             groupId: MALL_GROUP
             rule-type: system
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
 # ===============================
 # MyBatis-Plus 配置
@@ -155,14 +155,14 @@ seata:
     type: nacos
     nacos:
       cluster: default
-      username: nacos
-      password: nacos
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
       application: seata-server
   config:
     type: nacos
     nacos:
-      username: nacos
-      password: nacos
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
       data-id: seataServer.properties
 
 # ===============================

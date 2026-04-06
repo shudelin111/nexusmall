@@ -18,7 +18,7 @@ public interface ProductFeignService {
      * @param count 数量
      * @return 操作结果
      */
-    @PostMapping("/product/decreaseStock")
+    @PostMapping("/decreaseStock")
     Result<Boolean> decreaseStock(@RequestParam("productId") Long productId, 
                                    @RequestParam("count") Integer count);
 
@@ -28,7 +28,7 @@ public interface ProductFeignService {
      * @param count 数量
      * @return 操作结果
      */
-    @PostMapping("/product/increaseStock")
+    @PostMapping("/increaseStock")
     Result<Boolean> increaseStock(@RequestParam("productId") Long productId, 
                                    @RequestParam("count") Integer count);
 
@@ -38,7 +38,7 @@ public interface ProductFeignService {
      * @param count 数量
      * @return 库存是否充足
      */
-    @GetMapping("/product/checkStock")
+    @GetMapping("/checkStock")
     Result<Boolean> checkStock(@RequestParam("productId") Long productId,
                                 @RequestParam("count") Integer count);
 }

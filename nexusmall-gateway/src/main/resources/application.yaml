@@ -95,7 +95,7 @@ spring:
       eager: true
       # 控制台地址（生产环境改为实际 IP）
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
       datasource:
@@ -213,6 +213,10 @@ spring:
           predicates:
             - Path=/auth/**
           filters:
+            # 路径重写：去掉 /auth 前缀
+            # /auth/login -> /login
+            # /auth/logout -> /logout
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
         
         # 路由 3：商品服务（使用 Nacos 服务发现）
@@ -248,9 +252,47 @@ spring:
             - Path=/payment/**
           filters:
             # 路径重写：去掉 /payment 前缀
-            # /payment/orders/create -> /orders/create
+            # /payment/create -> /create
             # /payment/refunds/apply -> /refunds/apply
             - RewritePath=/payment/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 6：购物车服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: cart-service
+          uri: lb://nexusmall-cart  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/cart/**
+          filters:
+            # 路径重写：去掉 /cart 前缀
+            # /cart/items -> /items
+            # /cart/items/{skuId} -> /items/{skuId}
+            - RewritePath=/cart/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 7：行为服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: behavior-service
+          uri: lb://nexusmall-behavior  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/behavior/**
+          filters:
+            # 路径重写：去掉 /behavior 前缀
+            # /behavior/logs -> /logs
+            - RewritePath=/behavior/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 8：第三方服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: third-party-service
+          uri: lb://nexusmall-third-party  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/third-party/**
+          filters:
+            # 路径重写：去掉 /third-party 前缀
+            # /third-party/upload -> /upload
+            # /third-party/sms/send -> /sms/send
+            - RewritePath=/third-party/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置

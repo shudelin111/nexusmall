@@ -27,6 +27,7 @@
         <module>nexusmall-behavior</module>
         <module>nexusmall-member</module>
         <module>nexusmall-payment</module>
+        <module>nexusmall-cart</module>
     </modules>
 
     <!-- 统一的属性配置 -->

@@ -1,0 +1,132 @@
+# ==============================================================================
+# NexusMall Cart Service Deployment Configuration
+# NexusMall 购物车服务 Kubernetes 部署配置
+# ==============================================================================
+# 文件用途：定义购物车服务在 Kubernetes 集群中的部署规格
+# 维护团队：平台架构组
+# 更新频率：随版本发布更新
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexusmall-cart
+  namespace: nexusmall
+  annotations:
+    # ArgoCD 同步控制配置
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/hook: "PostSync"
+    
+    # ArgoCD 镜像自动更新器配置
+    argocd-image-updater.argoproj.io/image-list: "nexusmall-cart=docker.io/shudlsys/nexusmall-cart:~^sha-"
+    argocd-image-updater.argoproj.io/nexusmall-cart.update-strategy: "name"
+  
+  labels:
+    app: nexusmall-cart
+    app.kubernetes.io/name: nexusmall-cart
+    app.kubernetes.io/part-of: nexusmall
+
+spec:
+  replicas: 1
+  
+  selector:
+    matchLabels:
+      app: nexusmall-cart
+  
+  template:
+    metadata:
+      labels:
+        app: nexusmall-cart
+        app.kubernetes.io/name: nexusmall-cart
+    
+    spec:
+      containers:
+        - name: nexusmall-cart
+          
+          # 容器镜像配置
+          image: docker.io/shudlsys/nexusmall-cart:latest
+          
+          # 端口暴露
+          ports:
+            - containerPort: 10001  # 购物车服务端口(与Member同属用户域)
+              protocol: TCP
+          
+          # 环境变量配置
+          envFrom:
+            - configMapRef:
+                name: nexusmall-cart-config
+          
+          # 敏感配置从 Secret 加载
+          env:
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-cart-secret
+                  key: MYSQL_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-cart-secret
+                  key: MYSQL_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-cart-secret
+                  key: REDIS_PASSWORD
+            - name: NACOS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-cart-secret
+                  key: NACOS_USERNAME
+            - name: NACOS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-cart-secret
+                  key: NACOS_PASSWORD
+          
+          # 资源配额管理
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          
+          # 健康检查探针
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 10001  # 购物车服务端口
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 10001  # 购物车服务端口
+              scheme: HTTP
+            initialDelaySeconds: 100
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          
+          # 生命周期钩子
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+      
+      # 终止宽限期（秒）
+      terminationGracePeriodSeconds: 60
+      
+      # 重启策略
+      restartPolicy: Always
+      
+      # 调度策略
+      schedulerName: default-scheduler

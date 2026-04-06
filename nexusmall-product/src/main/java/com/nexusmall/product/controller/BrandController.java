@@ -16,7 +16,7 @@ import java.util.List;
  * 商品品牌控制器
  */
 @RestController
-@RequestMapping("/brands")  // Gateway 已通过 /product/** 路由,StripPrefix 后访问 /brands
+@RequestMapping("/")  // Gateway 已通过 /product/** 路由,StripPrefix 后直接访问
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "品牌管理", description = "商品品牌的增删改查")
 public class BrandController {
