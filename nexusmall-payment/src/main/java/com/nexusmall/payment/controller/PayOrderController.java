@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @Slf4j
 @RestController
-@RequestMapping("/payments")  // RESTful 资源命名：支付单使用 payments
+@RequestMapping("/")  // Gateway 已通过 /payment/** 路由,StripPrefix 后直接访问
 @RequiredArgsConstructor
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "支付单管理", description = "支付单的创建、查询、回调等接口")

@@ -80,7 +80,7 @@ spring:
     enabled: true
     # 控制台地址（生产环境改为实际 IP）
     transport:
-      dashboard: 10.10.1.1:8858
+      dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
     # 数据源配置（推荐用 Nacos 持久化规则）
     datasource:
       ds1:
@@ -98,7 +98,7 @@ spring:
     # MySQL 驱动类名
     driver-class-name: com.mysql.cj.jdbc.Driver
     # JDBC 连接 URL
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_behavior?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_behavior?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
     # 数据库用户名
     username: root
     # 数据库密码
@@ -219,7 +219,7 @@ spring:
       eager: true
       # 控制台地址（生产环境改为实际 IP）
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
       datasource:

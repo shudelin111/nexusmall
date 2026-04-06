@@ -2,17 +2,62 @@
 # NexusMall Product Service ConfigMap
 # NexusMall 商品服务 Kubernetes 配置映射
 # ==============================================================================
+# 文件用途：存储商品服务的环境变量配置
+# 维护团队：平台架构组
+# 更新频率：随环境配置变更更新
+# ==============================================================================
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  # ConfigMap 名称
   name: nexusmall-product-config
+  
+  # 命名空间：与 Deployment 保持一致
   namespace: nexusmall
+  
+  # 资源标签
   labels:
     app: nexusmall-product
     app.kubernetes.io/name: nexusmall-product
     app.kubernetes.io/part-of: nexusmall
 
+# 配置数据
 data:
+  # Spring Boot 激活的 Profile
+  # 可选值：dev (开发), test (测试), prod (生产)
   SPRING_PROFILES_ACTIVE: "prod"
+  
+  # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
   LOG_PATH: "/tmp/logs"
+  
+  # ========================================
+  # 中间件地址配置（生产环境）
+  # ========================================
+  # ⚠️ 注意：敏感信息（密码、密钥）已移至 secret.yaml
+  
+  # MySQL 数据库（非敏感配置）
+  MYSQL_HOST: "10.10.1.1"
+  MYSQL_PORT: "3306"
+  # MYSQL_USERNAME 和 MYSQL_PASSWORD 在 Secret 中定义
+  
+  # Redis（非敏感配置）
+  REDIS_HOST: "10.10.1.1"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "0"
+  # REDIS_PASSWORD 在 Secret 中定义
+  
+  # Nacos（非敏感配置）
+  NACOS_SERVER_ADDR: "10.10.1.1:8848"
+  NACOS_NAMESPACE: "prod"
+  NACOS_GROUP: "MALL_GROUP"
+  # NACOS_USERNAME 和 NACOS_PASSWORD 在 Secret 中定义
+  
+  # RocketMQ
+  ROCKETMQ_NAMESRV: "10.10.1.1:9876"
+  
+  # Sentinel
+  SENTINEL_DASHBOARD: "10.10.1.1:8858"
+  
+  # Seata
+  SEATA_SERVER: "10.10.1.1:8848"

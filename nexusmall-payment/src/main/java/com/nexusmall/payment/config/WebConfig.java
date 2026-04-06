@@ -30,7 +30,7 @@ public class WebConfig implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 API 版本拦截器
         registry.addInterceptor(apiVersionInterceptor())
-                .addPathPatterns("/payments/**", "/refunds/**")  // 只拦截业务接口
+                .addPathPatterns("/**")  // 拦截所有业务接口(Gateway StripPrefix后直接访问)
                 .excludePathPatterns("/actuator/**", "/doc.html", "/swagger-resources/**", "/v3/api-docs/**");  // 排除监控和文档
     }
 }

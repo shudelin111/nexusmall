@@ -20,7 +20,7 @@ import javax.validation.Valid;
  */
 @Validated
 @RestController
-@RequestMapping("/third-party")
+@RequestMapping("/")  // Gateway 已通过 /third-party/** 路由,StripPrefix 后直接访问
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 public class ThirdPartyController {
 

@@ -16,7 +16,7 @@ import java.util.List;
  * 商品分类控制器
  */
 @RestController
-@RequestMapping("/categories")  // Gateway 已通过 /product/** 路由,StripPrefix 后访问 /categories
+@RequestMapping("/")  // Gateway 已通过 /product/** 路由,StripPrefix 后直接访问
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "分类管理", description = "商品分类的增删改查")
 public class CategoryController {

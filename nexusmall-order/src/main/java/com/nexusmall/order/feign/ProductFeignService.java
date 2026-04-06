@@ -15,7 +15,7 @@ public interface ProductFeignService {
     /**
      * 扣减库存
      */
-    @PostMapping("/products/decreaseStock")  // 对应 ProductController: @RequestMapping("/products")
+    @PostMapping("/decreaseStock")  // 对应 ProductController: @RequestMapping("/") + @PostMapping("/decreaseStock")
     Result<Boolean> decreaseStock(
             @RequestParam("productId") Long productId,
             @RequestParam("count") Integer count

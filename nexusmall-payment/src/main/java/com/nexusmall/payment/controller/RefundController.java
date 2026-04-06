@@ -27,7 +27,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/refunds")
+@RequestMapping("/")  // Gateway 已通过 /payment/** 路由,StripPrefix 后直接访问
 @RequiredArgsConstructor
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "退款管理", description = "退款申请、审核、执行等接口")

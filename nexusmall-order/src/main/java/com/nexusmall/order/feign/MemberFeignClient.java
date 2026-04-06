@@ -18,7 +18,7 @@ import java.util.Map;
  * @author shudl
  * @since 2026-04-06
  */
-@FeignClient(name = "nexusmall-member", path = "/member")
+@FeignClient(name = "nexusmall-member", fallback = MemberFeignFallback.class)
 public interface MemberFeignClient {
 
     /**
@@ -27,7 +27,7 @@ public interface MemberFeignClient {
      * @param userId 用户 ID
      * @return 会员信息
      */
-    @GetMapping("/info")
+    @GetMapping("/info")  // 对应 MemberController: @RequestMapping("/") + @GetMapping("/info")
     Result<Map<String, Object>> getMemberInfo(@RequestParam("userId") Long userId);
 
     /**
@@ -36,6 +36,6 @@ public interface MemberFeignClient {
      * @param userId 用户 ID
      * @return 默认收货地址
      */
-    @GetMapping("/address/default")
+    @GetMapping("/address/default")  // 对应 MemberController: @RequestMapping("/") + @GetMapping("/address/default")
     Result<Map<String, Object>> getDefaultAddress(@RequestParam("userId") Long userId);
 }

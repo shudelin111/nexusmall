@@ -73,7 +73,7 @@ spring:
       eager: true
       # 控制台地址（生产环境改为实际 IP）
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
       datasource:
@@ -174,11 +174,11 @@ spring:
     # characterEncoding=UTF-8: 使用 UTF-8 编码
     # serverTimezone=Asia/Shanghai: 设置服务器时区为上海时间
     # useSSL=false: 禁用 SSL（内网环境可禁用，提升性能）
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
-    # 数据库用户名
-    username: root
-    # 数据库密码
-    password: "123456"
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false
+    # 数据库用户名（从环境变量读取，支持 K8s Secret 注入）
+    username: ${MYSQL_USERNAME:root}
+    # 数据库密码（从环境变量读取，支持 K8s Secret 注入）
+    password: ${MYSQL_PASSWORD:123456}
     # 数据源类型：HikariCP（Spring Boot 2.x 默认连接池，性能最优）
     type: com.zaxxer.hikari.HikariDataSource
     # HikariCP 连接池详细配置

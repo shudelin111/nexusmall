@@ -576,7 +576,255 @@ VALUES
 (1002, 'PLACE_ORDER', '下单购买', 10002, 'order_id', '{"amount": 599.00}', '192.168.1.101', NOW());
 
 -- =====================================================
--- 第六部分：第三方服务数据库 (nexusmall_third_party) - 预留
+-- 第六部分：会员服务数据库 (nexusmall_member)
+-- =====================================================
+
+CREATE DATABASE IF NOT EXISTS `nexusmall_member` 
+DEFAULT CHARACTER SET utf8mb4 
+DEFAULT COLLATE utf8mb4_general_ci;
+
+USE `nexusmall_member`;
+
+-- Seata 分布式事务回滚日志表
+CREATE TABLE IF NOT EXISTS `undo_log` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'increment id',
+  `branch_id` BIGINT(20) NOT NULL COMMENT 'branch transaction id',
+  `xid` VARCHAR(100) NOT NULL COMMENT 'global transaction id',
+  `context` VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
+  `rollback_info` LONGBLOB NOT NULL COMMENT 'rollback info',
+  `log_status` INT(11) NOT NULL COMMENT '0:normal status,1:defended status',
+  `log_created` DATETIME NOT NULL COMMENT 'create datetime',
+  `log_modified` DATETIME NOT NULL COMMENT 'modify datetime',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='AT transaction mode undo table';
+
+-- 会员表
+CREATE TABLE IF NOT EXISTS `member` (
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '会员 ID',
+    `user_id` BIGINT(20) NOT NULL COMMENT '用户 ID（关联 sys_user）',
+    `nickname` VARCHAR(100) DEFAULT NULL COMMENT '昵称',
+    `avatar` VARCHAR(500) DEFAULT NULL COMMENT '头像 URL',
+    `gender` TINYINT(4) DEFAULT NULL COMMENT '性别：0-未知，1-男，2-女',
+    `birthday` DATE DEFAULT NULL COMMENT '生日',
+    `phone` VARCHAR(20) DEFAULT NULL COMMENT '手机号',
+    `email` VARCHAR(100) DEFAULT NULL COMMENT '邮箱',
+    `integration` INT(11) NOT NULL DEFAULT 0 COMMENT '积分',
+    `growth` INT(11) NOT NULL DEFAULT 0 COMMENT '成长值',
+    `status` TINYINT(4) NOT NULL DEFAULT 1 COMMENT '状态：0-禁用，1-正常',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_user_id` (`user_id`),
+    KEY `idx_phone` (`phone`),
+    KEY `idx_integration` (`integration`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='会员信息表';
+
+-- 会员收货地址表
+CREATE TABLE IF NOT EXISTS `member_receive_address` (
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '地址 ID',
+    `member_id` BIGINT(20) NOT NULL COMMENT '会员 ID',
+    `name` VARCHAR(100) NOT NULL COMMENT '收货人姓名',
+    `phone` VARCHAR(20) NOT NULL COMMENT '收货人电话',
+    `province` VARCHAR(100) NOT NULL COMMENT '省份',
+    `city` VARCHAR(100) NOT NULL COMMENT '城市',
+    `district` VARCHAR(100) NOT NULL COMMENT '区县',
+    `detail_address` VARCHAR(500) NOT NULL COMMENT '详细地址',
+    `default_status` TINYINT(4) NOT NULL DEFAULT 0 COMMENT '是否默认：0-否，1-是',
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_member_id` (`member_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='会员收货地址表';
+
+-- 测试数据 - 会员
+INSERT INTO nexusmall_member.member (`user_id`, `nickname`, `phone`, `integration`, `growth`, `status`) VALUES
+(1, '管理员', '13800138000', 1000, 500, 1),
+(2, '张三', '13800138001', 500, 200, 1),
+(3, '李四', '13800138002', 300, 100, 1);
+
+-- 测试数据 - 收货地址
+INSERT INTO nexusmall_member.member_receive_address (`member_id`, `name`, `phone`, `province`, `city`, `district`, `detail_address`, `default_status`) VALUES
+(1, '管理员', '13800138000', '北京市', '北京市', '朝阳区', 'xx街道 xx号', 1),
+(2, '张三', '13800138001', '上海市', '上海市', '浦东新区', 'xx路 xx号', 1),
+(3, '李四', '13800138002', '广东省', '广州市', '天河区', 'xx大厦 xx室', 1);
+
+-- =====================================================
+-- 第七部分：购物车服务数据库 (nexusmall_cart)
+-- =====================================================
+
+CREATE DATABASE IF NOT EXISTS `nexusmall_cart` 
+DEFAULT CHARACTER SET utf8mb4 
+DEFAULT COLLATE utf8mb4_unicode_ci;
+
+USE `nexusmall_cart`;
+
+-- Seata 分布式事务回滚日志表
+CREATE TABLE IF NOT EXISTS `undo_log` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'increment id',
+  `branch_id` BIGINT(20) NOT NULL COMMENT 'branch transaction id',
+  `xid` VARCHAR(100) NOT NULL COMMENT 'global transaction id',
+  `context` VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
+  `rollback_info` LONGBLOB NOT NULL COMMENT 'rollback info',
+  `log_status` INT(11) NOT NULL COMMENT '0:normal status,1:defended status',
+  `log_created` DATETIME NOT NULL COMMENT 'create datetime',
+  `log_modified` DATETIME NOT NULL COMMENT 'modify datetime',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='AT transaction mode undo table';
+
+-- 购物车项表
+CREATE TABLE IF NOT EXISTS `cart_item` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `user_id` BIGINT NOT NULL COMMENT '用户ID',
+  `sku_id` BIGINT NOT NULL COMMENT '商品SKU ID',
+  `spu_id` BIGINT NOT NULL COMMENT '商品SPU ID',
+  
+  -- 商品快照字段(关键！)
+  `product_name` VARCHAR(200) NOT NULL COMMENT '商品名称快照(加入时)',
+  `product_image` VARCHAR(500) COMMENT '商品主图快照',
+  `snapshot_price` DECIMAL(10,2) NOT NULL COMMENT '加入时价格快照(永不改变)',
+  `snapshot_attrs` JSON COMMENT '商品属性快照JSON(color/storage等)',
+  `snapshot_version` INT NOT NULL DEFAULT 0 COMMENT '商品快照版本号',
+  `snapshot_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '快照创建时间',
+  
+  -- 购物车业务字段
+  `quantity` INT NOT NULL DEFAULT 1 COMMENT '购买数量',
+  `selected` TINYINT NOT NULL DEFAULT 1 COMMENT '是否选中: 0-否 1-是',
+  
+  -- 审计字段
+  `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `version` INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+  
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_user_sku` (`user_id`, `sku_id`) COMMENT '用户+SKU唯一索引(幂等性保证)',
+  KEY `idx_user_id` (`user_id`) COMMENT '用户ID索引(快速查询购物车)',
+  KEY `idx_create_time` (`create_time`) COMMENT '创建时间索引(定时清理)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='购物车项表';
+
+-- 测试数据 - 购物车项
+INSERT INTO nexusmall_cart.cart_item (`user_id`, `sku_id`, `spu_id`, `product_name`, `product_image`, `snapshot_price`, `snapshot_attrs`, `quantity`, `selected`) 
+VALUES 
+(1, 1001, 101, 'iPhone 15 Pro', 'https://example.com/iphone15.jpg', 8999.00, '{"color": "深空灰", "storage": "128GB"}', 2, 1),
+(1, 1002, 102, 'MacBook Air M3', 'https://example.com/macbook.jpg', 7999.00, '{"color": "银色", "memory": "16GB"}', 1, 1);
+
+-- =====================================================
+-- 第八部分：支付服务数据库 (nexusmall_payment)
+-- =====================================================
+
+CREATE DATABASE IF NOT EXISTS `nexusmall_payment` 
+DEFAULT CHARACTER SET utf8mb4 
+DEFAULT COLLATE utf8mb4_general_ci;
+
+USE `nexusmall_payment`;
+
+-- Seata 分布式事务回滚日志表
+CREATE TABLE IF NOT EXISTS `undo_log` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'increment id',
+  `branch_id` BIGINT(20) NOT NULL COMMENT 'branch transaction id',
+  `xid` VARCHAR(100) NOT NULL COMMENT 'global transaction id',
+  `context` VARCHAR(128) NOT NULL COMMENT 'undo_log context,such as serialization',
+  `rollback_info` LONGBLOB NOT NULL COMMENT 'rollback info',
+  `log_status` INT(11) NOT NULL COMMENT '0:normal status,1:defended status',
+  `log_created` DATETIME NOT NULL COMMENT 'create datetime',
+  `log_modified` DATETIME NOT NULL COMMENT 'modify datetime',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='AT transaction mode undo table';
+
+-- 支付单表
+CREATE TABLE IF NOT EXISTS `pay_order` (
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
+    `payment_no` VARCHAR(64) NOT NULL COMMENT '支付单号',
+    `order_no` VARCHAR(64) NOT NULL COMMENT '订单号',
+    `member_id` BIGINT(20) DEFAULT NULL COMMENT '会员ID',
+    
+    -- 支付金额信息
+    `total_amount` DECIMAL(10,2) NOT NULL COMMENT '订单总金额',
+    `pay_amount` DECIMAL(10,2) NOT NULL COMMENT '实际支付金额',
+    `discount_amount` DECIMAL(10,2) DEFAULT 0.00 COMMENT '优惠金额',
+    `refund_amount` DECIMAL(10,2) DEFAULT 0.00 COMMENT '已退款金额',
+    
+    -- 支付渠道信息
+    `channel_code` VARCHAR(32) NOT NULL COMMENT '支付渠道编码：ALIPAY/WECHAT/UNIONPAY',
+    `channel_name` VARCHAR(64) DEFAULT NULL COMMENT '支付渠道名称',
+    `trade_no` VARCHAR(128) DEFAULT NULL COMMENT '第三方交易号（支付宝/微信返回）',
+    
+    -- 支付状态
+    `status` TINYINT(2) NOT NULL DEFAULT 0 COMMENT '支付状态：0=待支付，1=支付中，2=支付成功，3=支付失败，4=已关闭，5=已退款',
+    `pay_time` DATETIME DEFAULT NULL COMMENT '支付完成时间',
+    `expire_time` DATETIME NOT NULL COMMENT '支付过期时间',
+    
+    -- 回调信息
+    `callback_content` TEXT COMMENT '第三方支付回调原始数据',
+    `callback_time` DATETIME DEFAULT NULL COMMENT '回调时间',
+    
+    -- 备注信息
+    `subject` VARCHAR(256) DEFAULT NULL COMMENT '商品描述',
+    `body` VARCHAR(512) DEFAULT NULL COMMENT '商品详情',
+    `client_ip` VARCHAR(64) DEFAULT NULL COMMENT '客户端IP',
+    
+    -- 审计字段
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `version` INT(11) NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_payment_no` (`payment_no`),
+    UNIQUE KEY `uk_order_no` (`order_no`),
+    KEY `idx_member_id` (`member_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_expire_time` (`expire_time`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='支付单表';
+
+-- 退款单表
+CREATE TABLE IF NOT EXISTS `refund_order` (
+    `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '主键 ID',
+    `refund_no` VARCHAR(64) NOT NULL COMMENT '退款单号',
+    `payment_no` VARCHAR(64) NOT NULL COMMENT '支付单号',
+    `order_no` VARCHAR(64) NOT NULL COMMENT '订单号',
+    `member_id` BIGINT(20) DEFAULT NULL COMMENT '会员ID',
+    
+    -- 退款金额
+    `refund_amount` DECIMAL(10,2) NOT NULL COMMENT '退款金额',
+    `refund_reason` VARCHAR(500) DEFAULT NULL COMMENT '退款原因',
+    
+    -- 退款状态
+    `status` TINYINT(2) NOT NULL DEFAULT 0 COMMENT '退款状态：0=申请中，1=审核中，2=审核通过，3=审核拒绝，4=退款中，5=退款成功，6=退款失败',
+    
+    -- 审核信息
+    `auditor_id` BIGINT(20) DEFAULT NULL COMMENT '审核人ID',
+    `auditor_name` VARCHAR(100) DEFAULT NULL COMMENT '审核人姓名',
+    `audit_time` DATETIME DEFAULT NULL COMMENT '审核时间',
+    `audit_remark` VARCHAR(500) DEFAULT NULL COMMENT '审核备注',
+    
+    -- 退款执行信息
+    `refund_trade_no` VARCHAR(128) DEFAULT NULL COMMENT '退款交易号',
+    `refund_time` DATETIME DEFAULT NULL COMMENT '退款完成时间',
+    
+    -- 审计字段
+    `create_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    `version` INT(11) NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+    
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_refund_no` (`refund_no`),
+    KEY `idx_payment_no` (`payment_no`),
+    KEY `idx_order_no` (`order_no`),
+    KEY `idx_member_id` (`member_id`),
+    KEY `idx_status` (`status`),
+    KEY `idx_create_time` (`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COMMENT='退款单表';
+
+-- 测试数据 - 支付单
+INSERT INTO nexusmall_payment.pay_order (`payment_no`, `order_no`, `member_id`, `total_amount`, `pay_amount`, `channel_code`, `channel_name`, `status`, `expire_time`, `subject`) VALUES
+('PAY2026040600001', 'ORD-2026032400001', 1, 6988.00, 6988.00, 'ALIPAY', '支付宝', 2, DATE_ADD(NOW(), INTERVAL 30 MINUTE), '华为 Mate 60 Pro'),
+('PAY2026040600002', 'ORD-2026032400002', 2, 4999.00, 4999.00, 'WECHAT', '微信支付', 2, DATE_ADD(NOW(), INTERVAL 30 MINUTE), '小米 14 Pro');
+
+-- =====================================================
+-- 第九部分：第三方服务数据库 (nexusmall_third_party) - 预留
 -- =====================================================
 -- 注意：当前第三方服务模块没有特定的表结构需求
 -- 如果后续需要存储 OSS 配置、短信日志等，可以在此添加

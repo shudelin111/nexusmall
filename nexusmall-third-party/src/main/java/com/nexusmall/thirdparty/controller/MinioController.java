@@ -29,7 +29,7 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/minio")
+@RequestMapping("/")  // Gateway 已通过 /third-party/** 路由,StripPrefix 后直接访问
 @ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "MinIO 文件管理", description = "提供文件上传、删除、查询等操作")
 public class MinioController {

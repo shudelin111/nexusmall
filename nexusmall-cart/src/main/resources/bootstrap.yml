@@ -1,0 +1,73 @@
+# =====================================================
+# NexusMall 购物车服务 - Bootstrap 配置
+# =====================================================
+# 用途：配置 Nacos 连接信息（优先级最高，最先加载）
+# 说明：此文件仅包含 Nacos 连接相关配置
+# =====================================================
+
+spring:
+  application:
+    name: nexusmall-cart
+  
+  cloud:
+    nacos:
+      # ===============================
+      # 服务注册中心配置
+      # ===============================
+      discovery:
+        # Nacos 服务器地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 命名空间 ID（来自 ConfigMap 或 Profile）
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 服务分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
+        # 是否启用临时实例（开发环境建议 true）
+        ephemeral: true
+      
+      # ===============================
+      # 配置中心配置
+      # ===============================
+      config:
+        # 配置中心地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 配置文件格式
+        file-extension: yaml
+        # 配置分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # 命名空间（来自 ConfigMap）
+        namespace: ${NACOS_NAMESPACE:prod}
+        # Nacos 认证信息（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+        # 是否启用配置动态刷新
+        refresh-enabled: true
+        # 连接超时时间（毫秒）
+        timeout: 3000
+        # 最大重试次数
+        max-retry: 3
+        
+        # ===============================
+        # 共享配置（所有服务共用）
+        # ===============================
+        shared-configs:
+          # 1. 平台公共配置
+          - data-id: nexusmall-common.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+        
+        # ===============================
+        # 扩展配置（服务专属）
+        # ===============================
+        extension-configs:
+          # Cart 服务通用配置（所有环境共享）
+          - data-id: nexusmall-cart.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # Cart 服务环境特定配置（根据 Profile 动态加载）
+          - data-id: nexusmall-cart-${spring.profiles.active}.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true

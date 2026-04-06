@@ -21,7 +21,7 @@ spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://10.10.1.1:3306/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
     username: root
     password: "123456"
     hikari:
@@ -36,8 +36,8 @@ spring:
   # Redis 缓存配置
   # ------------------------------
   redis:
-    host: 10.10.1.1
-    port: 6379
+    host: ${REDIS_HOST:10.10.1.1}
+    port: ${REDIS_PORT:6379}
     database: 0
     password: "123456"
     timeout: 5000ms
@@ -73,44 +73,44 @@ spring:
     sentinel:
       eager: true
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         port: 8719
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
             namespace: ""
             dataId: nexusmall-auth-flow-rule.json
             groupId: DEFAULT_GROUP
             rule-type: flow
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
         
         # 熔断降级规则数据源
         ds2:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
             namespace: ""
             dataId: nexusmall-auth-degrade-rule.json
             groupId: DEFAULT_GROUP
             rule-type: degrade
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
         
         # 系统自适应保护规则数据源
         ds3:
           nacos:
-            server-addr: 10.10.1.1:8848
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
             namespace: ""
             dataId: nexusmall-auth-system-rule.json
             groupId: DEFAULT_GROUP
             rule-type: system
             data-type: json
-            username: nacos
-            password: nacos
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
     
     # Kafka 配置（用于日志收集）
     kafka:
@@ -153,21 +153,21 @@ seata:
   registry:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
       namespace: ""
       group: SEATA_GROUP
       cluster: default
-      username: nacos
-      password: nacos
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
       application: seata-server
   config:
     type: nacos
     nacos:
-      server-addr: 10.10.1.1:8848
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
       namespace: ""
       group: SEATA_GROUP
-      username: nacos
-      password: nacos
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
       data-id: seataServer.properties
 
 # ===============================
