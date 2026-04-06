@@ -10,6 +10,7 @@ import com.nexusmall.order.dao.OrderItemMapper;
 import com.nexusmall.order.dao.OrderMapper;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.entity.OrderItem;
+import com.nexusmall.order.feign.MemberFeignClient;
 import com.nexusmall.order.feign.ProductFeignService;
 import com.nexusmall.order.service.OrderService;
 import com.nexusmall.order.service.RocketMQProducer;
@@ -17,8 +18,11 @@ import com.nexusmall.order.vo.OrderCreateRequest;
 import com.nexusmall.order.vo.OrderQueryRequest;
 import io.seata.core.context.RootContext;
 import io.seata.spring.annotation.GlobalTransactional;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +46,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Autowired
     private ProductFeignService productFeignService;
+
+    @Autowired
+    private MemberFeignClient memberFeignClient;
 
     @Autowired
     private RocketMQProducer rocketMQProducer;
@@ -122,7 +129,11 @@ public class OrderServiceImpl implements OrderService {
         // 1. 生成订单号
         String orderSn = generateOrderSn();
 
-        // 2. 扣减库存（调用 Product 服务）
+        // 2. 获取会员信息并计算折扣
+        BigDecimal memberDiscount = getMemberDiscount(request.getMemberId());
+        log.info("会员折扣率: {}", memberDiscount);
+        
+        // 3. 扣减库存（调用 Product 服务）
         log.info("====== 准备调用 Product 服务 Feign 接口，当前 XID: {} ======", xid);
         Result<Boolean> stockResult = productFeignService.decreaseStock(request.getProductId(), request.getCount());
         if (!stockResult.isSuccess() || !stockResult.getData()) {
@@ -130,17 +141,25 @@ public class OrderServiceImpl implements OrderService {
             throw new OrderException(CommonResultCode.INSUFFICIENT_STOCK.getErrorCode(), CommonResultCode.INSUFFICIENT_STOCK.getMessage());
         }
 
-        // 3. 创建订单主表
+        // 4. 计算实际支付金额（应用会员折扣）
+        BigDecimal originalAmount = request.getTotalAmount(); // 原价
+        BigDecimal payAmount = originalAmount.multiply(memberDiscount).setScale(2, RoundingMode.HALF_UP); // 折后价
+        BigDecimal discountAmount = originalAmount.subtract(payAmount); // 优惠金额
+        
+        log.info("订单金额计算 - 原价: {}, 折扣率: {}, 折后价: {}, 优惠: {}", 
+            originalAmount, memberDiscount, payAmount, discountAmount);
+
+        // 5. 创建订单主表
         Order order = new Order();
         order.setOrderSn(orderSn);
         order.setMemberId(request.getMemberId());
         order.setReceiverName(request.getReceiverName());
         order.setReceiverPhone(request.getReceiverPhone());
         order.setReceiverAddress(request.getReceiverAddress());
-        order.setTotalAmount(request.getTotalAmount());
-        order.setPayAmount(request.getPayAmount());
+        order.setTotalAmount(originalAmount); // 原价
+        order.setPayAmount(payAmount); // 实际支付金额
         order.setFreightAmount(request.getFreightAmount());
-        order.setPromotionAmount(request.getPromotionAmount());
+        order.setPromotionAmount(discountAmount); // 会员优惠金额
         order.setStatus(0); // 待支付
         order.setPaymentType(request.getPaymentType());
         order.setRemark(request.getRemark());
@@ -318,5 +337,40 @@ public class OrderServiceImpl implements OrderService {
     private String generateOrderSn() {
         return "ORD-" + LocalDateTime.now().toLocalDate().toString().replace("-", "") + "-" +
                 String.format("%06d", (int) (Math.random() * 1000000));
+    }
+
+    /**
+     * 获取会员折扣率
+     * <p>
+     * 业界标准：
+     * - 调用 Member 服务获取会员等级
+     * - 根据等级返回对应折扣率
+     * - 降级策略：如果 Member 服务不可用，返回默认折扣(1.0)
+     * </p>
+     *
+     * @param memberId 会员 ID
+     * @return 折扣率（0.85=85折，1.0=无折扣）
+     */
+    private BigDecimal getMemberDiscount(Long memberId) {
+        try {
+            // 调用 Member 服务获取会员信息
+            Result<Map<String, Object>> result = memberFeignClient.getMemberInfo(memberId);
+            
+            if (result != null && result.isSuccess() && result.getData() != null) {
+                Map<String, Object> memberInfo = result.getData();
+                
+                // TODO: 从 Member 服务返回会员等级对应的折扣率
+                // 目前简化处理，返回默认折扣
+                log.info("获取会员信息成功，memberId: {}", memberId);
+                return new BigDecimal("1.00"); // 默认无折扣
+            } else {
+                log.warn("获取会员信息失败，使用默认折扣，memberId: {}", memberId);
+                return new BigDecimal("1.00");
+            }
+        } catch (Exception e) {
+            log.error("调用 Member 服务异常，使用默认折扣，memberId: {}", memberId, e);
+            // 降级策略：返回默认折扣，不影响下单流程
+            return new BigDecimal("1.00");
+        }
     }
 }
