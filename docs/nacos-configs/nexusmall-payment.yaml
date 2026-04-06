@@ -1,0 +1,230 @@
+# =====================================================
+# NexusMall 支付服务配置
+# =====================================================
+# Data ID: nexusmall-payment.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：支付服务专属业务配置（所有环境共享）
+# 说明：
+# - 此文件存放所有环境共享的通用配置
+# - 环境特定配置请创建 nexusmall-payment-{profile}.yaml
+# - 示例：nexusmall-payment-dev.yaml, nexusmall-payment-test.yaml
+# =====================================================
+
+# ===============================
+# Spring 应用配置
+# ===============================
+spring:
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
+  
+  # Redis 连接池配置（通用参数，所有环境共享）
+  redis:
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
+    lettuce:
+      pool:
+        # 最大活跃连接数
+        max-active: 16
+        # 最大空闲连接数
+        max-idle: 8
+        # 最小空闲连接数
+        min-idle: 0
+        # 获取连接的最大等待时间（毫秒）
+        max-wait: 1000ms  # 1 秒
+
+  # Spring Cloud 配置
+  cloud:
+    # OpenFeign 服务调用配置
+    openfeign:
+      sentinel:
+        enabled: true
+      client:
+        config:
+          default:
+            # 连接超时
+            connectTimeout: 5000
+            # 读取超时
+            readTimeout: 5000
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
+
+    # Sentinel 熔断限流配置（通用参数）
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # ⚠️ 注意：以下环境相关配置在 nexusmall-payment-{profile}.yaml 中定义：
+      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
+      # - spring.cloud.sentinel.transport.port (本地通信端口)
+      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
+      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
+      datasource:
+        # 流控规则数据源
+        ds1:
+          nacos:
+            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-payment-{profile}.yaml 中定义
+            dataId: nexusmall-payment-flow-rule.json
+            groupId: MALL_GROUP
+            rule-type: flow
+            data-type: json
+            username: nacos
+            password: nacos
+
+        # 熔断降级规则数据源
+        ds2:
+          nacos:
+            dataId: nexusmall-payment-degrade-rule.json
+            groupId: MALL_GROUP
+            rule-type: degrade
+            data-type: json
+            username: nacos
+            password: nacos
+
+        # 系统自适应保护规则数据源
+        ds3:
+          nacos:
+            dataId: nexusmall-payment-system-rule.json
+            groupId: MALL_GROUP
+            rule-type: system
+            data-type: json
+            username: nacos
+            password: nacos
+
+# ===============================
+# MyBatis-Plus 配置
+# ===============================
+mybatis-plus:
+  # Mapper XML 文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包路径
+  type-aliases-package: com.nexusmall.payment.entity
+  # MyBatis 原生配置
+  configuration:
+    # 开启驼峰命名转换
+    map-underscore-to-camel-case: true
+    # 禁用二级缓存
+    cache-enabled: false
+    # SQL 日志实现类
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  # 全局配置
+  global-config:
+    db-config:
+      # 主键生成策略
+      id-type: auto
+      # 逻辑删除字段
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# ===============================
+# RocketMQ 配置（通用参数）
+# ===============================
+rocketmq:
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-payment-{profile}.yaml 中定义：
+  # - rocketmq.name-server (NameServer 地址)
+  # - rocketmq.producer.group (生产者组名称)
+  # 生产者配置（通用参数）
+  producer:
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+
+# ===============================
+# Seata 分布式事务配置（通用参数）
+# ===============================
+seata:
+  enabled: true
+  application-id: nexusmall-payment
+  tx-service-group: nexusmall-tx-group
+  service:
+    vgroup-mapping:
+      nexusmall-tx-group: default
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-payment-{profile}.yaml 中定义：
+  # - seata.registry.nacos.server-addr (Seata Server 地址)
+  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
+  # - seata.registry.nacos.group (Seata Server 所在分组)
+  # - seata.config.nacos.server-addr (Seata 配置中心地址)
+  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
+  # - seata.config.nacos.group (Seata 配置所在分组)
+  registry:
+    type: nacos
+    nacos:
+      cluster: default
+      username: nacos
+      password: nacos
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      username: nacos
+      password: nacos
+      data-id: seataServer.properties
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在 nexusmall-payment-{profile}.yaml 中定义：
+# - springdoc.api-docs.enabled (API 文档启用开关)
+# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
+# - knife4j.enable (Knife4j 启用开关)
+# - knife4j.production (生产模式开关)
+springdoc:
+  # OpenAPI 文档路径
+  api-docs:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /v3/api-docs
+  # Swagger UI 配置
+  swagger-ui:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /swagger-ui/index.html
+  # 扫描的包路径(所有环境相同)
+  packages-to-scan: com.nexusmall.payment.controller
+  # 分组配置(微服务架构下推荐)
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.nexusmall.payment.controller
+
+# Knife4j 增强配置（通用参数）
+knife4j:
+  # ⚠️ 注意：enable 和 production 在环境特定配置中定义
+  # 设置文档语言（所有环境相同）
+  setting:
+    language: zh_cn
+
+# ===============================
+# 业务特定配置（通用参数）
+# ===============================
+payment:
+  # 支付渠道配置
+  channels:
+    # 支付宝
+    alipay:
+      enabled: true
+      # 超时时间（分钟）
+      timeout: 30
+    # 微信支付
+    wechat:
+      enabled: true
+      timeout: 30
+    # 银联
+    unionpay:
+      enabled: false
+      timeout: 30
+  # 对账配置
+  reconciliation:
+    # 是否启用自动对账
+    auto-enabled: true
+    # 对账时间（每天凌晨2点）
+    cron: "0 0 2 * * ?"
+  # 退款配置
+  refund:
+    # 退款审核是否需要人工确认
+    manual-review: true
+    # 退款超时时间（天）
+    timeout-days: 7

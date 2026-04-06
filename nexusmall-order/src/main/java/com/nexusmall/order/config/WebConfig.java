@@ -1,7 +1,6 @@
-package com.nexusmall.product.config;
+package com.nexusmall.order.config;
 
 import com.nexusmall.common.interceptor.ApiVersionInterceptor;
-import com.nexusmall.product.config.SeataHandlerInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -19,11 +18,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public SeataHandlerInterceptor seataHandlerInterceptor() {
-        return new SeataHandlerInterceptor();
-    }
-
     /**
      * 创建 API 版本拦截器 Bean
      */
@@ -34,13 +28,9 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册 Seata XID 拦截器
-        registry.addInterceptor(seataHandlerInterceptor())
-                .addPathPatterns("/**");
-        
         // 注册 API 版本拦截器
         registry.addInterceptor(apiVersionInterceptor())
-                .addPathPatterns("/**", "/brands/**", "/categories/**")  // 拦截所有业务接口
+                .addPathPatterns("/**")  // 拦截所有业务接口
                 .excludePathPatterns("/actuator/**", "/doc.html", "/swagger-resources/**", "/v3/api-docs/**");  // 排除监控和文档
     }
 }

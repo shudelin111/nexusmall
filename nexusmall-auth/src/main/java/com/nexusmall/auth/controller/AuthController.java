@@ -3,6 +3,7 @@ package com.nexusmall.auth.controller;
 import com.nexusmall.auth.service.AuthService;
 import com.nexusmall.auth.vo.AuthRequest;
 import com.nexusmall.auth.vo.AuthResponse;
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
@@ -13,6 +14,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/")  // Gateway 已通过 /auth/** 路由，此处不需要再加前缀
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 public class AuthController {
 
     private final AuthService authService;
@@ -33,7 +35,7 @@ public class AuthController {
         return Result.success(payload);
     }
 
-    @PostMapping("/login")
+    @PostMapping(value = "/login", headers = "X-API-Version=v1")
     public Result<AuthResponse> login(@RequestBody AuthRequest request) {
         log.info("收到登录请求，username: {}", request.getUsername());
         
@@ -42,7 +44,7 @@ public class AuthController {
         return Result.success(response);
     }
 
-    @PostMapping("/logout")
+    @PostMapping(value = "/logout", headers = "X-API-Version=v1")
     public Result<Void> logout(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -54,7 +56,7 @@ public class AuthController {
         return Result.success();
     }
 
-    @GetMapping("/validate")
+    @GetMapping(value = "/validate", headers = "X-API-Version=v1")
     public Result<Boolean> validateToken(@RequestHeader("Authorization") String token) {
         if (token != null && token.startsWith("Bearer ")) {
             token = token.substring(7);
@@ -73,7 +75,7 @@ public class AuthController {
      * @param request 包含 Refresh Token 的请求
      * @return 新的 Access Token
      */
-    @PostMapping("/refresh")
+    @PostMapping(value = "/refresh", headers = "X-API-Version=v1")
     public Result<Map<String, Object>> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
         

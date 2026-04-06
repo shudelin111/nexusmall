@@ -1,5 +1,6 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.LogMessageConstants;
 import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
@@ -31,7 +32,8 @@ import java.util.Map;
  * 商品控制器 - 处理所有商品相关请求
  */
 @RestController
-@RequestMapping("/products")  // RESTful 资源路径(复数),Gateway 已通过 /product/** 路由
+@RequestMapping("/")  // Gateway 已通过 /product/** 路由,StripPrefix 后直接访问
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "商品管理", description = "商品信息管理、库存管理")
 public class ProductController {
 
@@ -67,7 +69,7 @@ public class ProductController {
     /**
      * 查询所有商品
      */
-    @GetMapping("/list")
+    @GetMapping(value = "/list", headers = "X-API-Version=v1")
     public Result<List<Product>> listProducts() {
         log.info("查询所有商品列表");
         List<Product> products = productService.listProducts();
@@ -78,7 +80,7 @@ public class ProductController {
     /**
      * 根据 SKU ID 查询商品（记录浏览行为）
      */
-    @GetMapping("/{skuId}")
+    @GetMapping(value = "/{skuId}", headers = "X-API-Version=v1")
     public Result<Product> getProduct(@PathVariable Long skuId,
                                       @RequestParam(required = false) Long userId,
                                       @RequestParam(required = false) String userName) {
@@ -110,7 +112,7 @@ public class ProductController {
     /**
      * 根据条件查询商品列表
      */
-    @GetMapping("/listByCondition")
+    @GetMapping(value = "/listByCondition", headers = "X-API-Version=v1")
     public Result<List<ProductVO>> listByCondition(@ModelAttribute ProductQueryRequest request) {
         log.info("条件查询商品，keyword: {}, categoryId: {}, brandId: {}, status: {}", 
                 request.getKeyword(), request.getCategoryId(), request.getBrandId(), request.getStatus());
@@ -145,7 +147,7 @@ public class ProductController {
     /**
      * 新增商品
      */
-    @PostMapping("/save")
+    @PostMapping(value = "/save", headers = "X-API-Version=v1")
     public Result<Integer> saveProduct(@RequestBody ProductVO productVO) {
         log.info("新增商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
         int result = productService.save(productVO);
@@ -193,7 +195,7 @@ public class ProductController {
     /**
      * 扣减库存（支持分布式事务）
      */
-    @PostMapping("/decreaseStock")
+    @PostMapping(value = "/decreaseStock", headers = "X-API-Version=v1")
     public Result<Boolean> decreaseStock(
             @RequestParam("productId") Long productId,
             @RequestParam("count") Integer count) {

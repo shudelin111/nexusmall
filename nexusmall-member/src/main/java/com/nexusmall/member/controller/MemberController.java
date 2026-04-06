@@ -1,6 +1,7 @@
 package com.nexusmall.member.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.member.entity.Member;
 import com.nexusmall.member.entity.MemberReceiveAddress;
@@ -36,7 +37,8 @@ import java.util.List;
  */
 @Slf4j
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/")
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "会员管理", description = "会员资料和收货地址管理")
 public class MemberController {
 
@@ -55,7 +57,7 @@ public class MemberController {
      * @param userId 用户 ID(从 Token 中解析)
      * @return 会员信息
      */
-    @GetMapping("/info")
+    @GetMapping(value = "/info", headers = "X-API-Version=v1")
     @Operation(summary = "查询会员信息")
     public Result<Member> getMemberInfo(@RequestParam Long userId) {
         log.info("查询会员信息，userId: {}", userId);
@@ -75,7 +77,7 @@ public class MemberController {
      * @param request 更新请求
      * @return 是否成功
      */
-    @PutMapping("/profile")
+    @PutMapping(value = "/profile", headers = "X-API-Version=v1")
     @Operation(summary = "更新会员资料")
     public Result<Void> updateProfile(@RequestParam Long userId, 
                                        @Validated @RequestBody MemberProfileUpdateRequest request) {
@@ -107,7 +109,7 @@ public class MemberController {
      * @param userId 用户 ID
      * @return 收货地址列表
      */
-    @GetMapping("/addresses")
+    @GetMapping(value = "/addresses", headers = "X-API-Version=v1")
     @Operation(summary = "查询收货地址列表")
     public Result<List<MemberReceiveAddress>> listAddresses(@RequestParam Long userId) {
         log.info("查询收货地址列表，userId: {}", userId);
@@ -151,7 +153,7 @@ public class MemberController {
      * @param request 地址信息
      * @return 是否成功
      */
-    @PostMapping("/address")
+    @PostMapping(value = "/address", headers = "X-API-Version=v1")
     @Operation(summary = "添加收货地址")
     public Result<Void> addAddress(@RequestParam Long userId, 
                                     @Validated @RequestBody AddressRequest request) {
@@ -260,7 +262,7 @@ public class MemberController {
      * @param request 兑换请求
      * @return 是否成功
      */
-    @PostMapping("/integration/consume")
+    @PostMapping(value = "/integration/consume", headers = "X-API-Version=v1")
     @Operation(summary = "积分兑换")
     public Result<Void> consumeIntegration(@RequestParam Long userId,
                                             @Validated @RequestBody IntegrationConsumeRequest request) {
