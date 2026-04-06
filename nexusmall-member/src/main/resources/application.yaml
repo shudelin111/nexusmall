@@ -46,11 +46,3 @@ spring:
     # 作用：超过此时间后强制关闭应用
     # 建议值：30-60 秒（给日志发送留足时间）
     timeout-per-shutdown-phase: 30s
-
-# ===============================
-# Seata 分布式事务配置
-# ===============================
-# 注意：使用 protobuf 序列化，避免 Kryo 依赖问题
-# Order 模块也使用相同的配置
-seata:
-  serializer: protobuf
