@@ -1,0 +1,132 @@
+# ==============================================================================
+# NexusMall Payment Service Deployment Configuration
+# NexusMall 支付服务 Kubernetes 部署配置
+# ==============================================================================
+# 文件用途：定义支付服务在 Kubernetes 集群中的部署规格
+# 维护团队：平台架构组
+# 更新频率：随版本发布更新
+# ==============================================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nexusmall-payment
+  namespace: nexusmall
+  annotations:
+    # ArgoCD 同步控制配置
+    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/hook: "PostSync"
+    
+    # ArgoCD 镜像自动更新器配置
+    argocd-image-updater.argoproj.io/image-list: "nexusmall-payment=docker.io/shudlsys/nexusmall-payment:~^sha-"
+    argocd-image-updater.argoproj.io/nexusmall-payment.update-strategy: "name"
+  
+  labels:
+    app: nexusmall-payment
+    app.kubernetes.io/name: nexusmall-payment
+    app.kubernetes.io/part-of: nexusmall
+
+spec:
+  replicas: 1
+  
+  selector:
+    matchLabels:
+      app: nexusmall-payment
+  
+  template:
+    metadata:
+      labels:
+        app: nexusmall-payment
+        app.kubernetes.io/name: nexusmall-payment
+    
+    spec:
+      containers:
+        - name: nexusmall-payment
+          
+          # 容器镜像配置
+          image: docker.io/shudlsys/nexusmall-payment:latest
+          
+          # 端口暴露
+          ports:
+            - containerPort: 15000
+              protocol: TCP
+          
+          # 环境变量配置
+          envFrom:
+            - configMapRef:
+                name: nexusmall-payment-config
+          
+          # 敏感配置从 Secret 加载
+          env:
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-payment-secret
+                  key: MYSQL_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-payment-secret
+                  key: MYSQL_PASSWORD
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-payment-secret
+                  key: REDIS_PASSWORD
+            - name: NACOS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-payment-secret
+                  key: NACOS_USERNAME
+            - name: NACOS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-payment-secret
+                  key: NACOS_PASSWORD
+          
+          # 资源配额管理
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "500m"
+            limits:
+              memory: "4Gi"
+              cpu: "1000m"
+          
+          # 健康检查探针
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 15000
+              scheme: HTTP
+            initialDelaySeconds: 120
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 15000
+              scheme: HTTP
+            initialDelaySeconds: 100
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+            successThreshold: 1
+          
+          # 生命周期钩子
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "sleep 10"]
+      
+      # 终止宽限期（秒）
+      terminationGracePeriodSeconds: 60
+      
+      # 重启策略
+      restartPolicy: Always
+      
+      # 调度策略
+      schedulerName: default-scheduler

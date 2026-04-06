@@ -1,5 +1,6 @@
 package com.nexusmall.product.controller;
 
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
@@ -15,7 +16,8 @@ import java.util.List;
  * 商品品牌控制器
  */
 @RestController
-@RequestMapping("/brands")  // RESTful 资源路径(复数),Gateway 已通过 /product/** 路由
+@RequestMapping("/brands")  // Gateway 已通过 /product/** 路由,StripPrefix 后访问 /brands
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "品牌管理", description = "商品品牌的增删改查")
 public class BrandController {
 
@@ -25,7 +27,7 @@ public class BrandController {
     /**
      * 查询所有品牌
      */
-    @GetMapping("/list")
+    @GetMapping(value = "/list", headers = "X-API-Version=v1")
     public Result<List<BrandVO>> list() {
         return Result.success(brandService.list());
     }
@@ -33,7 +35,7 @@ public class BrandController {
     /**
      * 根据 ID 查询品牌
      */
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", headers = "X-API-Version=v1")
     public Result<BrandVO> getById(@PathVariable Long id) {
         return Result.success(brandService.getById(id));
     }
@@ -41,7 +43,7 @@ public class BrandController {
     /**
      * 根据名称查询品牌
      */
-    @GetMapping("/getByName/{name}")
+    @GetMapping(value = "/getByName/{name}", headers = "X-API-Version=v1")
     public Result<BrandVO> getByName(@PathVariable String name) {
         return Result.success(brandService.getByName(name));
     }
@@ -49,7 +51,7 @@ public class BrandController {
     /**
      * 新增品牌
      */
-    @PostMapping("/save")
+    @PostMapping(value = "/save", headers = "X-API-Version=v1")
     public Result<Integer> save(@RequestBody BrandVO brandVO) {
         int result = brandService.save(brandVO);
         return result > 0 ? Result.success(ResponseMessageConstants.Brand.ADD_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
@@ -58,7 +60,7 @@ public class BrandController {
     /**
      * 更新品牌
      */
-    @PutMapping("/update")
+    @PutMapping(value = "/update", headers = "X-API-Version=v1")
     public Result<Integer> update(@RequestBody BrandVO brandVO) {
         int result = brandService.updateById(brandVO);
         return result > 0 ? Result.success(ResponseMessageConstants.Brand.UPDATE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
@@ -67,7 +69,7 @@ public class BrandController {
     /**
      * 删除品牌
      */
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping(value = "/delete/{id}", headers = "X-API-Version=v1")
     public Result<Integer> delete(@PathVariable Long id) {
         int result = brandService.deleteById(id);
         return result > 0 ? Result.success(ResponseMessageConstants.Brand.DELETE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
@@ -76,7 +78,7 @@ public class BrandController {
     /**
      * 根据状态查询品牌
      */
-    @GetMapping("/listByStatus/{status}")
+    @GetMapping(value = "/listByStatus/{status}", headers = "X-API-Version=v1")
     public Result<List<BrandVO>> listByStatus(@PathVariable Integer status) {
         return Result.success(brandService.listByStatus(status));
     }
@@ -84,7 +86,7 @@ public class BrandController {
     /**
      * 根据首字母查询品牌
      */
-    @GetMapping("/listByFirstLetter/{firstLetter}")
+    @GetMapping(value = "/listByFirstLetter/{firstLetter}", headers = "X-API-Version=v1")
     public Result<List<BrandVO>> listByFirstLetter(@PathVariable String firstLetter) {
         return Result.success(brandService.listByFirstLetter(firstLetter));
     }

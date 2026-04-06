@@ -1,5 +1,6 @@
 package com.nexusmall.order.controller;
 
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.LogMessageConstants;
 import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
@@ -29,6 +30,7 @@ import java.util.Map;
 @Slf4j
 @RestController
 @RequestMapping("/")  // Gateway 已通过 /order/** 路由，此处不需要再加前缀
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "订单管理", description = "订单的创建、查询、更新、删除及业务流程操作")
 public class OrderController {
 
@@ -51,7 +53,7 @@ public class OrderController {
     /**
      * 根据 ID 查询订单
      */
-    @GetMapping("/{id}")
+    @GetMapping(value = "/{id}", headers = "X-API-Version=v1")
     @Operation(summary = "根据ID查询订单", description = "根据订单ID查询订单详细信息")
     public Result<Order> getOrderById(
             @Parameter(description = "订单ID", example = "1000", required = true)
@@ -70,7 +72,7 @@ public class OrderController {
     /**
      * 根据订单号查询订单
      */
-    @GetMapping("/sn/{orderSn}")
+    @GetMapping(value = "/sn/{orderSn}", headers = "X-API-Version=v1")
     @Operation(summary = "根据订单号查询", description = "根据订单编号查询订单详细信息")
     public Result<Order> getOrderByOrderSn(
             @Parameter(description = "订单编号", example = "ORD202604040001", required = true)
@@ -134,7 +136,7 @@ public class OrderController {
     /**
      * 创建订单（带分布式事务）
      */
-    @PostMapping("/create")
+    @PostMapping(value = "/create", headers = "X-API-Version=v1")
     @Operation(summary = "创建订单", description = "创建新订单，包含库存扣减和订单生成，使用 Seata 分布式事务保证数据一致性")
     public Result<Order> createOrder(
             @Parameter(description = "订单创建请求", required = true)

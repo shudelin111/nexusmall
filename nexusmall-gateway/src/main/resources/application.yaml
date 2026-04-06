@@ -239,6 +239,19 @@ spring:
             # /member/addresses -> /addresses
             - RewritePath=/member/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
+        
+        # 路由 5：支付服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: payment-service
+          uri: lb://nexusmall-payment  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/payment/**
+          filters:
+            # 路径重写：去掉 /payment 前缀
+            # /payment/orders/create -> /orders/create
+            # /payment/refunds/apply -> /refunds/apply
+            - RewritePath=/payment/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
       globalcors:

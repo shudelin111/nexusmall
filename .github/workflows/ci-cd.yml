@@ -72,6 +72,7 @@ jobs:
       gateway-changed: ${{ steps.filter.outputs.gateway }}
       common-changed: ${{ steps.filter.outputs.common }}
       member-changed: ${{ steps.filter.outputs.member }}
+      payment-changed: ${{ steps.filter.outputs.payment }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -107,6 +108,11 @@ jobs:
               - 'pom.xml'  # 根 pom.xml 变更影响 common 模块
             member:
               - 'nexusmall-member/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            payment:
+              - 'nexusmall-payment/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
