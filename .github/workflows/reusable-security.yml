@@ -1,0 +1,80 @@
+# =====================================================
+# 可复用 Workflow - 安全扫描（Trivy）
+# =====================================================
+# 用途：使用 Trivy 扫描 Docker 镜像漏洞
+# 调用方式：通过 workflow_call 触发
+# 作者：shudl
+# 日期：2026-04-07
+# =====================================================
+
+name: Reusable Security Scan
+
+# ========================================
+# 触发条件（只能通过 workflow_call 调用）
+# ========================================
+on:
+  workflow_call:
+    inputs:
+      module-name:
+        description: '模块名称（如 nexusmall-notification）'
+        required: true
+        type: string
+      image-name:
+        description: '镜像名称（如 nexusmall-notification）'
+        required: true
+        type: string
+    secrets:
+      DOCKER_USERNAME:
+        required: true
+      DOCKER_PASSWORD:
+        required: true
+
+# ========================================
+# 权限配置
+# ========================================
+permissions:
+  contents: read
+  security-events: write
+
+# ========================================
+# 环境变量
+# ========================================
+env:
+  DEFAULT_REGISTRY: docker.io
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+# ========================================
+# Jobs
+# ========================================
+jobs:
+  # ========== Trivy 安全扫描 ==========
+  security-scan:
+    name: Security Scan - ${{ inputs.module-name }}
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ inputs.image-name }}:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-${{ inputs.module-name }}-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-${{ inputs.module-name }}-results.sarif'
+          category: 'trivy-${{ inputs.module-name }}-scan'
