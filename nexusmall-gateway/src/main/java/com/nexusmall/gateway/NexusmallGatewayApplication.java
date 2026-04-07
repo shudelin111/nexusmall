@@ -38,7 +38,7 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootApplication // 标记为 Spring Boot 应用，启用自动配置和组件扫描
 @EnableDiscoveryClient // 启用服务发现，向 Nacos 注册服务（动态路由依赖）
-@EnableConfigurationProperties(KafkaLoggingProperties.class) // 启用 Kafka 日志配置属性绑定
+@EnableConfigurationProperties(KafkaLoggingProperties.class) // 启用 Kafka 日志配置属性绑定了
 @Import(RedisConfig.class) // 导入 Redis 配置（Token 验证、会话管理）
 @ComponentScan(basePackageClasses = {
         NexusmallGatewayApplication.class,  // 主启动类（必须包含）
