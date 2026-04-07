@@ -13,7 +13,6 @@
 # - 路径过滤：只构建变更的模块
 # - 并行构建：多个模块同时构建
 # - 增量构建：只编译变更的代码
-# - 可复用 Workflow：减少重复代码
 # =====================================================
 
 name: NexusMall CI/CD
@@ -29,7 +28,6 @@ on:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
-      - '.github/workflows/**'  # CI/CD配置文件变更不触发构建
   pull_request:
     branches: [ master, dev ]  # master 用于生产，dev 用于开发
   workflow_dispatch:  # 允许手动触发
@@ -75,17 +73,9 @@ jobs:
       common-changed: ${{ steps.filter.outputs.common }}
       member-changed: ${{ steps.filter.outputs.member }}
       payment-changed: ${{ steps.filter.outputs.payment }}
-      cart-changed: ${{ steps.filter.outputs.cart }}
-      notification-changed: ${{ steps.filter.outputs.notification }}
-      promotion-changed: ${{ steps.filter.outputs.promotion }}
-      search-changed: ${{ steps.filter.outputs.search }}
-      logistics-changed: ${{ steps.filter.outputs.logistics }}
-      inventory-changed: ${{ steps.filter.outputs.inventory }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 2  # 只获取最近2次提交，用于检测单次提交的变更
       
       # 使用 paths-filter 检测变更（业界标准工具）
       - name: Detect changed modules
@@ -126,45 +116,15 @@ jobs:
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
-            cart:
-              - 'nexusmall-cart/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            notification:
-              - 'nexusmall-notification/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            promotion:
-              - 'nexusmall-promotion/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            search:
-              - 'nexusmall-search/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            logistics:
-              - 'nexusmall-logistics/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            inventory:
-              - 'nexusmall-inventory/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
 
-  # ========== 阶段 1: 编译与测试 - Notification 模块 ==========
-  build-notification:
-    name: Build & Test - Notification Service
+  # ========== 阶段 1: 编译与测试 - Product 模块 ==========
+  build-product:
+    name: Build & Test - Product Service
     runs-on: ubuntu-latest
     needs: [detect-changes]
     if: |
       github.event_name == 'workflow_dispatch' ||
-      needs.detect-changes.outputs.notification-changed == 'true'
+      needs.detect-changes.outputs.product-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -183,16 +143,41 @@ jobs:
           mvn clean install -N -B
           mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
       
-      - name: Compile Notification Module
+      - name: Compile Product Module
         run: |
-          echo "====== 编译 Notification 模块 ======"
-          mvn clean compile -f nexusmall-notification/pom.xml -B
+          echo "====== 编译 Product 模块 ======"
+          mvn clean compile -f nexusmall-product/pom.xml -B
+      
+      - name: Run Product Module Tests with Coverage
+        # ⚠️ 临时禁用：Nacos 为内网服务，GitHub Actions 无法访问
+        # TODO: 恢复测试后移除此注释
+        if: false  # 临时禁用
+        run: |
+          echo "====== 单元测试阶段 (带 JaCoCo 覆盖率检查) ======"
+          if [ -d "nexusmall-product/src/test/java" ] && [ "$(find nexusmall-product/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            # 执行测试并生成覆盖率报告,同时检查覆盖率阈值
+            mvn clean test jacoco:check -f nexusmall-product/pom.xml -B
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+            echo "💡 提示：建议为业务模块编写单元测试以达到 50%+ 覆盖率要求"
+          fi
+      
+      - name: Upload Test Results and Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: product-test-and-coverage
+          path: |
+            nexusmall-product/target/surefire-reports/
+            nexusmall-product/target/site/jacoco/
+          retention-days: 30
 
-  # ========== 阶段 2: 代码质量检查 - Notification 模块 ==========
-  quality-check-notification:
-    name: Quality Check - Notification Service
+  # ========== 阶段 2: 代码质量检查 - Product 模块 ==========
+  quality-check-product:
+    name: Quality Check - Product Service
     runs-on: ubuntu-latest
-    needs: [build-notification]
+    needs: [build-product]
+    # 修改：dev 和 master 分支都执行质量检查
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
@@ -206,21 +191,26 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      - name: Run SonarQube Analysis
-        run: |
-          echo "====== 代码质量检查（SonarQube） ======"
-          echo "💡 提示：需要配置 SonarQube 服务器和 Token"
-          echo "💡 当前跳过，请在配置后启用此步骤"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-product/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-product/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-product/pom.xml
+        continue-on-error: true
 
-  # ========== 阶段 3: 构建 Docker 镜像 - Notification 模块 ==========
-  build-docker-notification:
-    name: Build Docker - Notification Service
+  # ========== 阶段 3: 构建 Docker 镜像 - Product 模块 ==========
+  build-docker-product:
+    name: Build Docker Image - Product Service
     runs-on: ubuntu-latest
-    needs: [quality-check-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-product]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.product-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -235,44 +225,77 @@ jobs:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
       
-      - name: Build and push
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: .
-          file: nexusmall-notification/Dockerfile
+          file: nexusmall-product/Dockerfile
           push: true
-          tags: |
-            ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:sha-${{ github.sha }}
-            ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
 
-  # ========== 阶段 4: 安全扫描 - Notification 模块 ==========
-  security-scan-notification:
-    name: Security Scan - Notification Service
+  # ========== 阶段 4: 安全扫描 - Product 模块 ==========
+  security-scan-product:
+    name: Security Scan - Product Service
     runs-on: ubuntu-latest
-    needs: [build-docker-notification]
+    needs: [build-docker-product]
+    # 修改：dev 和 master 都执行安全扫描，但扫描严格程度不同
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:sha-${{ github.sha }}'
-          format: 'table'
-          exit-code: '1'
-          severity: 'CRITICAL,HIGH'
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-product-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-product-results.sarif'
+          category: 'trivy-product-scan'
 
-  # ========== 阶段 5: 更新 K8s Manifest - Notification 模块 ==========
-  update-manifest-notification:
-    name: Update K8s Manifest - Notification Service
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Product 模块 ==========
+  update-manifest-product:
+    name: Update K8s Manifest - Product Service
     runs-on: ubuntu-latest
-    needs: [security-scan-notification]
+    needs: [security-scan-product]
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -281,37 +304,1039 @@ jobs:
       
       - name: Update image tag in deployment.yaml
         run: |
+          echo "更新 Product 服务镜像标签..."
+          # 根据分支选择标签策略
           if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:sha-${{ github.sha }}"
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:sha-${{ github.sha }}"
           else
-            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:latest"
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-product:latest"
           fi
-          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/notification-service/deployment.yaml
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/product-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/product-service/deployment.yaml
       
       - name: Commit and push changes
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/notification-service/deployment.yaml; then
-              git add deploy/notification-service/deployment.yaml
+            if ! git diff --quiet deploy/product-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/product-service/deployment.yaml
+              # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update notification image to sha-${{ github.sha }} [skip ci]"
+                git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
               else
-                git commit -m "chore(deploy): update notification image to latest [skip ci]"
+                git commit -m "chore(deploy): update product image to latest [skip ci]"
               fi
+              
+              # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
                 git fetch origin ${{ github.ref_name }}
                 git reset --hard origin/${{ github.ref_name }}
-                sleep 10
+                sleep 10  # 等待其他模块推送完成
               fi
             else
+              echo "⚠️ 没有检测到变更，跳过提交"
               exit 0
             fi
           done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
           exit 1
+
+  # ========== 阶段 1: 编译与测试 - Order 模块 ==========
+  build-order:
+    name: Build & Test - Order Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.order-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Order Module
+        run: |
+          echo "====== 编译 Order 模块 ======"
+          mvn clean compile -f nexusmall-order/pom.xml -B
+      
+      - name: Run Order Module Tests with Coverage
+        # ⚠️ 临时禁用：Nacos 为内网服务，GitHub Actions 无法访问
+        # TODO: 恢复测试后移除此注释
+        if: false  # 临时禁用
+        run: |
+          echo "====== 单元测试阶段 (带 JaCoCo 覆盖率检查) ======"
+          if [ -d "nexusmall-order/src/test/java" ] && [ "$(find nexusmall-order/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            # 执行测试并生成覆盖率报告,同时检查覆盖率阈值
+            mvn clean test jacoco:check -f nexusmall-order/pom.xml -B
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+            echo "💡 提示：建议为业务模块编写单元测试以达到 50%+ 覆盖率要求"
+          fi
+      
+      - name: Upload Test Results and Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: order-test-and-coverage
+          path: |
+            nexusmall-order/target/surefire-reports/
+            nexusmall-order/target/site/jacoco/
+          retention-days: 30
+
+  # ========== 阶段 2: 代码质量检查 - Order 模块 ==========
+  quality-check-order:
+    name: Quality Check - Order Service
+    runs-on: ubuntu-latest
+    needs: [build-order]
+    # 修改：dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-order/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Order 模块 ==========
+  build-docker-order:
+    name: Build Docker Image - Order Service
+    runs-on: ubuntu-latest
+    needs: [build-order]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.order-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-order/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Order 模块 ==========
+  security-scan-order:
+    name: Security Scan - Order Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-order]
+    # 修改：dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-order-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-order-results.sarif'
+          category: 'trivy-order-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Order 模块 ==========
+  update-manifest-order:
+    name: Update K8s Manifest - Order Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-order]
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Order 服务镜像标签..."
+          # 根据分支选择标签策略
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:sha-${{ github.sha }}"
+          else
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-order:latest"
+          fi
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/order-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/order-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/order-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/order-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update order image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
+            else
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
+            fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
+
+  # ========== 阶段 1: 编译与测试 - Gateway 模块 ==========
+  build-gateway:
+    name: Build & Test - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.gateway-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Gateway Module
+        run: |
+          echo "====== 编译 Gateway 模块 ======"
+          mvn clean compile -f nexusmall-gateway/pom.xml -B
+      
+      - name: Run Gateway Module Tests
+        # ⚠️ 临时禁用：Nacos 为内网服务，GitHub Actions 无法访问
+        # TODO: 恢复测试后移除此注释
+        if: false  # 临时禁用
+        run: |
+          echo "====== 单元测试阶段 ======"
+          if [ -d "nexusmall-gateway/src/test/java" ] && [ "$(find nexusmall-gateway/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            mvn test -f nexusmall-gateway/pom.xml -Dtest=*Test
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+          fi
+        continue-on-error: true
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gateway-test-results
+          path: nexusmall-gateway/target/surefire-reports/
+        continue-on-error: true
+      
+      - name: Check Code Coverage
+        run: |
+          echo "生成覆盖率报告..."
+          mvn jacoco:report -f nexusmall-gateway/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+
+  # ========== 阶段 2: 代码质量检查 - Gateway 模块 ==========
+  quality-check-gateway:
+    name: Quality Check - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-gateway]
+    # dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-gateway/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Gateway 模块 ==========
+  build-docker-gateway:
+    name: Build Docker Image - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-gateway]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.gateway-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-gateway/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Gateway 模块 ==========
+  security-scan-gateway:
+    name: Security Scan - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-gateway]
+    # dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-gateway-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-gateway-results.sarif'
+          category: 'trivy-gateway-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Gateway 模块 ==========
+  update-manifest-gateway:
+    name: Update K8s Manifest - Gateway Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-gateway]
+    # dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Gateway 服务镜像标签..."
+          # 根据分支选择标签策略
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:sha-${{ github.sha }}"
+          else
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-gateway:latest"
+          fi
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/gateway-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/gateway-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/gateway-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update gateway image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
+            else
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
+            fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
+
+  # ========== 阶段 1: 编译与测试 - Auth 模块 ==========
+  build-auth:
+    name: Build & Test - Auth Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.auth-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Auth Module
+        run: |
+          echo "====== 编译 Auth 模块 ======"
+          mvn clean compile -f nexusmall-auth/pom.xml -B
+      
+      - name: Run Auth Module Tests
+        # ⚠️ 临时禁用：Nacos 为内网服务，GitHub Actions 无法访问
+        # TODO: 恢复测试后移除此注释
+        if: false  # 临时禁用
+        run: |
+          echo "====== 单元测试阶段 ======"
+          if [ -d "nexusmall-auth/src/test/java" ] && [ "$(find nexusmall-auth/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            mvn test -f nexusmall-auth/pom.xml -Dtest=*Test
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+          fi
+        continue-on-error: true
+      
+      - name: Upload Test Results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auth-test-results
+          path: nexusmall-auth/target/surefire-reports/
+        continue-on-error: true
+      
+      - name: Check Code Coverage
+        run: |
+          echo "生成覆盖率报告..."
+          mvn jacoco:report -f nexusmall-auth/pom.xml || echo "⚠️ 覆盖率报告生成失败"
+
+  # ========== 阶段 2: 代码质量检查 - Auth 模块 ==========
+  quality-check-auth:
+    name: Quality Check - Auth Service
+    runs-on: ubuntu-latest
+    needs: [build-auth]
+    # dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-auth/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-auth/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-auth/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Auth 模块 ==========
+  build-docker-auth:
+    name: Build Docker Image - Auth Service
+    runs-on: ubuntu-latest
+    needs: [build-auth]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.auth-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-auth
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-auth/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Auth 模块 ==========
+  security-scan-auth:
+    name: Security Scan - Auth Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-auth]
+    # dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-auth:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-auth-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-auth-results.sarif'
+          category: 'trivy-auth-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Auth 模块 ==========
+  update-manifest-auth:
+    name: Update K8s Manifest - Auth Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-auth]
+    # dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Auth 服务镜像标签..."
+          # 根据分支选择标签策略
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-auth:sha-${{ github.sha }}"
+          else
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-auth:latest"
+          fi
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/auth-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/auth-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/auth-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/auth-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update auth image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update auth image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
+            else
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
+            fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
+
+  # ========== 阶段 1: 编译与测试 - Member 模块 ==========
+  build-member:
+    name: Build & Test - Member Service
+    runs-on: ubuntu-latest
+    needs: [detect-changes]
+    if: |
+      github.event_name == 'workflow_dispatch' ||
+      needs.detect-changes.outputs.member-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Install Parent and Common
+        run: |
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Member Module
+        run: |
+          echo "====== 编译 Member 模块 ======"
+          mvn clean compile -f nexusmall-member/pom.xml -B
+      
+      - name: Run Member Module Tests with Coverage
+        # ⚠️ 临时禁用：Nacos 为内网服务，GitHub Actions 无法访问
+        # TODO: 恢复测试后移除此注释
+        if: false  # 临时禁用
+        run: |
+          echo "====== 单元测试阶段 (带 JaCoCo 覆盖率检查) ======"
+          if [ -d "nexusmall-member/src/test/java" ] && [ "$(find nexusmall-member/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
+            # 执行测试并生成覆盖率报告,同时检查覆盖率阈值
+            mvn clean test jacoco:check -f nexusmall-member/pom.xml -B
+          else
+            echo "⚠️ 未找到测试文件，跳过测试"
+            echo "💡 提示：建议为业务模块编写单元测试以达到 50%+ 覆盖率要求"
+          fi
+      
+      - name: Upload Test Results and Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: member-test-and-coverage
+          path: |
+            nexusmall-member/target/surefire-reports/
+            nexusmall-member/target/site/jacoco/
+          retention-days: 30
+
+  # ========== 阶段 2: 代码质量检查 - Member 模块 ==========
+  quality-check-member:
+    name: Quality Check - Member Service
+    runs-on: ubuntu-latest
+    needs: [build-member]
+    # 修改：dev 和 master 分支都执行质量检查
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: maven
+      
+      - name: Run Checkstyle
+        run: mvn checkstyle:check -f nexusmall-member/pom.xml
+        continue-on-error: true
+      
+      - name: Run PMD
+        run: mvn pmd:check -f nexusmall-member/pom.xml
+        continue-on-error: true
+      
+      - name: Run SpotBugs
+        run: mvn spotbugs:check -f nexusmall-member/pom.xml
+        continue-on-error: true
+
+  # ========== 阶段 3: 构建 Docker 镜像 - Member 模块 ==========
+  build-docker-member:
+    name: Build Docker Image - Member Service
+    runs-on: ubuntu-latest
+    needs: [build-member]
+    if: |
+      github.event_name == 'push' && 
+      needs.detect-changes.outputs.member-changed == 'true'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Generate image tags
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-member
+          tags: |
+            # dev 分支：使用 latest 标签（最新开发版，开发环境使用）
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/dev' }}
+            # 语义化版本（仅打 tag 时生成，如 v1.2.3）
+            type=semver,pattern={{version}},enable=${{ startsWith(github.ref, 'refs/tags/v') }}
+            # 所有分支：都生成 sha 标签（用于精确追溯）
+            type=sha,prefix=sha-,format=long
+      
+      - name: Build and Push Docker Image
+        id: build
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-member/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
+      
+      - name: Image digest
+        run: echo ${{ steps.build.outputs.digest }}
+
+  # ========== 阶段 4: 安全扫描 - Member 模块 ==========
+  security-scan-member:
+    name: Security Scan - Member Service
+    runs-on: ubuntu-latest
+    needs: [build-docker-member]
+    # 修改：dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
+      
+      - name: Run Trivy vulnerability scanner
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-member:sha-${{ github.sha }}'
+          format: 'sarif'
+          output: 'trivy-member-results.sarif'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+      
+      - name: Upload Trivy scan results to GitHub Security tab
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: 'trivy-member-results.sarif'
+          category: 'trivy-member-scan'
+
+  # ========== 阶段 5: 更新 Kubernetes Manifest - Member 模块 ==========
+  update-manifest-member:
+    name: Update K8s Manifest - Member Service
+    runs-on: ubuntu-latest
+    needs: [security-scan-member]
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update image tag in deployment.yaml
+        run: |
+          echo "更新 Member 服务镜像标签..."
+          # 根据分支选择标签策略
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            # master 分支：使用 sha 标签，确保版本可追溯（生产环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-member:sha-${{ github.sha }}"
+          else
+            # dev 分支：使用 latest 标签，自动拉取最新（开发环境）
+            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-member:latest"
+          fi
+          echo "新镜像：${NEW_IMAGE}"
+          
+          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/member-service/deployment.yaml
+          
+          echo "=== 变更后的配置 ==="
+          grep -A 2 "image:" deploy/member-service/deployment.yaml
+      
+      - name: Commit and push changes
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          
+          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
+            if ! git diff --quiet deploy/member-service/deployment.yaml; then
+              echo "检测到变更，提交..."
+              git add deploy/member-service/deployment.yaml
+              # 根据分支使用不同的提交信息
+              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+                git commit -m "chore(deploy): update member image to sha-${{ github.sha }} [skip ci]"
+              else
+                git commit -m "chore(deploy): update member image to latest [skip ci]"
+              fi
+              
+              # 尝试推送，如果失败则重试
+              if git push origin ${{ github.ref_name }}; then
+                echo "✅ Manifest 更新成功！"
+                exit 0
+              else
+                RETRY_COUNT=$((RETRY_COUNT + 1))
+                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
+                git fetch origin ${{ github.ref_name }}
+                git reset --hard origin/${{ github.ref_name }}
+                sleep 10  # 等待其他模块推送完成
+              fi
+            else
+              echo "⚠️ 没有检测到变更，跳过提交"
+              exit 0
+            fi
+          done
+          
+          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          exit 1
+
+  # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
+  # 注意：不再需要手动部署步骤，ArgoCD 会自动同步 manifest 变更
+  # 如果需要手动审批，可以使用 ArgoCD 的 manual sync 功能
+
