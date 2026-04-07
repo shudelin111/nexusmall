@@ -28,6 +28,12 @@ on:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
+      - '*.log'
+      - '*.ps1'
+      - '*.bat'
+      - '*.py'
+      - '*.txt'
+      - '*.sh'
   pull_request:
     branches: [ master, dev ]  # master 用于生产，dev 用于开发
   workflow_dispatch:  # 允许手动触发
@@ -83,7 +89,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # 只获取最近2次提交，避免检测整个分支历史
+          fetch-depth: 50  # 增加深度以确保 paths-filter 能正确计算 diff（避免全量构建）
       
       # 使用 paths-filter 检测变更（业界标准工具）
       - name: Detect changed modules
