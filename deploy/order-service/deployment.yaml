@@ -143,10 +143,10 @@ spec:
           #   - CPU 限制需考虑应用峰值负载的 1.5-2 倍余量
           resources:
             requests:
-              memory: "2Gi"   # 申请内存：1 GiB（调度依据）
+              memory: "2Gi"   # 申请内存：2 GiB（调度依据）
               cpu: "500m"     # 申请 CPU：500 毫核（0.5 核）
             limits:
-              memory: "4Gi"   # 内存上限：2 GiB（超出触发 OOMKilled）
+              memory: "4Gi"   # 内存上限：4 GiB（超出触发 OOMKilled）
               cpu: "1000m"    # CPU 上限：1000 毫核（1 核，可突发）
           
           # -------------------------------------------------------------------
@@ -162,7 +162,7 @@ spec:
               path: /actuator/health/liveness  # Spring Actuator 端点
               port: 11000
               scheme: HTTP                      # HTTP 协议（也可用 HTTPS）
-            initialDelaySeconds: 120            # 初始延迟：240 秒（给 JVM 启动留足时间）
+            initialDelaySeconds: 120            # 初始延迟：120 秒（给 JVM 启动留足时间）
             periodSeconds: 10                   # 检查间隔：10 秒
             timeoutSeconds: 5                   # 超时时间：5 秒
             failureThreshold: 5                 # 失败阈值：连续 5 次失败判定为不健康
@@ -181,7 +181,7 @@ spec:
               path: /actuator/health/readiness
               port: 11000
               scheme: HTTP
-            initialDelaySeconds: 100            # 初始延迟：300 秒（5 分钟，给启动留足时间）
+            initialDelaySeconds: 120            # 初始延迟：120 秒（给 Kafka/Seata 等依赖初始化留足时间）
             periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
             timeoutSeconds: 5                   # 超时时间：5 秒
             failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
@@ -202,9 +202,15 @@ spec:
               exec:
                 # 延迟 10 秒再关闭，配合 Spring Boot 的优雅关闭配置
                 # 目的：让负载均衡层有时间更新路由规则，避免流量损失
-                command: ["sh", "-c", "sleep 10"]
+                command: ["/bin/sh", "-c", "sleep 10"]
           
           # 优雅终止宽限期：从发送 SIGTERM 到强制 SIGKILL 的等待时间
           # 计算逻辑：preStop 执行时间 + 应用关闭钩子时间 + 安全余量
           # 默认值：30 秒；长时间任务建议延长至 60-120 秒
-          terminationGracePeriodSeconds: 30
+          terminationGracePeriodSeconds: 60
+      
+      # 重启策略
+      restartPolicy: Always
+      
+      # 调度策略
+      schedulerName: default-scheduler

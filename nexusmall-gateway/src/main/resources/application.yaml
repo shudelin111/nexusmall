@@ -294,6 +294,30 @@ spring:
             # /third-party/sms/send -> /sms/send
             - RewritePath=/third-party/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
+        
+        # 路由 9：库存服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: inventory-service
+          uri: lb://nexusmall-inventory  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/inventory/**
+          filters:
+            # 路径重写：/inventory/stocks -> /stocks, /inventory/stocks/123 -> /stocks/123
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/inventory/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 10：营销服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: promotion-service
+          uri: lb://nexusmall-promotion  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/promotion/**
+          filters:
+            # 路径重写：/promotion/coupons -> /coupons, /promotion/coupons/123 -> /coupons/123
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/promotion/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
       globalcors:

@@ -1,0 +1,25 @@
+# =====================================================
+# NexusMall 搜索服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 商品全文搜索（Elasticsearch）
+# 2. 搜索建议/自动补全
+# 3. 搜索历史记录
+# 4. 热门搜索词统计
+# 5. 搜索结果排序/过滤
+# =====================================================
+
+server:
+  port: 17000
+  shutdown: graceful
+
+info:
+  app:
+    name: nexusmall-search
+    description: NexusMall 搜索服务
+    version: 0.0.1-SNAPSHOT
+  java.version: 1.8
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s

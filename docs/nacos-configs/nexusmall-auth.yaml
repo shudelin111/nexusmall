@@ -1,56 +1,39 @@
 # =====================================================
-# NexusMall 认证服务配置（Nacos 托管）
+# NexusMall 认证服务配置
 # =====================================================
-# 说明：此文件存储在 Nacos 配置中心，Data ID 为 nexusmall-auth.yaml
-# 用途：Auth 服务的通用业务配置（所有环境共享）
+# Data ID: nexusmall-auth.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：认证服务专属业务配置（所有环境共享）
+# 说明：
+# - 此文件存放所有环境共享的通用配置
+# - 环境特定配置请创建 nexusmall-auth-{profile}.yaml
+# - 示例：nexusmall-auth-dev.yaml, nexusmall-auth-test.yaml
 # =====================================================
-
-# ===============================
-# 服务器配置
-# ===============================
-server:
-  port: 8000
 
 # ===============================
 # Spring 应用配置
 # ===============================
 spring:
-  # ------------------------------
-  # 数据源配置（HikariCP 连接池）
-  # ------------------------------
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    type: com.zaxxer.hikari.HikariDataSource
-    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    username: root
-    password: "123456"
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      connection-test-query: SELECT 1
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
   
-  # ------------------------------
-  # Redis 缓存配置
-  # ------------------------------
+  # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    host: ${REDIS_HOST:10.10.1.1}
-    port: ${REDIS_PORT:6379}
-    database: 0
-    password: "123456"
-    timeout: 5000ms
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
     lettuce:
       pool:
+        # 最大活跃连接数
         max-active: 16
+        # 最大空闲连接数
         max-idle: 8
+        # 最小空闲连接数
         min-idle: 0
-        max-wait: 1000ms
-  
-  # ------------------------------
+        # 获取连接的最大等待时间（毫秒）
+        max-wait: 1000ms  # 1 秒
+
   # Spring Cloud 配置
-  # ------------------------------
   cloud:
     # OpenFeign 服务调用配置
     openfeign:
@@ -59,89 +42,105 @@ spring:
       client:
         config:
           default:
+            # 连接超时
             connectTimeout: 5000
+            # 读取超时
             readTimeout: 5000
-      httpclient:
-        enabled: true
       compression:
         request:
           enabled: true
         response:
           enabled: true
-    
-    # Sentinel 熔断限流配置
+
+    # Sentinel 熔断限流配置（通用参数）
     sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
       eager: true
-      transport:
-        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-        port: 8719
+      # ⚠️ 注意：以下环境相关配置在 nexusmall-auth-{profile}.yaml 中定义：
+      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
+      # - spring.cloud.sentinel.transport.port (本地通信端口)
+      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
+      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
+            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-auth-{profile}.yaml 中定义
             dataId: nexusmall-auth-flow-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: flow
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-        
+
         # 熔断降级规则数据源
         ds2:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
             dataId: nexusmall-auth-degrade-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: degrade
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-        
+
         # 系统自适应保护规则数据源
         ds3:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
             dataId: nexusmall-auth-system-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: system
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-    
-    # Kafka 配置（用于日志收集）
-    kafka:
-      bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-      producer:
-        acks: 1
-        retries: 3
-        batch-size: 16384
-        buffer-memory: 33554432
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+
+      # Sentinel 日志配置
+      log:
+        # 日志级别：DEBUG, INFO, WARN, ERROR
+        level: INFO
 
 # ===============================
-# MyBatis-Plus ORM 配置
+# MyBatis-Plus 配置
 # ===============================
 mybatis-plus:
+  # Mapper XML 文件位置
   mapper-locations: classpath*:/mapper/**/*.xml
-  type-aliases-package: com.nexusmall.auth.entity
+  # 实体类别名包路径
+  type-aliases-package: com.nexusmall.auth.domain.entity
+  # MyBatis 原生配置
   configuration:
+    # 开启驼峰命名转换
     map-underscore-to-camel-case: true
+    # 禁用二级缓存
     cache-enabled: false
+    # SQL 日志实现类
     log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  # 全局配置
   global-config:
     db-config:
+      # 主键生成策略
       id-type: auto
+      # 逻辑删除字段
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
 
 # ===============================
-# Seata 分布式事务配置
+# RocketMQ 配置（通用参数）
+# ===============================
+rocketmq:
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-auth-{profile}.yaml 中定义：
+  # - rocketmq.name-server (NameServer 地址)
+  # - rocketmq.producer.group (生产者组名称)
+  # 生产者配置（通用参数）
+  producer:
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+    retry-times-when-send-async-failed: 2
+
+# ===============================
+# Seata 分布式事务配置（通用参数）
 # ===============================
 seata:
   enabled: true
@@ -150,12 +149,16 @@ seata:
   service:
     vgroup-mapping:
       nexusmall-tx-group: default
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-auth-{profile}.yaml 中定义：
+  # - seata.registry.nacos.server-addr (Seata Server 地址)
+  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
+  # - seata.registry.nacos.group (Seata Server 所在分组)
+  # - seata.config.nacos.server-addr (Seata 配置中心地址)
+  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
+  # - seata.config.nacos.group (Seata 配置所在分组)
   registry:
     type: nacos
     nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
       cluster: default
       username: ${NACOS_USERNAME:nacos}
       password: ${NACOS_PASSWORD:nacos}
@@ -163,53 +166,114 @@ seata:
   config:
     type: nacos
     nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
       username: ${NACOS_USERNAME:nacos}
       password: ${NACOS_PASSWORD:nacos}
       data-id: seataServer.properties
 
 # ===============================
-# Actuator 监控端点配置
+# Security JWT RSA 密钥配置
 # ===============================
+security:
+  jwt:
+    rsa:
+      # RSA 私钥 (PEM 格式) - 严格保密，仅 auth 服务可访问
+      private-key: |
+        -----BEGIN PRIVATE KEY-----
+        MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCsIKQfEy0VBVeh
+        yo19RqW/LqtrvsXImYreMUoiVwE2Ve9aPOgmvzNs+HYI6uTFE2nFaDa/ge2y9r+N
+        Nuiingzxc5Zv7XoXKOT7L/ht79QFocHU0uoKS4eCWKFAdkwmM40DEg3rpXLOQuAT
+        KarFLnvdxl9vJSIXOGNd+hTnQw9tPrfSrBYK7NYX008VKFVoiGwSDZ20vphIGWDn
+        pAiGVNNG83vWc+dX3u1St0cAsKuKjQYh+cZPdVbeJl2SWgYfMp3MDQ7mv64uxs9E
+        PG5DKiFPbnisuBjWbXBxXKqp7f3uPjlJb4lnPVe1Tp9Q1ruj1aOwy5OVHvS9XE+q
+        6kRMfkd/AgMBAAECggEAQCZ2JGK4NZJlI5Zi/yKaWVNibeiOvAGFgOPr1jqI6CBE
+        8WOrve0alG1RSGeK1Wwzym/Zn6wj08QkhdPGBf1To5VJpvNhwknqdTdeplJwuZyc
+        qd3lferCWTEBAA5WuRITZuaOq5lg3UCNVHb9/zkgzvnEzZ6QQwkv93Fh4wLaOAM+
+        dd+RdoYPYcSqu9nB4rIjoLboy1v6X1Ni/TSSKsWlRN6Q2ieE+/XpylCJDjlqXg7b
+        idP1x/TR5TBJlpgvZiYkqmq2zjjfohHuYxokIAVyJG7VYIjlm3zUY0vUkVIF1K7L
+        S5xK4HcChhXHDqPP7wrsnWbpW/fRpF/4IE1Qcy+M6QKBgQD2PZmgmRFyngGryJz2
+        ylGP9iyfua3O85WH44JgUnRrMY5myMo5W6G7Oc9V532QZizQ4V0ah65rauHV48Sy
+        tS3B49HNf0PkVmsmkCnnMGVoAtq6q2e3yN3i9n1Y3Oaq1oj+xmhiWs099lRy/Hxi
+        +EAcnuk7mVnprR4jQsVNcEMRVQKBgQCy8xOTo8XXKuq8Gi2BAxrRzruMZQVix7xj
+        x3tvFnVM1n/tWqHBJm/XwjQHyt6ktipBd1QSocbhHagM0E2iqx8lwDiks9dqWk6N
+        iUBuq/QmIBMkO8uii4yObrOYDcufc0OSdvVESGa4Wt6TNQ7NpqN15gFBPabcoVt2
+        eUFe3n7FgwKBgFRCvAFCn7/S5ct8uImSrdpPaPG3PgylObPoXELNtFzB9nKhnuGF
+        w5AnthU1Q7hX3loT5CIh78N+LY1dhX+JlADXDoH9XKQUFlJ53nzoCKtQ3rwlzzYK
+        nDMAGeCApsYq53IXPrz5SWY8lqVKVN4hCP9COZlVXnkh7kAupwlasviJAoGAJCsZ
+        I9gQHqMf+pDX7aFxBELiiUfJxONV4lzpR9SkNLmN9a1B0EYyiMtJtOF+CpB/DehO
+        Z82m4s0ZsC1R47TugLTPPgrTWT2Tbuv0x+mdWS9WbxZe3CWUbR1W0z7Gjx2+5JWC
+        kSCJEm3bWql4qnwpwaSRUFxjo2hBkjqDyebyfH0CgYBpOKwux+w+B0mWQqx8NrYV
+        v4hYi+V35QPfuqptiW9Zw9E/ToVwN9jjobzWg92yPEcCPG/2DC0WubXcg+ppzASL
+        OwqJWmy7Kv9xWaSpsIX/AHLwT1c+LL/Jv72RHpx84rtRAMHzJoFt6mDkvw85I5RW
+        cVeHt4w+6Al5NePkMmhI5g==
+        -----END PRIVATE KEY-----
+
+      # RSA 公钥 (PEM 格式) - 可公开分发给所有微服务和网关
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCCkHxMtFQVXocqNfUal
+        vy6ra77FyJmK3jFKIlcBNlXvWjzoJr8zbPh2COrkxRNpxWg2v4Htsva/jTboop4M
+        8XOWb+16Fyjk+y/4be/UBaHB1NLqCkuHglihQHZMJjONAxIN66VyzkLgEymqxS57
+        3cZfbyUiFzhjXfoU50MPbT630qwWCuzWF9NPFShVaIhsEg2dtL6YSBlg56QIhlTT
+        RvN71nPnV97tUrdHALCrio0GIfnGT3VW3iZdkloGHzKdzA0O5r+uLsbPRDxuQyoh
+        T254rLgY1m1wcVyqqe397j45SW+JZz1XtU6fUNa7o9WjsMuTlR70vVxPqupETH5H
+        fwIDAQAB
+        -----END PUBLIC KEY-----
+
+      # Access Token 过期时间 (毫秒) - 业界标准: 15-30 分钟
+      access-token-expire-time: 1800000
+
+      # Refresh Token 过期时间 (毫秒) - 业界标准: 7 天
+      refresh-token-expire-time: 604800000
+
+      # JWT 签发者标识
+      issuer: nexusmall-auth
+
+      # JWT 受众标识
+      audience: nexusmall-services
+
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+# 业界标准配置：暴露 Prometheus 监控端点
 management:
   endpoints:
     web:
+      # 暴露所有端点（生产环境建议只暴露 health,info,prometheus）
       exposure:
         include: "*"
+  # 端点详细配置
   endpoint:
     health:
+      # 显示健康检查详情
       show-details: always
     info:
+      # 启用 info 端点
       enabled: true
-  info:
-    env:
+    prometheus:
+      # 启用 Prometheus 端点（必需）
       enabled: true
+  # 指标监控配置
+  metrics:
+    # 启用指标收集
+    enabled: true
+    # 标签配置（用于区分不同微服务）
+    tags:
+      # 应用名称标签（Prometheus 中通过此标签区分服务）
+      application: ${spring.application.name}
+    # 导出配置
+    export:
+      # Prometheus 导出配置
+      prometheus:
+        # 启用 Prometheus 导出（必需）
+        enabled: true
 
 # ===============================
-# 日志级别配置
+# 日志级别配置（通用参数）
 # ===============================
+# ⚠️ 注意：具体日志级别在 nexusmall-auth-{profile}.yaml 中定义
 logging:
   level:
+    # 根日志级别（默认级别）
     root: INFO
+    # Seata 分布式事务日志
     io.seata: INFO
-    com.alibaba.csp.sentinel: DEBUG
-    com.nexusmall.auth: DEBUG
-    com.nexusmall.common: DEBUG
-    com.nexusmall.auth.dao: DEBUG
-
-# ===============================
-# Kafka 日志收集开关（Logback Appender）
-# ===============================
-KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
-
-# ===============================
-# 应用元信息配置
-# ===============================
-info:
-  app:
-    name: nexusmall-auth
-    description: NexusMall 认证服务
-    version: 0.0.1-SNAPSHOT
-  java.version: 1.8

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nexusmall.product.dao.ProductMapper">
+<mapper namespace="com.nexusmall.product.infrastructure.persistence.dao.ProductMapper">
 
-    <resultMap id="BaseResultMap" type="com.nexusmall.product.entity.Product">
+    <resultMap id="BaseResultMap" type="com.nexusmall.product.domain.entity.Product">
         <id column="sku_id" property="skuId"/>
         <result column="sku_name" property="skuName"/>
         <result column="price" property="price"/>
@@ -55,7 +55,7 @@
         ORDER BY create_time DESC
     </select>
 
-    <insert id="insert" parameterType="com.nexusmall.product.entity.Product" useGeneratedKeys="true" keyProperty="skuId">
+    <insert id="insert" parameterType="com.nexusmall.product.domain.entity.Product" useGeneratedKeys="true" keyProperty="skuId">
         INSERT INTO product (
             sku_name, price, stock, category_id, category_name, brand_id, brand_name,
             description, status
@@ -65,7 +65,7 @@
         )
     </insert>
 
-    <update id="updateById" parameterType="com.nexusmall.product.entity.Product">
+    <update id="updateById" parameterType="com.nexusmall.product.domain.entity.Product">
         UPDATE product
         <set>
             <if test="skuName != null">sku_name = #{skuName},</if>

@@ -1,12 +1,12 @@
 package com.nexusmall.payment.adapter.impl;
 
 import com.alibaba.fastjson2.JSON;
-import com.nexusmall.payment.adapter.PayChannelAdapter;
+import com.nexusmall.payment.domain.port.out.PayChannelAdapter;
 import com.nexusmall.payment.config.WechatPayConfig;
-import com.nexusmall.payment.constant.PayChannelCode;
-import com.nexusmall.payment.entity.PayOrder;
-import com.nexusmall.payment.enums.PayStatusEnum;
-import com.nexusmall.payment.vo.request.CreatePayOrderRequest;
+import com.nexusmall.payment.domain.constants.PayChannelCode;
+import com.nexusmall.payment.domain.model.entity.PayOrder;
+import com.nexusmall.payment.domain.model.enums.PayStatusEnum;
+import com.nexusmall.payment.interfaces.dto.request.CreatePayOrderRequest;
 import com.wechat.pay.java.core.Config;
 import com.wechat.pay.java.core.RSAAutoCertificateConfig;
 import com.wechat.pay.java.service.payments.jsapi.JsapiService;
@@ -68,7 +68,7 @@ public class WechatPayAdapter implements PayChannelAdapter {
 
     @Override
     public String getChannelCode() {
-        return PayChannelCode.WECHAT;
+        return PayChannelCode.WECHAT_PAY;
     }
 
     @Override
@@ -114,7 +114,7 @@ public class WechatPayAdapter implements PayChannelAdapter {
             resultData.put("paymentNo", payOrder.getPaymentNo());
             resultData.put("amount", payOrder.getPayAmount());
             resultData.put("subject", request.getSubject());
-            resultData.put("channel", PayChannelCode.WECHAT);
+            resultData.put("channel", PayChannelCode.WECHAT_PAY);
             resultData.put("codeUrl", codeUrl);
             resultData.put("prepayId", response.getPrepayId());
             resultData.put("qrCodeImage", "https://api.weixin.qq.com/qrcode?data=" + codeUrl);

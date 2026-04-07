@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nexusmall.product.dao.CategoryMapper">
+<mapper namespace="com.nexusmall.product.infrastructure.persistence.dao.CategoryMapper">
 
-    <resultMap id="BaseResultMap" type="com.nexusmall.product.entity.Category">
+    <resultMap id="BaseResultMap" type="com.nexusmall.product.domain.entity.Category">
         <id column="id" property="id"/>
         <result column="name" property="name"/>
         <result column="parent_id" property="parentId"/>
@@ -44,7 +44,7 @@
         ORDER BY sort_order ASC
     </select>
 
-    <insert id="insert" parameterType="com.nexusmall.product.entity.Category" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.nexusmall.product.domain.entity.Category" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO category (
             name, parent_id, level, sort_order, icon, status
         ) VALUES (
@@ -52,7 +52,7 @@
         )
     </insert>
 
-    <update id="updateById" parameterType="com.nexusmall.product.entity.Category">
+    <update id="updateById" parameterType="com.nexusmall.product.domain.entity.Category">
         UPDATE category
         <set>
             <if test="name != null">name = #{name},</if>

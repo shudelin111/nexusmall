@@ -28,6 +28,11 @@
         <module>nexusmall-member</module>
         <module>nexusmall-payment</module>
         <module>nexusmall-cart</module>
+        <module>nexusmall-inventory</module>
+        <module>nexusmall-notification</module>
+        <module>nexusmall-promotion</module>
+        <module>nexusmall-search</module>
+        <module>nexusmall-logistics</module>
     </modules>
 
     <!-- 统一的属性配置 -->

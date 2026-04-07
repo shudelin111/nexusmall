@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexusmall.logistics.infrastructure.persistence.mapper.LogisticsTrackMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.nexusmall.logistics.domain.entity.LogisticsTrack">
+        <id column="id" property="id"/>
+        <result column="logistics_order_id" property="logisticsOrderId"/>
+        <result column="express_no" property="expressNo"/>
+        <result column="track_time" property="trackTime"/>
+        <result column="track_content" property="trackContent"/>
+        <result column="track_location" property="trackLocation"/>
+        <result column="track_status" property="trackStatus"/>
+        <result column="create_time" property="createTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, logistics_order_id, express_no, track_time, track_content,
+        track_location, track_status, create_time
+    </sql>
+
+    <!-- 根据物流订单ID查询轨迹列表（按时间倒序） -->
+    <select id="selectByLogisticsOrderId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logistics_track
+        WHERE logistics_order_id = #{logisticsOrderId}
+        ORDER BY track_time DESC
+    </select>
+
+    <!-- 根据快递单号查询轨迹列表（按时间倒序） -->
+    <select id="selectByExpressNo" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logistics_track
+        WHERE express_no = #{expressNo}
+        ORDER BY track_time DESC
+    </select>
+
+</mapper>

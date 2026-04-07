@@ -1,0 +1,49 @@
+package com.nexusmall.inventory.interfaces.dto;
+
+import lombok.Data;
+
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.io.Serializable;
+
+/**
+ * 库存扣减请求DTO
+ *
+ * @author shudl
+ * @since 2026-04-06
+ */
+@Data
+public class StockDeductRequest implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    /**
+     * 商品SKU ID
+     */
+    @NotNull(message = "SKU ID不能为空")
+    private Long skuId;
+
+    /**
+     * 仓库ID
+     */
+    @NotNull(message = "仓库ID不能为空")
+    private Long warehouseId;
+
+    /**
+     * 扣减数量
+     */
+    @NotNull(message = "扣减数量不能为空")
+    @Min(value = 1, message = "扣减数量必须大于0")
+    private Integer quantity;
+
+    /**
+     * 业务单号（订单号）
+     */
+    @NotNull(message = "业务单号不能为空")
+    private String businessSn;
+
+    /**
+     * 操作人ID
+     */
+    private Long operatorId;
+}

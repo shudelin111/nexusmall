@@ -1,7 +1,7 @@
 package com.nexusmall.product.config;
 
 import com.nexusmall.common.interceptor.ApiVersionInterceptor;
-import com.nexusmall.product.config.SeataHandlerInterceptor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -17,12 +17,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @since 2026-04-06
  */
 @Configuration
+@RequiredArgsConstructor
 public class WebConfig implements WebMvcConfigurer {
 
-    @Bean
-    public SeataHandlerInterceptor seataHandlerInterceptor() {
-        return new SeataHandlerInterceptor();
-    }
+    private final SeataHandlerInterceptor seataHandlerInterceptor;
 
     /**
      * 创建 API 版本拦截器 Bean
@@ -34,8 +32,8 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册 Seata XID 拦截器
-        registry.addInterceptor(seataHandlerInterceptor())
+        // 注册 Seata XID 拦截器（使用已注册的 Bean）
+        registry.addInterceptor(seataHandlerInterceptor)
                 .addPathPatterns("/**");
         
         // 注册 API 版本拦截器
