@@ -95,6 +95,12 @@ jobs:
             .github/workflows/**
             '**.md'
             'docs/**'
+            '*.log'
+            '*.ps1'
+            '*.bat'
+            '*.py'
+            '*.txt'
+            '*.sh'
           filters: |
             order: 
               - 'nexusmall-order/**'
