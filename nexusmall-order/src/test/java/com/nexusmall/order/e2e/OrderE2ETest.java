@@ -3,7 +3,7 @@ package com.nexusmall.order.e2e;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexusmall.common.vo.Result;
-import com.nexusmall.order.feign.ProductFeignService;
+import com.nexusmall.order.interfaces.feign.ProductFeignService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
