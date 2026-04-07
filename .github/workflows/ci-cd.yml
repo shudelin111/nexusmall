@@ -1,50 +1,39 @@
 # =====================================================
 # GitHub Actions CI/CD Pipeline - NexusMall Multi-Module
 # =====================================================
-# GitOps 工作流程:
-# 1. 基于文件变更智能触发（路径过滤）
-# 2. 自动编译 + 单元测试 + 代码质量检查
-# 3. 构建 Docker 镜像并推送到 Docker Hub
-# 4. Trivy 安全扫描
-# 5. 更新 Kubernetes Manifest
-# 6. ArgoCD 自动同步到 K8s 集群
-#
-# 业界标准实践：
-# - 路径过滤：只构建变更的模块
-# - 并行构建：多个模块同时构建
-# - 增量构建：只编译变更的代码
-# - 可复用 Workflow：减少重复代码
+# 业界标准实践：单仓库直接在主文件中实现所有 jobs
+# 可复用 workflow (workflow_call) 仅用于跨仓库场景
 # =====================================================
 
 name: NexusMall CI/CD
 
 # ========================================
-# 触发条件（支持路径过滤）
+# 触发条件
 # ========================================
 on:
   push:
-    branches: [ master, dev ]  # master 用于生产，dev 用于开发
+    branches: [ master, dev ]
     tags: [ 'v*' ]
     paths-ignore:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
   pull_request:
-    branches: [ master, dev ]  # master 用于生产，dev 用于开发
-  workflow_dispatch:  # 允许手动触发
+    branches: [ master, dev ]
+  workflow_dispatch:
 
 # ========================================
-# 并发控制（自动取消旧的 workflow）
+# 并发控制
 # ========================================
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 # ========================================
-# 权限配置（修复 CodeQL 权限错误）
+# 权限配置
 # ========================================
 permissions:
-  contents: write  # 需要写入权限才能推送代码
+  contents: write
   security-events: write
   actions: read
 
@@ -55,124 +44,46 @@ env:
   DEFAULT_REGISTRY: docker.io
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"  # 统一设置 Java 编码为 UTF-8，避免 Nacos 配置解析乱码
+  JAVA_TOOL_OPTIONS: "-Dfile.encoding=UTF-8"
 
 # ========================================
-# 工作矩阵配置（业界标准做法）
+# Jobs
 # ========================================
-# 定义要构建的模块及其路径映射
 jobs:
   # ========== 阶段 0: 检测变更模块 ==========
   detect-changes:
     name: Detect Changed Modules
     runs-on: ubuntu-latest
     outputs:
-      order-changed: ${{ steps.filter.outputs.order }}
-      product-changed: ${{ steps.filter.outputs.product }}
-      auth-changed: ${{ steps.filter.outputs.auth }}
-      gateway-changed: ${{ steps.filter.outputs.gateway }}
-      common-changed: ${{ steps.filter.outputs.common }}
-      member-changed: ${{ steps.filter.outputs.member }}
-      payment-changed: ${{ steps.filter.outputs.payment }}
-      cart-changed: ${{ steps.filter.outputs.cart }}
       notification-changed: ${{ steps.filter.outputs.notification }}
-      promotion-changed: ${{ steps.filter.outputs.promotion }}
-      search-changed: ${{ steps.filter.outputs.search }}
-      logistics-changed: ${{ steps.filter.outputs.logistics }}
-      inventory-changed: ${{ steps.filter.outputs.inventory }}
+      common-changed: ${{ steps.filter.outputs.common }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 使用 paths-filter 检测变更（业界标准工具）
       - name: Detect changed modules
         uses: dorny/paths-filter@v3
         id: filter
         with:
           filters: |
-            order: 
-              - 'nexusmall-order/**'
-              - 'nexusmall-common/**'  # common 变更也会影响 order
-              - 'pom.xml'  # 根 pom.xml 变更影响所有模块
-              - 'nexusmall-common/pom.xml'  # 父 POM 变更也影响所有模块
-            product:
-              - 'nexusmall-product/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            auth:
-              - 'nexusmall-auth/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            gateway:
-              - 'nexusmall-gateway/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            common:
-              - 'nexusmall-common/**'
-              - 'pom.xml'  # 根 pom.xml 变更影响 common 模块
-            member:
-              - 'nexusmall-member/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            payment:
-              - 'nexusmall-payment/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            cart:
-              - 'nexusmall-cart/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
             notification:
               - 'nexusmall-notification/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
-            promotion:
-              - 'nexusmall-promotion/**'
+            common:
               - 'nexusmall-common/**'
               - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            search:
-              - 'nexusmall-search/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            logistics:
-              - 'nexusmall-logistics/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
-            inventory:
-              - 'nexusmall-inventory/**'
-              - 'nexusmall-common/**'
-              - 'pom.xml'
-              - 'nexusmall-common/pom.xml'
 
-  # ========== 阶段 1: 编译与测试 - Notification 模块 ==========
+  # ========== 阶段 1: 编译 Notification 模块 ==========
   build-notification:
     name: Build & Test - Notification Service
     needs: [detect-changes]
     if: |
       github.event_name == 'workflow_dispatch' ||
-      needs.detect-changes.outputs.notification-changed == 'true'
-    uses: ./.github/workflows/reusable-build.yml
-    with:
-      module-name: nexusmall-notification
-      module-display-name: Notification Service
-    secrets: inherit
-
-  # ========== 阶段 2: 代码质量检查 - Notification 模块 ==========
-  quality-check-notification:
-    name: Quality Check - Notification Service
+      needs.detect-changes.outputs.notification-changed == 'true' ||
+      needs.detect-changes.outputs.common-changed == 'true'
     runs-on: ubuntu-latest
-    needs: [build-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -185,83 +96,46 @@ jobs:
           distribution: 'temurin'
           cache: maven
       
-      - name: Run SonarQube Analysis
+      - name: Install Parent and Common
         run: |
-          echo "====== 代码质量检查（SonarQube） ======"
-          echo "💡 提示：需要配置 SonarQube 服务器和 Token"
-          echo "💡 当前跳过，请在配置后启用此步骤"
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
+          echo "====== 安装父项目和公共模块 ======"
+          mvn clean install -N -B
+          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
+      
+      - name: Compile Notification Module
+        run: |
+          echo "====== 编译 Notification 模块 ======"
+          mvn clean compile -f nexusmall-notification/pom.xml -B
 
-  # ========== 阶段 3: 构建 Docker 镜像 - Notification 模块 ==========
+  # ========== 阶段 2: 构建 Docker 镜像 ==========
   build-docker-notification:
     name: Build Docker - Notification Service
-    needs: [quality-check-notification]
+    needs: [build-notification]
     if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
-    uses: ./.github/workflows/reusable-docker.yml
-    with:
-      module-name: nexusmall-notification
-      dockerfile-path: nexusmall-notification/Dockerfile
-    secrets: inherit
-
-  # ========== 阶段 4: 安全扫描 - Notification 模块 ==========
-  security-scan-notification:
-    name: Security Scan - Notification Service
     runs-on: ubuntu-latest
-    needs: [build-docker-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
-    uses: ./.github/workflows/reusable-security.yml
-    with:
-      module-name: nexusmall-notification
-      image-name: nexusmall-notification
-    secrets: inherit
-
-  # ========== 阶段 5: 更新 K8s Manifest - Notification 模块 ==========
-  update-manifest-notification:
-    name: Update K8s Manifest - Notification Service
-    runs-on: ubuntu-latest
-    needs: [security-scan-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
       
-      - name: Update image tag in deployment.yaml
-        run: |
-          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:sha-${{ github.sha }}"
-          else
-            NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:latest"
-          fi
-          sed -i "s|image: .*|image: ${NEW_IMAGE}|g" deploy/notification-service/deployment.yaml
-      
-      - name: Commit and push changes
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          MAX_RETRIES=3
-          RETRY_COUNT=0
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/notification-service/deployment.yaml; then
-              git add deploy/notification-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update notification image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update notification image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              exit 0
-            fi
-          done
-          exit 1
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: nexusmall-notification/Dockerfile
+          push: true
+          tags: |
+            ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:sha-${{ github.sha }}
+            ${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/nexusmall-notification:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          platforms: linux/amd64
