@@ -8,6 +8,7 @@ import com.nexusmall.order.dao.OrderItemMapper;
 import com.nexusmall.order.dao.OrderMapper;
 import com.nexusmall.order.domain.entity.Order;
 import com.nexusmall.order.domain.entity.OrderItem;
+import com.nexusmall.order.infrastructure.persistence.OrderServiceImpl;
 import com.nexusmall.order.interfaces.feign.ProductFeignService;
 import com.nexusmall.order.application.service.RocketMQProducer;
 import com.nexusmall.order.interfaces.dto.OrderCreateRequest;

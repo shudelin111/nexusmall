@@ -1,4 +1,4 @@
-﻿# =====================================================
+# =====================================================
 # GitHub Actions CI/CD Pipeline - NexusMall Multi-Module
 # =====================================================
 # GitOps 工作流程:
@@ -368,39 +368,57 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          # Check if there are changes to commit
+          if git diff --quiet deploy/product-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/product-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update product image to latest [skip ci]"
+          fi
+          
+          # Retry with pull --rebase to avoid losing local changes
           MAX_RETRIES=3
           RETRY_COUNT=0
           
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/product-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/product-service/deployment.yaml
-              # 根据分支使用不同的提交信息
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update product image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update product image to latest [skip ci]"
-              fi
-              
-              # 尝试推送，如果失败则重试
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10  # 等待其他模块推送完成
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
-          done
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
+              exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              # Random delay 5-15s to reduce concurrent conflicts
+              sleep $((RANDOM % 11 + 5))
+            fi
           
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Order 模块 ==========
@@ -611,39 +629,41 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          # Check if there are changes to commit
+          if git diff --quiet deploy/order-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/order-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update order image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/order-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/order-service/deployment.yaml
-              # 根据分支使用不同的提交信息
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update order image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update order image to latest [skip ci]"
-              fi
-              
-              # 尝试推送，如果失败则重试
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10  # 等待其他模块推送完成
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
           
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Gateway 模块 ==========
@@ -856,39 +876,41 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          # Check if there are changes to commit
+          if git diff --quiet deploy/gateway-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/gateway-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update gateway image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/gateway-service/deployment.yaml
-              # 根据分支使用不同的提交信息
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update gateway image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update gateway image to latest [skip ci]"
-              fi
-              
-              # 尝试推送，如果失败则重试
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10  # 等待其他模块推送完成
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
           
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Auth 模块 ==========
@@ -1101,39 +1123,41 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          # Check if there are changes to commit
+          if git diff --quiet deploy/auth-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/auth-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update auth image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update auth image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/auth-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/auth-service/deployment.yaml
-              # 根据分支使用不同的提交信息
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update auth image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update auth image to latest [skip ci]"
-              fi
-              
-              # 尝试推送，如果失败则重试
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10  # 等待其他模块推送完成
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
           
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Member 模块 ==========
@@ -1344,39 +1368,41 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           
-          # 重试机制：处理多个模块并行推送时的 Git 冲突
+          # Check if there are changes to commit
+          if git diff --quiet deploy/member-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/member-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update member image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update member image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/member-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/member-service/deployment.yaml
-              # 根据分支使用不同的提交信息
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update member image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update member image to latest [skip ci]"
-              fi
-              
-              # 尝试推送，如果失败则重试
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10  # 等待其他模块推送完成
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
           
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
@@ -1582,33 +1608,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/cart-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/cart-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update cart image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update cart image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/cart-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/cart-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update cart image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update cart image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Notification 模块 ==========
@@ -1803,33 +1838,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/notification-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/notification-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update notification image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update notification image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/notification-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/notification-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update notification image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update notification image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Promotion 模块 ==========
@@ -2024,33 +2068,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/promotion-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/promotion-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update promotion image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update promotion image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/promotion-service/deployment.yaml; then
-              echo "Changes detected, committing....."
-              git add deploy/promotion-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update promotion image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update promotion image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "✅ SUCCESS: Manifest updated!！"
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重试 $RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit交"
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
 
@@ -2247,33 +2300,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/search-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/search-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update search image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update search image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/search-service/deployment.yaml; then
-              echo "Changes detected, committing...."
-              git add deploy/search-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update search image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update search image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "?SUCCESS: Manifest updated!?
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit?
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测?- Logistics 模块 ==========
@@ -2468,33 +2530,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/logistics-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/logistics-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update logistics image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update logistics image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/logistics-service/deployment.yaml; then
-              echo "Changes detected, committing...."
-              git add deploy/logistics-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update logistics image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update logistics image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "?SUCCESS: Manifest updated!?
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit?
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测?- Inventory 模块 ==========
@@ -2689,33 +2760,42 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/inventory-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/inventory-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update inventory image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update inventory image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/inventory-service/deployment.yaml; then
-              echo "Changes detected, committing...."
-              git add deploy/inventory-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update inventory image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update inventory image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "?SUCCESS: Manifest updated!?
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit?
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
 
   # ========== 阶段 1: 编译与测?- Payment 模块 ==========
@@ -2910,31 +2990,40 @@ jobs:
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
+          
+          # Check if there are changes to commit
+          if git diff --quiet deploy/payment-service/deployment.yaml; then
+            echo "No changes detected, skipping"
+            exit 0
+          fi
+          
+          echo "Changes detected, committing..."
+          git add deploy/payment-service/deployment.yaml
+          if [ "${{ github.ref }}" == "refs/heads/master" ]; then
+            git commit -m "chore(deploy): update payment image to sha-${{ github.sha }} [skip ci]"
+          else
+            git commit -m "chore(deploy): update payment image to latest [skip ci]"
+          fi
+          
+          # Retry push with rebase on conflict
           MAX_RETRIES=3
           RETRY_COUNT=0
+          
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
-            if ! git diff --quiet deploy/payment-service/deployment.yaml; then
-              echo "Changes detected, committing...."
-              git add deploy/payment-service/deployment.yaml
-              if [ "${{ github.ref }}" == "refs/heads/master" ]; then
-                git commit -m "chore(deploy): update payment image to sha-${{ github.sha }} [skip ci]"
-              else
-                git commit -m "chore(deploy): update payment image to latest [skip ci]"
-              fi
-              if git push origin ${{ github.ref_name }}; then
-                echo "?SUCCESS: Manifest updated!?
-                exit 0
-              else
-                RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
-                git fetch origin ${{ github.ref_name }}
-                git reset --hard origin/${{ github.ref_name }}
-                sleep 10
-              fi
-            else
-              echo "WARNING: No changes detected, skipping commit?
+            if git push origin ${{ github.ref_name }}; then
+              echo "SUCCESS: Manifest updated!"
               exit 0
+            else
+              RETRY_COUNT=$((RETRY_COUNT + 1))
+              echo "Push failed (conflict), retry $RETRY_COUNT/$MAX_RETRIES..."
+              git fetch origin ${{ github.ref_name }}
+              git pull --rebase origin ${{ github.ref_name }} || {
+                echo "Rebase failed, aborting"
+                exit 1
+              }
+              sleep $((RANDOM % 11 + 5))
             fi
           done
-          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
+          
+          echo "ERROR: Failed after $MAX_RETRIES retries"
           exit 1
