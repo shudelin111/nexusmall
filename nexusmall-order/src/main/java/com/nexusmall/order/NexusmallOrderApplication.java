@@ -63,7 +63,7 @@ import org.springframework.context.annotation.Import;
 public class NexusmallOrderApplication {
 
     public static void main(String[] args) {
-        // 启动订单服务，初始化 Spring 上下文
+        // 启动订单服务，初始化 Spring 上下文及分布式事务环境
         SpringApplication.run(NexusmallOrderApplication.class, args);
     }
 }

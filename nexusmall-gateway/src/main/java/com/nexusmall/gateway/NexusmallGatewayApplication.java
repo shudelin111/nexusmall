@@ -47,7 +47,7 @@ import org.springframework.context.annotation.Import;
 public class NexusmallGatewayApplication {
 
     public static void main(String[] args) {
-        // 启动网关服务，加载路由配置和全局过滤器
+        // 启动网关服务，加载路由配置和全局过滤器链
         SpringApplication.run(NexusmallGatewayApplication.class, args);
     }
 }
