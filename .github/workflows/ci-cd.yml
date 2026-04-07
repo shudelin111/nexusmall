@@ -56,6 +56,7 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
+          base: ${{ github.event_name == 'push' && github.event.before || github.ref }}
           filters: |
             order:
               - 'nexusmall-order/**'
