@@ -89,26 +89,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
       
-      # 使用 paths-filter 检测变更（业界标准工具）
+      # 使用 paths-filter 检测变更(业界标准工具)
       - name: Detect changed modules
-        uses: dorny/paths-filter@v3
         id: filter
+        uses: dorny/paths-filter@v3
         with:
-          # 设置对比基准为上一次提交，避免对比整个分支差异
-          base: 'HEAD~1'
-          # 过滤规则：根据文件变更路径判断哪些模块需要构建
+          # 不设置 base 参数,action 会自动处理:
+          # - push 触发时:自动对比推送前的最近一次提交
+          # - 首次提交时:自动将所有文件视为新增
+          # 这是官方推荐的标准做法,兼容所有场景
           filters: |
-            # 忽略临时文件，避免触发任何模块构建
-            ignore:
-              - '*.log'
-              - '*.ps1'
-              - '*.bat'
-              - '*.py'
-              - '*.txt'
-              - '*.sh'
-              - '.github/workflows/**'
-              - '**.md'
-              - 'docs/**'
             order: 
               - 'nexusmall-order/**'
               - 'nexusmall-common/**'  # common 变更也会影响 order
