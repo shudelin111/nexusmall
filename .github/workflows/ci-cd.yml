@@ -186,6 +186,9 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.detect-changes.outputs.service-matrix) }}
     uses: ./.github/workflows/reusable-service-pipeline.yml
+    permissions:
+      contents: write
+      security-events: write
     with:
       service_name: ${{ matrix.service_name }}
       module_dir: ${{ matrix.module_dir }}
