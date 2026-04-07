@@ -32,13 +32,19 @@ import org.springframework.context.annotation.Import;
  * - Redis 缓存订单状态和购物车数据
  * - Sentinel 限流保护
  * - Kafka 日志收集
+ * <p>
+ * 依赖服务：
+ * - Product 服务：商品信息查询
+ * - Inventory 服务：库存扣减
+ * - Promotion 服务：促销活动校验
+ * - Payment 服务：支付状态回调
  *
  * @author shudl
  * @since 2026-04-07
  */
 @SpringBootApplication // 标记为 Spring Boot 应用，启用自动配置和组件扫描
-@EnableDiscoveryClient // 启用服务发现，向 Nacos 注册服务
-@EnableFeignClients // 启用 Feign 客户端，扫描并注册 Feign 接口
+@EnableDiscoveryClient // 启用服务发现，向 Nacos 注册服务（服务注册与发现）
+@EnableFeignClients // 启用 Feign 客户端，扫描并注册 Feign 接口（声明式 HTTP 客户端）
 @EnableConfigurationProperties(KafkaLoggingProperties.class) // 启用 Kafka 日志配置属性绑定
 @Import({
         RedisConfig.class,              // Redis 配置
@@ -48,11 +54,11 @@ import org.springframework.context.annotation.Import;
         GlobalFeignConfig.class         // 全局 Feign 超时配置
 })
 @ComponentScan(basePackageClasses = {
-        NexusmallOrderApplication.class,
-        RedisUtils.class,
-        SeataXidFilter.class,           // Seata XID 过滤器（传递事务ID）
-        SentinelBlockExceptionHandler.class, // Sentinel 全局异常处理器
-        KafkaLoggingConfig.class        // Kafka 日志配置（延迟初始化）
+        NexusmallOrderApplication.class,    // 主启动类（必须包含）
+        RedisUtils.class,                   // Redis 工具类
+        SeataXidFilter.class,               // Seata XID 过滤器（传递事务ID到下游服务）
+        SentinelBlockExceptionHandler.class, // Sentinel 全局异常处理器（限流降级）
+        KafkaLoggingConfig.class            // Kafka 日志配置（延迟初始化，避免启动阻塞）
 })
 public class NexusmallOrderApplication {
 
