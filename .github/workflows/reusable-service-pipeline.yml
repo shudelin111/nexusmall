@@ -181,7 +181,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.30.0
         with:
           image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ inputs.image_name }}:sha-${{ github.sha }}'
           format: 'sarif'
