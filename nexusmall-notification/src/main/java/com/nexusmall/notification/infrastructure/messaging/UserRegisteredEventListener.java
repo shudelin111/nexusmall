@@ -49,29 +49,44 @@ public class UserRegisteredEventListener implements RocketMQListener<UserRegiste
 
         try {
             // 1. 幂等性校验：使用 Redis SETNX 原子操作（过期时间7天）
+            // 防止 RocketMQ 重试或网络抖动导致的重复消费
             if (!idempotencyService.tryProcess(event.getEventId(), 7 * 24 * 3600)) {
                 log.warn("事件已处理，跳过重复消费，eventId: {}", event.getEventId());
-                return;
+                return; // 直接返回，不抛异常，避免不必要的重试
             }
 
             // 2. 构建欢迎消息
+            // 根据用户信息生成个性化的欢迎内容
             NotificationMessage message = buildWelcomeMessage(event);
 
-            // 3. 保存站内消息
+            // 3. 保存站内消息到数据库
+            // 使用 MyBatis-Plus 的 insert 方法，自动填充 createTime 和 updateTime
             notificationMessageMapper.insert(message);
 
             log.info("用户欢迎消息发送成功，userId: {}, messageId: {}", 
                     event.getUserId(), message.getId());
 
         } catch (Exception e) {
+            // 记录完整堆栈信息，便于问题排查
             log.error("处理用户注册事件失败，userId: {}, eventId: {}", 
                     event.getUserId(), event.getEventId(), e);
-            throw e; // 抛出异常触发 RocketMQ 重试机制
+            // 抛出异常触发 RocketMQ 重试机制（最多重试16次）
+            throw e;
         }
     }
 
     /**
      * 构建欢迎消息
+     * <p>
+     * 根据用户信息生成个性化的欢迎内容，包括：
+     * - 消息标题：统一的欢迎语
+     * - 消息内容：包含用户名的个性化欢迎词 + 平台功能介绍
+     * - 消息类型：系统通知（type=1）
+     * - 初始状态：未读（status=0）
+     * </p>
+     *
+     * @param event 用户注册事件
+     * @return 欢迎消息实体
      */
     private NotificationMessage buildWelcomeMessage(UserRegisteredEvent event) {
         NotificationMessage message = new NotificationMessage();

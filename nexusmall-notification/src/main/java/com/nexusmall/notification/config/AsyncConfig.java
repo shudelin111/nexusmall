@@ -30,24 +30,33 @@ public class AsyncConfig {
      * 通知发送线程池
      * <p>
      * 核心参数说明：
-     * - corePoolSize: 核心线程数，保持活跃
-     * - maxPoolSize: 最大线程数，高峰期扩容
-     * - queueCapacity: 队列容量，缓冲任务
-     * - keepAliveSeconds: 非核心线程空闲存活时间
+     * - corePoolSize: 核心线程数，保持活跃（CPU 核心数 * 2）
+     * - maxPoolSize: 最大线程数，高峰期扩容（CPU 核心数 * 4）
+     * - queueCapacity: 队列容量，缓冲任务（1000）
+     * - keepAliveSeconds: 非核心线程空闲存活时间（60秒）
+     * - threadNamePrefix: 线程名前缀，便于日志追踪
      * - rejectedExecutionHandler: 拒绝策略（CallerRunsPolicy - 由调用线程执行）
      * </p>
+     * 
+     * @return 配置好的线程池执行器
      */
     @Bean("notificationTaskExecutor")
     public Executor notificationTaskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
         
         // 核心线程数：CPU 核心数 * 2
+        // 设置核心线程数（CPU 核心数 * 2）
+        // 适用于 IO 密集型任务（如发送通知、数据库写入）
         executor.setCorePoolSize(Runtime.getRuntime().availableProcessors() * 2);
         
         // 最大线程数：核心线程数 * 2
+        // 设置最大线程数（CPU 核心数 * 4）
+        // 高峰期可以扩容到最大线程数
         executor.setMaxPoolSize(Runtime.getRuntime().availableProcessors() * 4);
         
         // 队列容量：1000
+        // 设置队列容量
+        // 当核心线程都在忙时，新任务会进入队列等待
         executor.setQueueCapacity(1000);
         
         // 线程名前缀

@@ -38,6 +38,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         
         try {
             // SETNX 原子操作：如果 key 不存在则设置，返回 true；否则返回 false
+            // 使用 setIfAbsent 保证原子性，避免并发场景下的重复处理
             Boolean success = redisTemplate.opsForValue()
                 .setIfAbsent(key, KEY_VALUE, expireSeconds, TimeUnit.SECONDS);
             
@@ -54,6 +55,7 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         } catch (Exception e) {
             log.error("幂等性校验失败，eventId: {}", eventId, e);
             // 降级策略：Redis 异常时允许继续处理，由数据库唯一索引兜底
+            // 避免因为 Redis 故障导致整个消息处理流程中断
             return true;
         }
     }
@@ -97,6 +99,13 @@ public class IdempotencyServiceImpl implements IdempotencyService {
 
     /**
      * 构建 Redis Key
+     * <p>
+     * Key 格式：notification:event:processed:{eventId}
+     * 例如：notification:event:processed:user-reg-12345
+     * </p>
+     *
+     * @param eventId 事件唯一标识
+     * @return Redis Key
      */
     private String buildKey(String eventId) {
         return KEY_PREFIX + eventId;
