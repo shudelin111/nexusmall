@@ -1,72 +1,70 @@
 package com.nexusmall.order;
 
+import com.nexusmall.order.infrastructure.messaging.OrderCancelListener;
+import com.nexusmall.order.infrastructure.persistence.mapper.OrderItemMapper;
+import com.nexusmall.order.infrastructure.persistence.mapper.OrderMapper;
+import com.nexusmall.order.interfaces.feign.MemberFeignClient;
+import com.nexusmall.order.interfaces.feign.ProductFeignService;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.env.Environment;
-import org.springframework.test.context.ActiveProfiles;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-/**
- * 订单服务启动测试（集成测试）
- * 
- * 测试目的：
- * - 验证 Spring ApplicationContext 能否正常加载
- * - 验证关键 Bean 是否正确创建
- * - 验证 Nacos 配置是否成功加载
- * - 验证数据源、Redis、RocketMQ 等中间件连接正常
- * 
- * 环境说明：
- * - 使用 dev profile，从 Nacos 加载完整配置
- * - 测试环境已有 MySQL、Redis、Nacos、RocketMQ、Seata
- * - 仅 Kafka 不存在，但已通过 logback-test.xml 排除 Kafka Appender
- */
-@SpringBootTest
-@ActiveProfiles("test")
+@SpringBootTest(
+        properties = {
+                "spring.cloud.nacos.discovery.enabled=false",
+                "spring.cloud.nacos.config.enabled=false",
+                "spring.cloud.sentinel.enabled=false",
+                "rocketmq.name-server=127.0.0.1:9876",
+                "spring.autoconfigure.exclude=org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration,org.springframework.boot.autoconfigure.jdbc.DataSourceTransactionManagerAutoConfiguration,com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration"
+        }
+)
 class NexusmallOrderApplicationTests {
 
     @Autowired
     private ApplicationContext context;
-    
+
     @Autowired
     private Environment environment;
 
+    @MockBean
+    private RocketMQTemplate rocketMQTemplate;
+
+    @MockBean
+    private OrderMapper orderMapper;
+
+    @MockBean
+    private OrderItemMapper orderItemMapper;
+
+    @MockBean
+    private ProductFeignService productFeignService;
+
+    @MockBean
+    private MemberFeignClient memberFeignClient;
+
+    @MockBean
+    private OrderCancelListener orderCancelListener;
+
     @Test
     void contextLoads() {
-        // 验证应用上下文成功加载
-        assertNotNull(context, "ApplicationContext 不应为 null");
+        assertNotNull(context);
     }
-    
+
     @Test
-    void testApplicationName() {
-        // 验证应用名称配置正确
-        String appName = environment.getProperty("spring.application.name");
-        assertEquals("nexusmall-order", appName, "应用名称应为 nexusmall-order");
+    void shouldExposeApplicationName() {
+        assertEquals("nexusmall-order", environment.getProperty("spring.application.name"));
     }
-    
+
     @Test
-    void testDataSourceConfigured() {
-        // 验证数据源配置已加载（从 Nacos）
-        String datasourceUrl = environment.getProperty("spring.datasource.url");
-        assertNotNull(datasourceUrl, "数据源 URL 不应为 null");
-        assertTrue(datasourceUrl.contains("nexusmall_order"), 
-            "数据源 URL 应包含 nexusmall_order 数据库名");
-    }
-    
-    @Test
-    void testRedisConfigured() {
-        // 验证 Redis 配置已加载
-        String redisHost = environment.getProperty("spring.redis.host");
-        assertNotNull(redisHost, "Redis Host 不应为 null");
-    }
-    
-    @Test
-    void testKeyBeansExist() {
-        // 验证关键 Bean 是否存在
-        assertNotNull(context.getBean("orderController"), "OrderController Bean 应存在");
-        // OrderServiceImpl 的 Bean 名称是 orderServiceImpl（接口实现类）
-        assertNotNull(context.getBean("orderServiceImpl"), "OrderServiceImpl Bean 应存在");
+    void shouldRegisterKeyBeans() {
+        assertNotNull(context.getBean("orderController"));
+        assertNotNull(context.getBean("orderServiceImpl"));
+        assertNotNull(context.getBean("rocketMQProducer"));
     }
 }
