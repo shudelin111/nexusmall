@@ -18,6 +18,7 @@ on:
       - '**.md'
       - 'docs/**'
       - '.gitignore'
+      - '.github/workflows/**'  # CI/CD配置文件变更不触发构建
   pull_request:
     branches: [ master, dev ]
   workflow_dispatch:
@@ -62,6 +63,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # 只获取最近2次提交，用于检测单次提交的变更
       
       - name: Detect changed modules
         uses: dorny/paths-filter@v3
