@@ -1,5 +1,6 @@
 package com.nexusmall.order.service;
 
+import com.nexusmall.order.application.service.RocketMQProducer;
 import com.nexusmall.common.constant.MQConstants;
 import com.nexusmall.common.exception.OrderException;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;

@@ -67,7 +67,7 @@ class OrderControllerTest {
     
     // Mock RocketMQ 相关 Bean,避免启动时初始化失败
     @MockBean
-    private com.nexusmall.order.service.RocketMQProducer rocketMQProducer;
+    private com.nexusmall.order.application.service.RocketMQProducer rocketMQProducer;
     
     @MockBean
     private org.apache.rocketmq.spring.core.RocketMQTemplate rocketMQTemplate;

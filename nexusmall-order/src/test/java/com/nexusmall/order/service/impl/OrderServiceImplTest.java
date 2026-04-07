@@ -9,7 +9,7 @@ import com.nexusmall.order.dao.OrderMapper;
 import com.nexusmall.order.entity.Order;
 import com.nexusmall.order.entity.OrderItem;
 import com.nexusmall.order.feign.ProductFeignService;
-import com.nexusmall.order.service.RocketMQProducer;
+import com.nexusmall.order.application.service.RocketMQProducer;
 import com.nexusmall.order.vo.OrderCreateRequest;
 import io.seata.core.context.RootContext;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
