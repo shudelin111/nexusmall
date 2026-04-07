@@ -88,8 +88,6 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 50  # 增加深度以确保 paths-filter 能正确计算 diff（避免全量构建）
       
       # 使用 paths-filter 检测变更（业界标准工具）
       - name: Detect changed modules
