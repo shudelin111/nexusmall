@@ -104,7 +104,8 @@ ENV JAVA_OPTS="-XX:MaxRAMPercentage=75.0 \
 # Spring Boot 配置
 # 注意：实际使用哪个 profile 由 K8s 环境变量或 Nacos 配置决定
 ENV SPRING_PROFILES_ACTIVE=prod
-ENV SERVER_PORT=10001  # 购物车服务端口(与Member同属用户域)
+# 购物车服务端口(与Member同属用户域)
+ENV SERVER_PORT=10001
 
 # 日志路径配置（与 VOLUME 声明保持一致）
 ENV LOG_PATH=/tmp/logs
