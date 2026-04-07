@@ -121,28 +121,34 @@ jobs:
         id: build-matrix
         shell: pwsh
         run: |
-          $matrix = @'
-          [
-            {"key":"product","changed":"${{ steps.filter.outputs.product }}","service_name":"Product Service","module_dir":"nexusmall-product","image_name":"nexusmall-product","deployment_file":"deploy/product-service/deployment.yaml"},
-            {"key":"order","changed":"${{ steps.filter.outputs.order }}","service_name":"Order Service","module_dir":"nexusmall-order","image_name":"nexusmall-order","deployment_file":"deploy/order-service/deployment.yaml"},
-            {"key":"gateway","changed":"${{ steps.filter.outputs.gateway }}","service_name":"Gateway Service","module_dir":"nexusmall-gateway","image_name":"nexusmall-gateway","deployment_file":"deploy/gateway-service/deployment.yaml"},
-            {"key":"auth","changed":"${{ steps.filter.outputs.auth }}","service_name":"Auth Service","module_dir":"nexusmall-auth","image_name":"nexusmall-auth","deployment_file":"deploy/auth-service/deployment.yaml"},
-            {"key":"member","changed":"${{ steps.filter.outputs.member }}","service_name":"Member Service","module_dir":"nexusmall-member","image_name":"nexusmall-member","deployment_file":"deploy/member-service/deployment.yaml"},
-            {"key":"cart","changed":"${{ steps.filter.outputs.cart }}","service_name":"Cart Service","module_dir":"nexusmall-cart","image_name":"nexusmall-cart","deployment_file":"deploy/cart-service/deployment.yaml"},
-            {"key":"notification","changed":"${{ steps.filter.outputs.notification }}","service_name":"Notification Service","module_dir":"nexusmall-notification","image_name":"nexusmall-notification","deployment_file":"deploy/notification-service/deployment.yaml"},
-            {"key":"promotion","changed":"${{ steps.filter.outputs.promotion }}","service_name":"Promotion Service","module_dir":"nexusmall-promotion","image_name":"nexusmall-promotion","deployment_file":"deploy/promotion-service/deployment.yaml"},
-            {"key":"search","changed":"${{ steps.filter.outputs.search }}","service_name":"Search Service","module_dir":"nexusmall-search","image_name":"nexusmall-search","deployment_file":"deploy/search-service/deployment.yaml"},
-            {"key":"logistics","changed":"${{ steps.filter.outputs.logistics }}","service_name":"Logistics Service","module_dir":"nexusmall-logistics","image_name":"nexusmall-logistics","deployment_file":"deploy/logistics-service/deployment.yaml"},
-            {"key":"inventory","changed":"${{ steps.filter.outputs.inventory }}","service_name":"Inventory Service","module_dir":"nexusmall-inventory","image_name":"nexusmall-inventory","deployment_file":"deploy/inventory-service/deployment.yaml"},
-            {"key":"payment","changed":"${{ steps.filter.outputs.payment }}","service_name":"Payment Service","module_dir":"nexusmall-payment","image_name":"nexusmall-payment","deployment_file":"deploy/payment-service/deployment.yaml"}
-          ]
-          '@
-          "service-matrix={""include"":$matrix}" >> $env:GITHUB_OUTPUT
+          $services = @(
+            @{ key = 'product'; changed = '${{ steps.filter.outputs.product }}'; service_name = 'Product Service'; module_dir = 'nexusmall-product'; image_name = 'nexusmall-product'; deployment_file = 'deploy/product-service/deployment.yaml' },
+            @{ key = 'order'; changed = '${{ steps.filter.outputs.order }}'; service_name = 'Order Service'; module_dir = 'nexusmall-order'; image_name = 'nexusmall-order'; deployment_file = 'deploy/order-service/deployment.yaml' },
+            @{ key = 'gateway'; changed = '${{ steps.filter.outputs.gateway }}'; service_name = 'Gateway Service'; module_dir = 'nexusmall-gateway'; image_name = 'nexusmall-gateway'; deployment_file = 'deploy/gateway-service/deployment.yaml' },
+            @{ key = 'auth'; changed = '${{ steps.filter.outputs.auth }}'; service_name = 'Auth Service'; module_dir = 'nexusmall-auth'; image_name = 'nexusmall-auth'; deployment_file = 'deploy/auth-service/deployment.yaml' },
+            @{ key = 'member'; changed = '${{ steps.filter.outputs.member }}'; service_name = 'Member Service'; module_dir = 'nexusmall-member'; image_name = 'nexusmall-member'; deployment_file = 'deploy/member-service/deployment.yaml' },
+            @{ key = 'cart'; changed = '${{ steps.filter.outputs.cart }}'; service_name = 'Cart Service'; module_dir = 'nexusmall-cart'; image_name = 'nexusmall-cart'; deployment_file = 'deploy/cart-service/deployment.yaml' },
+            @{ key = 'notification'; changed = '${{ steps.filter.outputs.notification }}'; service_name = 'Notification Service'; module_dir = 'nexusmall-notification'; image_name = 'nexusmall-notification'; deployment_file = 'deploy/notification-service/deployment.yaml' },
+            @{ key = 'promotion'; changed = '${{ steps.filter.outputs.promotion }}'; service_name = 'Promotion Service'; module_dir = 'nexusmall-promotion'; image_name = 'nexusmall-promotion'; deployment_file = 'deploy/promotion-service/deployment.yaml' },
+            @{ key = 'search'; changed = '${{ steps.filter.outputs.search }}'; service_name = 'Search Service'; module_dir = 'nexusmall-search'; image_name = 'nexusmall-search'; deployment_file = 'deploy/search-service/deployment.yaml' },
+            @{ key = 'logistics'; changed = '${{ steps.filter.outputs.logistics }}'; service_name = 'Logistics Service'; module_dir = 'nexusmall-logistics'; image_name = 'nexusmall-logistics'; deployment_file = 'deploy/logistics-service/deployment.yaml' },
+            @{ key = 'inventory'; changed = '${{ steps.filter.outputs.inventory }}'; service_name = 'Inventory Service'; module_dir = 'nexusmall-inventory'; image_name = 'nexusmall-inventory'; deployment_file = 'deploy/inventory-service/deployment.yaml' },
+            @{ key = 'payment'; changed = '${{ steps.filter.outputs.payment }}'; service_name = 'Payment Service'; module_dir = 'nexusmall-payment'; image_name = 'nexusmall-payment'; deployment_file = 'deploy/payment-service/deployment.yaml' }
+          )
+
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            $selected = $services
+          } else {
+            $selected = $services | Where-Object { $_.changed -eq 'true' }
+          }
+
+          $matrix = @{ include = @($selected) } | ConvertTo-Json -Compress -Depth 4
+          "service-matrix=$matrix" >> $env:GITHUB_OUTPUT
 
   # Fan out the impacted services through one reusable pipeline definition.
   service-pipeline:
     needs: detect-changes
-    if: ${{ github.event_name == 'workflow_dispatch' || matrix.changed == 'true' }}
+    if: ${{ needs.detect-changes.outputs.service-matrix != '{"include":[]}' }}
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.detect-changes.outputs.service-matrix) }}

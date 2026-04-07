@@ -21,9 +21,9 @@
 1. `detect-changes`
    使用 `dorny/paths-filter` 判断哪些服务受本次提交影响。
 2. `build-service-matrix`
-   将服务元数据和变更结果组装成矩阵。
+   将服务元数据和变更结果组装成矩阵，并在这里就过滤掉不需要执行的服务。
 3. `service-pipeline`
-   对矩阵里的服务逐个调用 `reusable-service-pipeline.yml`。
+   只对筛选后的服务逐个调用 `reusable-service-pipeline.yml`。
 
 `reusable-service-pipeline.yml` 的执行顺序：
 
