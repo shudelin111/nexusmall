@@ -1,6 +1,6 @@
 package com.nexusmall.notification.infrastructure.messaging;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nexusmall.notification.application.service.IdempotencyService;
 import com.nexusmall.notification.domain.entity.NotificationMessage;
 import com.nexusmall.notification.domain.event.FlashSaleStartedEvent;
 import com.nexusmall.notification.infrastructure.persistence.mapper.NotificationMessageMapper;
@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 public class FlashSaleStartedEventListener implements RocketMQListener<FlashSaleStartedEvent> {
 
     private final NotificationMessageMapper notificationMessageMapper;
+    private final IdempotencyService idempotencyService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -50,8 +51,8 @@ public class FlashSaleStartedEventListener implements RocketMQListener<FlashSale
                 event.getFlashSaleId(), event.getActivityName(), event.getEventId());
 
         try {
-            // 1. 幂等性校验
-            if (isEventProcessed(event.getEventId())) {
+            // 1. 幂等性校验：使用 Redis SETNX 原子操作（过期时间7天）
+            if (!idempotencyService.tryProcess(event.getEventId(), 7 * 24 * 3600)) {
                 log.warn("事件已处理，跳过重复消费，eventId: {}", event.getEventId());
                 return;
             }
@@ -62,14 +63,6 @@ public class FlashSaleStartedEventListener implements RocketMQListener<FlashSale
             // 3. 临时方案：发送全员通知（实际应按订阅关系推送）
             NotificationMessage message = buildFlashSaleNotification(event);
             notificationMessageMapper.insert(message);
-
-            // 4. TODO: 批量发送给订阅用户
-            // for (Long userId : subscribedUserIds) {
-            //     sendNotificationToUser(userId, event);
-            // }
-
-            // 5. 标记事件已处理
-            markEventAsProcessed(event.getEventId());
 
             log.info("秒杀活动通知发送成功，flashSaleId: {}, messageId: {}", 
                     event.getFlashSaleId(), message.getId());
@@ -114,21 +107,5 @@ public class FlashSaleStartedEventListener implements RocketMQListener<FlashSale
         message.setCreateTime(LocalDateTime.now());
         message.setUpdateTime(LocalDateTime.now());
         return message;
-    }
-
-    /**
-     * 检查事件是否已处理（幂等性校验）
-     */
-    private boolean isEventProcessed(String eventId) {
-        // TODO: 实际项目中应使用 Redis 或数据库表存储已处理的事件ID
-        return false;
-    }
-
-    /**
-     * 标记事件已处理
-     */
-    private void markEventAsProcessed(String eventId) {
-        // TODO: 实际项目中应将事件ID存入 Redis 或数据库
-        log.debug("标记事件已处理，eventId: {}", eventId);
     }
 }

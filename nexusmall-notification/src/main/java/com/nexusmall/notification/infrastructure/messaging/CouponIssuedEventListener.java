@@ -1,6 +1,6 @@
 package com.nexusmall.notification.infrastructure.messaging;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nexusmall.notification.application.service.IdempotencyService;
 import com.nexusmall.notification.domain.entity.NotificationMessage;
 import com.nexusmall.notification.domain.event.CouponIssuedEvent;
 import com.nexusmall.notification.infrastructure.persistence.mapper.NotificationMessageMapper;
@@ -40,6 +40,7 @@ import java.time.format.DateTimeFormatter;
 public class CouponIssuedEventListener implements RocketMQListener<CouponIssuedEvent> {
 
     private final NotificationMessageMapper notificationMessageMapper;
+    private final IdempotencyService idempotencyService;
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
@@ -50,8 +51,8 @@ public class CouponIssuedEventListener implements RocketMQListener<CouponIssuedE
                 event.getUserId(), event.getCouponId(), event.getEventId());
 
         try {
-            // 1. 幂等性校验
-            if (isEventProcessed(event.getEventId())) {
+            // 1. 幂等性校验：使用 Redis SETNX 原子操作（过期时间7天）
+            if (!idempotencyService.tryProcess(event.getEventId(), 7 * 24 * 3600)) {
                 log.warn("事件已处理，跳过重复消费，eventId: {}", event.getEventId());
                 return;
             }
@@ -61,13 +62,6 @@ public class CouponIssuedEventListener implements RocketMQListener<CouponIssuedE
 
             // 3. 保存站内消息
             notificationMessageMapper.insert(message);
-
-            // 4. TODO: 根据用户偏好发送短信或推送通知
-            // sendSmsNotification(event);
-            // sendPushNotification(event);
-
-            // 5. 标记事件已处理
-            markEventAsProcessed(event.getEventId());
 
             log.info("优惠券到账通知发送成功，userId: {}, couponId: {}, messageId: {}", 
                     event.getUserId(), event.getCouponId(), message.getId());
@@ -109,21 +103,5 @@ public class CouponIssuedEventListener implements RocketMQListener<CouponIssuedE
         message.setCreateTime(LocalDateTime.now());
         message.setUpdateTime(LocalDateTime.now());
         return message;
-    }
-
-    /**
-     * 检查事件是否已处理（幂等性校验）
-     */
-    private boolean isEventProcessed(String eventId) {
-        // TODO: 实际项目中应使用 Redis 或数据库表存储已处理的事件ID
-        return false;
-    }
-
-    /**
-     * 标记事件已处理
-     */
-    private void markEventAsProcessed(String eventId) {
-        // TODO: 实际项目中应将事件ID存入 Redis 或数据库
-        log.debug("标记事件已处理，eventId: {}", eventId);
     }
 }

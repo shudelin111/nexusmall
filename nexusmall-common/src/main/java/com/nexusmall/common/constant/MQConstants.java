@@ -23,7 +23,7 @@ public class MQConstants {
         /**
          * 用户行为日志 Topic
          */
-        public static final String TOPIC = "user-behavior-topic";
+        public static final String TOPIC = "USER_BEHAVIOR_TOPIC";
 
         /**
          * 用户行为 Tag
@@ -53,7 +53,7 @@ public class MQConstants {
         /**
          * 订单 Topic
          */
-        public static final String TOPIC = "order-topic";
+        public static final String TOPIC = "ORDER_TOPIC";
 
         /**
          * 订单取消延迟消息 Tag
@@ -84,7 +84,7 @@ public class MQConstants {
         /**
          * 库存 Topic
          */
-        public static final String TOPIC = "stock-topic";
+        public static final String TOPIC = "STOCK_TOPIC";
 
         /**
          * 库存扣减成功消息 Tag

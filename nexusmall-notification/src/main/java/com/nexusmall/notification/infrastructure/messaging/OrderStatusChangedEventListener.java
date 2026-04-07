@@ -1,6 +1,6 @@
 package com.nexusmall.notification.infrastructure.messaging;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nexusmall.notification.application.service.IdempotencyService;
 import com.nexusmall.notification.domain.entity.NotificationMessage;
 import com.nexusmall.notification.domain.event.OrderStatusChangedEvent;
 import com.nexusmall.notification.infrastructure.persistence.mapper.NotificationMessageMapper;
@@ -39,6 +39,7 @@ import java.time.LocalDateTime;
 public class OrderStatusChangedEventListener implements RocketMQListener<OrderStatusChangedEvent> {
 
     private final NotificationMessageMapper notificationMessageMapper;
+    private final IdempotencyService idempotencyService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -47,8 +48,8 @@ public class OrderStatusChangedEventListener implements RocketMQListener<OrderSt
                 event.getOrderId(), event.getOldStatus(), event.getNewStatus(), event.getEventId());
 
         try {
-            // 1. 幂等性校验
-            if (isEventProcessed(event.getEventId())) {
+            // 1. 幂等性校验：使用 Redis SETNX 原子操作（过期时间7天）
+            if (!idempotencyService.tryProcess(event.getEventId(), 7 * 24 * 3600)) {
                 log.warn("事件已处理，跳过重复消费，eventId: {}", event.getEventId());
                 return;
             }
@@ -58,14 +59,6 @@ public class OrderStatusChangedEventListener implements RocketMQListener<OrderSt
 
             // 3. 保存站内消息
             notificationMessageMapper.insert(message);
-
-            // 4. TODO: 根据订单状态发送短信或推送通知
-            // if (shouldSendSms(event.getNewStatus())) {
-            //     sendSmsNotification(event);
-            // }
-
-            // 5. 标记事件已处理
-            markEventAsProcessed(event.getEventId());
 
             log.info("订单状态通知发送成功，orderId: {}, messageId: {}", 
                     event.getOrderId(), message.getId());
@@ -124,21 +117,5 @@ public class OrderStatusChangedEventListener implements RocketMQListener<OrderSt
             event.getOrderSn(),
             event.getStatusDesc() != null ? event.getStatusDesc() : "未知状态"
         );
-    }
-
-    /**
-     * 检查事件是否已处理（幂等性校验）
-     */
-    private boolean isEventProcessed(String eventId) {
-        // TODO: 实际项目中应使用 Redis 或数据库表存储已处理的事件ID
-        return false;
-    }
-
-    /**
-     * 标记事件已处理
-     */
-    private void markEventAsProcessed(String eventId) {
-        // TODO: 实际项目中应将事件ID存入 Redis 或数据库
-        log.debug("标记事件已处理，eventId: {}", eventId);
     }
 }

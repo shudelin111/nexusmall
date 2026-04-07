@@ -1,0 +1,143 @@
+# =====================================================
+# NexusMall - RocketMQ Topics 完整清单
+# =====================================================
+# 用途：定义整个项目需要创建的所有 RocketMQ Topics
+# 命名规范：大写字母 + 下划线（RocketMQ 官方推荐）
+# 作者：shudl
+# 日期：2026-04-07
+# =====================================================
+
+# -----------------------------------------------------
+# Topic 1: 用户注册事件
+# -----------------------------------------------------
+USER_REGISTERED_TOPIC:
+  producer: nexusmall-auth
+  consumers:
+    - nexusmall-member (Member 服务)
+    - nexusmall-notification (Notification 服务)
+  description: "用户注册成功后发送欢迎消息和创建会员档案"
+
+# -----------------------------------------------------
+# Topic 2: 购物车同步
+# -----------------------------------------------------
+CART_SYNC_TOPIC:
+  producer: nexusmall-cart
+  consumers:
+    - nexusmall-cart (自身消费，异步同步到 MySQL)
+  description: "购物车数据从 Redis 异步同步到 MySQL"
+
+# -----------------------------------------------------
+# Topic 3: 订单延迟消息
+# -----------------------------------------------------
+ORDER_TOPIC:
+  producer: nexusmall-order
+  consumers:
+    - nexusmall-order (延迟消息，30分钟后检查支付状态)
+  tags:
+    - order-cancel (订单取消)
+  description: "订单取消延迟消息（30分钟未支付自动取消）"
+
+# -----------------------------------------------------
+# Topic 4: 库存扣减
+# -----------------------------------------------------
+STOCK_TOPIC:
+  producer: nexusmall-product
+  consumers:
+    - nexusmall-inventory (Inventory 服务)
+  tags:
+    - stock-decreased (库存扣减成功)
+  description: "库存扣减成功消息，触发后续业务流程"
+
+# -----------------------------------------------------
+# Topic 5: 支付结果通知
+# -----------------------------------------------------
+PAYMENT_RESULT_TOPIC:
+  producer: nexusmall-payment
+  consumers:
+    - nexusmall-order (Order 服务)
+  description: "支付结果通知，更新订单支付状态"
+
+# -----------------------------------------------------
+# Topic 6: 物流状态变更
+# -----------------------------------------------------
+LOGISTICS_STATUS_CHANGE_TOPIC:
+  producer: nexusmall-logistics
+  consumers:
+    - nexusmall-order (Order 服务)
+    - nexusmall-notification (可选，发送物流通知)
+  description: "物流状态变更事件，通知订单服务和用户"
+
+# -----------------------------------------------------
+# Topic 7: 优惠券发放
+# -----------------------------------------------------
+COUPON_ISSUED_TOPIC:
+  producer: nexusmall-promotion
+  consumers:
+    - nexusmall-notification (Notification 服务)
+  description: "优惠券发放后通知用户"
+
+# -----------------------------------------------------
+# Topic 8: 秒杀活动开始
+# -----------------------------------------------------
+FLASH_SALE_STARTED_TOPIC:
+  producer: nexusmall-promotion
+  consumers:
+    - nexusmall-notification (Notification 服务)
+  description: "秒杀活动开始前批量推送提醒"
+
+# -----------------------------------------------------
+# Topic 9: 订单状态变更
+# -----------------------------------------------------
+ORDER_STATUS_CHANGED_TOPIC:
+  producer: nexusmall-order
+  consumers:
+    - nexusmall-notification (Notification 服务)
+  description: "订单状态变更时通知用户"
+
+# -----------------------------------------------------
+# Topic 10: 用户行为日志
+# -----------------------------------------------------
+USER_BEHAVIOR_TOPIC:
+  producer: 各业务服务（Product、Order、Search 等）
+  consumers:
+    - nexusmall-behavior (Behavior 服务)
+  description: "用户行为日志收集，用于大数据分析和推荐系统"
+
+# =====================================================
+# 批量创建命令（RocketMQ 4.x / 5.x 通用）
+# =====================================================
+# 进入 Broker 容器
+# docker exec -it rocketmq-broker bash
+
+# 批量创建所有 Topics
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t USER_REGISTERED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t CART_SYNC_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t ORDER_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t STOCK_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t PAYMENT_RESULT_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t LOGISTICS_STATUS_CHANGE_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t COUPON_ISSUED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t FLASH_SALE_STARTED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t ORDER_STATUS_CHANGED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t USER_BEHAVIOR_TOPIC -r 8 -w 4
+
+# 验证 Topic 列表
+sh mqadmin topicList -n rmqnamesrv:9876
+
+# 退出容器
+# exit
+
+# =====================================================
+# 参数说明
+# =====================================================
+# -n: NameServer 地址
+# -c: 集群名称（DefaultCluster）
+# -t: Topic 名称
+# -r: 读队列数量（默认 8）
+# -w: 写队列数量（默认 4）
+#
+# 队列数量可根据实际业务量调整：
+# - 低流量：-r 4 -w 2
+# - 中流量：-r 8 -w 4（推荐）
+# - 高流量：-r 16 -w 8
+# =====================================================

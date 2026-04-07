@@ -1,0 +1,102 @@
+# =====================================================
+# Notification Service - RocketMQ Topics 配置
+# =====================================================
+# 用途：定义通知模块需要订阅的 RocketMQ Topics
+# 部署方式：在 RocketMQ Console 或通过命令行创建
+# 作者：shudl
+# 日期：2026-04-07
+# =====================================================
+
+# -----------------------------------------------------
+# Topic 1: 用户注册事件
+# -----------------------------------------------------
+# Topic Name: USER_REGISTERED_TOPIC
+# 生产者：nexusmall-auth (Auth 服务)
+# 消费者：nexusmall-notification (Notification 服务)
+# 消息类型：普通消息
+# 用途：用户注册成功后发送欢迎消息
+# -----------------------------------------------------
+USER_REGISTERED_TOPIC:
+  producerGroup: auth-service-producer-group
+  consumerGroups:
+    - notification-service-user-registered-consumer-group
+  messageModel: CLUSTERING
+  consumeMode: CONCURRENTLY
+  retryTimesWhenSendFailed: 3
+  description: "用户注册事件 - 用于发送欢迎消息"
+
+# -----------------------------------------------------
+# Topic 2: 优惠券发放事件
+# -----------------------------------------------------
+# Topic Name: COUPON_ISSUED_TOPIC
+# 生产者：nexusmall-promotion (Promotion 服务)
+# 消费者：nexusmall-notification (Notification 服务)
+# 消息类型：普通消息
+# 用途：优惠券发放后通知用户
+# -----------------------------------------------------
+COUPON_ISSUED_TOPIC:
+  producerGroup: promotion-service-producer-group
+  consumerGroups:
+    - notification-service-coupon-issued-consumer-group
+  messageModel: CLUSTERING
+  consumeMode: CONCURRENTLY
+  retryTimesWhenSendFailed: 3
+  description: "优惠券发放事件 - 用于发送优惠券到账通知"
+
+# -----------------------------------------------------
+# Topic 3: 秒杀活动开始事件
+# -----------------------------------------------------
+# Topic Name: FLASH_SALE_STARTED_TOPIC
+# 生产者：nexusmall-promotion (Promotion 服务)
+# 消费者：nexusmall-notification (Notification 服务)
+# 消息类型：普通消息
+# 用途：秒杀活动开始前批量推送提醒
+# -----------------------------------------------------
+FLASH_SALE_STARTED_TOPIC:
+  producerGroup: promotion-service-producer-group
+  consumerGroups:
+    - notification-service-flash-sale-consumer-group
+  messageModel: CLUSTERING
+  consumeMode: CONCURRENTLY
+  retryTimesWhenSendFailed: 3
+  description: "秒杀活动开始事件 - 用于批量推送秒杀提醒"
+
+# -----------------------------------------------------
+# Topic 4: 订单状态变更事件
+# -----------------------------------------------------
+# Topic Name: ORDER_STATUS_CHANGED_TOPIC
+# 生产者：nexusmall-order (Order 服务)
+# 消费者：nexusmall-notification (Notification 服务)
+# 消息类型：普通消息
+# 用途：订单状态变更时通知用户
+# -----------------------------------------------------
+ORDER_STATUS_CHANGED_TOPIC:
+  producerGroup: order-service-producer-group
+  consumerGroups:
+    - notification-service-order-status-consumer-group
+  messageModel: CLUSTERING
+  consumeMode: CONCURRENTLY
+  retryTimesWhenSendFailed: 3
+  description: "订单状态变更事件 - 用于发送订单状态通知"
+
+# =====================================================
+# 创建命令（RocketMQ 4.x）
+# =====================================================
+# sh mqadmin updateTopic -n localhost:9876 -t USER_REGISTERED_TOPIC -c DefaultCluster
+# sh mqadmin updateTopic -n localhost:9876 -t COUPON_ISSUED_TOPIC -c DefaultCluster
+# sh mqadmin updateTopic -n localhost:9876 -t FLASH_SALE_STARTED_TOPIC -c DefaultCluster
+# sh mqadmin updateTopic -n localhost:9876 -t ORDER_STATUS_CHANGED_TOPIC -c DefaultCluster
+  docker exec -it rmqbroker sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t stock-topic
+# =====================================================
+# 创建命令（RocketMQ 5.x）
+# =====================================================
+# sh mqadmin updateTopic -n localhost:9876 -t USER_REGISTERED_TOPIC -c BROKER_NAME
+# sh mqadmin updateTopic -n localhost:9876 -t COUPON_ISSUED_TOPIC -c BROKER_NAME
+# sh mqadmin updateTopic -n localhost:9876 -t FLASH_SALE_STARTED_TOPIC -c BROKER_NAME
+# sh mqadmin updateTopic -n localhost:9876 -t ORDER_STATUS_CHANGED_TOPIC -c BROKER_NAME
+
+# =====================================================
+# 验证命令
+# =====================================================
+# sh mqadmin topicList -n localhost:9876
+# sh mqadmin topicStatus -n localhost:9876 -t USER_REGISTERED_TOPIC
