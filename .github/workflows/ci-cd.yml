@@ -188,6 +188,7 @@ jobs:
     uses: ./.github/workflows/reusable-service-pipeline.yml
     permissions:
       contents: write
+      actions: read
       security-events: write
     with:
       service_name: ${{ matrix.service_name }}
