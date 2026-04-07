@@ -88,16 +88,18 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       
       # 使用 paths-filter 检测变更(业界标准工具)
       - name: Detect changed modules
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          # 不设置 base 参数,action 会自动处理:
-          # - push 触发时:自动对比推送前的最近一次提交
-          # - 首次提交时:自动将所有文件视为新增
-          # 这是官方推荐的标准做法,兼容所有场景
+          # 设置为触发分支,这样只检测本次推送的变更
+          # - dev 分支推送:检测 dev 分支相对于上一次提交的变更
+          # - master 分支推送:检测 master 分支相对于上一次提交的变更
+          # 参考: https://github.com/dorny/paths-filter#supported-workflows
           filters: |
             order: 
               - 'nexusmall-order/**'
@@ -222,9 +224,12 @@ jobs:
   quality-check-product:
     name: Quality Check - Product Service
     runs-on: ubuntu-latest
-    needs: [build-product]
+    needs: [build-product, detect-changes]
     # 修改：dev 和 master 分支都执行质量检查
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.product-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -253,7 +258,7 @@ jobs:
   build-docker-product:
     name: Build Docker Image - Product Service
     runs-on: ubuntu-latest
-    needs: [build-product]
+    needs: [build-product, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.product-changed == 'true'
@@ -304,9 +309,12 @@ jobs:
   security-scan-product:
     name: Security Scan - Product Service
     runs-on: ubuntu-latest
-    needs: [build-docker-product]
+    needs: [build-docker-product, detect-changes]
     # 修改：dev 和 master 都执行安全扫描，但扫描严格程度不同
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.product-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -338,9 +346,12 @@ jobs:
   update-manifest-product:
     name: Update K8s Manifest - Product Service
     runs-on: ubuntu-latest
-    needs: [security-scan-product]
+    needs: [security-scan-product, detect-changes]
     # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.product-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -483,9 +494,12 @@ jobs:
   quality-check-order:
     name: Quality Check - Order Service
     runs-on: ubuntu-latest
-    needs: [build-order]
+    needs: [build-order, detect-changes]
     # 修改：dev 和 master 分支都执行质量检查
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.order-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -514,7 +528,7 @@ jobs:
   build-docker-order:
     name: Build Docker Image - Order Service
     runs-on: ubuntu-latest
-    needs: [build-order]
+    needs: [build-order, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.order-changed == 'true'
@@ -565,9 +579,12 @@ jobs:
   security-scan-order:
     name: Security Scan - Order Service
     runs-on: ubuntu-latest
-    needs: [build-docker-order]
+    needs: [build-docker-order, detect-changes]
     # 修改：dev 和 master 都执行安全扫描
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.order-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -599,9 +616,12 @@ jobs:
   update-manifest-order:
     name: Update K8s Manifest - Order Service
     runs-on: ubuntu-latest
-    needs: [security-scan-order]
+    needs: [security-scan-order, detect-changes]
     # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.order-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -730,9 +750,12 @@ jobs:
   quality-check-gateway:
     name: Quality Check - Gateway Service
     runs-on: ubuntu-latest
-    needs: [build-gateway]
+    needs: [build-gateway, detect-changes]
     # dev 和 master 分支都执行质量检查
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.gateway-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -761,7 +784,7 @@ jobs:
   build-docker-gateway:
     name: Build Docker Image - Gateway Service
     runs-on: ubuntu-latest
-    needs: [build-gateway]
+    needs: [build-gateway, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.gateway-changed == 'true'
@@ -812,9 +835,12 @@ jobs:
   security-scan-gateway:
     name: Security Scan - Gateway Service
     runs-on: ubuntu-latest
-    needs: [build-docker-gateway]
+    needs: [build-docker-gateway, detect-changes]
     # dev 和 master 都执行安全扫描
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.gateway-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -846,9 +872,12 @@ jobs:
   update-manifest-gateway:
     name: Update K8s Manifest - Gateway Service
     runs-on: ubuntu-latest
-    needs: [security-scan-gateway]
+    needs: [security-scan-gateway, detect-changes]
     # dev 和 master 都更新 Manifest（GitOps 标准实践）
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.gateway-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -977,9 +1006,12 @@ jobs:
   quality-check-auth:
     name: Quality Check - Auth Service
     runs-on: ubuntu-latest
-    needs: [build-auth]
+    needs: [build-auth, detect-changes]
     # dev 和 master 分支都执行质量检查
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.auth-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1008,7 +1040,7 @@ jobs:
   build-docker-auth:
     name: Build Docker Image - Auth Service
     runs-on: ubuntu-latest
-    needs: [build-auth]
+    needs: [build-auth, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.auth-changed == 'true'
@@ -1059,9 +1091,12 @@ jobs:
   security-scan-auth:
     name: Security Scan - Auth Service
     runs-on: ubuntu-latest
-    needs: [build-docker-auth]
+    needs: [build-docker-auth, detect-changes]
     # dev 和 master 都执行安全扫描
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.auth-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1093,9 +1128,12 @@ jobs:
   update-manifest-auth:
     name: Update K8s Manifest - Auth Service
     runs-on: ubuntu-latest
-    needs: [security-scan-auth]
+    needs: [security-scan-auth, detect-changes]
     # dev 和 master 都更新 Manifest（GitOps 标准实践）
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.auth-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1222,9 +1260,12 @@ jobs:
   quality-check-member:
     name: Quality Check - Member Service
     runs-on: ubuntu-latest
-    needs: [build-member]
+    needs: [build-member, detect-changes]
     # 修改：dev 和 master 分支都执行质量检查
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.member-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1253,7 +1294,7 @@ jobs:
   build-docker-member:
     name: Build Docker Image - Member Service
     runs-on: ubuntu-latest
-    needs: [build-member]
+    needs: [build-member, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.member-changed == 'true'
@@ -1304,9 +1345,12 @@ jobs:
   security-scan-member:
     name: Security Scan - Member Service
     runs-on: ubuntu-latest
-    needs: [build-docker-member]
+    needs: [build-docker-member, detect-changes]
     # 修改：dev 和 master 都执行安全扫描
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.member-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1338,9 +1382,12 @@ jobs:
   update-manifest-member:
     name: Update K8s Manifest - Member Service
     runs-on: ubuntu-latest
-    needs: [security-scan-member]
+    needs: [security-scan-member, detect-changes]
     # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.member-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1471,8 +1518,11 @@ jobs:
   quality-check-cart:
     name: Quality Check - Cart Service
     runs-on: ubuntu-latest
-    needs: [build-cart]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-cart, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.cart-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1501,7 +1551,7 @@ jobs:
   build-docker-cart:
     name: Build Docker Image - Cart Service
     runs-on: ubuntu-latest
-    needs: [build-cart]
+    needs: [build-cart, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.cart-changed == 'true'
@@ -1552,8 +1602,11 @@ jobs:
   security-scan-cart:
     name: Security Scan - Cart Service
     runs-on: ubuntu-latest
-    needs: [build-docker-cart]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-cart, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.cart-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1585,8 +1638,11 @@ jobs:
   update-manifest-cart:
     name: Update K8s Manifest - Cart Service
     runs-on: ubuntu-latest
-    needs: [security-scan-cart]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-cart, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.cart-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1704,8 +1760,11 @@ jobs:
   quality-check-notification:
     name: Quality Check - Notification Service
     runs-on: ubuntu-latest
-    needs: [build-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-notification, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.notification-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1734,7 +1793,7 @@ jobs:
   build-docker-notification:
     name: Build Docker Image - Notification Service
     runs-on: ubuntu-latest
-    needs: [build-notification]
+    needs: [build-notification, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.notification-changed == 'true'
@@ -1782,8 +1841,11 @@ jobs:
   security-scan-notification:
     name: Security Scan - Notification Service
     runs-on: ubuntu-latest
-    needs: [build-docker-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-notification, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.notification-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1815,8 +1877,11 @@ jobs:
   update-manifest-notification:
     name: Update K8s Manifest - Notification Service
     runs-on: ubuntu-latest
-    needs: [security-scan-notification]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-notification, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.notification-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1934,8 +1999,11 @@ jobs:
   quality-check-promotion:
     name: Quality Check - Promotion Service
     runs-on: ubuntu-latest
-    needs: [build-promotion]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-promotion, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.promotion-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -1964,7 +2032,7 @@ jobs:
   build-docker-promotion:
     name: Build Docker Image - Promotion Service
     runs-on: ubuntu-latest
-    needs: [build-promotion]
+    needs: [build-promotion, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.promotion-changed == 'true'
@@ -2012,8 +2080,11 @@ jobs:
   security-scan-promotion:
     name: Security Scan - Promotion Service
     runs-on: ubuntu-latest
-    needs: [build-docker-promotion]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-promotion, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.promotion-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2045,8 +2116,11 @@ jobs:
   update-manifest-promotion:
     name: Update K8s Manifest - Promotion Service
     runs-on: ubuntu-latest
-    needs: [security-scan-promotion]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-promotion, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.promotion-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2166,8 +2240,11 @@ jobs:
   quality-check-search:
     name: Quality Check - Search Service
     runs-on: ubuntu-latest
-    needs: [build-search]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-search, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.search-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2196,7 +2273,7 @@ jobs:
   build-docker-search:
     name: Build Docker Image - Search Service
     runs-on: ubuntu-latest
-    needs: [build-search]
+    needs: [build-search, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.search-changed == 'true'
@@ -2244,8 +2321,11 @@ jobs:
   security-scan-search:
     name: Security Scan - Search Service
     runs-on: ubuntu-latest
-    needs: [build-docker-search]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-search, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.search-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2277,8 +2357,11 @@ jobs:
   update-manifest-search:
     name: Update K8s Manifest - Search Service
     runs-on: ubuntu-latest
-    needs: [security-scan-search]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-search, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.search-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2396,8 +2479,11 @@ jobs:
   quality-check-logistics:
     name: Quality Check - Logistics Service
     runs-on: ubuntu-latest
-    needs: [build-logistics]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-logistics, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.logistics-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2426,7 +2512,7 @@ jobs:
   build-docker-logistics:
     name: Build Docker Image - Logistics Service
     runs-on: ubuntu-latest
-    needs: [build-logistics]
+    needs: [build-logistics, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.logistics-changed == 'true'
@@ -2474,8 +2560,11 @@ jobs:
   security-scan-logistics:
     name: Security Scan - Logistics Service
     runs-on: ubuntu-latest
-    needs: [build-docker-logistics]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-logistics, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.logistics-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2507,8 +2596,11 @@ jobs:
   update-manifest-logistics:
     name: Update K8s Manifest - Logistics Service
     runs-on: ubuntu-latest
-    needs: [security-scan-logistics]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-logistics, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.logistics-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2626,8 +2718,11 @@ jobs:
   quality-check-inventory:
     name: Quality Check - Inventory Service
     runs-on: ubuntu-latest
-    needs: [build-inventory]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-inventory, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.inventory-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2656,7 +2751,7 @@ jobs:
   build-docker-inventory:
     name: Build Docker Image - Inventory Service
     runs-on: ubuntu-latest
-    needs: [build-inventory]
+    needs: [build-inventory, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.inventory-changed == 'true'
@@ -2704,8 +2799,11 @@ jobs:
   security-scan-inventory:
     name: Security Scan - Inventory Service
     runs-on: ubuntu-latest
-    needs: [build-docker-inventory]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-inventory, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.inventory-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2737,8 +2835,11 @@ jobs:
   update-manifest-inventory:
     name: Update K8s Manifest - Inventory Service
     runs-on: ubuntu-latest
-    needs: [security-scan-inventory]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-inventory, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.inventory-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2856,8 +2957,11 @@ jobs:
   quality-check-payment:
     name: Quality Check - Payment Service
     runs-on: ubuntu-latest
-    needs: [build-payment]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-payment, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.payment-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2886,7 +2990,7 @@ jobs:
   build-docker-payment:
     name: Build Docker Image - Payment Service
     runs-on: ubuntu-latest
-    needs: [build-payment]
+    needs: [build-payment, detect-changes]
     if: |
       github.event_name == 'push' && 
       needs.detect-changes.outputs.payment-changed == 'true'
@@ -2934,8 +3038,11 @@ jobs:
   security-scan-payment:
     name: Security Scan - Payment Service
     runs-on: ubuntu-latest
-    needs: [build-docker-payment]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [build-docker-payment, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.payment-changed == 'true'
     
     steps:
       - name: Checkout code
@@ -2967,8 +3074,11 @@ jobs:
   update-manifest-payment:
     name: Update K8s Manifest - Payment Service
     runs-on: ubuntu-latest
-    needs: [security-scan-payment]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    needs: [security-scan-payment, detect-changes]
+    if: |
+      github.event_name == 'push' &&
+      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') &&
+      needs.detect-changes.outputs.payment-changed == 'true'
     
     steps:
       - name: Checkout code
