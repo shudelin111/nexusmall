@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component;
 public class GatewayJwtConfig {
 
     /**
-     * RSA 公钥 (PEM 格式)
+     * RSA公钥 (PEM 格式)
      * 用于验证 JWT Token 签名
      */
     private String publicKey;
