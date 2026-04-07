@@ -5,6 +5,8 @@ import com.nexusmall.common.constant.LogMessageConstants;
 import com.nexusmall.common.constant.ResponseMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
+import com.nexusmall.common.message.ProductIndexSyncEvent;
+import com.nexusmall.common.message.ProductIndexSyncEventType;
 import com.nexusmall.common.util.RedisUtils;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.common.vo.UserBehaviorVO;
@@ -38,6 +40,7 @@ import java.util.Map;
 public class ProductController {
 
     private static final Logger log = LoggerFactory.getLogger(ProductController.class);
+    private static final String PRODUCT_INDEX_SYNC_TOPIC = "PRODUCT_INDEX_SYNC_TOPIC";
 
     @Autowired
     private ProductService productService;
@@ -152,6 +155,7 @@ public class ProductController {
         log.info("新增商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
         int result = productService.save(productVO);
         if (result > 0) {
+            publishIndexSyncEvent(productVO.getSkuId(), ProductIndexSyncEventType.UPSERT);
             log.info(LogMessageConstants.Product.PRODUCT_ADDED, result);
             return Result.success(ResponseMessageConstants.Product.ADD_SUCCESS, result);
         } else {
@@ -169,6 +173,7 @@ public class ProductController {
         productVO.setSkuId(skuId);
         int result = productService.updateById(productVO);
         if (result > 0) {
+            publishIndexSyncEvent(skuId, ProductIndexSyncEventType.UPSERT);
             log.info(LogMessageConstants.Product.PRODUCT_UPDATED, result);
             return Result.success(ResponseMessageConstants.Product.UPDATE_SUCCESS, result);
         } else {
@@ -185,6 +190,7 @@ public class ProductController {
         log.info("删除商品，skuId: {}", skuId);
         int result = productService.deleteById(skuId);
         if (result > 0) {
+            publishIndexSyncEvent(skuId, ProductIndexSyncEventType.REMOVE);
             log.info(LogMessageConstants.Product.PRODUCT_DELETED, skuId);
             return Result.success(ResponseMessageConstants.Product.DELETE_SUCCESS, result);
         } else {
@@ -251,6 +257,7 @@ public class ProductController {
         log.info("商品上架，skuId: {}", skuId);
         boolean result = productService.putOnSale(skuId);
         if (result) {
+            publishIndexSyncEvent(skuId, ProductIndexSyncEventType.UPSERT);
             log.info(LogMessageConstants.Product.PRODUCT_PUT_ON_SALE, skuId);
             return Result.success(ResponseMessageConstants.Product.PUT_ON_SALE_SUCCESS, true);
         } else {
@@ -267,6 +274,7 @@ public class ProductController {
         log.info("商品下架，skuId: {}", skuId);
         boolean result = productService.putOffSale(skuId);
         if (result) {
+            publishIndexSyncEvent(skuId, ProductIndexSyncEventType.REMOVE);
             log.info(LogMessageConstants.Product.PRODUCT_PUT_OFF_SALE, skuId);
             return Result.success(ResponseMessageConstants.Product.PUT_OFF_SALE_SUCCESS, true);
         } else {
@@ -304,6 +312,19 @@ public class ProductController {
         } else {
             log.error("批量增加库存失败");
             return Result.failure(CommonResultCode.SYSTEM_ERROR);
+        }
+    }
+    private void publishIndexSyncEvent(Long productId, ProductIndexSyncEventType eventType) {
+        if (productId == null) {
+            log.warn("Skip product index sync event because productId is null, eventType={}", eventType);
+            return;
+        }
+        try {
+            ProductIndexSyncEvent event = new ProductIndexSyncEvent(productId, eventType, System.currentTimeMillis());
+            rocketMQTemplate.convertAndSend(PRODUCT_INDEX_SYNC_TOPIC, event);
+            log.info("Published product index sync event, productId={}, eventType={}", productId, eventType);
+        } catch (Exception ex) {
+            log.error("Failed to publish product index sync event, productId={}, eventType={}", productId, eventType, ex);
         }
     }
 }

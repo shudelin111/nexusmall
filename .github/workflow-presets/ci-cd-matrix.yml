@@ -1,0 +1,163 @@
+name: NexusMall CI/CD
+
+on:
+  push:
+    branches: [master, dev]
+    tags: ['v*']
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '*.log'
+      - '*.ps1'
+      - '*.bat'
+      - '*.py'
+      - '*.txt'
+      - '*.sh'
+  pull_request:
+    branches: [master, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  security-events: write
+  actions: read
+
+jobs:
+  # Detect which services are affected by this change set.
+  detect-changes:
+    name: Detect Changed Modules
+    runs-on: ubuntu-latest
+    outputs:
+      order-changed: ${{ steps.filter.outputs.order }}
+      product-changed: ${{ steps.filter.outputs.product }}
+      auth-changed: ${{ steps.filter.outputs.auth }}
+      gateway-changed: ${{ steps.filter.outputs.gateway }}
+      member-changed: ${{ steps.filter.outputs.member }}
+      payment-changed: ${{ steps.filter.outputs.payment }}
+      cart-changed: ${{ steps.filter.outputs.cart }}
+      notification-changed: ${{ steps.filter.outputs.notification }}
+      promotion-changed: ${{ steps.filter.outputs.promotion }}
+      search-changed: ${{ steps.filter.outputs.search }}
+      logistics-changed: ${{ steps.filter.outputs.logistics }}
+      inventory-changed: ${{ steps.filter.outputs.inventory }}
+      service-matrix: ${{ steps.build-matrix.outputs.service-matrix }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed modules
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event_name == 'push' && github.event.before || github.ref }}
+          filters: |
+            order:
+              - 'nexusmall-order/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            product:
+              - 'nexusmall-product/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            auth:
+              - 'nexusmall-auth/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            gateway:
+              - 'nexusmall-gateway/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            member:
+              - 'nexusmall-member/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            payment:
+              - 'nexusmall-payment/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            cart:
+              - 'nexusmall-cart/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            notification:
+              - 'nexusmall-notification/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            promotion:
+              - 'nexusmall-promotion/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            search:
+              - 'nexusmall-search/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            logistics:
+              - 'nexusmall-logistics/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            inventory:
+              - 'nexusmall-inventory/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+
+      - name: Build service matrix
+        id: build-matrix
+        shell: pwsh
+        run: |
+          $services = @(
+            @{ key = 'product'; changed = '${{ steps.filter.outputs.product }}'; service_name = 'Product Service'; module_dir = 'nexusmall-product'; image_name = 'nexusmall-product'; deployment_file = 'deploy/product-service/deployment.yaml' },
+            @{ key = 'order'; changed = '${{ steps.filter.outputs.order }}'; service_name = 'Order Service'; module_dir = 'nexusmall-order'; image_name = 'nexusmall-order'; deployment_file = 'deploy/order-service/deployment.yaml' },
+            @{ key = 'gateway'; changed = '${{ steps.filter.outputs.gateway }}'; service_name = 'Gateway Service'; module_dir = 'nexusmall-gateway'; image_name = 'nexusmall-gateway'; deployment_file = 'deploy/gateway-service/deployment.yaml' },
+            @{ key = 'auth'; changed = '${{ steps.filter.outputs.auth }}'; service_name = 'Auth Service'; module_dir = 'nexusmall-auth'; image_name = 'nexusmall-auth'; deployment_file = 'deploy/auth-service/deployment.yaml' },
+            @{ key = 'member'; changed = '${{ steps.filter.outputs.member }}'; service_name = 'Member Service'; module_dir = 'nexusmall-member'; image_name = 'nexusmall-member'; deployment_file = 'deploy/member-service/deployment.yaml' },
+            @{ key = 'cart'; changed = '${{ steps.filter.outputs.cart }}'; service_name = 'Cart Service'; module_dir = 'nexusmall-cart'; image_name = 'nexusmall-cart'; deployment_file = 'deploy/cart-service/deployment.yaml' },
+            @{ key = 'notification'; changed = '${{ steps.filter.outputs.notification }}'; service_name = 'Notification Service'; module_dir = 'nexusmall-notification'; image_name = 'nexusmall-notification'; deployment_file = 'deploy/notification-service/deployment.yaml' },
+            @{ key = 'promotion'; changed = '${{ steps.filter.outputs.promotion }}'; service_name = 'Promotion Service'; module_dir = 'nexusmall-promotion'; image_name = 'nexusmall-promotion'; deployment_file = 'deploy/promotion-service/deployment.yaml' },
+            @{ key = 'search'; changed = '${{ steps.filter.outputs.search }}'; service_name = 'Search Service'; module_dir = 'nexusmall-search'; image_name = 'nexusmall-search'; deployment_file = 'deploy/search-service/deployment.yaml' },
+            @{ key = 'logistics'; changed = '${{ steps.filter.outputs.logistics }}'; service_name = 'Logistics Service'; module_dir = 'nexusmall-logistics'; image_name = 'nexusmall-logistics'; deployment_file = 'deploy/logistics-service/deployment.yaml' },
+            @{ key = 'inventory'; changed = '${{ steps.filter.outputs.inventory }}'; service_name = 'Inventory Service'; module_dir = 'nexusmall-inventory'; image_name = 'nexusmall-inventory'; deployment_file = 'deploy/inventory-service/deployment.yaml' },
+            @{ key = 'payment'; changed = '${{ steps.filter.outputs.payment }}'; service_name = 'Payment Service'; module_dir = 'nexusmall-payment'; image_name = 'nexusmall-payment'; deployment_file = 'deploy/payment-service/deployment.yaml' }
+          )
+
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+            $selected = $services
+          } else {
+            $selected = $services | Where-Object { $_.changed -eq 'true' }
+          }
+
+          $matrix = @{ include = @($selected) } | ConvertTo-Json -Compress -Depth 4
+          "service-matrix=$matrix" >> $env:GITHUB_OUTPUT
+
+  # Fan out the impacted services through one reusable pipeline definition.
+  service-pipeline:
+    needs: detect-changes
+    if: ${{ needs.detect-changes.outputs.service-matrix != '{"include":[]}' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.detect-changes.outputs.service-matrix) }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: ${{ matrix.service_name }}
+      module_dir: ${{ matrix.module_dir }}
+      image_name: ${{ matrix.image_name }}
+      deployment_file: ${{ matrix.deployment_file }}
+    secrets: inherit

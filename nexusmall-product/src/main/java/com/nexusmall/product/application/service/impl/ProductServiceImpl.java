@@ -64,7 +64,9 @@ public class ProductServiceImpl implements ProductService {
         product.setUpdateTime(LocalDateTime.now());
         product.setVersion(0);
         
-        return productMapper.insert(product);
+        int rows = productMapper.insert(product);
+        productVO.setSkuId(product.getSkuId());
+        return rows;
     }
 
     @Override

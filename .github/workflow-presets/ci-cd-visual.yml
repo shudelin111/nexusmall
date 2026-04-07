@@ -1,0 +1,250 @@
+name: NexusMall CI/CD
+
+on:
+  push:
+    branches: [master, dev]
+    tags: ['v*']
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.gitignore'
+      - '*.log'
+      - '*.ps1'
+      - '*.bat'
+      - '*.py'
+      - '*.txt'
+      - '*.sh'
+  pull_request:
+    branches: [master, dev]
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  security-events: write
+  actions: read
+
+jobs:
+  detect-changes:
+    name: Detect Changed Modules
+    runs-on: ubuntu-latest
+    outputs:
+      order-changed: ${{ steps.filter.outputs.order }}
+      product-changed: ${{ steps.filter.outputs.product }}
+      auth-changed: ${{ steps.filter.outputs.auth }}
+      gateway-changed: ${{ steps.filter.outputs.gateway }}
+      member-changed: ${{ steps.filter.outputs.member }}
+      payment-changed: ${{ steps.filter.outputs.payment }}
+      cart-changed: ${{ steps.filter.outputs.cart }}
+      notification-changed: ${{ steps.filter.outputs.notification }}
+      promotion-changed: ${{ steps.filter.outputs.promotion }}
+      search-changed: ${{ steps.filter.outputs.search }}
+      logistics-changed: ${{ steps.filter.outputs.logistics }}
+      inventory-changed: ${{ steps.filter.outputs.inventory }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed modules
+        id: filter
+        uses: dorny/paths-filter@v3
+        with:
+          base: ${{ github.event_name == 'push' && github.event.before || github.ref }}
+          filters: |
+            order:
+              - 'nexusmall-order/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            product:
+              - 'nexusmall-product/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            auth:
+              - 'nexusmall-auth/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            gateway:
+              - 'nexusmall-gateway/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            member:
+              - 'nexusmall-member/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            payment:
+              - 'nexusmall-payment/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            cart:
+              - 'nexusmall-cart/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            notification:
+              - 'nexusmall-notification/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            promotion:
+              - 'nexusmall-promotion/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            search:
+              - 'nexusmall-search/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            logistics:
+              - 'nexusmall-logistics/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+            inventory:
+              - 'nexusmall-inventory/**'
+              - 'nexusmall-common/**'
+              - 'pom.xml'
+              - 'nexusmall-common/pom.xml'
+
+  product:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.product-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Product Service
+      module_dir: nexusmall-product
+      image_name: nexusmall-product
+      deployment_file: deploy/product-service/deployment.yaml
+    secrets: inherit
+
+  order:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.order-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Order Service
+      module_dir: nexusmall-order
+      image_name: nexusmall-order
+      deployment_file: deploy/order-service/deployment.yaml
+    secrets: inherit
+
+  gateway:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.gateway-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Gateway Service
+      module_dir: nexusmall-gateway
+      image_name: nexusmall-gateway
+      deployment_file: deploy/gateway-service/deployment.yaml
+    secrets: inherit
+
+  auth:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.auth-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Auth Service
+      module_dir: nexusmall-auth
+      image_name: nexusmall-auth
+      deployment_file: deploy/auth-service/deployment.yaml
+    secrets: inherit
+
+  member:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.member-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Member Service
+      module_dir: nexusmall-member
+      image_name: nexusmall-member
+      deployment_file: deploy/member-service/deployment.yaml
+    secrets: inherit
+
+  cart:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.cart-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Cart Service
+      module_dir: nexusmall-cart
+      image_name: nexusmall-cart
+      deployment_file: deploy/cart-service/deployment.yaml
+    secrets: inherit
+
+  notification:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.notification-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Notification Service
+      module_dir: nexusmall-notification
+      image_name: nexusmall-notification
+      deployment_file: deploy/notification-service/deployment.yaml
+    secrets: inherit
+
+  promotion:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.promotion-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Promotion Service
+      module_dir: nexusmall-promotion
+      image_name: nexusmall-promotion
+      deployment_file: deploy/promotion-service/deployment.yaml
+    secrets: inherit
+
+  search:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.search-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Search Service
+      module_dir: nexusmall-search
+      image_name: nexusmall-search
+      deployment_file: deploy/search-service/deployment.yaml
+    secrets: inherit
+
+  logistics:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.logistics-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Logistics Service
+      module_dir: nexusmall-logistics
+      image_name: nexusmall-logistics
+      deployment_file: deploy/logistics-service/deployment.yaml
+    secrets: inherit
+
+  inventory:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.inventory-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Inventory Service
+      module_dir: nexusmall-inventory
+      image_name: nexusmall-inventory
+      deployment_file: deploy/inventory-service/deployment.yaml
+    secrets: inherit
+
+  payment:
+    needs: detect-changes
+    if: ${{ github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.payment-changed == 'true' }}
+    uses: ./.github/workflows/reusable-service-pipeline.yml
+    with:
+      service_name: Payment Service
+      module_dir: nexusmall-payment
+      image_name: nexusmall-payment
+      deployment_file: deploy/payment-service/deployment.yaml
+    secrets: inherit

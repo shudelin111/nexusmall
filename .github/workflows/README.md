@@ -3,9 +3,13 @@
 本目录当前采用两层结构：
 
 - `ci-cd.yml`
-  入口编排器。负责触发、并发取消、变更检测，以及按服务矩阵调用 reusable workflow。
+  当前激活的入口编排器。默认使用矩阵模式。
 - `reusable-service-pipeline.yml`
   可复用的单服务流水线模板。负责构建、质量检查、镜像构建、安全扫描和 Manifest 更新。
+- `../workflow-presets/ci-cd-visual.yml`
+  视觉优先版主流程模板。每个服务一个独立 job，GitHub UI 更直观。
+- `../workflow-presets/ci-cd-matrix.yml`
+  矩阵版主流程模板。便于随时切回当前实现。
 
 ## 设计目标
 
@@ -32,6 +36,38 @@
 3. `build-docker`
 4. `security-scan`
 5. `update-manifest`
+
+## 两种主流程模式
+
+仓库里保留了两种主流程写法，但默认只激活一种，避免同一次 push 触发两套 CI。
+
+- 矩阵模式
+  当前文件：`workflows/ci-cd.yml`
+  优点：主流程短，维护成本低。
+  缺点：GitHub Actions 图形界面一般。
+- 视觉模式
+  备用文件：`workflow-presets/ci-cd-visual.yml`
+  优点：每个服务单独展示，GitHub Actions 图更容易看。
+  缺点：主流程更长。
+
+## 如何切换模式
+
+只保留一个激活版在 `.github/workflows/ci-cd.yml`。
+
+从矩阵模式切到视觉模式：
+
+1. 用 `workflow-presets/ci-cd-visual.yml` 的内容覆盖 `workflows/ci-cd.yml`
+2. 提交并推送
+
+从视觉模式切回矩阵模式：
+
+1. 用 `workflow-presets/ci-cd-matrix.yml` 的内容覆盖 `workflows/ci-cd.yml`
+2. 提交并推送
+
+建议：
+
+- 追求维护性时，用矩阵模式
+- 追求 GitHub 页面可读性时，用视觉模式
 
 ## 如何新增一个服务
 

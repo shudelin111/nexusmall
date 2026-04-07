@@ -1,4 +1,4 @@
-package com.nexusmall.search.exception;
+package com.nexusmall.search.interfaces.exception;
 
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
