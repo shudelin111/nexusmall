@@ -94,18 +94,21 @@ jobs:
         uses: dorny/paths-filter@v3
         id: filter
         with:
-          # 忽略 CI/CD 配置文件变更，避免触发构建
-          paths-ignore: |
-            .github/workflows/**
-            '**.md'
-            'docs/**'
-            '*.log'
-            '*.ps1'
-            '*.bat'
-            '*.py'
-            '*.txt'
-            '*.sh'
+          # 设置对比基准为上一次提交，避免对比整个分支差异
+          base: 'HEAD~1'
+          # 过滤规则：根据文件变更路径判断哪些模块需要构建
           filters: |
+            # 忽略临时文件，避免触发任何模块构建
+            ignore:
+              - '*.log'
+              - '*.ps1'
+              - '*.bat'
+              - '*.py'
+              - '*.txt'
+              - '*.sh'
+              - '.github/workflows/**'
+              - '**.md'
+              - 'docs/**'
             order: 
               - 'nexusmall-order/**'
               - 'nexusmall-common/**'  # common 变更也会影响 order
