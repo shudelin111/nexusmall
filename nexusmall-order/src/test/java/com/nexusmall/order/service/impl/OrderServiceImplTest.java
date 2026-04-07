@@ -10,7 +10,7 @@ import com.nexusmall.order.domain.entity.Order;
 import com.nexusmall.order.domain.entity.OrderItem;
 import com.nexusmall.order.interfaces.feign.ProductFeignService;
 import com.nexusmall.order.application.service.RocketMQProducer;
-import com.nexusmall.order.vo.OrderCreateRequest;
+import com.nexusmall.order.interfaces.dto.OrderCreateRequest;
 import io.seata.core.context.RootContext;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.junit.jupiter.api.BeforeEach;

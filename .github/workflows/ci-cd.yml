@@ -1,4 +1,4 @@
-# =====================================================
+﻿# =====================================================
 # GitHub Actions CI/CD Pipeline - NexusMall Multi-Module
 # =====================================================
 # GitOps 工作流程:
@@ -302,10 +302,8 @@ jobs:
     name: Security Scan - Product Service
     runs-on: ubuntu-latest
     needs: [build-docker-product]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.product-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都执行安全扫描，但扫描严格程度不同
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -338,10 +336,8 @@ jobs:
     name: Update K8s Manifest - Product Service
     runs-on: ubuntu-latest
     needs: [security-scan-product]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.product-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -378,7 +374,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/product-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/product-service/deployment.yaml
               # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
@@ -389,7 +385,7 @@ jobs:
               
               # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -399,12 +395,12 @@ jobs:
                 sleep 10  # 等待其他模块推送完成
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
           
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Order 模块 ==========
@@ -549,10 +545,8 @@ jobs:
     name: Security Scan - Order Service
     runs-on: ubuntu-latest
     needs: [build-docker-order]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.order-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -585,10 +579,8 @@ jobs:
     name: Update K8s Manifest - Order Service
     runs-on: ubuntu-latest
     needs: [security-scan-order]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.order-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -625,7 +617,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/order-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/order-service/deployment.yaml
               # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
@@ -636,7 +628,7 @@ jobs:
               
               # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -646,12 +638,12 @@ jobs:
                 sleep 10  # 等待其他模块推送完成
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
           
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Gateway 模块 ==========
@@ -798,10 +790,8 @@ jobs:
     name: Security Scan - Gateway Service
     runs-on: ubuntu-latest
     needs: [build-docker-gateway]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.gateway-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -834,10 +824,8 @@ jobs:
     name: Update K8s Manifest - Gateway Service
     runs-on: ubuntu-latest
     needs: [security-scan-gateway]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.gateway-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -874,7 +862,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/gateway-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/gateway-service/deployment.yaml
               # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
@@ -885,7 +873,7 @@ jobs:
               
               # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -895,12 +883,12 @@ jobs:
                 sleep 10  # 等待其他模块推送完成
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
           
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Auth 模块 ==========
@@ -1047,10 +1035,8 @@ jobs:
     name: Security Scan - Auth Service
     runs-on: ubuntu-latest
     needs: [build-docker-auth]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.auth-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1083,10 +1069,8 @@ jobs:
     name: Update K8s Manifest - Auth Service
     runs-on: ubuntu-latest
     needs: [security-scan-auth]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.auth-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1123,7 +1107,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/auth-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/auth-service/deployment.yaml
               # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
@@ -1134,7 +1118,7 @@ jobs:
               
               # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -1144,12 +1128,12 @@ jobs:
                 sleep 10  # 等待其他模块推送完成
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
           
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Member 模块 ==========
@@ -1294,10 +1278,8 @@ jobs:
     name: Security Scan - Member Service
     runs-on: ubuntu-latest
     needs: [build-docker-member]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.member-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都执行安全扫描
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1330,10 +1312,8 @@ jobs:
     name: Update K8s Manifest - Member Service
     runs-on: ubuntu-latest
     needs: [security-scan-member]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.member-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    # 修改：dev 和 master 都更新 Manifest（GitOps 标准实践）
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1370,7 +1350,7 @@ jobs:
           
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/member-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/member-service/deployment.yaml
               # 根据分支使用不同的提交信息
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
@@ -1381,7 +1361,7 @@ jobs:
               
               # 尝试推送，如果失败则重试
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -1391,12 +1371,12 @@ jobs:
                 sleep 10  # 等待其他模块推送完成
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
           
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 6: 生产环境部署（由 ArgoCD 自动完成）==========
@@ -1544,10 +1524,7 @@ jobs:
     name: Security Scan - Cart Service
     runs-on: ubuntu-latest
     needs: [build-docker-cart]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.cart-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1580,10 +1557,7 @@ jobs:
     name: Update K8s Manifest - Cart Service
     runs-on: ubuntu-latest
     needs: [security-scan-cart]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.cart-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1612,7 +1586,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/cart-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/cart-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update cart image to sha-${{ github.sha }} [skip ci]"
@@ -1620,7 +1594,7 @@ jobs:
                 git commit -m "chore(deploy): update cart image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -1630,11 +1604,11 @@ jobs:
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Notification 模块 ==========
@@ -1771,10 +1745,7 @@ jobs:
     name: Security Scan - Notification Service
     runs-on: ubuntu-latest
     needs: [build-docker-notification]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.notification-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1807,10 +1778,7 @@ jobs:
     name: Update K8s Manifest - Notification Service
     runs-on: ubuntu-latest
     needs: [security-scan-notification]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.notification-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -1839,7 +1807,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/notification-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/notification-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update notification image to sha-${{ github.sha }} [skip ci]"
@@ -1847,7 +1815,7 @@ jobs:
                 git commit -m "chore(deploy): update notification image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -1857,11 +1825,11 @@ jobs:
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
   # ========== 阶段 1: 编译与测试 - Promotion 模块 ==========
@@ -1998,10 +1966,7 @@ jobs:
     name: Security Scan - Promotion Service
     runs-on: ubuntu-latest
     needs: [build-docker-promotion]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.promotion-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2034,10 +1999,7 @@ jobs:
     name: Update K8s Manifest - Promotion Service
     runs-on: ubuntu-latest
     needs: [security-scan-promotion]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.promotion-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2066,7 +2028,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/promotion-service/deployment.yaml; then
-              echo "检测到变更，提交..."
+              echo "Changes detected, committing....."
               git add deploy/promotion-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update promotion image to sha-${{ github.sha }} [skip ci]"
@@ -2074,7 +2036,7 @@ jobs:
                 git commit -m "chore(deploy): update promotion image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "✅ Manifest 更新成功！"
+                echo "✅ SUCCESS: Manifest updated!！"
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
@@ -2084,16 +2046,16 @@ jobs:
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提交"
+              echo "WARNING: No changes detected, skipping commit交"
               exit 0
             fi
           done
-          echo "❌ 重试 $MAX_RETRIES 次后仍然失败，请检查日志"
+          echo "❌ ERROR: Failed after $MAX_RETRIES retries, please check logs志"
           exit 1
 
 
 
-  # ========== 阶段 1: 编译与测�?- Search 模块 ==========
+  # ========== 阶段 1: 编译与测?- Search 模块 ==========
   build-search:
     name: Build & Test - Search Service
     runs-on: ubuntu-latest
@@ -2127,7 +2089,7 @@ jobs:
       - name: Run Search Module Tests with Coverage
         if: false
         run: |
-          echo "====== 单元测试阶段 (�?JaCoCo 覆盖率检�? ======"
+          echo "====== 单元测试阶段 (?JaCoCo 覆盖率检? ======"
           if [ -d "nexusmall-search/src/test/java" ] && [ "$(find nexusmall-search/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
             mvn clean test jacoco:check -f nexusmall-search/pom.xml -B
           else
@@ -2144,7 +2106,7 @@ jobs:
             nexusmall-search/target/site/jacoco/
           retention-days: 30
 
-  # ========== 阶段 2: 代码质量检�?- Search 模块 ==========
+  # ========== 阶段 2: 代码质量检?- Search 模块 ==========
   quality-check-search:
     name: Quality Check - Search Service
     runs-on: ubuntu-latest
@@ -2227,10 +2189,7 @@ jobs:
     name: Security Scan - Search Service
     runs-on: ubuntu-latest
     needs: [build-docker-search]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.search-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2263,10 +2222,7 @@ jobs:
     name: Update K8s Manifest - Search Service
     runs-on: ubuntu-latest
     needs: [security-scan-search]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.search-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2295,7 +2251,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/search-service/deployment.yaml; then
-              echo "检测到变更，提�?.."
+              echo "Changes detected, committing...."
               git add deploy/search-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update search image to sha-${{ github.sha }} [skip ci]"
@@ -2303,24 +2259,24 @@ jobs:
                 git commit -m "chore(deploy): update search image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "�?Manifest 更新成功�?
+                echo "?SUCCESS: Manifest updated!?
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重�?$RETRY_COUNT/$MAX_RETRIES..."
+                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
                 git fetch origin ${{ github.ref_name }}
                 git reset --hard origin/${{ github.ref_name }}
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提�?
+              echo "WARNING: No changes detected, skipping commit?
               exit 0
             fi
           done
-          echo "�?重试 $MAX_RETRIES 次后仍然失败，请检查日�?
+          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
           exit 1
 
-  # ========== 阶段 1: 编译与测�?- Logistics 模块 ==========
+  # ========== 阶段 1: 编译与测?- Logistics 模块 ==========
   build-logistics:
     name: Build & Test - Logistics Service
     runs-on: ubuntu-latest
@@ -2354,7 +2310,7 @@ jobs:
       - name: Run Logistics Module Tests with Coverage
         if: false
         run: |
-          echo "====== 单元测试阶段 (�?JaCoCo 覆盖率检�? ======"
+          echo "====== 单元测试阶段 (?JaCoCo 覆盖率检? ======"
           if [ -d "nexusmall-logistics/src/test/java" ] && [ "$(find nexusmall-logistics/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
             mvn clean test jacoco:check -f nexusmall-logistics/pom.xml -B
           else
@@ -2371,7 +2327,7 @@ jobs:
             nexusmall-logistics/target/site/jacoco/
           retention-days: 30
 
-  # ========== 阶段 2: 代码质量检�?- Logistics 模块 ==========
+  # ========== 阶段 2: 代码质量检?- Logistics 模块 ==========
   quality-check-logistics:
     name: Quality Check - Logistics Service
     runs-on: ubuntu-latest
@@ -2454,10 +2410,7 @@ jobs:
     name: Security Scan - Logistics Service
     runs-on: ubuntu-latest
     needs: [build-docker-logistics]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.logistics-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2490,10 +2443,7 @@ jobs:
     name: Update K8s Manifest - Logistics Service
     runs-on: ubuntu-latest
     needs: [security-scan-logistics]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.logistics-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2522,7 +2472,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/logistics-service/deployment.yaml; then
-              echo "检测到变更，提�?.."
+              echo "Changes detected, committing...."
               git add deploy/logistics-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update logistics image to sha-${{ github.sha }} [skip ci]"
@@ -2530,24 +2480,24 @@ jobs:
                 git commit -m "chore(deploy): update logistics image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "�?Manifest 更新成功�?
+                echo "?SUCCESS: Manifest updated!?
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重�?$RETRY_COUNT/$MAX_RETRIES..."
+                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
                 git fetch origin ${{ github.ref_name }}
                 git reset --hard origin/${{ github.ref_name }}
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提�?
+              echo "WARNING: No changes detected, skipping commit?
               exit 0
             fi
           done
-          echo "�?重试 $MAX_RETRIES 次后仍然失败，请检查日�?
+          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
           exit 1
 
-  # ========== 阶段 1: 编译与测�?- Inventory 模块 ==========
+  # ========== 阶段 1: 编译与测?- Inventory 模块 ==========
   build-inventory:
     name: Build & Test - Inventory Service
     runs-on: ubuntu-latest
@@ -2581,7 +2531,7 @@ jobs:
       - name: Run Inventory Module Tests with Coverage
         if: false
         run: |
-          echo "====== 单元测试阶段 (�?JaCoCo 覆盖率检�? ======"
+          echo "====== 单元测试阶段 (?JaCoCo 覆盖率检? ======"
           if [ -d "nexusmall-inventory/src/test/java" ] && [ "$(find nexusmall-inventory/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
             mvn clean test jacoco:check -f nexusmall-inventory/pom.xml -B
           else
@@ -2598,7 +2548,7 @@ jobs:
             nexusmall-inventory/target/site/jacoco/
           retention-days: 30
 
-  # ========== 阶段 2: 代码质量检�?- Inventory 模块 ==========
+  # ========== 阶段 2: 代码质量检?- Inventory 模块 ==========
   quality-check-inventory:
     name: Quality Check - Inventory Service
     runs-on: ubuntu-latest
@@ -2681,10 +2631,7 @@ jobs:
     name: Security Scan - Inventory Service
     runs-on: ubuntu-latest
     needs: [build-docker-inventory]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.inventory-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2717,10 +2664,7 @@ jobs:
     name: Update K8s Manifest - Inventory Service
     runs-on: ubuntu-latest
     needs: [security-scan-inventory]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.inventory-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2749,7 +2693,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/inventory-service/deployment.yaml; then
-              echo "检测到变更，提�?.."
+              echo "Changes detected, committing...."
               git add deploy/inventory-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update inventory image to sha-${{ github.sha }} [skip ci]"
@@ -2757,24 +2701,24 @@ jobs:
                 git commit -m "chore(deploy): update inventory image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "�?Manifest 更新成功�?
+                echo "?SUCCESS: Manifest updated!?
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重�?$RETRY_COUNT/$MAX_RETRIES..."
+                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
                 git fetch origin ${{ github.ref_name }}
                 git reset --hard origin/${{ github.ref_name }}
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提�?
+              echo "WARNING: No changes detected, skipping commit?
               exit 0
             fi
           done
-          echo "�?重试 $MAX_RETRIES 次后仍然失败，请检查日�?
+          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
           exit 1
 
-  # ========== 阶段 1: 编译与测�?- Payment 模块 ==========
+  # ========== 阶段 1: 编译与测?- Payment 模块 ==========
   build-payment:
     name: Build & Test - Payment Service
     runs-on: ubuntu-latest
@@ -2808,7 +2752,7 @@ jobs:
       - name: Run Payment Module Tests with Coverage
         if: false
         run: |
-          echo "====== 单元测试阶段 (�?JaCoCo 覆盖率检�? ======"
+          echo "====== 单元测试阶段 (?JaCoCo 覆盖率检? ======"
           if [ -d "nexusmall-payment/src/test/java" ] && [ "$(find nexusmall-payment/src/test/java -name '*Test.java' | wc -l)" -gt 0 ]; then
             mvn clean test jacoco:check -f nexusmall-payment/pom.xml -B
           else
@@ -2825,7 +2769,7 @@ jobs:
             nexusmall-payment/target/site/jacoco/
           retention-days: 30
 
-  # ========== 阶段 2: 代码质量检�?- Payment 模块 ==========
+  # ========== 阶段 2: 代码质量检?- Payment 模块 ==========
   quality-check-payment:
     name: Quality Check - Payment Service
     runs-on: ubuntu-latest
@@ -2908,10 +2852,7 @@ jobs:
     name: Security Scan - Payment Service
     runs-on: ubuntu-latest
     needs: [build-docker-payment]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.payment-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2944,10 +2885,7 @@ jobs:
     name: Update K8s Manifest - Payment Service
     runs-on: ubuntu-latest
     needs: [security-scan-payment]
-    if: |
-      github.event_name == 'push' && 
-      needs.detect-changes.outputs.payment-changed == 'true' &&
-      (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev')
     
     steps:
       - name: Checkout code
@@ -2976,7 +2914,7 @@ jobs:
           RETRY_COUNT=0
           while [ $RETRY_COUNT -lt $MAX_RETRIES ]; do
             if ! git diff --quiet deploy/payment-service/deployment.yaml; then
-              echo "检测到变更，提�?.."
+              echo "Changes detected, committing...."
               git add deploy/payment-service/deployment.yaml
               if [ "${{ github.ref }}" == "refs/heads/master" ]; then
                 git commit -m "chore(deploy): update payment image to sha-${{ github.sha }} [skip ci]"
@@ -2984,19 +2922,19 @@ jobs:
                 git commit -m "chore(deploy): update payment image to latest [skip ci]"
               fi
               if git push origin ${{ github.ref_name }}; then
-                echo "�?Manifest 更新成功�?
+                echo "?SUCCESS: Manifest updated!?
                 exit 0
               else
                 RETRY_COUNT=$((RETRY_COUNT + 1))
-                echo "⚠️ 推送失败（可能与其他模块冲突），重�?$RETRY_COUNT/$MAX_RETRIES..."
+                echo "⚠️ 推送失败（可能与其他模块冲突），重?$RETRY_COUNT/$MAX_RETRIES..."
                 git fetch origin ${{ github.ref_name }}
                 git reset --hard origin/${{ github.ref_name }}
                 sleep 10
               fi
             else
-              echo "⚠️ 没有检测到变更，跳过提�?
+              echo "WARNING: No changes detected, skipping commit?
               exit 0
             fi
           done
-          echo "�?重试 $MAX_RETRIES 次后仍然失败，请检查日�?
+          echo "?ERROR: Failed after $MAX_RETRIES retries, please check logs?
           exit 1
