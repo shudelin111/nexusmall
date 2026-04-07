@@ -76,12 +76,19 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # 只获取最近2次提交，避免检测整个分支历史
       
       # 使用 paths-filter 检测变更（业界标准工具）
       - name: Detect changed modules
         uses: dorny/paths-filter@v3
         id: filter
         with:
+          # 忽略 CI/CD 配置文件变更，避免触发构建
+          paths-ignore: |
+            .github/workflows/**
+            '**.md'
+            'docs/**'
           filters: |
             order: 
               - 'nexusmall-order/**'
