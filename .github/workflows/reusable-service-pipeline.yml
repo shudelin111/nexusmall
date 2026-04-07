@@ -34,8 +34,7 @@ on:
         required: true
 
 permissions:
-  contents: write
-  security-events: write
+  contents: read
   actions: read
 
 env:
@@ -48,6 +47,8 @@ jobs:
   build:
     name: Build & Test - ${{ inputs.service_name }}
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -61,13 +62,11 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Install parent and common modules
+      - name: Compile module with dependencies
         run: |
-          mvn clean install -N -B
-          mvn clean install -f nexusmall-common/pom.xml -DskipTests -B
-
-      - name: Compile module
-        run: mvn clean compile -f ${{ inputs.module_dir }}/pom.xml -B
+          # 通过 -pl + -am 让 Maven 自动解析当前模块依赖闭包，
+          # 避免只安装 common 时遗漏其他内部模块。
+          mvn -pl ${{ inputs.module_dir }} -am clean compile -DskipTests -B
 
       - name: Run module tests
         if: ${{ inputs.test_enabled }}
@@ -82,12 +81,15 @@ jobs:
           path: |
             ${{ inputs.module_dir }}/target/surefire-reports/
             ${{ inputs.module_dir }}/target/site/jacoco/
+          if-no-files-found: ignore
           retention-days: 30
 
   quality-check:
     name: Quality Check - ${{ inputs.service_name }}
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') }}
     steps:
       - name: Checkout code
@@ -102,6 +104,8 @@ jobs:
 
       - name: Run Checkstyle
         run: mvn checkstyle:check -f ${{ inputs.module_dir }}/pom.xml
+        # 当前阶段质量检查只提供反馈，不阻塞交付；
+        # 后续如需升级为门禁，删除 continue-on-error 即可。
         continue-on-error: true
 
       - name: Run PMD
@@ -116,6 +120,8 @@ jobs:
     name: Build Docker Image - ${{ inputs.service_name }}
     runs-on: ubuntu-latest
     needs: build
+    permissions:
+      contents: read
     if: ${{ github.event_name == 'push' }}
     steps:
       - name: Checkout code
@@ -160,6 +166,9 @@ jobs:
     name: Security Scan - ${{ inputs.service_name }}
     runs-on: ubuntu-latest
     needs: build-docker
+    permissions:
+      contents: read
+      security-events: write
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') }}
     steps:
       - name: Checkout code
@@ -172,7 +181,7 @@ jobs:
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@0.28.0
         with:
           image-ref: '${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ inputs.image_name }}:sha-${{ github.sha }}'
           format: 'sarif'
@@ -191,6 +200,8 @@ jobs:
     name: Update K8s Manifest - ${{ inputs.service_name }}
     runs-on: ubuntu-latest
     needs: security-scan
+    permissions:
+      contents: write
     if: ${{ github.event_name == 'push' && (github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev') }}
     steps:
       - name: Checkout code
@@ -202,6 +213,8 @@ jobs:
       - name: Update image tag
         shell: bash
         run: |
+          # master 固定到 sha 标签，dev 维持 latest，
+          # 这样开发环境可以持续跟进最新镜像，生产环境则保持可追溯。
           if [ "${{ github.ref }}" = "refs/heads/master" ]; then
             NEW_IMAGE="${{ env.DEFAULT_REGISTRY }}/${{ env.DOCKER_USERNAME }}/${{ inputs.image_name }}:sha-${{ github.sha }}"
           else
@@ -229,6 +242,7 @@ jobs:
             git commit -m "chore(deploy): update ${{ inputs.image_name }} image to latest [skip ci]"
           fi
 
+          # Manifest 回写可能和并发提交发生竞争，这里做有限次重试并自动 rebase。
           max_retries=3
           retry_count=0
 

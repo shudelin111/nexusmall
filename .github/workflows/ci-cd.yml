@@ -5,7 +5,8 @@ on:
     branches: [master, dev]
     tags: ['v*']
     paths-ignore:
-      - '**.md'
+      - '*.md'
+      - '**/*.md'
       - 'docs/**'
       - '.gitignore'
       - '*.log'
@@ -23,16 +24,16 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: write
-  security-events: write
+  contents: read
   actions: read
 
 jobs:
-  # Detect which services are affected by this change set.
+  # 先识别本次变更影响了哪些模块，再决定后续实际要跑哪些服务。
   detect-changes:
     name: Detect Changed Modules
     runs-on: ubuntu-latest
     outputs:
+      workflow-changed: ${{ steps.filter.outputs.workflow }}
       order-changed: ${{ steps.filter.outputs.order }}
       product-changed: ${{ steps.filter.outputs.product }}
       auth-changed: ${{ steps.filter.outputs.auth }}
@@ -56,72 +57,102 @@ jobs:
         id: filter
         uses: dorny/paths-filter@v3
         with:
-          base: ${{ github.event_name == 'push' && github.event.before || github.ref }}
+          # PR 使用目标分支的 base SHA，push 使用 before，手动触发时回退到当前 ref。
+          base: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before || github.ref }}
           filters: |
+            workflow:
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             order:
               - 'nexusmall-order/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             product:
               - 'nexusmall-product/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             auth:
               - 'nexusmall-auth/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             gateway:
               - 'nexusmall-gateway/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             member:
               - 'nexusmall-member/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             payment:
               - 'nexusmall-payment/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             cart:
               - 'nexusmall-cart/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             notification:
               - 'nexusmall-notification/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             promotion:
               - 'nexusmall-promotion/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             search:
               - 'nexusmall-search/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             logistics:
               - 'nexusmall-logistics/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
             inventory:
               - 'nexusmall-inventory/**'
               - 'nexusmall-common/**'
               - 'pom.xml'
               - 'nexusmall-common/pom.xml'
+              - '.github/workflows/**'
+              - '.github/workflow-presets/**'
+
       - name: Build service matrix
         id: build-matrix
         shell: pwsh
         run: |
+          # 这里维护“服务元数据单一来源”，主流程只消费组装后的矩阵。
           $services = @(
             @{ key = 'product'; changed = '${{ steps.filter.outputs.product }}'; service_name = 'Product Service'; module_dir = 'nexusmall-product'; image_name = 'nexusmall-product'; deployment_file = 'deploy/product-service/deployment.yaml' },
             @{ key = 'order'; changed = '${{ steps.filter.outputs.order }}'; service_name = 'Order Service'; module_dir = 'nexusmall-order'; image_name = 'nexusmall-order'; deployment_file = 'deploy/order-service/deployment.yaml' },
@@ -137,7 +168,8 @@ jobs:
             @{ key = 'payment'; changed = '${{ steps.filter.outputs.payment }}'; service_name = 'Payment Service'; module_dir = 'nexusmall-payment'; image_name = 'nexusmall-payment'; deployment_file = 'deploy/payment-service/deployment.yaml' }
           )
 
-          if ('${{ github.event_name }}' -eq 'workflow_dispatch') {
+          # 手动触发或 workflow 基础设施变更时，默认跑全部服务，避免 CI 自己改坏了却没有真实校验。
+          if ('${{ github.event_name }}' -eq 'workflow_dispatch' -or '${{ steps.filter.outputs.workflow }}' -eq 'true') {
             $selected = $services
           } else {
             $selected = $services | Where-Object { $_.changed -eq 'true' }
@@ -146,7 +178,7 @@ jobs:
           $matrix = @{ include = @($selected) } | ConvertTo-Json -Compress -Depth 4
           "service-matrix=$matrix" >> $env:GITHUB_OUTPUT
 
-  # Fan out the impacted services through one reusable pipeline definition.
+  # 将受影响的服务分发到同一套 reusable workflow 中执行，避免主流程复制多份相同逻辑。
   service-pipeline:
     needs: detect-changes
     if: ${{ needs.detect-changes.outputs.service-matrix != '{"include":[]}' }}
@@ -159,4 +191,8 @@ jobs:
       module_dir: ${{ matrix.module_dir }}
       image_name: ${{ matrix.image_name }}
       deployment_file: ${{ matrix.deployment_file }}
+      # 如需启用模块测试，请取消下面三行注释，并按模块实际情况调整命令。
+      # test_enabled: true
+      # test_command: mvn -pl ${{ matrix.module_dir }} -am test -B
+      # test_artifact_name: ${{ matrix.image_name }}-test-report
     secrets: inherit
