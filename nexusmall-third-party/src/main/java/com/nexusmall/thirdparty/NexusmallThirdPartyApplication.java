@@ -1,8 +1,6 @@
 package com.nexusmall.thirdparty;
 
 import com.nexusmall.common.config.GlobalFeignConfig;
-import com.nexusmall.common.config.RedisConfig;
-import com.nexusmall.common.util.RedisUtils;
 import com.nexusmall.thirdparty.service.MinioService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -25,8 +23,8 @@ import javax.annotation.PostConstruct;
 @SpringBootApplication
 @EnableDiscoveryClient
 @EnableFeignClients
-@Import({RedisConfig.class, GlobalFeignConfig.class})
-@ComponentScan(basePackageClasses = {NexusmallThirdPartyApplication.class, RedisUtils.class})
+@Import({GlobalFeignConfig.class})
+@ComponentScan(basePackageClasses = {NexusmallThirdPartyApplication.class})
 public class NexusmallThirdPartyApplication {
 
     private final MinioService minioService;
