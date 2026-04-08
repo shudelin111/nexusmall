@@ -5,7 +5,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
@@ -17,14 +16,11 @@ import java.io.IOException;
 /**
  * Seata XID 过滤器（全局）
  * 用于从 HTTP Header 中提取 XID 并绑定到 RootContext
- * 
- * 执行顺序说明：
- * 1. CorsFilter (-101) - 最先执行，处理跨域
- * 2. Spring Security (-100) - 第二个执行，进行身份认证
- * 3. SeataXidFilter (-1000) - 第三个执行，绑定 XID
- * 4. 其他业务 Filter (0+) - 最后执行
+ * <p>
+ * 注意：此类不应使用 @Component，而应由 CommonWebAutoConfiguration 通过 @Bean 注册
+ * 以确保在自动装配场景下能正确控制 Filter 的执行顺序。
+ * </p>
  */
-@Component
 @Order(Ordered.HIGHEST_PRECEDENCE + 1000) // 在 CORS 和 Spring Security 之后，业务 Filter 之前执行
 public class SeataXidFilter extends OncePerRequestFilter {
 

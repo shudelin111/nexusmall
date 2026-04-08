@@ -4,6 +4,7 @@ import feign.RequestInterceptor;
 import io.seata.core.context.RootContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -16,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
  * 用于在 Feign 调用时自动传递 Seata XID
  */
 @Configuration
+@ConditionalOnClass(RootContext.class)
 public class SeataFeignConfig {
 
     private static final Logger log = LoggerFactory.getLogger(SeataFeignConfig.class);

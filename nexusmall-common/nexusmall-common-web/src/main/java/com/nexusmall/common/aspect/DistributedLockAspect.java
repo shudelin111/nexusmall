@@ -10,6 +10,7 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -22,11 +23,16 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * 分布式锁 AOP 切面
+ * <p>
+ * 注意：此类使用 @ConditionalOnClass 条件化加载，
+ * 只有当 Redisson 依赖存在时才会被实例化。
+ * </p>
  * 
  * @author shudl
  */
 @Aspect
 @Component
+@ConditionalOnClass(RedissonClient.class)
 @Order(1) // 确保切面优先级较高
 public class DistributedLockAspect {
 

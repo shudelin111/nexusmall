@@ -1,19 +1,9 @@
 package com.nexusmall.payment;
 
-import com.nexusmall.common.aspect.SentinelBlockExceptionHandler;
-import com.nexusmall.common.config.GlobalFeignConfig;
-import com.nexusmall.common.config.KafkaLoggingProperties;
-import com.nexusmall.common.config.KafkaLoggingConfig;
-import com.nexusmall.common.config.SeataFeignConfig;
-import com.nexusmall.common.filter.SeataXidFilter;
-import com.nexusmall.common.util.RedisUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
@@ -35,15 +25,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableDiscoveryClient
 @EnableFeignClients
 @EnableScheduling
-@EnableConfigurationProperties(KafkaLoggingProperties.class)
-@Import({SeataFeignConfig.class, GlobalFeignConfig.class})
-@ComponentScan(basePackageClasses = {
-        NexusmallPaymentApplication.class,
-        RedisUtils.class,
-        SeataXidFilter.class,
-        SentinelBlockExceptionHandler.class,
-        KafkaLoggingConfig.class
-})
 public class NexusmallPaymentApplication {
 
     public static void main(String[] args) {

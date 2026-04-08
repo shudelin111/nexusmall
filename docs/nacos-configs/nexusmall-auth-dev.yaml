@@ -90,11 +90,14 @@ rocketmq:
 # Seata 分布式事务配置（开发环境）
 # ===============================
 # ⚠️ 注意：Seata 通用参数（enabled、tx-service-group、vgroup-mapping、type、cluster、username、password、application、data-id）在 nexusmall-auth.yaml 中定义
+# ⚠️ 重要：Seata 客户端不经过 Spring 属性解析器，不能直接使用 Spring 占位符 ${xxx}
+#          应直接写明实际地址，或使用 Seata 自身支持的环境变量语法
 seata:
   registry:
     nacos:
       # Seata Server 地址（开发环境）
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      # 注意：Seata 1.5+ 支持 ${xxx:default} 语法从环境变量读取
+      server-addr: 10.10.1.1:8848
       # Seata Server 注册的命名空间（通常为 public 或 ""）
       namespace: ""
       # Seata Server 所在的分组
@@ -102,7 +105,7 @@ seata:
   config:
     nacos:
       # Seata 配置中心地址（开发环境）
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      server-addr: 10.10.1.1:8848
       # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
       # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
       namespace: ""

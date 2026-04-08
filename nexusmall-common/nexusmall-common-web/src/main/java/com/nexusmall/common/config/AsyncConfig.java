@@ -1,5 +1,6 @@
 package com.nexusmall.common.config;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableAsync;
@@ -24,6 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
  */
 @Configuration
 @EnableAsync
+@ConditionalOnClass(name = "org.springframework.scheduling.annotation.EnableAsync")
 public class AsyncConfig {
 
     /**

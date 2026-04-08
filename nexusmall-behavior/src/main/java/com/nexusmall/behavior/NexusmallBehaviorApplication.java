@@ -1,11 +1,10 @@
 package com.nexusmall.behavior;
 
-import com.nexusmall.common.config.GlobalFeignConfig;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.context.annotation.Import;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
  * 用户行为日志服务启动类
@@ -15,8 +14,8 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootApplication
 @EnableDiscoveryClient
+@EnableFeignClients
 @MapperScan("com.nexusmall.behavior.dao")
-@Import({GlobalFeignConfig.class})
 public class NexusmallBehaviorApplication {
 
     public static void main(String[] args) {

@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- =====================================================
+     NexusMall 统一日志配置文件（基于 Logback）
+     =====================================================
+     职责说明：
+     1. 定义统一的日志输出格式（JSON for ELK, Pattern for Console）
+     2. 配置日志文件滚动策略（按日期 + 大小，异步写入）
+     3. 分环境控制日志级别（dev/test/prod）
+     4. 集成 Spring Boot 动态属性与 MDC 链路追踪
+     ===================================================== -->
+<configuration>
+    <!-- 包含 Spring Boot 默认日志配置 -->
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!-- ===============================
+         动态属性配置
+         =============================== -->
+    <!-- 应用名称，用于日志目录区分 -->
+    <springProperty scope="context" name="APP_NAME" source="spring.application.name" defaultValue="unknown"/>
+    
+    <!-- 日志根路径，可通过 Nacos 配置 logging.file.path 或环境变量 LOG_PATH 覆盖 -->
+    <springProperty scope="context" name="LOG_PATH" source="logging.file.path" defaultValue="./logs"/>
+
+    <!-- 日志文件具体路径 -->
+    <property name="LOG_FILE" value="${LOG_PATH}/${APP_NAME}/app.log"/>
+    <property name="LOG_ERROR_FILE" value="${LOG_PATH}/${APP_NAME}/error.log"/>
+    
+    <!-- 控制台日志格式（带链路追踪 ID） -->
+    <property name="CONSOLE_LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] [%X{traceId:-}] %-5level %logger{50} - %msg%n"/>
+
+    <!-- ===============================
+         Appender 配置
+         =============================== -->
+
+    <!-- 1. 控制台 Appender -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${CONSOLE_LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 2. 全量日志 Appender (JSON 格式，记录所有级别，供 ELK/Filebeat 采集) -->
+    <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <!-- 按天滚动，且单个文件最大 100MB -->
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}/app.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <!-- 保留最近 30 天的日志 -->
+            <maxHistory>30</maxHistory>
+            <!-- 总日志大小上限 10GB -->
+            <totalSizeCap>10GB</totalSizeCap>
+            <!-- 启动时清理过期日志 -->
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+
+        <!-- 使用 LogstashEncoder 输出 JSON 格式，自动包含 MDC (traceId, spanId) -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <!-- 添加自定义字段 service，方便 Kibana 筛选 -->
+            <customFields>{"service":"${APP_NAME}"}</customFields>
+            <!-- 包含 MDC 中的链路追踪信息 -->
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+    <!-- 3. ERROR 级别文件 Appender (JSON 格式) -->
+    <appender name="ERROR_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_ERROR_FILE}</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/${APP_NAME}/error.%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <maxFileSize>100MB</maxFileSize>
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>10GB</totalSizeCap>
+            <cleanHistoryOnStart>true</cleanHistoryOnStart>
+        </rollingPolicy>
+        
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <customFields>{"service":"${APP_NAME}"}</customFields>
+            <includeMdcKeyName>traceId</includeMdcKeyName>
+            <includeMdcKeyName>spanId</includeMdcKeyName>
+            <includeMdcKeyName>userId</includeMdcKeyName>
+        </encoder>
+    </appender>
+
+    <!-- 3. 异步全量日志包装器 (提升性能，避免阻塞业务线程) -->
+    <appender name="ASYNC_APP" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>2048</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+        <maxFlushTime>10000</maxFlushTime>
+        <includeCallerData>false</includeCallerData>
+        <appender-ref ref="APP_FILE"/>
+    </appender>
+
+    <!-- 4. 异步错误日志包装器 -->
+    <appender name="ASYNC_ERROR" class="ch.qos.logback.classic.AsyncAppender">
+        <queueSize>1024</queueSize>
+        <discardingThreshold>0</discardingThreshold>
+        <neverBlock>true</neverBlock>
+        <maxFlushTime>10000</maxFlushTime>
+        <includeCallerData>false</includeCallerData>
+        <appender-ref ref="ERROR_FILE"/>
+    </appender>
+
+    <!-- ===============================
+         Root Logger 配置
+         =============================== -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="ASYNC_APP"/>
+        <appender-ref ref="ASYNC_ERROR"/>
+    </root>
+
+    <!-- ===============================
+         特定包日志级别控制
+         =============================== -->
+    <!-- Spring 框架日志 -->
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.springframework.web" level="INFO"/>
+    
+    <!-- MyBatis-Plus 日志 -->
+    <logger name="com.baomidou.mybatisplus" level="DEBUG"/>
+    
+    <!-- 连接池日志 -->
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+    
+    <!-- Redis 日志 -->
+    <logger name="org.springframework.data.redis" level="WARN"/>
+    
+    <!-- RocketMQ 日志 -->
+    <logger name="org.apache.rocketmq" level="INFO"/>
+    
+    <!-- Kafka 日志 -->
+    <logger name="org.springframework.kafka" level="WARN"/>
+    
+    <!-- Sentinel 日志 -->
+    <logger name="com.alibaba.csp.sentinel" level="INFO"/>
+    
+    <!-- Seata 分布式事务日志 -->
+    <logger name="io.seata" level="INFO"/>
+    
+    <!-- Nacos 客户端日志 -->
+    <logger name="com.alibaba.nacos" level="WARN"/>
+    
+    <!-- Sleuth 链路追踪日志 -->
+    <logger name="org.springframework.cloud.sleuth" level="DEBUG"/>
+    <logger name="brave" level="DEBUG"/>
+
+    <!-- ===============================
+         环境特定配置
+         =============================== -->
+    <!-- 开发环境：提高日志级别以便调试 -->
+    <springProfile name="dev">
+        <root level="DEBUG">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_APP"/>
+            <appender-ref ref="ASYNC_ERROR"/>
+        </root>
+        <logger name="com.nexusmall" level="DEBUG"/>
+    </springProfile>
+
+    <!-- 测试环境 -->
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_APP"/>
+            <appender-ref ref="ASYNC_ERROR"/>
+        </root>
+    </springProfile>
+
+    <!-- 生产环境 -->
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="ASYNC_APP"/>
+            <appender-ref ref="ASYNC_ERROR"/>
+        </root>
+    </springProfile>
+</configuration>

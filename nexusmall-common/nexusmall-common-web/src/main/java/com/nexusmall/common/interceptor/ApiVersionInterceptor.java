@@ -28,7 +28,6 @@ import java.util.Arrays;
  * @since 2026-04-06
  */
 @Slf4j
-@Component
 public class ApiVersionInterceptor implements HandlerInterceptor {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
