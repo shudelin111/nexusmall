@@ -61,3 +61,6 @@ data:
   
   # Seata
   SEATA_SERVER: "10.10.1.1:8848"
+  
+  # Elasticsearch（非敏感配置）
+  ELASTICSEARCH_URIS: "http://10.10.1.1:9200"
