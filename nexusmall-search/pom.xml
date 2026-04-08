@@ -133,6 +133,12 @@
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
         </dependency>
+        
+        <!-- Logback Kafka Appender（Kafka 日志收集必需） -->
+        <dependency>
+            <groupId>com.github.danielwegener</groupId>
+            <artifactId>logback-kafka-appender</artifactId>
+        </dependency>
 
         <!-- 公共消息队列模块 -->
         <dependency>
