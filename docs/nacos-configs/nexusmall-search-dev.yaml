@@ -19,31 +19,6 @@ server:
   port: 17000
 
 spring:
-  # 数据库连接配置（完整配置，符合业界标准）
-  datasource:
-    # JDBC 驱动类名
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
-    type: com.zaxxer.hikari.HikariDataSource
-    # JDBC 连接 URL（搜索服务专用数据库）
-    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_search?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    # 数据库用户名
-    username: ${MYSQL_USERNAME:root}
-    # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
-    password: ${MYSQL_PASSWORD:123456}
-    # HikariCP 连接池参数
-    hikari:
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 最大连接数
-      maximum-pool-size: 20
-      # 空闲连接超时时间（毫秒）
-      idle-timeout: 30000
-      # 连接最大生命周期（毫秒）
-      max-lifetime: 1800000
-      # 连接超时时间（毫秒）
-      connection-timeout: 30000
-  
   # Redis 配置（开发环境）
   redis:
     # Redis 服务器地址
@@ -90,39 +65,14 @@ rocketmq:
     group: search-producer-group-dev
 
 # ===============================
-# Seata 分布式事务配置（开发环境）
-# ===============================
-# ⚠️ 注意：Seata 通用参数（enabled、tx-service-group、vgroup-mapping、type、cluster、username、password、application、data-id）在 nexusmall-search.yaml 中定义
-seata:
-  registry:
-    nacos:
-      # Seata Server 地址（开发环境）
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
-      # Seata Server 注册的命名空间（通常为 public 或 ""）
-      namespace: ""
-      # Seata Server 所在的分组
-      group: SEATA_GROUP
-  config:
-    nacos:
-      # Seata 配置中心地址（开发环境）
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
-      # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
-      # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
-      namespace: ""
-      # Seata 配置所在的分组
-      group: SEATA_GROUP
-
-# ===============================
 # 日志级别配置（开发环境）
 # ===============================
 logging:
   level:
     root: INFO
-    io.seata: DEBUG
     com.alibaba.csp.sentinel: DEBUG
     com.nexusmall.search: DEBUG
     com.nexusmall.common: DEBUG
-    com.nexusmall.search.dao: DEBUG
 
 # ===============================
 # SpringDoc + Knife4j API 文档配置（开发环境）

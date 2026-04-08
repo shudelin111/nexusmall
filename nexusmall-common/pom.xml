@@ -98,7 +98,6 @@
         <dependency>
             <groupId>net.logstash.logback</groupId>
             <artifactId>logstash-logback-encoder</artifactId>
-            <version>7.0.1</version>
         </dependency>
 
         <!-- Seata 分布式事务 -->

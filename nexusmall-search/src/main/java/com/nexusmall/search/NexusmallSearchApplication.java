@@ -6,9 +6,6 @@ import com.nexusmall.common.config.KafkaLoggingProperties;
 import com.nexusmall.common.config.KafkaLoggingConfig;
 import com.nexusmall.common.config.RedisConfig;
 import com.nexusmall.common.config.RedissonConfig;
-import com.nexusmall.common.config.SeataDataSourceConfig;
-import com.nexusmall.common.config.SeataFeignConfig;
-import com.nexusmall.common.filter.SeataXidFilter;
 import com.nexusmall.common.util.RedisUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -38,11 +35,10 @@ import org.springframework.context.annotation.Import;
 @EnableFeignClients
 @EnableCaching  // 启用 Spring Cache
 @EnableConfigurationProperties(KafkaLoggingProperties.class)
-@Import({RedisConfig.class, RedissonConfig.class, SeataDataSourceConfig.class, SeataFeignConfig.class, GlobalFeignConfig.class})
+@Import({RedisConfig.class, RedissonConfig.class, GlobalFeignConfig.class})
 @ComponentScan(basePackageClasses = {
         NexusmallSearchApplication.class,
         RedisUtils.class,
-        SeataXidFilter.class,
         SentinelBlockExceptionHandler.class,
         KafkaLoggingConfig.class
 })
