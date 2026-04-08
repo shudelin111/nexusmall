@@ -5,6 +5,7 @@ import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -20,16 +21,22 @@ import java.util.Map;
 /**
  * Kafka 配置类
  * 
- * 💡 用途：
- * 1. 配置 Kafka 生产者和消费者
- * 2. 支持日志消息的发送和接收
- * 3. 异步处理，不阻塞业务线程
+ * <p>业界标准实践：使用 @ConditionalOnClass 实现条件化加载</p>
+ * <p>只有当 spring-kafka 依赖存在时，才会加载此配置类</p>
+ * 
+ * <p>💡 用途：</p>
+ * <ol>
+ *   <li>配置 Kafka 生产者和消费者</li>
+ *   <li>支持日志消息的发送和接收</li>
+ *   <li>异步处理，不阻塞业务线程</li>
+ * </ol>
  * 
  * @author shudl
  * @since 2026-03-25
  */
 @EnableKafka
 @Configuration
+@ConditionalOnClass(name = "org.springframework.kafka.config.KafkaListenerContainerFactory")
 public class KafkaConfig {
 
     @Value("${spring.kafka.bootstrap-servers:10.10.1.1:31000}")

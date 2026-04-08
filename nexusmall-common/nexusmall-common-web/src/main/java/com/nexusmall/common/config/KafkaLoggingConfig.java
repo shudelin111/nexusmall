@@ -10,6 +10,7 @@ import com.github.danielwegener.logback.kafka.keying.HostNameKeyingStrategy;
 import net.logstash.logback.encoder.LogstashEncoder;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
@@ -17,7 +18,11 @@ import org.springframework.stereotype.Component;
 /**
  * Kafka 日志收集配置 - 延迟初始化版本
  * 
- * <p>业界标准实践：在应用完全启动后才初始化 Kafka Appender，避免启动时的竞态条件问题</p>
+ * <p>业界标准实践：</p>
+ * <ol>
+ *   <li>使用 @ConditionalOnClass 实现条件化加载（只有当 Kafka 依赖存在时才加载）</li>
+ *   <li>在应用完全启动后才初始化 Kafka Appender，避免启动时的竞态条件问题</li>
+ * </ol>
  * 
  * <p>工作原理：</p>
  * <ol>
@@ -46,6 +51,7 @@ import org.springframework.stereotype.Component;
  * @since 2026-04-04
  */
 @Component
+@ConditionalOnClass(name = "org.springframework.kafka.config.KafkaListenerContainerFactory")
 public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyEvent> {
 
     private static final String KAFKA_APPENDER_NAME = "async_kafka";
