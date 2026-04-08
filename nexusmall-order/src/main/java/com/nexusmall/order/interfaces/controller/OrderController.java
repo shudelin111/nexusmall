@@ -51,7 +51,7 @@ public class OrderController {
     }
 
     /**
-     * 根据 ID 查询订单
+     * 根据订单ID查询订单详细信息
      */
     @GetMapping(value = "/{id}", headers = "X-API-Version=v1")
     @Operation(summary = "根据ID查询订单", description = "根据订单ID查询订单详细信息")
