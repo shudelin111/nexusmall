@@ -3,6 +3,7 @@ package com.nexusmall.common.config;
 import com.nexusmall.common.feign.FeignApiVersionInterceptor;
 import com.nexusmall.common.feign.FeignAuthInterceptor;
 import feign.Logger;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,9 +12,13 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Feign 和 RestTemplate 全局配置
  * 
+ * <p>业界标准实践：使用 @ConditionalOnClass 实现条件化加载</p>
+ * <p>只有当 spring-cloud-starter-openfeign 依赖存在时，才会加载此配置类</p>
+ * 
  * @author shudl
  */
 @Configuration
+@ConditionalOnClass(name = "org.springframework.cloud.openfeign.EnableFeignClients")
 public class GlobalFeignConfig {
 
     /**
