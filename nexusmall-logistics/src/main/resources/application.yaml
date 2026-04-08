@@ -1,0 +1,25 @@
+# =====================================================
+# NexusMall 物流服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 物流订单管理
+# 2. 物流轨迹跟踪（对接第三方物流API）
+# 3. 运费计算
+# 4. 仓库管理
+# 5. 发货/退货管理
+# =====================================================
+
+server:
+  port: 18000
+  shutdown: graceful
+
+info:
+  app:
+    name: nexusmall-logistics
+    description: NexusMall 物流服务
+    version: 0.0.1-SNAPSHOT
+  java.version: 1.8
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s

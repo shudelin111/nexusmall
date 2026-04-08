@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.nexusmall.order.dao.OrderMapper">
+<mapper namespace="com.nexusmall.order.infrastructure.persistence.mapper.OrderMapper">
 
-    <resultMap id="BaseResultMap" type="com.nexusmall.order.entity.Order">
+    <resultMap id="BaseResultMap" type="com.nexusmall.order.domain.entity.Order">
         <id column="id" property="id"/>
         <result column="order_sn" property="orderSn"/>
         <result column="member_id" property="memberId"/>
@@ -83,7 +83,7 @@
         ORDER BY create_time DESC
     </select>
 
-    <insert id="insert" parameterType="com.nexusmall.order.entity.Order" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insert" parameterType="com.nexusmall.order.domain.entity.Order" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO `order` (
             order_sn, member_id, receiver_name, receiver_phone, receiver_address,
             total_amount, pay_amount, freight_amount, promotion_amount, status,
@@ -97,7 +97,7 @@
         )
     </insert>
 
-    <update id="updateById" parameterType="com.nexusmall.order.entity.Order">
+    <update id="updateById" parameterType="com.nexusmall.order.domain.entity.Order">
         UPDATE `order`
         <set>
             <if test="receiverName != null">receiver_name = #{receiverName},</if>

@@ -16,11 +16,11 @@ seata:
       default: 127.0.0.1:8091
   registry:
     nacos:
-      server-addr: 10.10.1.1:8848
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
       group: SEATA_GROUP
       application: seata-server
   config:
     nacos:
-      server-addr: 10.10.1.1:8848
+      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
       group: SEATA_GROUP
       data-id: seataServer.properties

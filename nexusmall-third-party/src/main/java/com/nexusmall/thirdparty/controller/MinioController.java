@@ -1,5 +1,6 @@
 package com.nexusmall.thirdparty.controller;
 
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.thirdparty.service.MinioService;
@@ -28,7 +29,8 @@ import java.util.Map;
  */
 @Slf4j
 @RestController
-@RequestMapping("/minio")
+@RequestMapping("/")  // Gateway 已通过 /third-party/** 路由,StripPrefix 后直接访问
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 @Tag(name = "MinIO 文件管理", description = "提供文件上传、删除、查询等操作")
 public class MinioController {
 
@@ -44,7 +46,7 @@ public class MinioController {
      * @param file 上传的文件
      * @return 文件访问 URL
      */
-    @PostMapping("/upload")
+    @PostMapping(value = "/upload", headers = "X-API-Version=v1")
     @Operation(summary = "单文件上传", description = "上传单个文件到 MinIO，返回访问 URL")
     public Result<Map<String, String>> uploadFile(
             @Parameter(description = "上传的文件", required = true) 
@@ -72,7 +74,7 @@ public class MinioController {
      * @param type 文件类型（product-商品、avatar-头像、order-订单等）
      * @return 文件访问 URL
      */
-    @PostMapping("/upload/{type}")
+    @PostMapping(value = "/upload/{type}", headers = "X-API-Version=v1")
     @Operation(summary = "指定类型的文件上传", description = "按业务类型分类存储文件")
     public Result<Map<String, String>> uploadFileByType(
             @Parameter(description = "上传的文件", required = true) 
@@ -102,7 +104,7 @@ public class MinioController {
      * @param url 文件 URL
      * @return 操作结果
      */
-    @DeleteMapping("/delete")
+    @DeleteMapping(value = "/delete", headers = "X-API-Version=v1")
     @Operation(summary = "删除文件", description = "从 MinIO 中删除指定文件")
     public Result<Void> deleteFile(
             @Parameter(description = "文件 URL", required = true)
@@ -123,7 +125,7 @@ public class MinioController {
      * @param files 多个文件
      * @return 文件 URL 列表
      */
-    @PostMapping("/batch-upload")
+    @PostMapping(value = "/batch-upload", headers = "X-API-Version=v1")
     @Operation(summary = "批量上传文件", description = "一次性上传多个文件")
     public Result<Map<String, Object>> batchUploadFiles(
             @Parameter(description = "多个文件", required = true)
@@ -163,7 +165,7 @@ public class MinioController {
      * @param expirySeconds 过期时间（秒），默认 3600 秒
      * @return 预签名 URL
      */
-    @PostMapping("/presigned-url")
+    @PostMapping(value = "/presigned-url", headers = "X-API-Version=v1")
     @Operation(summary = "生成预签名 URL", description = "为私有桶文件生成临时访问链接")
     public Result<Map<String, String>> getPresignedUrl(
             @Parameter(description = "对象名称或文件 URL", required = true)
@@ -204,7 +206,7 @@ public class MinioController {
      * @param expirySeconds 过期时间（秒）
      * @return 上传用的预签名 URL
      */
-    @PostMapping("/presigned-upload-url")
+    @PostMapping(value = "/presigned-upload-url", headers = "X-API-Version=v1")
     @Operation(summary = "生成上传预签名 URL", description = "生成用于前端直传 MinIO 的预签名 URL")
     public Result<Map<String, String>> getPresignedUploadUrl(
             @Parameter(description = "对象名称", required = true)

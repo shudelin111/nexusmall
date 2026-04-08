@@ -1,0 +1,45 @@
+# =====================================================
+# NexusMall 搜索服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 商品全文搜索（Elasticsearch）
+# 2. 搜索建议/自动补全
+# 3. 搜索历史记录
+# 4. 热门搜索词统计
+# 5. 搜索结果排序/过滤
+# =====================================================
+
+server:
+  port: 17000
+  shutdown: graceful
+
+info:
+  app:
+    name: nexusmall-search
+    description: NexusMall 搜索服务
+    version: 0.0.1-SNAPSHOT
+  java.version: 1.8
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://127.0.0.1:9200}
+  # Redis 缓存配置（搜索建议缓存）
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5分钟（毫秒）
+      key-prefix: "search:cache:"  # Key 前缀
+      use-key-prefix: true
+      cache-null-values: false  # 不缓存空值
+
+nexusmall:
+  search:
+    index-alias: nexusmall_product
+    default-page-no: 1
+    default-page-size: 20
+    max-page-size: 100
+    index-shards: 1
+    index-replicas: 1
+    product-sync-topic: PRODUCT_INDEX_SYNC_TOPIC

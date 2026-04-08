@@ -25,6 +25,14 @@
         <module>nexusmall-common</module>
         <module>nexusmall-third-party</module>
         <module>nexusmall-behavior</module>
+        <module>nexusmall-member</module>
+        <module>nexusmall-payment</module>
+        <module>nexusmall-cart</module>
+        <module>nexusmall-inventory</module>
+        <module>nexusmall-notification</module>
+        <module>nexusmall-promotion</module>
+        <module>nexusmall-search</module>
+        <module>nexusmall-logistics</module>
     </modules>
 
     <!-- 统一的属性配置 -->
@@ -215,6 +223,61 @@
                 <artifactId>knife4j-gateway-spring-boot-starter</artifactId>
                 <version>4.3.0</version>
             </dependency>
+            <!-- Elasticsearch Rest High Level Client (7.x) -->
+            <dependency>
+                <groupId>org.elasticsearch.client</groupId>
+                <artifactId>elasticsearch-rest-high-level-client</artifactId>
+                <version>7.17.13</version>
+            </dependency>
+            <!-- Testcontainers (集成测试) -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers</artifactId>
+                <version>1.20.4</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>elasticsearch</artifactId>
+                <version>1.20.4</version>
+                <scope>test</scope>
+            </dependency>
+            <!-- Logstash Logback Encoder -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>7.0.1</version>
+            </dependency>
+            <!-- FastJSON2 -->
+            <dependency>
+                <groupId>com.alibaba.fastjson2</groupId>
+                <artifactId>fastjson2</artifactId>
+                <version>2.0.40</version>
+            </dependency>
+            <!-- 支付宝 SDK -->
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-sdk-java</artifactId>
+                <version>4.38.0.ALL</version>
+            </dependency>
+            <!-- 微信支付 SDK -->
+            <dependency>
+                <groupId>com.github.wechatpay-apiv3</groupId>
+                <artifactId>wechatpay-java</artifactId>
+                <version>0.2.12</version>
+            </dependency>
+            <!-- Google Guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>31.1-jre</version>
+            </dependency>
+            <!-- MinIO -->
+            <dependency>
+                <groupId>io.minio</groupId>
+                <artifactId>minio</artifactId>
+                <version>8.5.7</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -237,6 +300,13 @@
                             </configuration>
                         </execution>
                     </executions>
+                </plugin>
+                    
+                <!-- Maven Failsafe Plugin (集成测试插件) -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.2.5</version>
                 </plugin>
                     
                 <!-- ========================================

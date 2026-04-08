@@ -1,0 +1,48 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.nexusmall.logistics.infrastructure.persistence.mapper.LogisticsReturnApplyMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.nexusmall.logistics.domain.entity.LogisticsReturnApply">
+        <id column="id" property="id"/>
+        <result column="order_sn" property="orderSn"/>
+        <result column="member_id" property="memberId"/>
+        <result column="return_reason" property="returnReason"/>
+        <result column="return_description" property="returnDescription"/>
+        <result column="return_images" property="returnImages"/>
+        <result column="status" property="status"/>
+        <result column="express_company" property="expressCompany"/>
+        <result column="express_no" property="expressNo"/>
+        <result column="apply_time" property="applyTime"/>
+        <result column="handle_time" property="handleTime"/>
+        <result column="receive_time" property="receiveTime"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, order_sn, member_id, return_reason, return_description, return_images,
+        status, express_company, express_no, apply_time, handle_time, receive_time,
+        create_time, update_time
+    </sql>
+
+    <!-- 根据订单编号查询退货申请列表 -->
+    <select id="selectByOrderSn" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logistics_return_apply
+        WHERE order_sn = #{orderSn}
+        ORDER BY create_time DESC
+    </select>
+
+    <!-- 根据会员ID查询退货申请列表 -->
+    <select id="selectByMemberId" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List"/>
+        FROM logistics_return_apply
+        WHERE member_id = #{memberId}
+        ORDER BY create_time DESC
+    </select>
+
+</mapper>

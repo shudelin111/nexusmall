@@ -95,7 +95,7 @@ spring:
       eager: true
       # 控制台地址（生产环境改为实际 IP）
       transport:
-        dashboard: 10.10.1.1:8858
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         # 与 Dashboard 通信的端口（0 表示自动选择可用端口）
         port: 8719
       datasource:
@@ -104,45 +104,45 @@ spring:
         # ===============================
         ds1:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-gateway-flow-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: flow
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # ===============================
         # 熔断降级规则数据源（异常比例/慢调用）
         # ===============================
         ds2:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-gateway-degrade-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: degrade
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
         # ===============================
         # 系统自适应保护规则数据源
         # ===============================
         ds3:
           nacos:
-            server-addr: ${spring.cloud.nacos.discovery.server-addr}
-            namespace: ${spring.cloud.nacos.discovery.namespace}
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            namespace: ${NACOS_NAMESPACE:prod}
             dataId: nexusmall-gateway-system-rule.json
-            groupId: ${spring.cloud.nacos.discovery.group}
+            groupId: ${NACOS_GROUP:MALL_GROUP}
             rule-type: system
             data-type: json
             # Nacos 认证配置
-            username: ${spring.cloud.nacos.discovery.username}
-            password: ${spring.cloud.nacos.discovery.password}
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
 
       # Sentinel 日志配置
       log:
@@ -151,17 +151,33 @@ spring:
     
     nacos:
       discovery:
-        # Nacos 服务发现地址
-        server-addr: 10.10.1.1:8848
-        # 命名空间
-        # 注意：public 命名空间在 API 调用时应传空字符串
-        namespace: ""
-        # 服务分组
-        group: DEFAULT_GROUP
-        # Nacos 用户名
-        username: nacos
-        # Nacos 密码
-        password: nacos
+        # Nacos 服务发现地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 命名空间（必须与微服务注册的命名空间一致）
+        # "" 表示 public 命名空间
+        # 如果微服务使用其他命名空间，需要填写对应的命名空间 ID
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 服务分组（必须与微服务注册的分组一致）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
+      
+      # 配置中心配置（从 Nacos 读取配置）
+      config:
+        # 配置中心地址（来自 ConfigMap）
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        # 配置命名空间（来自 ConfigMap）
+        namespace: ${NACOS_NAMESPACE:prod}
+        # 配置分组（来自 ConfigMap）
+        group: ${NACOS_GROUP:MALL_GROUP}
+        # Nacos 用户名（来自 Secret）
+        username: ${NACOS_USERNAME:nacos}
+        # Nacos 密码（来自 Secret）
+        password: ${NACOS_PASSWORD:nacos}
+        # 配置文件后缀名
+        file-extension: yaml
     
     gateway:
       # 服务发现相关配置
@@ -184,7 +200,8 @@ spring:
           predicates:
             - Path=/order/**
           filters:
-            # 路径重写：去掉 /order 前缀
+            # 路径重写：去掉 /order 前缀，转发到下游服务
+            # /order/ping -> /ping
             # /order/v3/api-docs -> /v3/api-docs
             - RewritePath=/order/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
@@ -196,6 +213,10 @@ spring:
           predicates:
             - Path=/auth/**
           filters:
+            # 路径重写：去掉 /auth 前缀
+            # /auth/login -> /login
+            # /auth/logout -> /logout
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
         
         # 路由 3：商品服务（使用 Nacos 服务发现）
@@ -208,6 +229,106 @@ spring:
             # 路径重写：去掉 /product 前缀
             # /product/v3/api-docs -> /v3/api-docs
             - RewritePath=/product/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 4：会员服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: member-service
+          uri: lb://nexusmall-member  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/member/**
+          filters:
+            # 路径重写：去掉 /member 前缀
+            # /member/info -> /info
+            # /member/addresses -> /addresses
+            - RewritePath=/member/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 5：支付服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: payment-service
+          uri: lb://nexusmall-payment  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/payment/**
+          filters:
+            # 路径重写：去掉 /payment 前缀
+            # /payment/create -> /create
+            # /payment/refunds/apply -> /refunds/apply
+            - RewritePath=/payment/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 6：购物车服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: cart-service
+          uri: lb://nexusmall-cart  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/cart/**
+          filters:
+            # 路径重写：去掉 /cart 前缀
+            # /cart/items -> /items
+            # /cart/items/{skuId} -> /items/{skuId}
+            - RewritePath=/cart/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 7：行为服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: behavior-service
+          uri: lb://nexusmall-behavior  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/behavior/**
+          filters:
+            # 路径重写：去掉 /behavior 前缀
+            # /behavior/logs -> /logs
+            - RewritePath=/behavior/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 8：第三方服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: third-party-service
+          uri: lb://nexusmall-third-party  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/third-party/**
+          filters:
+            # 路径重写：去掉 /third-party 前缀
+            # /third-party/upload -> /upload
+            # /third-party/sms/send -> /sms/send
+            - RewritePath=/third-party/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 9：库存服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: inventory-service
+          uri: lb://nexusmall-inventory  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/inventory/**
+          filters:
+            # 路径重写：/inventory/stocks -> /stocks, /inventory/stocks/123 -> /stocks/123
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/inventory/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 10：营销服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: promotion-service
+          uri: lb://nexusmall-promotion  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/promotion/**
+          filters:
+            # 路径重写：/promotion/coupons -> /coupons, /promotion/coupons/123 -> /coupons/123
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/promotion/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 路由 11：搜索服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: search-service
+          uri: lb://nexusmall-search  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/search/**
+          filters:
+            # 路径重写：/search/products -> /products, /search/suggest -> /suggest
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/search/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
@@ -283,12 +404,41 @@ server:
 # =====================================================
 # 安全配置（JWT 相关）
 # =====================================================
+#security:
+#  jwt:
+#    # JWT 签名密钥
+#    secret-key: mySecretKeyForJWTGenerationAndValidation
+#    # Token 过期时间（毫秒）
+#    expire-time-in-ms: 86400000
+# =====================================================
+# NexusMall Gateway - JWT Configuration
+# =====================================================
+# 说明：
+# 1. 此配置应存入 Nacos 配置中心
+# 2. Data ID: nexusmall-gateway.yaml
+# 3. Group: DEFAULT_GROUP
+# =====================================================
+
 security:
   jwt:
-    # JWT 签名密钥
-    secret-key: mySecretKeyForJWTGenerationAndValidation
-    # Token 过期时间（毫秒）
-    expire-time-in-ms: 86400000
+    rsa:
+      # RSA 公钥 (PEM 格式) - 与 auth 服务的公钥一致
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCCkHxMtFQVXocqNfUal
+        vy6ra77FyJmK3jFKIlcBNlXvWjzoJr8zbPh2COrkxRNpxWg2v4Htsva/jTboop4M
+        8XOWb+16Fyjk+y/4be/UBaHB1NLqCkuHglihQHZMJjONAxIN66VyzkLgEymqxS57
+        3cZfbyUiFzhjXfoU50MPbT630qwWCuzWF9NPFShVaIhsEg2dtL6YSBlg56QIhlTT
+        RvN71nPnV97tUrdHALCrio0GIfnGT3VW3iZdkloGHzKdzA0O5r+uLsbPRDxuQyoh
+        T254rLgY1m1wcVyqqe397j45SW+JZz1XtU6fUNa7o9WjsMuTlR70vVxPqupETH5H
+        fwIDAQAB
+        -----END PUBLIC KEY-----
+
+      # JWT 签发者标识 (必须与 auth 服务一致)
+      issuer: nexusmall-auth
+
+      # JWT 受众标识 (必须与 auth 服务一致)
+      audience: nexusmall-services
 
 # =====================================================
 # 日志级别配置

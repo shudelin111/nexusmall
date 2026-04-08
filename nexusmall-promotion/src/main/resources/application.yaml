@@ -1,0 +1,25 @@
+# =====================================================
+# NexusMall 营销服务配置文件
+# =====================================================
+# 模块职责：
+# 1. 优惠券管理（发放/领取/使用/过期）
+# 2. 秒杀活动管理
+# 3. 满减/折扣活动
+# 4. 积分商城
+# 5. 拼团活动
+# =====================================================
+
+server:
+  port: 16000
+  shutdown: graceful
+
+info:
+  app:
+    name: nexusmall-promotion
+    description: NexusMall 营销服务
+    version: 0.0.1-SNAPSHOT
+  java.version: 1.8
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s

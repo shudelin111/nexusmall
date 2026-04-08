@@ -104,14 +104,12 @@
 		<dependency>
 			<groupId>io.minio</groupId>
 			<artifactId>minio</artifactId>
-			<version>8.5.7</version>
 		</dependency>
 
 		<!-- SpringDoc OpenAPI (Swagger) - Java 8 兼容版本 -->
 		<dependency>
 			<groupId>org.springdoc</groupId>
 			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.7.0</version>
 		</dependency>
 
 		<!-- 阿里云短信 -->

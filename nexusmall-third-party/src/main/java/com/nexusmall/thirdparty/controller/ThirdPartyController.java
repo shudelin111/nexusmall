@@ -1,5 +1,6 @@
 package com.nexusmall.thirdparty.controller;
 
+import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.service.OssService;
@@ -19,7 +20,8 @@ import javax.validation.Valid;
  */
 @Validated
 @RestController
-@RequestMapping("/third-party")
+@RequestMapping("/")  // Gateway 已通过 /third-party/** 路由,StripPrefix 后直接访问
+@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
 public class ThirdPartyController {
 
     /**
@@ -37,7 +39,7 @@ public class ThirdPartyController {
     /**
      * 发送短信。
      */
-    @PostMapping("/sms/send")
+    @PostMapping(value = "/sms/send", headers = "X-API-Version=v1")
     public SmsSendResponse sendSms(@RequestBody @Valid SmsSendRequest request) {
         if (smsService == null) {
             throw new ThirdPartyException(CommonResultCode.SMS_SERVICE_ERROR.getErrorCode(), CommonResultCode.SMS_SERVICE_ERROR.getMessage());
@@ -48,7 +50,7 @@ public class ThirdPartyController {
     /**
      * 上传文件到OSS。
      */
-    @PostMapping("/oss/upload")
+    @PostMapping(value = "/oss/upload", headers = "X-API-Version=v1")
     public OssUploadResponse upload(@RequestPart("file") MultipartFile file,
                                     @RequestParam(value = "dir", required = false) String dir) {
         if (ossService == null) {

@@ -24,6 +24,8 @@ public enum CommonResultCode implements ResultCode {
     
     UNAUTHORIZED(401, "20101", "未登录或登录已过期"),
     INVALID_CREDENTIALS(401, "20102", "用户名或密码错误"),
+    TOKEN_INVALID(401, "20103", "Token 无效"),
+    TOKEN_EXPIRED(401, "20104", "Token 已过期"),
     
     FORBIDDEN(403, "20301", "无权限访问"),
     SENTINEL_AUTHORITY(403, "20302", "无权限访问该资源"),

@@ -1,0 +1,41 @@
+# =====================================================
+# NexusMall 搜索服务 - Bootstrap 配置
+# =====================================================
+
+spring:
+  application:
+    name: nexusmall-search
+  
+  cloud:
+    nacos:
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        namespace: ${NACOS_NAMESPACE:prod}
+        group: ${NACOS_GROUP:MALL_GROUP}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+        ephemeral: true
+      
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        file-extension: yaml
+        group: ${NACOS_GROUP:MALL_GROUP}
+        namespace: ${NACOS_NAMESPACE:prod}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+        refresh-enabled: true
+        timeout: 3000
+        max-retry: 3
+        
+        shared-configs:
+          - data-id: nexusmall-common.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+        
+        extension-configs:
+          - data-id: nexusmall-search.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          - data-id: nexusmall-search-${spring.profiles.active}.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
