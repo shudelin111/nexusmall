@@ -97,34 +97,18 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
-        <!-- 公共模块 -->
+        <!-- 公共核心模块 -->
         <dependency>
             <groupId>com.nexusmall</groupId>
-            <artifactId>nexusmall-common</artifactId>
+            <artifactId>nexusmall-common-core</artifactId>
             <version>${project.version}</version>
-            <exclusions>
-                <!-- Search 模块不需要数据库，排除 MyBatis-Plus -->
-                <exclusion>
-                    <groupId>com.baomidou</groupId>
-                    <artifactId>mybatis-plus-boot-starter</artifactId>
-                </exclusion>
-                <!-- 排除 MySQL 驱动 -->
-                <exclusion>
-                    <groupId>mysql</groupId>
-                    <artifactId>mysql-connector-java</artifactId>
-                </exclusion>
-                <!-- 排除 JDBC Starter（避免 DataSource 自动配置） -->
-                <exclusion>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-starter-jdbc</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-
-        <!-- FST for Redisson Codec (Redisson 序列化器) -->
+        
+        <!-- 公共 Web 模块（Redis、Feign、Sentinel） -->
         <dependency>
-            <groupId>de.ruedigermoeller</groupId>
-            <artifactId>fst</artifactId>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-web</artifactId>
+            <version>${project.version}</version>
         </dependency>
 
         <!-- Lombok -->

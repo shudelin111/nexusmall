@@ -137,10 +137,31 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
-        <!-- 公共模块 -->
+        <!-- 公共核心模块 -->
         <dependency>
             <groupId>com.nexusmall</groupId>
-            <artifactId>nexusmall-common</artifactId>
+            <artifactId>nexusmall-common-core</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共 Web 模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共数据库模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共消息队列模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-mq</artifactId>
             <version>${project.version}</version>
         </dependency>
 
