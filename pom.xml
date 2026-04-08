@@ -70,7 +70,6 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- 强制指定 Nacos Client 版本以修复 gRPC PerfMark 报错 -->
             <dependency>
                 <groupId>com.alibaba.nacos</groupId>
                 <artifactId>nacos-client</artifactId>
@@ -280,6 +279,30 @@
             </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <!-- ========================================
+         全局依赖（所有子模块自动继承）
+         生产级标准：Kafka 日志收集为必需功能
+         ======================================== -->
+    <dependencies>
+        <!-- Spring Kafka（日志收集） -->
+        <dependency>
+            <groupId>org.springframework.kafka</groupId>
+            <artifactId>spring-kafka</artifactId>
+        </dependency>
+        
+        <!-- Logstash Logback Encoder（JSON 格式化） -->
+        <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+        </dependency>
+        
+        <!-- Logback Kafka Appender（日志发送到 Kafka） -->
+        <dependency>
+            <groupId>com.github.danielwegener</groupId>
+            <artifactId>logback-kafka-appender</artifactId>
+        </dependency>
+    </dependencies>
 
     <build>
         <pluginManagement>
