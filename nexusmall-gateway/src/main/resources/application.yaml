@@ -318,6 +318,18 @@ spring:
             # RESTful风格：保留完整的资源路径
             - RewritePath=/promotion/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
+        
+        # 路由 11：搜索服务（使用 Nacos 服务发现）
+        # ===============================
+        - id: search-service
+          uri: lb://nexusmall-search  # 通过 Nacos 负载均衡
+          predicates:
+            - Path=/search/**
+          filters:
+            # 路径重写：/search/products -> /products, /search/suggest -> /suggest
+            # RESTful风格：保留完整的资源路径
+            - RewritePath=/search/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
       
       # 跨域资源共享（CORS）配置
       globalcors:

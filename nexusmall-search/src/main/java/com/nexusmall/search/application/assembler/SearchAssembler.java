@@ -53,6 +53,7 @@ public class SearchAssembler {
             dto.setKeyword(item.getKeyword());
             dto.setType(item.getType());
             dto.setScore(item.getScore());
+            dto.setCount(item.getCount());
             result.add(dto);
         }
         return result;

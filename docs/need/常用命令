@@ -9,13 +9,28 @@ ls /mnt/sata1-4/docker/nacos/conf
 docker tag docker.m.daocloud.io/apacherocketmq/rocketmq-dashboard:1.0.0 apacherocketmq/rocketmq-dashboard:1.0.0
 
 
+docker exec -it rmqbroker bash
 
+# 创建所有 Topics
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t USER_REGISTERED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t CART_SYNC_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t ORDER_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t STOCK_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t PAYMENT_RESULT_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t LOGISTICS_STATUS_CHANGE_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t COUPON_ISSUED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t FLASH_SALE_STARTED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t ORDER_STATUS_CHANGED_TOPIC -r 8 -w 4
+sh mqadmin updateTopic -n rmqnamesrv:9876 -c DefaultCluster -t USER_BEHAVIOR_TOPIC -r 8 -w 4
+ # ← 新增
 
+# 验证
+sh mqadmin topicList -n rmqnamesrv:9876
 
+exit
 
 
 链路追踪 SkyWalking
-
 搜索与聚合分析 (Search Engine) —— Elasticsearch + Logstash + Kibana (ELK)
 不用Logstash， 现代方案（更推荐）： 现在的 Spring Cloud Alibaba 项目，大家更倾向于用 Filebeat（极轻量）或者直接在 Logback 里配置 Logstash-Tcp-Appender 把日志发出去。
 

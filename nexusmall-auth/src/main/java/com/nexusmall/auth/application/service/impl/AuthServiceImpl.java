@@ -261,41 +261,52 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateUser(User user) {
-        log.info("更新用户信息，userId: {}", user.getId());
+        log.info("【管理操作】更新用户信息，userId: {}", user.getId());
         
         User existingUser = userMapper.selectById(user.getId());
         if (existingUser == null) {
             throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
         }
         
-        // 如果修改了密码，需要加密
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+        // 生产级：密码修改需要特殊处理
+        if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
+            // 只有明确提供了新密码才修改
             user.setPassword(passwordEncoder.encode(user.getPassword()));
+            log.info("用户密码已更新，userId: {}", user.getId());
         } else {
-            user.setPassword(null); // 不修改密码
+            // 不修改密码字段
+            user.setPassword(null);
         }
         
         int result = userMapper.updateById(user);
-        log.info("用户信息更新{}", result > 0 ? "成功" : "失败");
+        log.info("【管理操作】用户信息更新{}，userId: {}", result > 0 ? "成功" : "失败", user.getId());
         return result > 0;
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteUser(Long userId) {
-        log.info("删除用户，userId: {}", userId);
+        log.info("【管理操作】删除用户，userId: {}", userId);
         
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
             throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
         }
         
-        // 先删除用户角色关联
-        userMapper.deleteUserRoles(userId);
+        // 生产级：逻辑删除（软删除），保留审计追踪
+        existingUser.setStatus(0); // 0=禁用（逻辑删除）
+        int result = userMapper.updateById(existingUser);
         
-        // 再删除用户
-        int result = userMapper.deleteById(userId);
-        log.info("用户删除{}", result > 0 ? "成功" : "失败");
+        // 撤销该用户的所有 Token
+        try {
+            refreshTokenService.revokeAllRefreshTokens(userId);
+            log.info("已撤销用户所有 Token，userId: {}", userId);
+        } catch (Exception e) {
+            log.error("撤销用户 Token 失败，userId: {}", userId, e);
+            // 不抛出异常，避免影响主流程
+        }
+        
+        log.info("【管理操作】用户已逻辑删除，userId: {}, username: {}", userId, existingUser.getUsername());
         return result > 0;
     }
 

@@ -28,6 +28,13 @@ public class GlobalExceptionHandler {
         return Result.failure(CommonResultCode.PARAM_INVALID);
     }
 
+    @ExceptionHandler(SearchModuleException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public Result<Void> handleSearchModuleException(SearchModuleException ex) {
+        log.error("搜索业务异常：{}", ex.getMessage(), ex);
+        return Result.failure(CommonResultCode.PARAM_INVALID.getErrorCode(), ex.getMessage());
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleValidation(MethodArgumentNotValidException ex) {

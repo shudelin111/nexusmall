@@ -24,7 +24,7 @@ public class ProductDataRepositoryImpl implements ProductDataRepository {
 
     @Override
     public ProductIndexDocument findByProductId(Long productId) {
-        Result<ProductClientDTO> result = productClient.getProduct(API_VERSION, productId);
+        Result<ProductClientDTO> result = productClient.getProduct(productId);
         if (result == null || !result.isSuccess() || result.getData() == null) {
             return null;
         }
@@ -35,7 +35,7 @@ public class ProductDataRepositoryImpl implements ProductDataRepository {
     public List<ProductIndexDocument> listOnSaleProducts() {
         ProductQueryClientRequest request = new ProductQueryClientRequest();
         request.setStatus(1);
-        Result<List<ProductClientDTO>> result = productClient.searchProducts(API_VERSION, request);
+        Result<List<ProductClientDTO>> result = productClient.searchProducts(request);
         if (result == null || !result.isSuccess() || CollectionUtils.isEmpty(result.getData())) {
             return new ArrayList<ProductIndexDocument>();
         }

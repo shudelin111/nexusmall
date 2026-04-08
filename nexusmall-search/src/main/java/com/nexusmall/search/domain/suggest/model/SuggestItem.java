@@ -5,6 +5,7 @@ public class SuggestItem {
     private String keyword;
     private String type;
     private Double score;
+    private Long count;
 
     public SuggestItem() {
     }
@@ -13,6 +14,13 @@ public class SuggestItem {
         this.keyword = keyword;
         this.type = type;
         this.score = score;
+    }
+
+    public SuggestItem(String keyword, String type, Double score, Long count) {
+        this.keyword = keyword;
+        this.type = type;
+        this.score = score;
+        this.count = count;
     }
 
     public String getKeyword() {
@@ -37,5 +45,13 @@ public class SuggestItem {
 
     public void setScore(Double score) {
         this.score = score;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 }

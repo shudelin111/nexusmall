@@ -25,6 +25,14 @@ spring:
     timeout-per-shutdown-phase: 30s
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://127.0.0.1:9200}
+  # Redis 缓存配置（搜索建议缓存）
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5分钟（毫秒）
+      key-prefix: "search:cache:"  # Key 前缀
+      use-key-prefix: true
+      cache-null-values: false  # 不缓存空值
 
 nexusmall:
   search:

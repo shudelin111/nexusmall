@@ -5,6 +5,7 @@ public class SuggestItemDTO {
     private String keyword;
     private String type;
     private Double score;
+    private Long count;
 
     public String getKeyword() {
         return keyword;
@@ -28,5 +29,13 @@ public class SuggestItemDTO {
 
     public void setScore(Double score) {
         this.score = score;
+    }
+
+    public Long getCount() {
+        return count;
+    }
+
+    public void setCount(Long count) {
+        this.count = count;
     }
 }
