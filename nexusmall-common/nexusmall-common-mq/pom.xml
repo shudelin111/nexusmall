@@ -23,6 +23,13 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- Kafka 支持 -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>

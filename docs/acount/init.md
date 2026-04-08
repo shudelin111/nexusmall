@@ -6,8 +6,8 @@ dckr_pat_377dijs8S7Y9jbuBDmIk_yi-CKI
 shudlsys/nexusmall
 
 
-https://10.10.1.40:30601/app/home#/ kibana
-elastic 12345678
+https://10.10.1.40:31820/app/integrations/browse kibana
+elastic G2M9CI4OHL1T9E4j123vIq9M
 
 argocd
 https://10.10.1.40:31256/applications/argocd/nexusmall-order?view=tree&resource=

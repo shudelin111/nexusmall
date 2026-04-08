@@ -63,4 +63,4 @@ data:
   SEATA_SERVER: "10.10.1.1:8848"
   
   # Elasticsearch（非敏感配置）
-  ELASTICSEARCH_URIS: "http://10.10.1.1:9200"
+  ELASTICSEARCH_URIS: "http://es-cluster-es-http.nexusmall-infra.svc:9200"
