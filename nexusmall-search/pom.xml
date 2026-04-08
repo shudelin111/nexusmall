@@ -111,6 +111,19 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Redis（Search 模块必需） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- 公共消息队列模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-mq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

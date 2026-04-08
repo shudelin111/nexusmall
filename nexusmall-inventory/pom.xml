@@ -165,6 +165,12 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Redisson 分布式锁（Inventory 模块必需） -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>
