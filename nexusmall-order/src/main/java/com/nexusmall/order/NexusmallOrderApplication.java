@@ -4,9 +4,6 @@ import com.nexusmall.common.aspect.SentinelBlockExceptionHandler;
 import com.nexusmall.common.config.GlobalFeignConfig;
 import com.nexusmall.common.config.KafkaLoggingProperties;
 import com.nexusmall.common.config.KafkaLoggingConfig;
-import com.nexusmall.common.config.RedisConfig;
-import com.nexusmall.common.config.RedissonConfig;
-import com.nexusmall.common.config.SeataDataSourceConfig;
 import com.nexusmall.common.config.SeataFeignConfig;
 import com.nexusmall.common.filter.SeataXidFilter;
 import com.nexusmall.common.util.RedisUtils;
@@ -47,9 +44,6 @@ import org.springframework.context.annotation.Import;
 @EnableFeignClients // 启用 Feign 客户端，扫描并注册 Feign 接口（声明式 HTTP 客户端）
 @EnableConfigurationProperties(KafkaLoggingProperties.class) // 启用 Kafka 日志配置属性绑定
 @Import({
-        RedisConfig.class,              // Redis 配置
-        RedissonConfig.class,           // 分布式锁配置
-        SeataDataSourceConfig.class,    // Seata 分布式事务配置
         SeataFeignConfig.class,         // Seata Feign 事务传播配置
         GlobalFeignConfig.class         // 全局 Feign 超时配置
 })

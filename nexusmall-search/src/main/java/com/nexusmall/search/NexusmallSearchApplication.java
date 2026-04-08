@@ -4,8 +4,6 @@ import com.nexusmall.common.aspect.SentinelBlockExceptionHandler;
 import com.nexusmall.common.config.GlobalFeignConfig;
 import com.nexusmall.common.config.KafkaLoggingProperties;
 import com.nexusmall.common.config.KafkaLoggingConfig;
-import com.nexusmall.common.config.RedisConfig;
-import com.nexusmall.common.config.RedissonConfig;
 import com.nexusmall.common.util.RedisUtils;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -35,7 +33,7 @@ import org.springframework.context.annotation.Import;
 @EnableFeignClients
 @EnableCaching  // 启用 Spring Cache
 @EnableConfigurationProperties(KafkaLoggingProperties.class)
-@Import({RedisConfig.class, RedissonConfig.class, GlobalFeignConfig.class})
+@Import({GlobalFeignConfig.class})
 @ComponentScan(basePackageClasses = {
         NexusmallSearchApplication.class,
         RedisUtils.class,

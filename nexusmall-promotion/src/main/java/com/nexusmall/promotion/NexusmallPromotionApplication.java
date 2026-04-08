@@ -4,9 +4,6 @@ import com.nexusmall.common.aspect.SentinelBlockExceptionHandler;
 import com.nexusmall.common.config.GlobalFeignConfig;
 import com.nexusmall.common.config.KafkaLoggingProperties;
 import com.nexusmall.common.config.KafkaLoggingConfig;
-import com.nexusmall.common.config.RedisConfig;
-import com.nexusmall.common.config.RedissonConfig;
-import com.nexusmall.common.config.SeataDataSourceConfig;
 import com.nexusmall.common.config.SeataFeignConfig;
 import com.nexusmall.common.filter.SeataXidFilter;
 import com.nexusmall.common.util.RedisUtils;
@@ -39,7 +36,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableFeignClients
 @EnableScheduling  // 启用定时任务
 @EnableConfigurationProperties(KafkaLoggingProperties.class)
-@Import({RedisConfig.class, RedissonConfig.class, SeataDataSourceConfig.class, SeataFeignConfig.class, GlobalFeignConfig.class, BloomFilterConfig.class})
+@Import({SeataFeignConfig.class, GlobalFeignConfig.class, BloomFilterConfig.class})
 @ComponentScan(basePackageClasses = {
         NexusmallPromotionApplication.class,
         RedisUtils.class,
