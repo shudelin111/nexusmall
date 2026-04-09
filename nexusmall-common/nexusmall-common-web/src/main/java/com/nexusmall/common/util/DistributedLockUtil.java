@@ -1,28 +1,38 @@
 package com.nexusmall.common.util;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.NexusmallException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
-import org.springframework.stereotype.Component;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 /**
  * Redisson 分布式锁工具类
- * 仅在 classpath 中存在 RedissonClient 时生效
+ * <p>
+ * 生产级实践：
+ * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
+ * 2. 使用构造器注入，便于单元测试
+ * 3. 条件化加载，仅在Redisson存在时生效
+ * </p>
  * 
  * @author shudl
  */
-@Component
 @ConditionalOnClass(RedissonClient.class)
 public class DistributedLockUtil {
 
-    @Autowired
-    private RedissonClient redissonClient;
+    private final RedissonClient redissonClient;
+
+    /**
+     * 构造器注入（生产级实践）
+     *
+     * @param redissonClient Redisson客户端
+     */
+    public DistributedLockUtil(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     /**
      * 尝试获取锁并执行操作
@@ -42,18 +52,11 @@ public class DistributedLockUtil {
             if (isLocked) {
                 return action.get();
             } else {
-                throw new NexusmallException(
-                    CommonResultCode.LOCK_FAILED.getCode(), 
-                    CommonResultCode.LOCK_FAILED.getMessage() + ": " + lockKey
-                );
+                throw new NexusmallException(ResultCode.LOCK_FAILED);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(
-                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
-                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
-                e
-            );
+            throw new NexusmallException(ResultCode.LOCK_INTERRUPTED, e);
         } finally {
             if (isLocked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -93,18 +96,11 @@ public class DistributedLockUtil {
             if (isLocked) {
                 return action.get();
             } else {
-                throw new NexusmallException(
-                    CommonResultCode.LOCK_FAILED.getCode(), 
-                    CommonResultCode.LOCK_FAILED.getMessage() + ": " + lockKey
-                );
+                throw new NexusmallException(ResultCode.LOCK_FAILED);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(
-                CommonResultCode.LOCK_INTERRUPTED.getCode(), 
-                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
-                e
-            );
+            throw new NexusmallException(ResultCode.LOCK_INTERRUPTED, e);
         } finally {
             if (isLocked && lock.isHeldByCurrentThread()) {
                 lock.unlock();

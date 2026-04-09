@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 /**
  * 物流缓存配置
  * <p>
- * 业界标准：
- * - 缓存仓库信息（变化频率低）
- * - 缓存运费模板（变化频率低）
- * - 设置合理的过期时间
+ * 业界标准�?
+ * - 缓存仓库信息（变化频率低�?
+ * - 缓存运费模板（变化频率低�?
+ * - 设置合理的过期时�?
  * </p>
  *
  * @author shudl
@@ -57,7 +57,7 @@ public class LogisticsCacheConfig {
         private long listTtlSeconds = 1800;
 
         /**
-         * 最大缓存数量
+         * 最大缓存数�?
          */
         private int maxSize = 100;
     }
@@ -78,12 +78,12 @@ public class LogisticsCacheConfig {
         private long ttlSeconds = 3600;
 
         /**
-         * 默认模板缓存TTL（秒），默认2小时（访问频率高）
+         * 默认模板缓存TTL（秒），默认2小时（访问频率高�?
          */
         private long defaultTtlSeconds = 7200;
 
         /**
-         * 最大缓存数量
+         * 最大缓存数�?
          */
         private int maxSize = 50;
     }

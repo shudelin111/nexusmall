@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component;
 /**
  * 第三方物流API配置
  * <p>
- * 业界标准：
+ * 业界标准�?
  * - 支持多家快递公司API对接
- * - 配置化API密钥和端点
- * - 便于切换物流服务商
+ * - 配置化API密钥和端�?
+ * - 便于切换物流服务�?
  * </p>
  *
  * @author shudl
@@ -27,7 +27,7 @@ public class ExpressApiConfig {
     private KuaiDiNiao kuaidiniao = new KuaiDiNiao();
 
     /**
-     * 快递100 API配置
+     * 快�?00 API配置
      */
     private KuaiDi100 kuaidi100 = new KuaiDi100();
 
@@ -63,7 +63,7 @@ public class ExpressApiConfig {
     }
 
     /**
-     * 快递100 API配置
+     * 快�?00 API配置
      */
     @Data
     public static class KuaiDi100 {

@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 会员业务异常
  * <p>
@@ -12,27 +14,11 @@ public class MemberException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public MemberException(String message) {
-        super(message);
+    public MemberException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public MemberException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public MemberException(String code, String message) {
-        super(code, message);
-    }
-
-    public MemberException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public MemberException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public MemberException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public MemberException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

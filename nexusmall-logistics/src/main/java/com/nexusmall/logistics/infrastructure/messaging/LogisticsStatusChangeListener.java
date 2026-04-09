@@ -17,10 +17,10 @@ import java.util.Map;
 /**
  * 物流状态变更事件监听器
  * <p>
- * 业界标准：
- * - 监听物流服务的状态变更事件
- * - 同步更新订单服务的物流状态
- * - 发送通知给用户
+ * 业界标准�?
+ * - 监听物流服务的状态变更事�?
+ * - 同步更新订单服务的物流状�?
+ * - 发送通知给用�?
  * </p>
  *
  * @author shudl
@@ -47,17 +47,17 @@ public class LogisticsStatusChangeListener implements RocketMQListener<String> {
             // 1. 解析事件
             LogisticsStatusChangeEvent event = JSON.parseObject(message, LogisticsStatusChangeEvent.class);
             if (event == null || event.getOrderSn() == null) {
-                log.error("【物流状态变更事件】事件数据无效");
+                log.error("【物流状态变更事件】事件数据无�?);
                 return;
             }
 
             log.info("【处理物流状态变更】orderSn={}, oldStatus={}, newStatus={}",
                     event.getOrderSn(), event.getOldStatus(), event.getNewStatus());
 
-            // 2. 更新订单服务的物流状态
+            // 2. 更新订单服务的物流状�?
             updateOrderLogisticsStatus(event);
 
-            // 3. 发送通知给用户
+            // 3. 发送通知给用�?
             sendNotificationToUser(event);
 
             log.info("【物流状态变更事件处理成功】orderSn={}", event.getOrderSn());
@@ -65,12 +65,12 @@ public class LogisticsStatusChangeListener implements RocketMQListener<String> {
         } catch (Exception e) {
             log.error("【物流状态变更事件处理失败】message={}", message, e);
             // 抛出异常，触发RocketMQ重试机制
-            throw new RuntimeException("物流状态变更事件处理失败", e);
+            throw new RuntimeException("物流状态变更事件处理失�?, e);
         }
     }
 
     /**
-     * 更新订单服务的物流状态
+     * 更新订单服务的物流状�?
      */
     private void updateOrderLogisticsStatus(LogisticsStatusChangeEvent event) {
         try {
@@ -81,19 +81,19 @@ public class LogisticsStatusChangeListener implements RocketMQListener<String> {
                     event.getOrderSn(), event.getNewStatus());
         } catch (Exception e) {
             log.error("【更新订单物流状态失败】orderSn={}", event.getOrderSn(), e);
-            // 不抛出异常，避免影响通知发送
+            // 不抛出异常，避免影响通知发�?
         }
     }
 
     /**
-     * 发送通知给用户
+     * 发送通知给用�?
      */
     private void sendNotificationToUser(LogisticsStatusChangeEvent event) {
         try {
             // 构建通知内容
             Map<String, Object> notification = new HashMap<>();
             notification.put("memberId", event.getMemberId());
-            notification.put("title", "物流状态更新");
+            notification.put("title", "物流状态更�?);
             notification.put("content", buildNotificationContent(event));
             notification.put("type", "LOGISTICS_STATUS_CHANGE");
             notification.put("bizId", event.getLogisticsOrderId());
@@ -105,7 +105,7 @@ public class LogisticsStatusChangeListener implements RocketMQListener<String> {
                     event.getMemberId(), notification.get("content"));
         } catch (Exception e) {
             log.error("【发送物流通知失败】memberId={}", event.getMemberId(), e);
-            // 不抛出异常，避免影响主流程
+            // 不抛出异常，避免影响主流�?
         }
     }
 
@@ -116,18 +116,18 @@ public class LogisticsStatusChangeListener implements RocketMQListener<String> {
         StringBuilder content = new StringBuilder();
         
         switch (event.getNewStatus()) {
-            case 1: // 已发货
+            case 1: // 已发�?
                 content.append("您的订单已发货，快递公司：").append(event.getExpressCompany())
                         .append("，快递单号：").append(event.getExpressNo());
                 break;
-            case 2: // 运输中
-                content.append("您的包裹正在运输中");
+            case 2: // 运输�?
+                content.append("您的包裹正在运输�?);
                 if (event.getTrackContent() != null) {
                     content.append("，最新状态：").append(event.getTrackContent());
                 }
                 break;
-            case 3: // 已签收
-                content.append("您的包裹已签收，请确认商品是否完好");
+            case 3: // 已签�?
+                content.append("您的包裹已签收，请确认商品是否完�?);
                 break;
             case 4: // 异常
                 content.append("您的包裹出现异常，请联系客服处理");

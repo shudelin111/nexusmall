@@ -1,7 +1,7 @@
 package com.nexusmall.common.aspect;
 
 import com.nexusmall.common.annotation.DistributedLock;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.NexusmallException;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -9,8 +9,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.core.annotation.Order;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
@@ -24,27 +24,30 @@ import java.util.concurrent.TimeUnit;
 /**
  * 分布式锁 AOP 切面
  * <p>
- * 注意：此类使用 @ConditionalOnClass 条件化加载，
- * 只有当 Redisson 依赖存在时才会被实例化。
+ * 生产级实践：
+ * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
+ * 2. 使用构造器注入，便于单元测试
+ * 3. 条件化加载，仅在Redisson存在时生效
  * </p>
  * 
  * @author shudl
  */
 @Aspect
-@Component
-@ConditionalOnClass(RedissonClient.class)
 @Order(1) // 确保切面优先级较高
 public class DistributedLockAspect {
 
-    @Autowired
-    private RedissonClient redissonClient;
+    private final RedissonClient redissonClient;
 
     private final ExpressionParser parser = new SpelExpressionParser();
-    
+
     /**
-     * 错误消息分隔符
+     * 构造器注入（生产级实践）
+     *
+     * @param redissonClient Redisson客户端
      */
-    private static final String ERROR_MESSAGE_SEPARATOR = "：";
+    public DistributedLockAspect(RedissonClient redissonClient) {
+        this.redissonClient = redissonClient;
+    }
 
     /**
      * 环绕通知，处理带有@DistributedLock 注解的方法
@@ -75,18 +78,11 @@ public class DistributedLockAspect {
                 return joinPoint.proceed();
             } else {
                 // 获取锁失败
-                throw new NexusmallException(
-                    CommonResultCode.LOCK_FAILED.getErrorCode(), 
-                    CommonResultCode.LOCK_FAILED.getMessage() + ERROR_MESSAGE_SEPARATOR + lockKey
-                );
+                throw new NexusmallException(ResultCode.LOCK_FAILED);
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new NexusmallException(
-                CommonResultCode.LOCK_INTERRUPTED.getErrorCode(), 
-                CommonResultCode.LOCK_INTERRUPTED.getMessage(), 
-                e
-            );
+            throw new NexusmallException(ResultCode.LOCK_INTERRUPTED, e);
         } finally {
             // 释放锁
             if (isLocked && lock.isHeldByCurrentThread()) {

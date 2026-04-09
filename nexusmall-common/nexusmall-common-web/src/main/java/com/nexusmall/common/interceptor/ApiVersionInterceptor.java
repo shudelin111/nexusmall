@@ -3,7 +3,7 @@ package com.nexusmall.common.interceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.ApiVersionConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
@@ -58,9 +58,7 @@ public class ApiVersionInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_NOT_ACCEPTABLE);
             response.setContentType("application/json;charset=UTF-8");
             Result<Void> result = Result.failure(
-                    CommonResultCode.SYSTEM_ERROR.getErrorCode(),
-                    "不支持的 API 版本：" + requestedVersion + "，支持的版本：" + 
-                    Arrays.toString(ApiVersionConstants.SUPPORTED_VERSIONS)
+                    ResultCode.SYSTEM_ERROR
             );
             response.getWriter().write(objectMapper.writeValueAsString(result));
             return false;
@@ -97,8 +95,7 @@ public class ApiVersionInterceptor implements HandlerInterceptor {
             response.setStatus(HttpServletResponse.SC_NOT_FOUND);
             response.setContentType("application/json;charset=UTF-8");
             Result<Void> result = Result.failure(
-                    CommonResultCode.SYSTEM_ERROR.getErrorCode(),
-                    "该接口不支持 API 版本：" + requestedVersion
+                    ResultCode.NOT_FOUND
             );
             response.getWriter().write(objectMapper.writeValueAsString(result));
             return false;

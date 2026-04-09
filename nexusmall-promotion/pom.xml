@@ -8,9 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.nexusmall</groupId>
     <artifactId>nexusmall-promotion</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>nexusmall-promotion</name>
     <description>nexusmall-promotion</description>
 

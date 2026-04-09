@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 库存业务异常
  * <p>
@@ -12,27 +14,11 @@ public class InventoryException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public InventoryException(String message) {
-        super(message);
+    public InventoryException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public InventoryException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public InventoryException(String code, String message) {
-        super(code, message);
-    }
-
-    public InventoryException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public InventoryException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public InventoryException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public InventoryException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

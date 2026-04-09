@@ -22,13 +22,13 @@ public class RedissonConfig {
     private String redisHost;
 
     @Value("${spring.redis.port}")
-    private int redisPort;
+    private Integer redisPort;
 
     @Value("${spring.redis.password:}")
     private String redisPassword;
 
     @Value("${spring.redis.database:0}")
-    private int redisDatabase;
+    private Integer redisDatabase;
 
     /**
      * 创建 RedissonClient 实例

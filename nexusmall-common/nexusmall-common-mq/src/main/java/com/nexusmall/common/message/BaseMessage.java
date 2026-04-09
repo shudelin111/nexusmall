@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 /**
  * 消息基类
  * <p>
- * 所有 MQ 消息都应该继承此类，提供通用的消息属性
+ * 所�?MQ 消息都应该继承此类，提供通用的消息属�?
  * </p>
  *
  * @author shudl
@@ -20,12 +20,12 @@ public abstract class BaseMessage implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 消息 ID（唯一标识）
+     * 消息 ID（唯一标识�?
      */
     private String messageId;
 
     /**
-     * 消息发送时间
+     * 消息发送时�?
      */
     private LocalDateTime sendTime;
 

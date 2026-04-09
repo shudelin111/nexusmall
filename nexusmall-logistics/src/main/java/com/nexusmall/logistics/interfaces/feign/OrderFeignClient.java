@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 /**
- * 订单服务 Feign 客户端
+ * 订单服务 Feign 客户�?
  * <p>
- * 业界标准：
+ * 业界标准�?
  * - 用于查询订单详细信息
  * - 物流状态变更时通知订单服务
  * </p>
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 public interface OrderFeignClient {
 
     /**
-     * 根据订单号查询订单
+     * 根据订单号查询订�?
      *
      * @param orderSn 订单编号
      * @return 订单信息
@@ -29,10 +29,10 @@ public interface OrderFeignClient {
     Result<Object> getOrderByOrderSn(@PathVariable("orderSn") String orderSn);
 
     /**
-     * 更新订单物流状态
+     * 更新订单物流状�?
      *
      * @param orderId     订单ID
-     * @param logisticsStatus 物流状态
+     * @param logisticsStatus 物流状�?
      * @return 是否成功
      */
     @GetMapping("/{orderId}/logistics-status")

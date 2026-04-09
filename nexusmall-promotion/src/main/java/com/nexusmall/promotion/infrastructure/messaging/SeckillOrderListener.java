@@ -8,7 +8,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 秒杀订单创建监听器
+ * 秒杀订单创建监听�?
  * <p>
  * 业界标准：异步解耦，提升秒杀响应速度
  * </p>
@@ -30,14 +30,14 @@ public class SeckillOrderListener implements RocketMQListener<String> {
         log.info("【收到秒杀订单消息】message={}", message);
         
         try {
-            // TODO: 解析消息，调用订单服务创建订单
+            // TODO: 解析消息，调用订单服务创建订�?
             // SeckillOrderMessage seckillOrder = JSON.parseObject(message, SeckillOrderMessage.class);
             // orderFeignClient.createSeckillOrder(buildOrderRequest(seckillOrder));
             
-            log.info("【秒杀订单创建成功】");
+            log.info("【秒杀订单创建成功�?);
         } catch (Exception e) {
             log.error("【秒杀订单创建失败】message={}, error={}", message, e.getMessage(), e);
-            // TODO: 重试机制或人工介入
+            // TODO: 重试机制或人工介�?
         }
     }
 }

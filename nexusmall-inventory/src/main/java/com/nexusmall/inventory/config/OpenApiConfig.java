@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * OpenAPI 3.0 配置类 (SpringDoc + Knife4j)
+ * OpenAPI 3.0 配置�?(SpringDoc + Knife4j)
  * <p>
  * 业界标准配置,遵循 OpenAPI 3.0 规范
  * 官方文档: https://springdoc.org/
@@ -49,12 +49,12 @@ public class OpenApiConfig {
                     "使用 JWT Token 进行身份验证，在请求头中添加 `Authorization: Bearer {token}`")
                 // API 版本
                 .version("v1.0.0")
-                // 联系人信息
+                // 联系人信�?
                 .contact(new Contact()
                     .name("NexusMall Team")
                     .email("support@nexusmall.com")
                     .url("https://github.com/nexusmall"))
-                // 许可证信息
+                // 许可证信�?
                 .license(new License()
                     .name("Apache 2.0")
                     .url("https://www.apache.org/licenses/LICENSE-2.0.html"))

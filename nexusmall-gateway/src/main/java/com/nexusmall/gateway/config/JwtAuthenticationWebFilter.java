@@ -1,6 +1,6 @@
 package com.nexusmall.gateway.config;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.GatewayException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -77,19 +77,19 @@ public class JwtAuthenticationWebFilter implements WebFilter {
             return processValidToken(claims, exchange, chain);
         } catch (ExpiredJwtException e) {
             log.warn("JWT Token 已过期，path: {}, 过期时间：{}", path, e.getClaims().getExpiration());
-            return Mono.error(createGatewayException(CommonResultCode.UNAUTHORIZED, "Token 已过期"));
+            return Mono.error(createGatewayException(ResultCode.UNAUTHORIZED, "Token 已过期"));
         } catch (SignatureException e) {
             log.warn("JWT Token 签名无效，path: {}, 原因：{}", path, e.getMessage());
-            return Mono.error(createGatewayException(CommonResultCode.UNAUTHORIZED, "Token 签名无效"));
+            return Mono.error(createGatewayException(ResultCode.UNAUTHORIZED, "Token 签名无效"));
         } catch (JwtException e) {
             log.warn("JWT Token 解析失败，path: {}, 原因：{}", path, e.getMessage());
-            return Mono.error(createGatewayException(CommonResultCode.UNAUTHORIZED, "Token 解析失败"));
+            return Mono.error(createGatewayException(ResultCode.UNAUTHORIZED, "Token 解析失败"));
         } catch (IllegalArgumentException e) {
             log.warn("JWT Token 格式非法，path: {}, 原因：{}", path, e.getMessage());
-            return Mono.error(createGatewayException(CommonResultCode.UNAUTHORIZED, "Token 格式非法"));
+            return Mono.error(createGatewayException(ResultCode.UNAUTHORIZED, "Token 格式非法"));
         } catch (Exception e) {
             log.error("JWT Token 验证异常，path: {}, token: {}", path, token, e);
-            return Mono.error(createGatewayException(CommonResultCode.UNAUTHORIZED, "Token 验证失败"));
+            return Mono.error(createGatewayException(ResultCode.UNAUTHORIZED, "Token 验证失败"));
         }
     }
 
@@ -164,8 +164,8 @@ public class JwtAuthenticationWebFilter implements WebFilter {
      * @param message 错误消息
      * @return GatewayException
      */
-    private GatewayException createGatewayException(CommonResultCode code, String message) {
-        return new GatewayException(code.getErrorCode(), message);
+    private GatewayException createGatewayException(ResultCode code, String message) {
+        return new GatewayException(code);
     }
 
     /**

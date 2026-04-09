@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 第三方服务业务异常
  * <p>
@@ -12,27 +14,11 @@ public class ThirdPartyException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public ThirdPartyException(String message) {
-        super(message);
+    public ThirdPartyException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public ThirdPartyException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public ThirdPartyException(String code, String message) {
-        super(code, message);
-    }
-
-    public ThirdPartyException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ThirdPartyException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public ThirdPartyException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public ThirdPartyException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

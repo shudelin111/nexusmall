@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 /**
  * 物流轨迹实体
  * <p>
- * 业界标准：
+ * 业界标准�?
  * - 记录完整物流轨迹链路
  * - 支持第三方物流API同步
  * - 按时间倒序展示
@@ -40,9 +40,9 @@ public class LogisticsTrack implements Serializable {
     private Long logisticsOrderId;
 
     /**
-     * 快递单号
+     * 快递单�?
      */
-    @Schema(description = "快递单号")
+    @Schema(description = "快递单�?)
     private String expressNo;
 
     /**
@@ -64,9 +64,9 @@ public class LogisticsTrack implements Serializable {
     private String trackLocation;
 
     /**
-     * 轨迹状态：1=已揽件，2=运输中，3=派送中，4=已签收
+     * 轨迹状态：1=已揽件，2=运输中，3=派送中�?=已签�?
      */
-    @Schema(description = "轨迹状态：1=已揽件，2=运输中，3=派送中，4=已签收")
+    @Schema(description = "轨迹状态：1=已揽件，2=运输中，3=派送中�?=已签�?)
     private Integer trackStatus;
 
     /**

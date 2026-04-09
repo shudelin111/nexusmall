@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * 仓库服务接口
  * <p>
- * 业界标准：
+ * 业界标准�?
  * - 支持仓库CRUD
  * - 支持智能仓库分配
  * - 支持仓库启用/禁用
@@ -35,9 +35,9 @@ public interface LogisticsWarehouseService extends IService<LogisticsWarehouse> 
     LogisticsWarehouse getByWarehouseCode(String warehouseCode);
 
     /**
-     * 智能分配仓库（根据收货地址）
+     * 智能分配仓库（根据收货地址�?
      * <p>
-     * 业界标准：
+     * 业界标准�?
      * - 优先匹配同省仓库
      * - 其次匹配同城仓库
      * - 最后选择距离最近的仓库

@@ -27,7 +27,7 @@ public interface RefreshTokenMapper extends BaseMapper<RefreshToken> {
     /**
      * 根据用户名查询有效的 Refresh Token 列表
      *
-     * @param username 用户名
+     * @param username 用户�?
      * @return RefreshToken 列表
      */
     List<RefreshToken> findValidByUserId(@Param("userId") Long userId);
@@ -42,7 +42,7 @@ public interface RefreshTokenMapper extends BaseMapper<RefreshToken> {
     int invalidateToken(@Param("userId") Long userId, @Param("jti") String jti);
 
     /**
-     * 使指定用户的所有 Token 失效 (登出所有设备)
+     * 使指定用户的所�?Token 失效 (登出所有设�?
      *
      * @param userId 用户ID
      * @return 影响行数
@@ -50,7 +50,7 @@ public interface RefreshTokenMapper extends BaseMapper<RefreshToken> {
     int invalidateAllTokens(@Param("userId") Long userId);
 
     /**
-     * 清理过期的 Refresh Token
+     * 清理过期�?Refresh Token
      *
      * @return 影响行数
      */

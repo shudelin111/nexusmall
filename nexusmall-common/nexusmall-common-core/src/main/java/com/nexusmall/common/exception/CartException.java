@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 购物车业务异常
  * <p>
@@ -12,27 +14,11 @@ public class CartException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public CartException(String message) {
-        super(message);
+    public CartException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public CartException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public CartException(String code, String message) {
-        super(code, message);
-    }
-
-    public CartException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public CartException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public CartException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public CartException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

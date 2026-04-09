@@ -11,8 +11,8 @@ import java.time.LocalDateTime;
 /**
  * 运费模板实体
  * <p>
- * 业界标准：
- * - 支持多种计费方式（按重量/体积/件数）
+ * 业界标准�?
+ * - 支持多种计费方式（按重量/体积/件数�?
  * - 首重续重计费模型
  * - 包邮门槛设置
  * </p>
@@ -41,51 +41,51 @@ public class LogisticsFreightTemplate implements Serializable {
     private String templateName;
 
     /**
-     * 计费方式：1=按重量，2=按体积，3=按件数
+     * 计费方式�?=按重量，2=按体积，3=按件�?
      */
-    @Schema(description = "计费方式：1=按重量，2=按体积，3=按件数")
+    @Schema(description = "计费方式�?=按重量，2=按体积，3=按件�?)
     private Integer chargeType;
 
     /**
-     * 首重（kg）
+     * 首重（kg�?
      */
-    @Schema(description = "首重（kg）")
+    @Schema(description = "首重（kg�?)
     private BigDecimal firstWeight;
 
     /**
-     * 首重费用（元）
+     * 首重费用（元�?
      */
-    @Schema(description = "首重费用（元）")
+    @Schema(description = "首重费用（元�?)
     private BigDecimal firstFee;
 
     /**
-     * 续重（kg）
+     * 续重（kg�?
      */
-    @Schema(description = "续重（kg）")
+    @Schema(description = "续重（kg�?)
     private BigDecimal continuedWeight;
 
     /**
-     * 续重费用（元）
+     * 续重费用（元�?
      */
-    @Schema(description = "续重费用（元）")
+    @Schema(description = "续重费用（元�?)
     private BigDecimal continuedFee;
 
     /**
-     * 包邮门槛（元）
+     * 包邮门槛（元�?
      */
-    @Schema(description = "包邮门槛（元）")
+    @Schema(description = "包邮门槛（元�?)
     private BigDecimal freeThreshold;
 
     /**
-     * 是否默认模板：0=否，1=是
+     * 是否默认模板�?=否，1=�?
      */
-    @Schema(description = "是否默认模板：0=否，1=是")
+    @Schema(description = "是否默认模板�?=否，1=�?)
     private Integer isDefault;
 
     /**
-     * 状态：0=禁用，1=启用
+     * 状态：0=禁用�?=启用
      */
-    @Schema(description = "状态：0=禁用，1=启用")
+    @Schema(description = "状态：0=禁用�?=启用")
     private Integer status;
 
     /**

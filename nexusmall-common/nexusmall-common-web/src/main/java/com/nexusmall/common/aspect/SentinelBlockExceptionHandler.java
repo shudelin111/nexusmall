@@ -3,13 +3,11 @@ package com.nexusmall.common.aspect;
 import com.alibaba.csp.sentinel.adapter.spring.webmvc.callback.BlockExceptionHandler;
 import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.enums.SentinelBlockType;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import javax.servlet.http.HttpServletRequest;
@@ -19,17 +17,16 @@ import javax.servlet.http.HttpServletResponse;
  * Sentinel 全局流控异常处理器
  * <p>
  * 生产级实践：
- * 1. 使用 @ConditionalOnClass 确保只有在引入 Sentinel 依赖时才创建此 Bean
- * 2. 避免在未使用 Sentinel 的模块中因缺少依赖导致启动失败
- * 3. 统一处理所有被 Sentinel 拦截的请求（限流、熔断、降级等）
+ * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
+ * 2. 使用@ConditionalOnClass确保只有在引入 Sentinel 依赖时才创建此 Bean
+ * 3. 避免在未使用 Sentinel 的模块中因缺少依赖导致启动失败
+ * 4. 统一处理所有被 Sentinel 拦截的请求（限流、熔断、降级等）
  * </p>
  *
  * @author shudl
  * @since 2026-03-26
  */
 @Slf4j
-@Component
-@ConditionalOnClass(BlockExceptionHandler.class)
 public class SentinelBlockExceptionHandler implements BlockExceptionHandler {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();
@@ -57,13 +54,10 @@ public class SentinelBlockExceptionHandler implements BlockExceptionHandler {
         Result<Void> result;
         if (blockType != null) {
             // 使用枚举中定义的业务错误码和消息
-            result = Result.failure(
-                blockType.getResultCode().getErrorCode(), 
-                blockType.getResultCode().getMessage()
-            );
+            result = Result.failure(blockType.getResultCode());
         } else {
             // 未知类型，使用默认错误码
-            result = Result.failure(CommonResultCode.SENTINEL_UNKNOWN.getErrorCode(), CommonResultCode.SENTINEL_UNKNOWN.getMessage());
+            result = Result.failure(ResultCode.SENTINEL_UNKNOWN);
         }
         
         // 返回 JSON 响应
@@ -79,8 +73,8 @@ public class SentinelBlockExceptionHandler implements BlockExceptionHandler {
      */
     private int getHttpStatus(SentinelBlockType blockType) {
         if (blockType != null) {
-            return blockType.getResultCode().getCode();
+            return blockType.getResultCode().getHttpStatus();
         }
-        return CommonResultCode.SYSTEM_ERROR.getCode();
+        return ResultCode.SYSTEM_ERROR.getHttpStatus();
     }
 }

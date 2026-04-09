@@ -10,9 +10,9 @@ import java.util.UUID;
  * 管理操作审计日志服务
  * <p>
  * 生产级特性：
- * - 记录所有管理后台操作
- * - 结构化日志输出
- * - 支持异步发送到 Kafka（TODO）
+ * - 记录所有管理后台操�?
+ * - 结构化日志输�?
+ * - 支持异步发送到 Kafka（TODO�?
  * </p>
  *
  * @author nexusmall
@@ -28,17 +28,17 @@ public class AdminAuditService {
      * @param auditLog 审计日志对象
      */
     public void logAudit(AdminAuditLog auditLog) {
-        // 1. 生成操作 ID（如果未提供）
+        // 1. 生成操作 ID（如果未提供�?
         if (auditLog.getOperationId() == null) {
             auditLog.setOperationId(UUID.randomUUID().toString());
         }
 
-        // 2. 设置操作时间（如果未提供）
+        // 2. 设置操作时间（如果未提供�?
         if (auditLog.getOperateTime() == null) {
             auditLog.setOperateTime(LocalDateTime.now());
         }
 
-        // 3. 结构化日志输出
+        // 3. 结构化日志输�?
         log.info("[审计日志-{}] type={}, operator={}, target={}, result={}, duration={}ms, ip={}",
                 auditLog.getOperationId(),
                 auditLog.getOperationType(),

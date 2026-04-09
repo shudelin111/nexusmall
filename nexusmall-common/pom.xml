@@ -8,9 +8,7 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>com.nexusmall</groupId>
 	<artifactId>nexusmall-common</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>nexusmall-common</name>
 	<description>NexusMall 公共模块父 POM - 聚合 core/web/database/mq 子模块</description>

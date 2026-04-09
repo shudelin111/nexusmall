@@ -37,7 +37,7 @@ import java.util.Map;
 @RequestMapping("/payments")  // V1 和 V2 使用相同路径,通过 Header 区分版本
 @RequiredArgsConstructor
 @ApiVersion("v2")  // 标记此 Controller 为 v2 版本
-@Tag(name = "支付单管理 V2", description = "支付单的创建、查询、回调等接口(V2版本)")
+@Tag(name = "支付单管理V2", description = "支付单的创建、查询、回调等接口(V2版本)")
 public class PayOrderControllerV2 {
 
     private final PayOrderService payOrderService;
@@ -55,14 +55,14 @@ public class PayOrderControllerV2 {
      * @return 支付表单HTML或二维码URL
      */
     @PostMapping(value = "/create", headers = "X-API-Version=v2")
-    @Operation(summary = "创建支付单 V2", description = "V2版本：支持组合支付、分期付款等新特性")
+    @Operation(summary = "创建支付单V2", description = "V2版本：支持组合支付、分期付款等新特性")
     public Result<String> createPayOrderV2(@RequestBody CreatePayOrderRequest request) {
         log.info("【V2 创建支付单】orderNo={}, channel={}, amount={}", 
                 request.getOrderNo(), request.getChannelCode(), request.getPayAmount());
         
         // V2 增强逻辑：验证是否支持新功能
         // 注：当前版本暂不支持 extraParams，未来可扩展
-        log.info("【V2 增强功能】支付金额={}, 优惠金额={}", 
+        log.info("【V2 增强功能】支付金额:{}, 优惠金额:{}", 
                 request.getPayAmount(), request.getDiscountAmount());
         
         String paymentResult = payOrderService.createPayOrder(request);
@@ -82,7 +82,7 @@ public class PayOrderControllerV2 {
      * @return 支付单详情
      */
     @GetMapping(value = "/query/{paymentNo}", headers = "X-API-Version=v2")
-    @Operation(summary = "查询支付单 V2", description = "V2版本：返回更详细的支付信息")
+    @Operation(summary = "查询支付单V2", description = "V2版本：返回更详细的支付信息")
     public Result<PayOrderResponse> queryPayOrderV2(
             @Parameter(description = "支付单号", required = true)
             @PathVariable String paymentNo) {
@@ -162,7 +162,7 @@ public class PayOrderControllerV2 {
         result.put("expireTime", 1800);
         result.put("message", "请分别完成两个支付渠道的付款");
         
-        log.info("【V2 组合支付】创建成功，总金额={}, 支付宝={}, 微信={}", 
+        log.info("【V2 组合支付】创建成功，总金额:{}, 支付宝:{}, 微信:{}", 
                 totalAmount, alipayAmount, wechatAmount);
         
         return Result.success(result);
@@ -225,7 +225,7 @@ public class PayOrderControllerV2 {
         result.put("installmentPlan", installmentPlan);
         result.put("firstPaymentDue", now.plusMonths(1).toString());
         
-        log.info("【V2 分期付款】计算完成，总金额={}, 总利息={}, 每期={}", 
+        log.info("【V2 分期付款】计算完成，总金额:{}, 总利息:{}, 每期:{}", 
                 totalAmount, totalInterest, perPeriodAmount);
         
         return Result.success(result);

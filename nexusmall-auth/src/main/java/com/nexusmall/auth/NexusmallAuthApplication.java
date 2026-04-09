@@ -6,9 +6,9 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * 认证服务启动类
+ * 认证服务启动�?
  * <p>
- * 负责用户认证、Token 生成与验证
+ * 负责用户认证、Token 生成与验�?
  * </p>
  *
  * @author shudl

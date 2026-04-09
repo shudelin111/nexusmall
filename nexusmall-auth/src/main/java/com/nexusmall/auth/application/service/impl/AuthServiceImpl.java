@@ -7,7 +7,8 @@ import com.nexusmall.auth.domain.entity.Permission;
 import com.nexusmall.auth.domain.entity.Role;
 import com.nexusmall.auth.domain.entity.User;
 import com.nexusmall.auth.infrastructure.messaging.UserRegisteredEvent;
-import com.nexusmall.auth.interfaces.exception.AuthException;
+import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.exception.AuthException;
 import com.nexusmall.auth.application.service.AuthService;
 import com.nexusmall.auth.application.service.RefreshTokenService;
 import com.nexusmall.auth.application.service.TokenBlacklistService;
@@ -15,7 +16,7 @@ import com.nexusmall.auth.util.JwtUtil;
 import com.nexusmall.auth.interfaces.dto.AuthRequest;
 import com.nexusmall.auth.interfaces.dto.AuthResponse;
 import com.nexusmall.common.constant.ErrorMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,12 +62,12 @@ public class AuthServiceImpl implements AuthService {
         User user = userMapper.findByUsername(request.getUsername());
         if (user == null || user.getStatus() != 1) {
             log.warn("用户不存在或已禁用，username: {}", request.getUsername());
-            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getErrorCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
+            throw new AuthException(ResultCode.INVALID_CREDENTIALS);
         }
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("密码不匹配，username: {}", request.getUsername());
-            throw new AuthException(CommonResultCode.INVALID_CREDENTIALS.getErrorCode(), CommonResultCode.INVALID_CREDENTIALS.getMessage());
+            throw new AuthException(ResultCode.INVALID_CREDENTIALS);
         }
 
         List<Role> roles = roleMapper.findByUserId(user.getId());
@@ -111,16 +112,16 @@ public class AuthServiceImpl implements AuthService {
             // 1. 获取 Token JTI
             String jti = jwtUtil.getJtiFromToken(token);
             
-            // 2. 获取用户名
+            // 2. 获取用户�?
             String username = jwtUtil.getUsernameFromToken(token);
             User user = userMapper.findByUsername(username);
             
             if (user != null) {
-                // 3. 撤销该用户的所有 Refresh Token
+                // 3. 撤销该用户的所�?Refresh Token
                 refreshTokenService.revokeAllRefreshTokens(user.getId());
             }
             
-            // 4. 将 Access Token 加入黑名单
+            // 4. �?Access Token 加入黑名�?
             long remainingTime = jwtUtil.validateToken(token) ? 
                     calculateRemainingTime(token) : 0;
             if (remainingTime > 0) {
@@ -134,7 +135,7 @@ public class AuthServiceImpl implements AuthService {
     }
     
     /**
-     * 计算 Token 剩余有效期
+     * 计算 Token 剩余有效�?
      */
     private long calculateRemainingTime(String token) {
         try {
@@ -157,7 +158,7 @@ public class AuthServiceImpl implements AuthService {
      */
     private java.security.PublicKey getPublicKey() {
         try {
-            String publicKeyPEM = ""; // TODO: 从 RsaKeyProperties 获取
+            String publicKeyPEM = ""; // TODO: �?RsaKeyProperties 获取
             publicKeyPEM = publicKeyPEM
                     .replace("-----BEGIN PUBLIC KEY-----", "")
                     .replace("-----END PUBLIC KEY-----", "")
@@ -183,7 +184,7 @@ public class AuthServiceImpl implements AuthService {
             return false;
         }
         
-        // 2. 验证 Token 签名和过期时间
+        // 2. 验证 Token 签名和过期时�?
         boolean valid = jwtUtil.validateToken(token);
         log.info("Token 验证{}", valid ? "成功" : "失败");
         return valid;
@@ -200,10 +201,10 @@ public class AuthServiceImpl implements AuthService {
     public boolean register(User user, List<Long> roleIds) {
         log.info("开始注册用户，username: {}", user.getUsername());
         
-        // 1. 检查用户名是否已存在
+        // 1. 检查用户名是否已存�?
         User existingUser = userMapper.findByUsername(user.getUsername());
         if (existingUser != null) {
-            throw new AuthException(CommonResultCode.USER_ALREADY_EXISTS.getErrorCode(), CommonResultCode.USER_ALREADY_EXISTS.getMessage());
+            throw new AuthException(ResultCode.USER_ALREADY_EXISTS);
         }
         
         // 2. 加密密码
@@ -213,10 +214,10 @@ public class AuthServiceImpl implements AuthService {
         // 3. 插入用户
         int result = userMapper.insert(user);
         if (result <= 0) {
-            throw new AuthException(CommonResultCode.USER_REGISTRATION_FAILED.getErrorCode(), CommonResultCode.USER_REGISTRATION_FAILED.getMessage());
+            throw new AuthException(ResultCode.USER_REGISTRATION_FAILED);
         }
         
-        // 4. 分配角色（如果有）
+        // 4. 分配角色（如果有�?
         if (roleIds != null && !roleIds.isEmpty()) {
             for (Long roleId : roleIds) {
                 com.nexusmall.auth.domain.entity.UserRole userRole = new com.nexusmall.auth.domain.entity.UserRole();
@@ -250,8 +251,8 @@ public class AuthServiceImpl implements AuthService {
             log.info("用户注册事件已发送，userId: {}", user.getId());
         } catch (Exception e) {
             log.error("发送用户注册事件失败，userId: {}", user.getId(), e);
-            // 注意：这里不抛出异常，避免影响注册流程
-            // Member 服务会通过重试机制最终处理
+            // 注意：这里不抛出异常，避免影响注册流�?
+            // Member 服务会通过重试机制最终处�?
         }
         
         log.info("用户注册成功，userId: {}", user.getId());
@@ -265,16 +266,16 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(user.getId());
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(ResultCode.USER_NOT_FOUND);
         }
         
-        // 生产级：密码修改需要特殊处理
+        // 生产级：密码修改需要特殊处�?
         if (user.getPassword() != null && !user.getPassword().trim().isEmpty()) {
-            // 只有明确提供了新密码才修改
+            // 只有明确提供了新密码才修�?
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             log.info("用户密码已更新，userId: {}", user.getId());
         } else {
-            // 不修改密码字段
+            // 不修改密码字�?
             user.setPassword(null);
         }
         
@@ -290,20 +291,20 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(ResultCode.USER_NOT_FOUND);
         }
         
         // 生产级：逻辑删除（软删除），保留审计追踪
-        existingUser.setStatus(0); // 0=禁用（逻辑删除）
+        existingUser.setStatus(0); // 0=禁用（逻辑删除�?
         int result = userMapper.updateById(existingUser);
         
-        // 撤销该用户的所有 Token
+        // 撤销该用户的所�?Token
         try {
             refreshTokenService.revokeAllRefreshTokens(userId);
-            log.info("已撤销用户所有 Token，userId: {}", userId);
+            log.info("已撤销用户所�?Token，userId: {}", userId);
         } catch (Exception e) {
             log.error("撤销用户 Token 失败，userId: {}", userId, e);
-            // 不抛出异常，避免影响主流程
+            // 不抛出异常，避免影响主流�?
         }
         
         log.info("【管理操作】用户已逻辑删除，userId: {}, username: {}", userId, existingUser.getUsername());
@@ -317,10 +318,10 @@ public class AuthServiceImpl implements AuthService {
         
         User existingUser = userMapper.selectById(userId);
         if (existingUser == null) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getErrorCode(), CommonResultCode.USER_NOT_FOUND.getMessage());
+            throw new AuthException(ResultCode.USER_NOT_FOUND);
         }
         
-        // 删除原有的角色关联
+        // 删除原有的角色关�?
         userMapper.deleteUserRoles(userId);
         
         // 添加新的角色关联
@@ -328,7 +329,7 @@ public class AuthServiceImpl implements AuthService {
             for (Long roleId : roleIds) {
                 Role role = roleMapper.selectById(roleId);
                 if (role == null) {
-                    throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getErrorCode(), 
+                    throw new AuthException(ResultCode.ROLE_NOT_FOUND, 
                             ErrorMessageConstants.Auth.ROLE_NOT_FOUND_WITH_ID + roleId);
                 }
                 com.nexusmall.auth.domain.entity.UserRole userRole = new com.nexusmall.auth.domain.entity.UserRole();
@@ -349,10 +350,10 @@ public class AuthServiceImpl implements AuthService {
         
         Role existingRole = roleMapper.selectById(roleId);
         if (existingRole == null) {
-            throw new AuthException(CommonResultCode.ROLE_NOT_FOUND.getErrorCode(), CommonResultCode.ROLE_NOT_FOUND.getMessage());
+            throw new AuthException(ResultCode.ROLE_NOT_FOUND);
         }
         
-        // 删除原有的权限关联
+        // 删除原有的权限关�?
         roleMapper.deleteRolePermissions(roleId);
         
         // 添加新的权限关联
@@ -360,7 +361,7 @@ public class AuthServiceImpl implements AuthService {
             for (Long permissionId : permissionIds) {
                 Permission permission = permissionMapper.selectById(permissionId);
                 if (permission == null) {
-                    throw new AuthException(CommonResultCode.PERMISSION_NOT_FOUND.getErrorCode(), 
+                    throw new AuthException(ResultCode.PERMISSION_NOT_FOUND, 
                             ErrorMessageConstants.Auth.PERMISSION_NOT_FOUND_WITH_ID + permissionId);
                 }
                 com.nexusmall.auth.domain.entity.RolePermission rolePermission = new com.nexusmall.auth.domain.entity.RolePermission();

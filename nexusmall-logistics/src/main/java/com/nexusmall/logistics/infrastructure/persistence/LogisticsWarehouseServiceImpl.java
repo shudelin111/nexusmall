@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 仓库服务实现类
+ * 仓库服务实现�?
  *
  * @author shudl
  * @since 2026-04-07
@@ -49,18 +49,18 @@ public class LogisticsWarehouseServiceImpl extends ServiceImpl<LogisticsWarehous
             return null;
         }
 
-        // 策略1：优先匹配同省仓库
+        // 策略1：优先匹配同省仓�?
         List<LogisticsWarehouse> sameProvinceWarehouses = enabledWarehouses.stream()
                 .filter(w -> w.getProvince().equals(province))
                 .collect(Collectors.toList());
 
         if (!sameProvinceWarehouses.isEmpty()) {
             log.info("【智能分配仓库】匹配到同省仓库，count={}", sameProvinceWarehouses.size());
-            // 同省仓库中选择第一个
+            // 同省仓库中选择第一�?
             return sameProvinceWarehouses.get(0).getId();
         }
 
-        // 策略2：其次匹配同城仓库（理论上不会走到这里，因为同城必然同省）
+        // 策略2：其次匹配同城仓库（理论上不会走到这里，因为同城必然同省�?
         List<LogisticsWarehouse> sameCityWarehouses = enabledWarehouses.stream()
                 .filter(w -> w.getCity().equals(city))
                 .collect(Collectors.toList());
@@ -70,8 +70,8 @@ public class LogisticsWarehouseServiceImpl extends ServiceImpl<LogisticsWarehous
             return sameCityWarehouses.get(0).getId();
         }
 
-        // 策略3：选择距离最近的仓库（简化版：选择第一个启用的仓库）
-        log.info("【智能分配仓库】未匹配到同省/同城仓库，使用默认仓库");
+        // 策略3：选择距离最近的仓库（简化版：选择第一个启用的仓库�?
+        log.info("【智能分配仓库】未匹配到同�?同城仓库，使用默认仓�?);
         return enabledWarehouses.get(0).getId();
     }
 

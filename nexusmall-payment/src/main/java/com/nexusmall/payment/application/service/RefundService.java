@@ -8,7 +8,9 @@ import com.nexusmall.payment.domain.model.entity.PayOrder;
 import com.nexusmall.payment.domain.model.entity.PayRefund;
 import com.nexusmall.payment.domain.model.enums.PayStatusEnum;
 import com.nexusmall.payment.domain.model.enums.RefundStatusEnum;
-import com.nexusmall.payment.interfaces.exception.PaymentException;
+import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.exception.PaymentException;
+import com.nexusmall.common.util.DesensitizationUtils;
 import com.nexusmall.payment.interfaces.dto.request.CreateRefundRequest;
 import com.nexusmall.payment.interfaces.dto.response.RefundResponse;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +68,11 @@ public class RefundService {
      */
     @Transactional(rollbackFor = Exception.class)
     public String applyRefund(CreateRefundRequest request) {
-        log.info("【申请退款】开始，paymentNo={}, amount={}", request.getPaymentNo(), request.getRefundAmount());
+        log.info("【申请退款】开始 - paymentNo={}, orderNo={}, amount={}, userId={}", 
+                DesensitizationUtils.desensitizePaymentNo(request.getPaymentNo()),
+                DesensitizationUtils.desensitizeOrderNo(request.getOrderNo()),
+                request.getRefundAmount(),
+                request.getUserId());
 
         // 1. 查询支付单
         LambdaQueryWrapper<PayOrder> orderWrapper = new LambdaQueryWrapper<>();
@@ -74,17 +80,17 @@ public class RefundService {
         PayOrder payOrder = payOrderMapper.selectOne(orderWrapper);
 
         if (payOrder == null) {
-            throw new PaymentException("支付单不存在");
+            throw new PaymentException(ResultCode.PAYMENT_NOT_FOUND, "支付单不存在: " + request.getPaymentNo());
         }
 
         // 2. 验证支付单状态（只有支付成功的才能退款）
         if (!PayStatusEnum.SUCCESS.getCode().equals(payOrder.getStatus())) {
-            throw new PaymentException("只有支付成功的订单才能申请退款");
+            throw new PaymentException(ResultCode.PAYMENT_FAILED, "只有支付成功的订单才能申请退款");
         }
 
         // 3. 验证退款金额
         if (request.getRefundAmount().compareTo(payOrder.getPayAmount()) > 0) {
-            throw new PaymentException("退款金额不能超过支付金额");
+            throw new PaymentException(ResultCode.INVALID_PAYMENT_AMOUNT, "退款金额不能超过支付金额");
         }
 
         // 4. 生成退款单号
@@ -98,10 +104,11 @@ public class RefundService {
 
         int rows = payRefundMapper.insert(refund);
         if (rows <= 0) {
-            throw new PaymentException("创建退款申请失败");
+            throw new PaymentException(ResultCode.REFUND_FAILED, "创建退款申请失败");
         }
 
-        log.info("【申请退款】成功，refundNo={}", refundNo);
+        log.info("【申请退款】成功 - refundNo={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo));
         return refundNo;
     }
 
@@ -116,7 +123,10 @@ public class RefundService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void auditRefund(String refundNo, Long auditorId, String auditorName, boolean approved, String remark) {
-        log.info("【审核退款】refundNo={}, approved={}", refundNo, approved);
+        log.info("【审核退款】开始 - refundNo={}, auditorId={}, approved={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo),
+                auditorId,
+                approved);
 
         // 1. 查询退款单
         LambdaQueryWrapper<PayRefund> wrapper = new LambdaQueryWrapper<>();
@@ -124,12 +134,12 @@ public class RefundService {
         PayRefund refund = payRefundMapper.selectOne(wrapper);
 
         if (refund == null) {
-            throw new PaymentException("退款单不存在");
+            throw new PaymentException(ResultCode.REFUND_NOT_FOUND, "退款单不存在: " + refundNo);
         }
 
         // 2. 验证状态（只有待审核的才能审核）
         if (!RefundStatusEnum.WAITING_AUDIT.getCode().equals(refund.getStatus())) {
-            throw new PaymentException("退款单状态不正确");
+            throw new PaymentException(ResultCode.REFUND_FAILED, "退款单状态不正确");
         }
 
         // 3. 更新审核信息
@@ -146,7 +156,9 @@ public class RefundService {
 
         payRefundMapper.updateById(refund);
 
-        log.info("【审核退款】完成");
+        log.info("【审核退款】完成 - refundNo={}, result={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo),
+                approved ? "通过" : "拒绝");
     }
 
     /**
@@ -156,7 +168,8 @@ public class RefundService {
      */
     @Transactional(rollbackFor = Exception.class)
     public void executeRefund(String refundNo) {
-        log.info("【执行退款】refundNo={}", refundNo);
+        log.info("【执行退款】开始 - refundNo={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo));
 
         // 1. 查询退款单
         LambdaQueryWrapper<PayRefund> wrapper = new LambdaQueryWrapper<>();
@@ -164,12 +177,12 @@ public class RefundService {
         PayRefund refund = payRefundMapper.selectOne(wrapper);
 
         if (refund == null) {
-            throw new PaymentException("退款单不存在");
+            throw new PaymentException(ResultCode.REFUND_NOT_FOUND, "退款单不存在: " + refundNo);
         }
 
         // 2. 验证状态（只有审核通过的才能执行退款）
         if (!RefundStatusEnum.AUDIT_PASSED.getCode().equals(refund.getStatus())) {
-            throw new PaymentException("退款单未审核通过");
+            throw new PaymentException(ResultCode.REFUND_FAILED, "退款单未审核通过");
         }
 
         // 3. 查询支付单
@@ -178,7 +191,7 @@ public class RefundService {
         PayOrder payOrder = payOrderMapper.selectOne(orderWrapper);
 
         if (payOrder == null || payOrder.getTradeNo() == null) {
-            throw new PaymentException("支付单或交易号不存在");
+            throw new PaymentException(ResultCode.PAYMENT_NOT_FOUND, "支付单或交易号不存在");
         }
 
         // 4. 更新退款状态为退款中
@@ -208,20 +221,24 @@ public class RefundService {
                 }
                 payOrderMapper.updateById(payOrder);
 
-                log.info("【执行退款】成功");
+                log.info("【执行退款】成功 - refundNo={}, amount={}", 
+                        DesensitizationUtils.desensitizePaymentNo(refundNo),
+                        refund.getRefundAmount());
             } else {
                 // 8. 更新退款状态为失败
                 refund.setStatus(RefundStatusEnum.FAILED.getCode());
                 payRefundMapper.updateById(refund);
 
-                log.error("【执行退款】失败");
-                throw new PaymentException("退款执行失败");
+                log.error("【执行退款】失败 - refundNo={}", 
+                        DesensitizationUtils.desensitizePaymentNo(refundNo));
+                throw new PaymentException(ResultCode.REFUND_FAILED, "退款执行失败");
             }
         } catch (Exception e) {
-            log.error("【执行退款】异常", e);
+            log.error("【执行退款】异常 - refundNo={}", 
+                    DesensitizationUtils.desensitizePaymentNo(refundNo), e);
             refund.setStatus(RefundStatusEnum.FAILED.getCode());
             payRefundMapper.updateById(refund);
-            throw new PaymentException("退款执行异常：" + e.getMessage());
+            throw new PaymentException(ResultCode.REFUND_FAILED, "退款执行异常：" + e.getMessage(), e);
         }
     }
 
@@ -232,20 +249,25 @@ public class RefundService {
      * @return 退款响应
      */
     public RefundResponse queryRefund(String refundNo) {
-        log.info("【查询退款单】refundNo={}", refundNo);
+        log.info("【查询退款单】开始 - refundNo={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo));
 
         LambdaQueryWrapper<PayRefund> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PayRefund::getRefundNo, refundNo);
         PayRefund refund = payRefundMapper.selectOne(wrapper);
 
         if (refund == null) {
-            throw new PaymentException("退款单不存在");
+            throw new PaymentException(ResultCode.REFUND_NOT_FOUND, "退款单不存在: " + refundNo);
         }
 
         RefundResponse response = new RefundResponse();
         BeanUtils.copyProperties(refund, response);
         response.setStatusDesc(RefundStatusEnum.getByCode(refund.getStatus()).getDesc());
 
+        log.info("【查询退款单】成功 - refundNo={}, status={}", 
+                DesensitizationUtils.desensitizePaymentNo(refundNo),
+                response.getStatusDesc());
+        
         return response;
     }
 
@@ -268,7 +290,7 @@ public class RefundService {
         initAdapterMap();
         PayChannelAdapter adapter = adapterMap.get(channelCode);
         if (adapter == null) {
-            throw new PaymentException("不支持的支付渠道：" + channelCode);
+            throw new PaymentException(ResultCode.PAYMENT_CHANNEL_UNAVAILABLE, "不支持的支付渠道: " + channelCode);
         }
         return adapter;
     }

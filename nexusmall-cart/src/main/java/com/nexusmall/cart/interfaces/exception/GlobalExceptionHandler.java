@@ -1,6 +1,6 @@
 package com.nexusmall.cart.interfaces.exception;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -32,6 +32,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result<?> handleException(Exception e) {
         log.error("【系统异常】", e);
-        return Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 }

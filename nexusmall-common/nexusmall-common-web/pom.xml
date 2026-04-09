@@ -119,6 +119,12 @@
             <scope>provided</scope>
         </dependency>
         
+        <!-- Jsoup XSS防护 -->
+        <dependency>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+        </dependency>
+        
         <!-- 测试依赖 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

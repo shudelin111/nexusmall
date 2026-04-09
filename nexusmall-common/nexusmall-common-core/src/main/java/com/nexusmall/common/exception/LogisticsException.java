@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 物流业务异常
  * <p>
@@ -12,27 +14,11 @@ public class LogisticsException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public LogisticsException(String message) {
-        super(message);
+    public LogisticsException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public LogisticsException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public LogisticsException(String code, String message) {
-        super(code, message);
-    }
-
-    public LogisticsException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public LogisticsException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public LogisticsException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public LogisticsException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

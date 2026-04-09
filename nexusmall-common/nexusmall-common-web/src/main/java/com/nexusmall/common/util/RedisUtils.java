@@ -2,7 +2,6 @@ package com.nexusmall.common.util;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -13,14 +12,14 @@ import java.util.concurrent.TimeUnit;
  * Redis 工具类
  * <p>
  * 生产级实践：
- * 1. 使用 @ConditionalOnClass 确保只有在引入 Redis 依赖时才创建此 Bean
- * 2. 避免在未使用 Redis 的模块中因缺少依赖导致启动失败
+ * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
+ * 2. 使用构造器注入，便于单元测试
+ * 3. 条件化加载，仅在Redis存在时生效
  * </p>
  *
  * @author shudl
  * @since 2026-04-09
  */
-@Component
 @ConditionalOnClass(RedisTemplate.class)
 public class RedisUtils {
 

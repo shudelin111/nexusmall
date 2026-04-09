@@ -159,7 +159,7 @@ public class AlipayAdapter implements PayChannelAdapter {
                 log.info("【支付宝】查询结果：交易关闭");
                 return PayStatusEnum.CLOSED.getCode();
             } else {
-                log.warn("【支付宝】查询结果：未知状态 {}", tradeStatus);
+                log.warn("【支付宝】查询结果：未知状态:{}", tradeStatus);
                 return PayStatusEnum.FAILED.getCode();
             }
         } catch (AlipayApiException e) {

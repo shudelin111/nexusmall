@@ -19,12 +19,12 @@ public interface OrderMapper {
     Order selectById(@Param("id") Long id);
 
     /**
-     * 根据订单号查询订单
+     * 根据订单号查询订�?
      */
     Order selectByOrderSn(@Param("orderSn") String orderSn);
 
     /**
-     * 查询所有订单
+     * 查询所有订�?
      */
     List<Order> list();
 
@@ -34,7 +34,7 @@ public interface OrderMapper {
     List<Order> listByMemberId(@Param("memberId") Long memberId);
 
     /**
-     * 根据订单状态查询订单列表
+     * 根据订单状态查询订单列�?
      */
     List<Order> listByStatus(@Param("status") Integer status);
 
@@ -69,7 +69,7 @@ public interface OrderMapper {
     int batchDelete(@Param("ids") List<Long> ids);
 
     /**
-     * 更新订单状态
+     * 更新订单状�?
      */
     int updateStatus(
             @Param("id") Long id,

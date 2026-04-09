@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 用户优惠券领取记录实体
+ * 用户优惠券领取记录实�?
  * <p>
- * 业界标准：
+ * 业界标准�?
  * - 记录每个用户的每张优惠券
- * - 支持状态流转（未使用→已锁定→已使用/已过期）
- * - 支持订单关联（核销时记录订单ID）
- * - 支持退款回退（释放优惠券）
+ * - 支持状态流转（未使用→已锁定→已使�?已过期）
+ * - 支持订单关联（核销时记录订单ID�?
+ * - 支持退款回退（释放优惠券�?
  * </p>
  *
  * @author shudl
@@ -23,7 +23,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("promotion_coupon_user_record")
-@Schema(description = "用户优惠券领取记录实体")
+@Schema(description = "用户优惠券领取记录实�?)
 public class CouponUserRecord implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -50,37 +50,37 @@ public class CouponUserRecord implements Serializable {
     /**
      * 优惠券名称（冗余字段，方便查询）
      */
-    @Schema(description = "优惠券名称")
+    @Schema(description = "优惠券名�?)
     private String couponName;
 
     /**
-     * 优惠类型：1-满减 2-折扣 3-立减
+     * 优惠类型�?-满减 2-折扣 3-立减
      */
-    @Schema(description = "优惠类型：1-满减 2-折扣 3-立减")
+    @Schema(description = "优惠类型�?-满减 2-折扣 3-立减")
     private Integer couponType;
 
     /**
-     * 面值/折扣率
+     * 面�?折扣�?
      */
-    @Schema(description = "面值/折扣率")
+    @Schema(description = "面�?折扣�?)
     private BigDecimal value;
 
     /**
-     * 最低消费金额
+     * 最低消费金�?
      */
-    @Schema(description = "最低消费金额")
+    @Schema(description = "最低消费金�?)
     private BigDecimal minAmount;
 
     /**
-     * 最高优惠金额
+     * 最高优惠金�?
      */
-    @Schema(description = "最高优惠金额")
+    @Schema(description = "最高优惠金�?)
     private BigDecimal maxDiscount;
 
     /**
-     * 使用范围：0-全场 1-指定分类 2-指定商品
+     * 使用范围�?-全场 1-指定分类 2-指定商品
      */
-    @Schema(description = "使用范围：0-全场 1-指定分类 2-指定商品")
+    @Schema(description = "使用范围�?-全场 1-指定分类 2-指定商品")
     private Integer scope;
 
     /**
@@ -90,21 +90,21 @@ public class CouponUserRecord implements Serializable {
     private String scopeData;
 
     /**
-     * 有效期开始时间
+     * 有效期开始时�?
      */
-    @Schema(description = "有效期开始时间")
+    @Schema(description = "有效期开始时�?)
     private LocalDateTime validStart;
 
     /**
-     * 有效期结束时间
+     * 有效期结束时�?
      */
-    @Schema(description = "有效期结束时间")
+    @Schema(description = "有效期结束时�?)
     private LocalDateTime validEnd;
 
     /**
-     * 使用状态：0-未使用 1-已使用 2-已过期 3-已锁定
+     * 使用状态：0-未使�?1-已使�?2-已过�?3-已锁�?
      */
-    @Schema(description = "使用状态：0-未使用 1-已使用 2-已过期 3-已锁定")
+    @Schema(description = "使用状态：0-未使�?1-已使�?2-已过�?3-已锁�?)
     private Integer useStatus;
 
     /**

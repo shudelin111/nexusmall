@@ -3,6 +3,7 @@ package com.nexusmall.common.config;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Bean;
@@ -34,6 +35,7 @@ public class JacksonConfig {
      * - 忽略 null 字段（减少传输数据量）
      * - 禁用将日期写为时间戳
      * - 注册 JavaTimeModule 支持 Java 8 时间 API
+     * - 注册敏感数据序列化器（自动脱敏）
      * </p>
      */
     @Bean
@@ -55,6 +57,11 @@ public class JacksonConfig {
         
         // 注册 JavaTimeModule 以支持 Java 8 时间 API（LocalDateTime 等）
         objectMapper.registerModule(new JavaTimeModule());
+        
+        // 注册敏感数据序列化器（@Sensitive注解自动脱敏）
+        SimpleModule sensitiveModule = new SimpleModule("SensitiveDataModule");
+        sensitiveModule.addSerializer(String.class, new SensitiveDataSerializer());
+        objectMapper.registerModule(sensitiveModule);
         
         return objectMapper;
     }

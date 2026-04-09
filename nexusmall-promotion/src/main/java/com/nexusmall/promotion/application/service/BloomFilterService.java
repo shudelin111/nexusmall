@@ -15,12 +15,12 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 布隆过滤器服务
+ * 布隆过滤器服�?
  * <p>
- * 业界标准：
+ * 业界标准�?
  * 1. 应用启动时预热布隆过滤器
  * 2. 秒杀请求先经过布隆过滤器校验
- * 3. 防止缓存穿透，保护数据库
+ * 3. 防止缓存穿透，保护数据�?
  * </p>
  *
  * @author shudl
@@ -52,27 +52,27 @@ public class BloomFilterService {
     private static final String BLOOM_FILTER_INIT_KEY = "bloom:filter:init";
 
     /**
-     * 应用启动时初始化布隆过滤器
+     * 应用启动时初始化布隆过滤�?
      * <p>
      * 从数据库加载所有有效的SKU ID和优惠券ID到布隆过滤器
      * </p>
      */
     @PostConstruct
     public void initBloomFilter() {
-        // 防止重复初始化（分布式环境下）
+        // 防止重复初始化（分布式环境下�?
         Boolean isInit = redisTemplate.opsForValue().setIfAbsent(BLOOM_FILTER_INIT_KEY, "1", 1, TimeUnit.HOURS);
         if (Boolean.FALSE.equals(isInit)) {
-            log.info("【布隆过滤器】已由其他实例初始化，跳过");
+            log.info("【布隆过滤器】已由其他实例初始化，跳�?);
             return;
         }
 
         log.info("【布隆过滤器】开始初始化...");
 
         try {
-            // 1. 初始化秒杀商品布隆过滤器
+            // 1. 初始化秒杀商品布隆过滤�?
             initSeckillSkuBloomFilter();
 
-            // 2. 初始化优惠券布隆过滤器
+            // 2. 初始化优惠券布隆过滤�?
             initCouponBloomFilter();
 
             log.info("【布隆过滤器】初始化完成");
@@ -84,43 +84,43 @@ public class BloomFilterService {
     }
 
     /**
-     * 初始化秒杀商品布隆过滤器
+     * 初始化秒杀商品布隆过滤�?
      */
     private void initSeckillSkuBloomFilter() {
         log.info("【布隆过滤器】加载秒杀商品SKU ID...");
 
         List<FlashSaleItem> items = flashSaleItemService.lambdaQuery()
-                .gt(FlashSaleItem::getStock, 0)  // 有库存
+                .gt(FlashSaleItem::getStock, 0)  // 有库�?
                 .list();
 
         for (FlashSaleItem item : items) {
             seckillSkuBloomFilter.put(String.valueOf(item.getSkuId()));
         }
 
-        log.info("【布隆过滤器】秒杀商品SKU ID加载完成，数量={}", items.size());
+        log.info("【布隆过滤器】秒杀商品SKU ID加载完成，数�?{}", items.size());
     }
 
     /**
-     * 初始化优惠券布隆过滤器
+     * 初始化优惠券布隆过滤�?
      */
     private void initCouponBloomFilter() {
         log.info("【布隆过滤器】加载优惠券ID...");
 
         List<Coupon> coupons = couponService.lambdaQuery()
-                .in(Coupon::getStatus, 0, 1)  // 未开始或进行中
+                .in(Coupon::getStatus, 0, 1)  // 未开始或进行�?
                 .list();
 
         for (Coupon coupon : coupons) {
             couponBloomFilter.put(String.valueOf(coupon.getId()));
         }
 
-        log.info("【布隆过滤器】优惠券ID加载完成，数量={}", coupons.size());
+        log.info("【布隆过滤器】优惠券ID加载完成，数�?{}", coupons.size());
     }
 
     /**
-     * 判断SKU ID是否可能在秒杀活动中
+     * 判断SKU ID是否可能在秒杀活动�?
      * <p>
-     * - 返回false：一定不存在，直接拒绝
+     * - 返回false：一定不存在，直接拒�?
      * - 返回true：可能存在，继续后续校验
      * </p>
      *
@@ -162,17 +162,17 @@ public class BloomFilterService {
     }
 
     /**
-     * 手动刷新布隆过滤器（管理后台调用）
+     * 手动刷新布隆过滤器（管理后台调用�?
      */
     public void refreshBloomFilter() {
-        log.warn("【布隆过滤器】手动刷新开始...");
+        log.warn("【布隆过滤器】手动刷新开�?..");
         
-        // 清除Redis初始化标记
+        // 清除Redis初始化标�?
         redisTemplate.delete(BLOOM_FILTER_INIT_KEY);
         
-        // 重新初始化
+        // 重新初始�?
         initBloomFilter();
         
-        log.info("【布隆过滤器】手动刷新完成");
+        log.info("【布隆过滤器】手动刷新完�?);
     }
 }

@@ -1,7 +1,7 @@
 package com.nexusmall.common.exception;
 
 import com.nexusmall.common.constant.ErrorMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -88,8 +88,7 @@ public class GlobalExceptionHandler {
         log.warn("【业务异常】URI: {}, Code: {}, Message: {}", 
                 request.getRequestURI(), ex.getCode(), ex.getMessage());
         
-        String code = ex.getCode() != null ? ex.getCode() : CommonResultCode.SYSTEM_ERROR.getErrorCode();
-        return Result.failure(code, ex.getMessage());
+        return Result.failure(ex.getResultCode());
     }
 
     // ==================== 参数校验异常处理 ====================
@@ -113,7 +112,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
         
         log.warn("【参数校验异常】URI: {}, 错误: {}", request.getRequestURI(), message);
-        return Result.failure(CommonResultCode.PARAM_INVALID.getErrorCode(), message);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -134,7 +133,7 @@ public class GlobalExceptionHandler {
                 .collect(Collectors.joining("; "));
         
         log.warn("【参数绑定异常】URI: {}, 错误: {}", request.getRequestURI(), message);
-        return Result.failure(CommonResultCode.PARAM_INVALID.getErrorCode(), message);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -153,7 +152,7 @@ public class GlobalExceptionHandler {
     public Result<Void> handleMissingParameter(MissingServletRequestParameterException ex, HttpServletRequest request) {
         String message = String.format("缺少必填参数: %s", ex.getParameterName());
         log.warn("【缺少参数异常】URI: {}, 参数: {}", request.getRequestURI(), ex.getParameterName());
-        return Result.failure(CommonResultCode.PARAM_INVALID.getErrorCode(), message);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -174,7 +173,7 @@ public class GlobalExceptionHandler {
                 ex.getName(), ex.getRequiredType() != null ? ex.getRequiredType().getSimpleName() : "未知");
         log.warn("【类型不匹配异常】URI: {}, 参数: {}, 值: {}", 
                 request.getRequestURI(), ex.getName(), ex.getValue());
-        return Result.failure(CommonResultCode.PARAM_INVALID.getErrorCode(), message);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -191,7 +190,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
         log.warn("【非法参数异常】URI: {}, 错误: {}", request.getRequestURI(), ex.getMessage());
-        return Result.failure(CommonResultCode.PARAM_INVALID);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     // ==================== HTTP 协议异常处理 ====================
@@ -218,7 +217,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public Result<Void> handleNotFound(NoHandlerFoundException ex, HttpServletRequest request) {
         log.warn("【404 异常】URI: {}, Method: {}", ex.getRequestURL(), ex.getHttpMethod());
-        return Result.failure(CommonResultCode.RESOURCE_NOT_FOUND);
+        return Result.failure(ResultCode.NOT_FOUND);
     }
 
     /**
@@ -237,7 +236,7 @@ public class GlobalExceptionHandler {
         String message = String.format("不支持的请求方法: %s，支持的方法: %s", 
                 ex.getMethod(), String.join(", ", ex.getSupportedMethods()));
         log.warn("【方法不支持异常】URI: {}, 方法: {}", request.getRequestURI(), ex.getMethod());
-        return Result.failure(CommonResultCode.METHOD_NOT_ALLOWED.getErrorCode(), message);
+        return Result.failure(ResultCode.METHOD_NOT_ALLOWED);
     }
 
     // ==================== 系统异常处理 ====================
@@ -265,11 +264,10 @@ public class GlobalExceptionHandler {
         // 生产环境返回通用错误提示，避免泄露敏感信息
         if (isDevEnvironment()) {
             // 开发/测试环境：返回详细错误信息
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), 
-                    ex.getMessage() != null ? ex.getMessage() : ErrorMessageConstants.System.INTERNAL_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         } else {
             // 生产环境：返回通用提示
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 }

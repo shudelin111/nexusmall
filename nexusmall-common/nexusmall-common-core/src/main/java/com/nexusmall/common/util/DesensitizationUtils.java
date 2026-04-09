@@ -16,6 +16,30 @@ package com.nexusmall.common.util;
  */
 public class DesensitizationUtils {
 
+    /**
+     * 脱敏类型枚举
+     */
+    public enum SensitiveType {
+        /** 手机号 */
+        PHONE,
+        /** 身份证号 */
+        ID_CARD,
+        /** 邮箱 */
+        EMAIL,
+        /** 姓名 */
+        NAME,
+        /** 银行卡号 */
+        BANK_CARD,
+        /** 地址 */
+        ADDRESS,
+        /** 订单号 */
+        ORDER_NO,
+        /** 支付单号 */
+        PAYMENT_NO,
+        /** 密码（全部隐藏） */
+        PASSWORD
+    }
+
     private DesensitizationUtils() {
         // 防止实例化
     }
@@ -150,5 +174,90 @@ public class DesensitizationUtils {
         }
         
         return address.substring(0, 6) + "***";
+    }
+
+    /**
+     * 订单号脱敏
+     * <p>
+     * 保留前4位和后4位，中间用****替代
+     * 例如：ORD202604090001 -> ORD2****0001
+     * </p>
+     *
+     * @param orderNo 订单号
+     * @return 脱敏后的订单号
+     */
+    public static String desensitizeOrderNo(String orderNo) {
+        if (StringUtils.isBlank(orderNo) || orderNo.length() <= 8) {
+            return orderNo;
+        }
+        
+        return orderNo.substring(0, 4) + "****" + orderNo.substring(orderNo.length() - 4);
+    }
+
+    /**
+     * 支付单号脱敏
+     * <p>
+     * 保留前4位和后4位，中间用****替代
+     * 例如：PAY202604090001 -> PAY2****0001
+     * </p>
+     *
+     * @param paymentNo 支付单号
+     * @return 脱敏后的支付单号
+     */
+    public static String desensitizePaymentNo(String paymentNo) {
+        if (StringUtils.isBlank(paymentNo) || paymentNo.length() <= 8) {
+            return paymentNo;
+        }
+        
+        return paymentNo.substring(0, 4) + "****" + paymentNo.substring(paymentNo.length() - 4);
+    }
+
+    /**
+     * 通用脱敏方法（根据类型自动选择脱敏策略）
+     *
+     * @param value 原始值
+     * @param type 脱敏类型
+     * @return 脱敏后的值
+     */
+    public static String desensitize(String value, SensitiveType type) {
+        if (value == null) {
+            return null;
+        }
+        
+        switch (type) {
+            case PHONE:
+                return desensitizePhone(value);
+            case ID_CARD:
+                return desensitizeIdCard(value);
+            case EMAIL:
+                return desensitizeEmail(value);
+            case NAME:
+                return desensitizeName(value);
+            case BANK_CARD:
+                return desensitizeBankCard(value);
+            case ADDRESS:
+                return desensitizeAddress(value);
+            case ORDER_NO:
+                return desensitizeOrderNo(value);
+            case PAYMENT_NO:
+                return desensitizePaymentNo(value);
+            case PASSWORD:
+                return "******";
+            default:
+                return value;
+        }
+    }
+
+    /**
+     * 密码脱敏（全部隐藏）
+     *
+     * @param password 密码
+     * @return ******
+     */
+    public static String desensitizePassword(String password) {
+        if (StringUtils.isBlank(password)) {
+            return password;
+        }
+        return "******";
     }
 }

@@ -2,6 +2,7 @@ package com.nexusmall.gateway.filter;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.gateway.util.GatewayJwtValidator;
 import io.jsonwebtoken.Claims;
@@ -130,7 +131,7 @@ public class JwtAuthGlobalFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        Result<Void> result = Result.failure("20101", message);
+        Result<Void> result = Result.failure(ResultCode.UNAUTHORIZED);
 
         try {
             byte[] bytes = objectMapper.writeValueAsBytes(result);

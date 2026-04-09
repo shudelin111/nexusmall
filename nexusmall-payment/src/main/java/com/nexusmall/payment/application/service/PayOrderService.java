@@ -2,11 +2,14 @@ package com.nexusmall.payment.application.service;
 
 import com.alibaba.fastjson2.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.exception.PaymentException;
+import com.nexusmall.common.util.DesensitizationUtils;
 import com.nexusmall.payment.domain.port.out.PayChannelAdapter;
 import com.nexusmall.payment.adapter.outbound.persistence.PayOrderMapper;
 import com.nexusmall.payment.domain.model.entity.PayOrder;
 import com.nexusmall.payment.domain.model.enums.PayStatusEnum;
-import com.nexusmall.payment.interfaces.exception.PaymentException;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.payment.interfaces.dto.request.CreatePayOrderRequest;
 import com.nexusmall.payment.interfaces.dto.response.PayOrderResponse;
 import lombok.RequiredArgsConstructor;
@@ -63,7 +66,11 @@ public class PayOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public String createPayOrder(CreatePayOrderRequest request) {
-        log.info("【创建支付单】开始，orderNo={}, channel={}", request.getOrderNo(), request.getChannelCode());
+        log.info("【创建支付单】开始 - orderNo={}, channel={}, amount={}, userId={}", 
+                DesensitizationUtils.desensitizeOrderNo(request.getOrderNo()), 
+                request.getChannelCode(), 
+                request.getPayAmount(), 
+                request.getUserId());
 
         // 1. 检查订单是否已存在支付单
         LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
@@ -71,7 +78,8 @@ public class PayOrderService {
                 .eq(PayOrder::getStatus, PayStatusEnum.WAITING.getCode());
         PayOrder existOrder = payOrderMapper.selectOne(wrapper);
         if (existOrder != null) {
-            log.warn("【创建支付单】订单已存在待支付单，paymentNo={}", existOrder.getPaymentNo());
+            log.warn("【创建支付单】订单已存在待支付单 - paymentNo={}", 
+                    DesensitizationUtils.desensitizePaymentNo(existOrder.getPaymentNo()));
             return getChannelAdapter(request.getChannelCode()).createPayment(request, existOrder);
         }
 
@@ -91,13 +99,17 @@ public class PayOrderService {
         // 4. 保存支付单
         int rows = payOrderMapper.insert(payOrder);
         if (rows <= 0) {
-            throw new PaymentException("创建支付单失败");
+            throw new PaymentException(ResultCode.PAYMENT_FAILED, "创建支付单失败");
         }
 
-        log.info("【创建支付单】成功，paymentNo={}", paymentNo);
-
         // 5. 调用第三方支付接口
-        return getChannelAdapter(request.getChannelCode()).createPayment(request, payOrder);
+        String result = getChannelAdapter(request.getChannelCode()).createPayment(request, payOrder);
+        
+        log.info("【创建支付单】成功 - paymentNo={}, resultLength={}", 
+                DesensitizationUtils.desensitizePaymentNo(paymentNo), 
+                result != null ? result.length() : 0);
+        
+        return result;
     }
 
     /**
@@ -107,14 +119,15 @@ public class PayOrderService {
      * @return 支付单响应
      */
     public PayOrderResponse queryPayOrder(String paymentNo) {
-        log.info("【查询支付单】paymentNo={}", paymentNo);
+        log.info("【查询支付单】开始 - paymentNo={}", 
+                DesensitizationUtils.desensitizePaymentNo(paymentNo));
 
         LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PayOrder::getPaymentNo, paymentNo);
         PayOrder payOrder = payOrderMapper.selectOne(wrapper);
 
         if (payOrder == null) {
-            throw new PaymentException("支付单不存在");
+            throw new PaymentException(ResultCode.PAYMENT_NOT_FOUND, "支付单不存在: " + paymentNo);
         }
 
         // 转换为响应对象
@@ -122,6 +135,10 @@ public class PayOrderService {
         BeanUtils.copyProperties(payOrder, response);
         response.setStatusDesc(PayStatusEnum.getByCode(payOrder.getStatus()).getDesc());
 
+        log.info("【查询支付单】成功 - paymentNo={}, status={}", 
+                DesensitizationUtils.desensitizePaymentNo(paymentNo), 
+                response.getStatusDesc());
+        
         return response;
     }
 
@@ -132,7 +149,8 @@ public class PayOrderService {
      * @return 支付单响应
      */
     public PayOrderResponse queryByOrderNo(String orderNo) {
-        log.info("【查询支付单】orderNo={}", orderNo);
+        log.info("【根据订单号查询支付单】开始 - orderNo={}", 
+                DesensitizationUtils.desensitizeOrderNo(orderNo));
 
         LambdaQueryWrapper<PayOrder> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(PayOrder::getOrderNo, orderNo)
@@ -141,13 +159,18 @@ public class PayOrderService {
         PayOrder payOrder = payOrderMapper.selectOne(wrapper);
 
         if (payOrder == null) {
-            throw new PaymentException("支付单不存在");
+            throw new PaymentException(ResultCode.PAYMENT_NOT_FOUND, "支付单不存在: " + orderNo);
         }
 
         PayOrderResponse response = new PayOrderResponse();
         BeanUtils.copyProperties(payOrder, response);
         response.setStatusDesc(PayStatusEnum.getByCode(payOrder.getStatus()).getDesc());
 
+        log.info("【根据订单号查询支付单】成功 - orderNo={}, paymentNo={}, status={}", 
+                DesensitizationUtils.desensitizeOrderNo(orderNo),
+                DesensitizationUtils.desensitizePaymentNo(response.getPaymentNo()),
+                response.getStatusDesc());
+        
         return response;
     }
 
@@ -156,9 +179,9 @@ public class PayOrderService {
      * <p>
      * 业界标准：
      * 1. 验证签名(防止伪造回调)
-     * 2. 幂等性处理(同一回调可能多次发送)
+     * 2. 幂等性处理（同一回调可能多次发送）
      * 3. 更新支付单状态
-     * 4. 发送支付成功消息到 MQ(触发订单状态更新)
+     * 4. 发送支付成功消息到MQ(触发订单状态更新)
      * </p>
      *
      * @param channelCode 渠道编码
@@ -167,21 +190,21 @@ public class PayOrderService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean handleCallback(String channelCode, Object callbackData) {
-        log.info("【支付回调】channel={}, data={}", channelCode, callbackData);
+        log.info("【支付回调】开始 - channel={}", channelCode);
 
         try {
             // 1. 获取渠道适配器
             PayChannelAdapter adapter = getChannelAdapter(channelCode);
 
-            // 2. 验证签名并解析数据(适配器内部会验证)
+            // 2. 验证签名并解析数据（适配器内部会验证）
             boolean verified = adapter.handleCallback(callbackData);
             if (!verified) {
-                log.error("【支付回调】签名验证失败");
+                log.error("【支付回调】签名验证失败 - channel={}", channelCode);
                 return false;
             }
 
-            // 3. 从回调数据中提取 paymentNo 和 tradeNo
-            // 真实场景需要根据实际回调数据结构解析:
+            // 3. 从回调数据中提取paymentNo和tradeNo
+            // 真实场景需要根据实际回调数据结构解析
             // Map<String, String> params = (Map<String, String>) callbackData;
             // String paymentNo = params.get("out_trade_no");
             // String tradeNo = params.get("trade_no");  // 支付宝的交易号
@@ -197,13 +220,15 @@ public class PayOrderService {
             PayOrder payOrder = payOrderMapper.selectOne(wrapper);
 
             if (payOrder == null) {
-                log.error("【支付回调】支付单不存在，paymentNo={}", paymentNo);
+                log.error("【支付回调】支付单不存在 - paymentNo={}", 
+                        DesensitizationUtils.desensitizePaymentNo(paymentNo));
                 return false;
             }
 
             // 5. 幂等性检查：如果已经是成功状态，直接返回成功
             if (PayStatusEnum.SUCCESS.getCode().equals(payOrder.getStatus())) {
-                log.info("【支付回调】支付单已经是成功状态，无需重复处理，paymentNo={}", paymentNo);
+                log.info("【支付回调】支付单已经是成功状态，无需重复处理 - paymentNo={}", 
+                        DesensitizationUtils.desensitizePaymentNo(paymentNo));
                 return true;
             }
 
@@ -215,13 +240,15 @@ public class PayOrderService {
             payOrder.setCallbackTime(LocalDateTime.now());
             payOrderMapper.updateById(payOrder);
 
-            // 7. 发送支付成功消息到 MQ(触发订单服务更新订单状态)
+            // 7. 发送支付成功消息到MQ(触发订单服务更新订单状态)
             // sendPaymentSuccessMessage(payOrder);
 
-            log.info("【支付回调】处理成功，paymentNo={}, tradeNo={}", paymentNo, tradeNo);
+            log.info("【支付回调】处理成功 - paymentNo={}, tradeNo={}", 
+                    DesensitizationUtils.desensitizePaymentNo(paymentNo), 
+                    DesensitizationUtils.desensitizePaymentNo(tradeNo));
             return true;
         } catch (Exception e) {
-            log.error("【支付回调】处理异常", e);
+            log.error("【支付回调】处理异常 - channel={}", channelCode, e);
             return false;
         }
     }
@@ -291,7 +318,7 @@ public class PayOrderService {
             count++;
         }
 
-        log.info("【关闭过期订单】完成，关闭{}个订单", count);
+        log.info("【关闭过期订单】完成 - 关闭数量={}", count);
         return count;
     }
 
@@ -314,7 +341,7 @@ public class PayOrderService {
         initAdapterMap();
         PayChannelAdapter adapter = adapterMap.get(channelCode);
         if (adapter == null) {
-            throw new PaymentException("不支持的支付渠道：" + channelCode);
+            throw new PaymentException(ResultCode.PAYMENT_CHANNEL_UNAVAILABLE, "不支持的支付渠道: " + channelCode);
         }
         return adapter;
     }

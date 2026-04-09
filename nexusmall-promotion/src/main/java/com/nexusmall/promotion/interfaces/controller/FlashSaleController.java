@@ -18,7 +18,7 @@ import java.util.List;
 /**
  * 秒杀控制器（RESTful标准版）
  * <p>
- * RESTful资源设计：
+ * RESTful资源设计�?
  * - GET    /flash-sales/items           - 查询秒杀商品列表
  * - GET    /flash-sales/items/{skuId}   - 查询单个秒杀商品详情
  * - POST   /flash-sales/items/{skuId}/seckill - 参与秒杀
@@ -46,7 +46,7 @@ public class FlashSaleController {
     @GetMapping(value = "/items", headers = "X-API-Version=v1")
     @Operation(summary = "查询秒杀商品列表", description = "获取当前正在进行的所有秒杀商品")
     public Result<List<FlashSaleItem>> listActiveItems() {
-        log.info("【查询秒杀商品列表】");
+        log.info("【查询秒杀商品列表�?);
         List<FlashSaleItem> items = flashSaleItemService.listActiveItems();
         return Result.success(items);
     }
@@ -68,7 +68,7 @@ public class FlashSaleController {
                 .one();
         
         if (item == null) {
-            return Result.failure("404", "秒杀商品不存在");
+            return Result.failure("404", "秒杀商品不存�?);
         }
         return Result.success(item);
     }
@@ -76,10 +76,10 @@ public class FlashSaleController {
     /**
      * 参与秒杀（核心接口）
      * <p>
-     * 业界标准：
+     * 业界标准�?
      * - Redis预减库存（抗高并发）
-     * - 分布式锁防超卖
-     * - 数据库乐观锁最终一致性
+     * - 分布式锁防超�?
+     * - 数据库乐观锁最终一致�?
      * - 异步创建订单
      * - Sentinel限流降级
      * </p>
@@ -103,8 +103,8 @@ public class FlashSaleController {
         
         // ==================== 第零层：布隆过滤器校验（防止缓存穿透）====================
         if (!bloomFilterService.mightContainSeckillSku(skuId)) {
-            log.warn("【秒杀拦截】SKU ID不存在于布隆过滤器中，直接拒绝: skuId={}", skuId);
-            return Result.failure("404", "秒杀商品不存在");
+            log.warn("【秒杀拦截】SKU ID不存在于布隆过滤器中，直接拒�? skuId={}", skuId);
+            return Result.failure("404", "秒杀商品不存�?);
         }
         
         boolean success = flashSaleItemService.seckill(skuId, userId);

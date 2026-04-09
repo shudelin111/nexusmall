@@ -1,6 +1,6 @@
 package com.nexusmall.notification.exception;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,7 +37,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public Result<Void> handleIllegalArgument(IllegalArgumentException ex) {
         log.error("参数异常：{}", ex.getMessage(), ex);
-        return Result.failure(CommonResultCode.PARAM_INVALID);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
                 ? "参数校验失败"
                 : ex.getBindingResult().getFieldError().getDefaultMessage();
         log.error("参数校验失败：{}", message, ex);
-        return Result.failure(CommonResultCode.PARAM_INVALID);
+        return Result.failure(ResultCode.PARAM_INVALID);
     }
 
     /**
@@ -66,6 +66,6 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public Result<Void> handleException(Exception ex) {
         log.error("系统异常：", ex);
-        return Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 }

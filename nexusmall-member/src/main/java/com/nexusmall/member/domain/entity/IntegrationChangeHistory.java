@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 积分变化历史记录实体类
+ * 积分变化历史记录实体�?
  * <p>
- * 业界标准：
- * - 记录每次积分变化的详细信息
- * - 支持审计和追溯
+ * 业界标准�?
+ * - 记录每次积分变化的详细信�?
+ * - 支持审计和追�?
  * </p>
  *
  * @author shudl
@@ -40,7 +40,7 @@ public class IntegrationChangeHistory {
     private Long memberId;
 
     /**
-     * 变化类型：0=增加，1=减少
+     * 变化类型�?=增加�?=减少
      */
     private Integer changeType;
 
@@ -50,7 +50,7 @@ public class IntegrationChangeHistory {
     private Integer changeCount;
 
     /**
-     * 来源类型：ORDER(订单)/COUPON(优惠券)/REFUND(退款)
+     * 来源类型：ORDER(订单)/COUPON(优惠�?/REFUND(退�?
      */
     private String sourceType;
 

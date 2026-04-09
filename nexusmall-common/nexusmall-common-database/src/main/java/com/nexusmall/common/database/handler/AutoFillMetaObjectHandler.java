@@ -26,12 +26,12 @@ import java.time.LocalDateTime;
 public class AutoFillMetaObjectHandler implements MetaObjectHandler {
 
     /**
-     * 创建时间字段名
+     * 创建时间字段
      */
     private static final String FIELD_CREATE_TIME = "createTime";
     
     /**
-     * 更新时间字段名
+     * 更新时间字段
      */
     private static final String FIELD_UPDATE_TIME = "updateTime";
 

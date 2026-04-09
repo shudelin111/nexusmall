@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 网关业务异常
  * <p>
@@ -12,27 +14,11 @@ public class GatewayException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public GatewayException(String message) {
-        super(message);
+    public GatewayException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public GatewayException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public GatewayException(String code, String message) {
-        super(code, message);
-    }
-
-    public GatewayException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public GatewayException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public GatewayException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public GatewayException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

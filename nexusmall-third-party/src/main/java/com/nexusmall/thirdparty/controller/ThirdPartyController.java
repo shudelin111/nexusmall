@@ -1,7 +1,7 @@
 package com.nexusmall.thirdparty.controller;
 
 import com.nexusmall.common.annotation.ApiVersion;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.service.OssService;
 import com.nexusmall.thirdparty.service.SmsService;
@@ -42,7 +42,7 @@ public class ThirdPartyController {
     @PostMapping(value = "/sms/send", headers = "X-API-Version=v1")
     public SmsSendResponse sendSms(@RequestBody @Valid SmsSendRequest request) {
         if (smsService == null) {
-            throw new ThirdPartyException(CommonResultCode.SMS_SERVICE_ERROR.getErrorCode(), CommonResultCode.SMS_SERVICE_ERROR.getMessage());
+            throw new ThirdPartyException(ResultCode.SMS_SERVICE_ERROR);
         }
         return smsService.sendSms(request);
     }
@@ -54,7 +54,7 @@ public class ThirdPartyController {
     public OssUploadResponse upload(@RequestPart("file") MultipartFile file,
                                     @RequestParam(value = "dir", required = false) String dir) {
         if (ossService == null) {
-            throw new ThirdPartyException(CommonResultCode.OSS_CONFIG_ERROR.getErrorCode(), CommonResultCode.OSS_CONFIG_ERROR.getMessage());
+            throw new ThirdPartyException(ResultCode.OSS_CONFIG_ERROR);
         }
         return ossService.upload(file, dir);
     }

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import java.util.List;
 
 /**
- * Product 服务 Feign 客户端
+ * Product 服务 Feign 客户�?
  * <p>
  * API 版本号由 FeignApiVersionInterceptor 自动透传，无需手动指定
  * </p>

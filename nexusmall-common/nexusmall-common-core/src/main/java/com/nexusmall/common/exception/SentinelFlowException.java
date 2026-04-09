@@ -1,5 +1,6 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
 import lombok.Getter;
 
 /**
@@ -21,18 +22,13 @@ public class SentinelFlowException extends NexusmallException {
      */
     private final String resourceName;
 
-    public SentinelFlowException(String message) {
-        super(message);
-        this.resourceName = null;
-    }
-
-    public SentinelFlowException(String resourceName, String message) {
-        super(message);
+    public SentinelFlowException(ResultCode resultCode, String resourceName) {
+        super(resultCode);
         this.resourceName = resourceName;
     }
 
-    public SentinelFlowException(String resourceName, String message, Throwable cause) {
-        super(message, cause);
+    public SentinelFlowException(ResultCode resultCode, String resourceName, Throwable cause) {
+        super(resultCode, cause);
         this.resourceName = resourceName;
     }
 }

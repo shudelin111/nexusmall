@@ -1,6 +1,6 @@
 package com.nexusmall.cart.interfaces.exception;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import lombok.Getter;
 
 /**
@@ -12,19 +12,19 @@ import lombok.Getter;
 @Getter
 public class CartException extends RuntimeException {
 
-    private final CommonResultCode resultCode;
+    private final ResultCode resultCode;
 
-    public CartException(CommonResultCode resultCode) {
+    public CartException(ResultCode resultCode) {
         super(resultCode.getMessage());
         this.resultCode = resultCode;
     }
 
-    public CartException(CommonResultCode resultCode, String message) {
+    public CartException(ResultCode resultCode, String message) {
         super(message);
         this.resultCode = resultCode;
     }
 
-    public CartException(CommonResultCode resultCode, String message, Throwable cause) {
+    public CartException(ResultCode resultCode, String message, Throwable cause) {
         super(message, cause);
         this.resultCode = resultCode;
     }

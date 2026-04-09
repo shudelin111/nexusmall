@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 营销业务异常
  * <p>
@@ -12,27 +14,11 @@ public class PromotionException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public PromotionException(String message) {
-        super(message);
+    public PromotionException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public PromotionException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public PromotionException(String code, String message) {
-        super(code, message);
-    }
-
-    public PromotionException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public PromotionException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public PromotionException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public PromotionException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

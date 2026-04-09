@@ -14,15 +14,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 库存管理控制器
+ * 库存管理控制�?
  *
  * @author shudl
  * @since 2026-04-06
  */
 @Slf4j
 @RestController
-@RequestMapping("/stocks")  // RESTful资源路径：库存集合
-@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
+@RequestMapping("/stocks")  // RESTful资源路径：库存集�?
+@ApiVersion("v1")  // 标记�?Controller 支持 v1 版本
 @RequiredArgsConstructor
 @Tag(name = "库存管理", description = "SKU库存查询、扣减、回滚等操作")
 public class InventoryController {
@@ -47,26 +47,26 @@ public class InventoryController {
     }
 
     /**
-     * 检查库存是否充足
+     * 检查库存是否充�?
      *
      * @param skuId SKU ID
      * @param warehouseId 仓库ID
-     * @param quantity 需求数量
+     * @param quantity 需求数�?
      * @return 是否充足
      */
     @GetMapping(value = "/{skuId}/availability", headers = "X-API-Version=v1")
-    @Operation(summary = "检查库存是否充足", description = "判断指定SKU的库存是否满足需求数量")
+    @Operation(summary = "检查库存是否充�?, description = "判断指定SKU的库存是否满足需求数�?)
     public Result<Boolean> checkStock(
             @PathVariable Long skuId,
             @RequestParam Long warehouseId,
             @RequestParam Integer quantity) {
-        log.info("检查库存: skuId={}, warehouseId={}, quantity={}", skuId, warehouseId, quantity);
+        log.info("检查库�? skuId={}, warehouseId={}, quantity={}", skuId, warehouseId, quantity);
         boolean sufficient = skuStockService.checkStockSufficient(skuId, warehouseId, quantity);
         return Result.success(sufficient);
     }
 
     /**
-     * 扣减库存（锁定库存，用于下单）
+     * 扣减库存（锁定库存，用于下单�?
      *
      * @param skuId SKU ID
      * @param request 扣减请求
@@ -96,7 +96,7 @@ public class InventoryController {
      * @return 操作结果
      */
     @PatchMapping(value = "/{skuId}/rollback", headers = "X-API-Version=v1")
-    @Operation(summary = "回滚库存", description = "订单取消时回滚已锁定的库存")
+    @Operation(summary = "回滚库存", description = "订单取消时回滚已锁定的库�?)
     public Result<Void> rollbackStock(
             @PathVariable Long skuId,
             @Validated @RequestBody StockRollbackRequest request) {
@@ -121,7 +121,7 @@ public class InventoryController {
      * @return 操作结果
      */
     @PatchMapping(value = "/{skuId}/confirmation", headers = "X-API-Version=v1")
-    @Operation(summary = "确认库存", description = "订单支付成功后，将锁定库存转为已售")
+    @Operation(summary = "确认库存", description = "订单支付成功后，将锁定库存转为已�?)
     public Result<Void> confirmStock(
             @PathVariable Long skuId,
             @RequestParam Long warehouseId,

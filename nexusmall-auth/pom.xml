@@ -8,24 +8,9 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>com.nexusmall</groupId>
 	<artifactId>nexusmall-auth</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>nexusmall-auth</name>
 	<description>nexusmall-auth</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
 	<properties>
 		<java.version>8</java.version>
 	</properties>
@@ -133,7 +118,6 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-actuator</artifactId>
-			<!-- 版本由父工程 dependencyManagement 统一管理 -->
 		</dependency>
 
 		<!-- Sentinel 熔断限流 -->

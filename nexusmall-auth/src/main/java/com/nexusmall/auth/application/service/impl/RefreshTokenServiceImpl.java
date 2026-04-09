@@ -4,12 +4,12 @@ import com.nexusmall.auth.infrastructure.persistence.dao.RefreshTokenMapper;
 import com.nexusmall.auth.infrastructure.persistence.dao.UserMapper;
 import com.nexusmall.auth.domain.entity.RefreshToken;
 import com.nexusmall.auth.domain.entity.User;
-import com.nexusmall.auth.interfaces.exception.AuthException;
+import com.nexusmall.common.exception.AuthException;
 import com.nexusmall.auth.application.service.RefreshTokenService;
 import com.nexusmall.auth.application.service.TokenBlacklistService;
 import com.nexusmall.auth.util.JwtUtil;
 import com.nexusmall.common.constant.ErrorMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void saveRefreshToken(User user, String token, String jti, String deviceInfo, String ipAddress) {
         // 计算过期时间
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(
-                604800L // 7 天
+                604800L // 7 �?
         );
 
         RefreshToken refreshToken = RefreshToken.builder()
@@ -68,43 +68,43 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String refreshAccessToken(String refreshTokenStr) {
-        // 1. 验证 Refresh Token 格式和签名
+        // 1. 验证 Refresh Token 格式和签�?
         if (!jwtUtil.validateToken(refreshTokenStr)) {
-            throw new AuthException(CommonResultCode.TOKEN_INVALID.getCode(), "Refresh Token 无效");
+            throw new AuthException(ResultCode.TOKEN_INVALID);
         }
 
         // 2. 检查是否为 Refresh Token
         if (!jwtUtil.isRefreshToken(refreshTokenStr)) {
-            throw new AuthException(CommonResultCode.TOKEN_INVALID.getCode(), "不是有效的 Refresh Token");
+            throw new AuthException(ResultCode.TOKEN_INVALID);
         }
 
         // 3. 获取 JTI 并检查是否在黑名单中
         String jti = jwtUtil.getJtiFromToken(refreshTokenStr);
         if (blacklistService.isBlacklisted(jti)) {
-            throw new AuthException(CommonResultCode.TOKEN_EXPIRED.getCode(), "Refresh Token 已被撤销");
+            throw new AuthException(ResultCode.TOKEN_REVOKED);
         }
 
         // 4. 从数据库查询 Refresh Token
         RefreshToken storedToken = refreshTokenMapper.findByJti(jti);
         if (storedToken == null || storedToken.getStatus() != 1) {
-            throw new AuthException(CommonResultCode.TOKEN_EXPIRED.getCode(), "Refresh Token 不存在或已失效");
+            throw new AuthException(ResultCode.REFRESH_TOKEN_INVALID);
         }
 
-        // 5. 检查是否过期
+        // 5. 检查是否过�?
         if (storedToken.getExpireTime().isBefore(LocalDateTime.now())) {
-            throw new AuthException(CommonResultCode.TOKEN_EXPIRED.getCode(), "Refresh Token 已过期");
+            throw new AuthException(ResultCode.TOKEN_EXPIRED);
         }
 
         // 6. 获取用户信息
         User user = userMapper.selectById(storedToken.getUserId());
         if (user == null || user.getStatus() != 1) {
-            throw new AuthException(CommonResultCode.USER_NOT_FOUND.getCode(), "用户不存在或已被禁用");
+            throw new AuthException(ResultCode.USER_NOT_FOUND);
         }
 
         // 7. 生成新的 Access Token + Refresh Token
         String newAccessToken = jwtUtil.generateAccessToken(
                 user.getUsername(),
-                Collections.emptyList(), // TODO: 从数据库加载角色和权限
+                Collections.emptyList(), // TODO: 从数据库加载角色和权�?
                 Collections.emptyList()
         );
         String newRefreshToken = jwtUtil.generateRefreshToken(user.getUsername());
@@ -126,8 +126,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 1. 数据库标记为无效
         int rows = refreshTokenMapper.invalidateToken(userId, jti);
         
-        // 2. 加入 Redis 黑名单
-        // 获取 Token 剩余有效期
+        // 2. 加入 Redis 黑名�?
+        // 获取 Token 剩余有效�?
         RefreshToken token = refreshTokenMapper.findByJti(jti);
         if (token != null) {
             long remainingTime = java.time.Duration.between(
@@ -149,7 +149,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 1. 获取所有有效的 Token JTI
         java.util.List<RefreshToken> validTokens = refreshTokenMapper.findValidByUserId(userId);
         
-        // 2. 将所有 JTI 加入黑名单
+        // 2. 将所�?JTI 加入黑名�?
         for (RefreshToken token : validTokens) {
             long remainingTime = java.time.Duration.between(
                     LocalDateTime.now(), 
@@ -164,7 +164,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 3. 数据库批量标记为无效
         int rows = refreshTokenMapper.invalidateAllTokens(userId);
         
-        log.info("用户所有 Refresh Token 已撤销，userId: {}, 影响行数: {}", userId, rows);
+        log.info("用户所�?Refresh Token 已撤销，userId: {}, 影响行数: {}", userId, rows);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional(rollbackFor = Exception.class)
     public int cleanExpiredTokens() {
         int count = refreshTokenMapper.cleanExpiredTokens();
-        log.info("已清理过期 Refresh Token，数量: {}", count);
+        log.info("已清理过�?Refresh Token，数�? {}", count);
         return count;
     }
 }

@@ -1,30 +1,30 @@
 package com.nexusmall.common.aspect;
 
 import com.nexusmall.common.annotation.Idempotent;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.NexusmallException;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
-import org.redisson.api.RLock;
-import org.redisson.api.RedissonClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.core.LocalVariableTableParameterNameDiscoverer;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.expression.EvaluationContext;
 import org.springframework.expression.Expression;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 幂等性 AOP 切面
+ * 幂等性AOP切面
  * <p>
- * 基于 Redis 分布式锁实现接口幂等性，防止重复提交
+ * 生产级实践：基于Redis实现分布式幂等性控制，防止重复提交
  * </p>
  *
  * @author shudl
@@ -32,122 +32,74 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Aspect
-@Component
-@ConditionalOnClass(RedissonClient.class)
 public class IdempotentAspect {
 
-    @Autowired(required = false)
-    private RedissonClient redissonClient;
-
+    private final StringRedisTemplate redisTemplate;
     private final ExpressionParser parser = new SpelExpressionParser();
+    private final LocalVariableTableParameterNameDiscoverer discoverer = new LocalVariableTableParameterNameDiscoverer();
 
-    /**
-     * 环绕通知，处理带有@Idempotent 注解的方法
-     */
-    @Around("@annotation(com.nexusmall.common.annotation.Idempotent)")
-    public Object around(ProceedingJoinPoint joinPoint) throws Throwable {
-        if (redissonClient == null) {
-            log.warn("【幂等性】RedissonClient 未配置，跳过幂等性检查");
-            return joinPoint.proceed();
+    public IdempotentAspect(StringRedisTemplate redisTemplate) {
+        this.redisTemplate = redisTemplate;
+    }
+
+    @Around("@annotation(idempotent)")
+    public Object around(ProceedingJoinPoint joinPoint, Idempotent idempotent) throws Throwable {
+        // 解析SpEL表达式生成幂等性key
+        String key = parseKey(joinPoint, idempotent.key());
+        String redisKey = "idempotent:" + key;
+
+        // 尝试设置Redis key（SETNX）
+        Boolean success = redisTemplate.opsForValue()
+                .setIfAbsent(redisKey, "1", idempotent.expireTime(), idempotent.timeUnit());
+
+        if (Boolean.FALSE.equals(success)) {
+            // key已存在，说明是重复请求
+            log.warn("【幂等性拦截】key: {}, 方法: {}", redisKey, joinPoint.getSignature());
+            throw new NexusmallException(ResultCode.CONFLICT, idempotent.message());
         }
 
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        Method method = signature.getMethod();
-        
-        // 获取注解信息
-        Idempotent idempotent = method.getAnnotation(Idempotent.class);
-        
-        // 生成幂等性键
-        String idempotentKey = generateIdempotentKey(idempotent, joinPoint);
-        
-        // 获取分布式锁
-        RLock lock = redissonClient.getLock("idempotent:" + idempotentKey);
-        
-        boolean isLocked = false;
         try {
-            // 尝试获取锁（不等待，立即返回）
-            isLocked = lock.tryLock(0, idempotent.expireTime(), TimeUnit.SECONDS);
-            
-            if (isLocked) {
-                // 获取锁成功，执行业务逻辑
-                log.debug("【幂等性】请求通过，key: {}", idempotentKey);
-                return joinPoint.proceed();
-            } else {
-                // 获取锁失败，说明是重复请求
-                log.warn("【幂等性】重复请求被拦截，key: {}", idempotentKey);
-                throw new NexusmallException(
-                    CommonResultCode.SYSTEM_BUSY.getErrorCode(),
-                    idempotent.message()
-                );
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            log.error("【幂等性】获取锁被中断，key: {}", idempotentKey, e);
-            throw new NexusmallException(
-                CommonResultCode.SYSTEM_ERROR.getErrorCode(),
-                "系统异常，请稍后重试",
-                e
-            );
-        } finally {
-            // 释放锁
-            if (isLocked && lock.isHeldByCurrentThread()) {
-                lock.unlock();
-            }
+            // 执行目标方法
+            return joinPoint.proceed();
+        } catch (Exception e) {
+            // 业务异常时删除key，允许重试
+            redisTemplate.delete(redisKey);
+            log.error("【幂等性异常】key: {}, 错误: {}", redisKey, e.getMessage());
+            throw e;
         }
     }
 
     /**
-     * 生成幂等性键
+     * 解析SpEL表达式
+     *
+     * @param joinPoint 切点
+     * @param keyExpression SpEL表达式
+     * @return 解析后的key
      */
-    private String generateIdempotentKey(Idempotent idempotent, ProceedingJoinPoint joinPoint) {
-        StringBuilder keyBuilder = new StringBuilder();
-        
-        // 添加前缀
-        if (idempotent.prefix() != null && !idempotent.prefix().isEmpty()) {
-            keyBuilder.append(idempotent.prefix()).append(":");
-        } else {
-            // 默认使用方法签名作为前缀
-            keyBuilder.append(joinPoint.getSignature().toShortString()).append(":");
-        }
-        
-        // 添加自定义键（支持 SpEL 表达式）
-        if (idempotent.key() != null && !idempotent.key().isEmpty()) {
-            String customKey = parseSpEL(idempotent.key(), joinPoint);
-            keyBuilder.append(customKey);
-        } else {
-            // 如果没有指定 key，使用参数哈希值
-            keyBuilder.append(java.util.Arrays.hashCode(joinPoint.getArgs()));
-        }
-        
-        return keyBuilder.toString();
-    }
-
-    /**
-     * 解析 SpEL 表达式
-     */
-    private String parseSpEL(String expression, ProceedingJoinPoint joinPoint) {
-        if (!expression.contains("#")) {
-            return expression;
-        }
-        
-        MethodSignature signature = (MethodSignature) joinPoint.getSignature();
-        String[] parameterNames = signature.getParameterNames();
+    private String parseKey(ProceedingJoinPoint joinPoint, String keyExpression) {
+        Method method = ((MethodSignature) joinPoint.getSignature()).getMethod();
         Object[] args = joinPoint.getArgs();
         
-        StandardEvaluationContext context = new StandardEvaluationContext();
-        
-        // 添加方法参数到上下文
-        for (int i = 0; i < parameterNames.length; i++) {
-            context.setVariable(parameterNames[i], args[i]);
+        // 获取参数名
+        String[] paramNames = discoverer.getParameterNames(method);
+        if (paramNames == null || paramNames.length == 0) {
+            throw new IllegalArgumentException("无法获取方法参数名，请确保编译时保留调试信息");
         }
-        
-        try {
-            Expression expr = parser.parseExpression(expression);
-            Object value = expr.getValue(context);
-            return value != null ? value.toString() : expression;
-        } catch (Exception e) {
-            log.warn("【幂等性】SpEL 解析失败，使用原始表达式: {}", expression, e);
-            return expression;
+
+        // 构建SpEL上下文
+        EvaluationContext context = new StandardEvaluationContext();
+        for (int i = 0; i < paramNames.length; i++) {
+            context.setVariable(paramNames[i], args[i]);
         }
+
+        // 解析表达式
+        Expression expression = parser.parseExpression(keyExpression);
+        Object value = expression.getValue(context);
+        
+        if (value == null) {
+            throw new IllegalArgumentException("幂等性key解析结果为null: " + keyExpression);
+        }
+
+        return value.toString();
     }
 }

@@ -7,13 +7,13 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * NexusMall 搜索服务启动类
+ * NexusMall 搜索服务启动�?
  * <p>
- * 职责：
- * - 商品全文搜索（Elasticsearch）
+ * 职责�?
+ * - 商品全文搜索（Elasticsearch�?
  * - 搜索建议/自动补全
  * - 搜索历史记录
- * - 热门搜索词统计
+ * - 热门搜索词统�?
  * - 搜索结果排序/过滤
  * </p>
  *

@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 搜索业务异常
  * <p>
@@ -12,27 +14,11 @@ public class SearchException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public SearchException(String message) {
-        super(message);
+    public SearchException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public SearchException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public SearchException(String code, String message) {
-        super(code, message);
-    }
-
-    public SearchException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public SearchException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public SearchException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public SearchException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

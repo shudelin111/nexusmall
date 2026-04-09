@@ -1,5 +1,7 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.enums.ResultCode;
+
 /**
  * 商品业务异常
  * <p>
@@ -12,27 +14,11 @@ public class ProductException extends NexusmallException {
 
     private static final long serialVersionUID = 1L;
 
-    public ProductException(String message) {
-        super(message);
+    public ProductException(ResultCode resultCode) {
+        super(resultCode);
     }
 
-    public ProductException(Integer code, String message) {
-        super(code, message);
-    }
-
-    public ProductException(String code, String message) {
-        super(code, message);
-    }
-
-    public ProductException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public ProductException(Integer code, String message, Throwable cause) {
-        super(code, message, cause);
-    }
-
-    public ProductException(String code, String message, Throwable cause) {
-        super(code, message, cause);
+    public ProductException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 }

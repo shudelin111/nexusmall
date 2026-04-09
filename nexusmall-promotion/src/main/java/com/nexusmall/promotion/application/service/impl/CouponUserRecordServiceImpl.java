@@ -30,7 +30,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
 
     @Override
     public List<UserCouponVO> listUserCoupons(Long userId, Integer useStatus) {
-        log.info("查询用户优惠券列表: userId={}, useStatus={}", userId, useStatus);
+        log.info("查询用户优惠券列�? userId={}, useStatus={}", userId, useStatus);
         
         LambdaQueryWrapper<CouponUserRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CouponUserRecord::getUserId, userId);
@@ -49,12 +49,12 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean useCoupon(Long recordId, Long orderId) {
-        log.info("核销优惠券: recordId={}, orderId={}", recordId, orderId);
+        log.info("核销优惠�? recordId={}, orderId={}", recordId, orderId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
-               .eq(CouponUserRecord::getUseStatus, 0)  // 未使用
-               .set(CouponUserRecord::getUseStatus, 1)  // 已使用
+               .eq(CouponUserRecord::getUseStatus, 0)  // 未使�?
+               .set(CouponUserRecord::getUseStatus, 1)  // 已使�?
                .set(CouponUserRecord::getOrderId, orderId)
                .set(CouponUserRecord::getUseTime, LocalDateTime.now());
         
@@ -72,19 +72,19 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean lockCoupon(Long recordId) {
-        log.info("锁定优惠券: recordId={}", recordId);
+        log.info("锁定优惠�? recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
-               .eq(CouponUserRecord::getUseStatus, 0)  // 未使用
-               .set(CouponUserRecord::getUseStatus, 2);  // 已锁定
+               .eq(CouponUserRecord::getUseStatus, 0)  // 未使�?
+               .set(CouponUserRecord::getUseStatus, 2);  // 已锁�?
         
         boolean success = this.update(wrapper);
         
         if (success) {
-            log.info("优惠券锁定成功: recordId={}", recordId);
+            log.info("优惠券锁定成�? recordId={}", recordId);
         } else {
-            log.warn("优惠券锁定失败: recordId={}", recordId);
+            log.warn("优惠券锁定失�? recordId={}", recordId);
         }
         
         return success;
@@ -93,19 +93,19 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean releaseCoupon(Long recordId) {
-        log.info("释放优惠券: recordId={}", recordId);
+        log.info("释放优惠�? recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
-               .eq(CouponUserRecord::getUseStatus, 2)  // 已锁定
-               .set(CouponUserRecord::getUseStatus, 0);  // 未使用
+               .eq(CouponUserRecord::getUseStatus, 2)  // 已锁�?
+               .set(CouponUserRecord::getUseStatus, 0);  // 未使�?
         
         boolean success = this.update(wrapper);
         
         if (success) {
-            log.info("优惠券释放成功: recordId={}", recordId);
+            log.info("优惠券释放成�? recordId={}", recordId);
         } else {
-            log.warn("优惠券释放失败: recordId={}", recordId);
+            log.warn("优惠券释放失�? recordId={}", recordId);
         }
         
         return success;
@@ -114,12 +114,12 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean refundCoupon(Long recordId) {
-        log.info("回退优惠券: recordId={}", recordId);
+        log.info("回退优惠�? recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
-               .in(CouponUserRecord::getUseStatus, 1, 2)  // 已使用或已锁定
-               .set(CouponUserRecord::getUseStatus, 0)  // 未使用
+               .in(CouponUserRecord::getUseStatus, 1, 2)  // 已使用或已锁�?
+               .set(CouponUserRecord::getUseStatus, 0)  // 未使�?
                .set(CouponUserRecord::getOrderId, null)
                .set(CouponUserRecord::getUseTime, null);
         
@@ -146,7 +146,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     }
 
     /**
-     * Entity 转 VO
+     * Entity �?VO
      */
     private UserCouponVO convertToVO(CouponUserRecord record) {
         UserCouponVO vo = new UserCouponVO();

@@ -25,7 +25,7 @@ import java.util.List;
 @Tag(name = "搜索建议", description = "提供关键字联想、自动补全功能")
 @Validated
 @RestController
-@RequestMapping("/")  // 根路径：Gateway已处理/service前缀
+@RequestMapping("/")  // 根路径：Gateway已处理service前缀
 public class SuggestController {
 
     private final SearchFacade searchFacade;

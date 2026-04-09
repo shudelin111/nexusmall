@@ -10,12 +10,12 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Token 黑名单服务实现 (基于 Redis)
+ * Token 黑名单服务实�?(基于 Redis)
  * <p>
- * 业界标准：
- * - 使用 Redis SET 结构存储黑名单
+ * 业界标准�?
+ * - 使用 Redis SET 结构存储黑名�?
  * - Key 格式: token:blacklist:{jti}
- * - TTL = Token 剩余有效期 (自动过期清理)
+ * - TTL = Token 剩余有效�?(自动过期清理)
  * </p>
  *
  * @author shudl
@@ -43,8 +43,8 @@ public class TokenBlacklistServiceImpl implements TokenBlacklistService {
 
         String key = BLACKLIST_KEY_PREFIX + jti;
         
-        // 将 JTI 存入 Redis，设置过期时间
-        // 过期时间 = Token 剩余有效期，确保黑名单不会永久存在
+        // �?JTI 存入 Redis，设置过期时�?
+        // 过期时间 = Token 剩余有效期，确保黑名单不会永久存�?
         redisUtils.set(key, "1", expireTime, TimeUnit.MILLISECONDS);
         
         log.debug("Token 已加入黑名单，jti: {}, 过期时间: {}ms", jti, expireTime);

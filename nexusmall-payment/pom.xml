@@ -8,9 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.nexusmall</groupId>
     <artifactId>nexusmall-payment</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>nexusmall-payment</name>
     <description>nexusmall-payment</description>
 

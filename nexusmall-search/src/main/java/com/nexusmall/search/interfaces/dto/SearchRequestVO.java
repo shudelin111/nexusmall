@@ -2,6 +2,7 @@ package com.nexusmall.search.interfaces.dto;
 
 import com.nexusmall.search.shared.enums.SearchSortType;
 
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import java.math.BigDecimal;
@@ -15,6 +16,7 @@ public class SearchRequestVO {
     @Min(value = 1, message = "pageNo must be greater than 0")
     private Integer pageNo = 1;
     @Min(value = 1, message = "pageSize must be greater than 0")
+    @Max(value = 100, message = "pageSize must not exceed 100")
     private Integer pageSize = 20;
     private SearchSortType sortType = SearchSortType.RELEVANCE;
     private Long categoryId;

@@ -23,27 +23,27 @@ public enum SentinelBlockType {
     /**
      * 流控异常
      */
-    FLOW(FlowException.class, CommonResultCode.SENTINEL_FLOW, "流控"),
+    FLOW(FlowException.class, ResultCode.SENTINEL_FLOW, "流控"),
 
     /**
      * 熔断降级异常
      */
-    DEGRADE(DegradeException.class, CommonResultCode.SENTINEL_DEGRADE, "熔断降级"),
+    DEGRADE(DegradeException.class, ResultCode.SENTINEL_DEGRADE, "熔断降级"),
 
     /**
      * 热点参数限流异常
      */
-    PARAM_FLOW(ParamFlowException.class, CommonResultCode.SENTINEL_PARAM_FLOW, "热点参数限流"),
+    PARAM_FLOW(ParamFlowException.class, ResultCode.SENTINEL_PARAM_FLOW, "热点参数限流"),
 
     /**
      * 系统保护异常
      */
-    SYSTEM(SystemBlockException.class, CommonResultCode.SENTINEL_SYSTEM, "系统保护"),
+    SYSTEM(SystemBlockException.class, ResultCode.SENTINEL_SYSTEM, "系统保护"),
 
     /**
      * 授权异常
      */
-    AUTHORITY(AuthorityException.class, CommonResultCode.SENTINEL_AUTHORITY, "授权异常");
+    AUTHORITY(AuthorityException.class, ResultCode.SENTINEL_AUTHORITY, "授权异常");
 
     /**
      * 异常类型
@@ -53,14 +53,14 @@ public enum SentinelBlockType {
     /**
      * 对应的错误码
      */
-    private final CommonResultCode resultCode;
+    private final ResultCode resultCode;
 
     /**
      * 异常类型名称（用于日志记录）
      */
     private final String name;
 
-    SentinelBlockType(Class<? extends BlockException> exceptionClass, CommonResultCode resultCode, String name) {
+    SentinelBlockType(Class<? extends BlockException> exceptionClass, ResultCode resultCode, String name) {
         this.exceptionClass = exceptionClass;
         this.resultCode = resultCode;
         this.name = name;

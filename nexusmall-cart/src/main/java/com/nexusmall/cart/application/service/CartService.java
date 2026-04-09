@@ -11,7 +11,7 @@ import com.nexusmall.cart.infrastructure.messaging.CartSyncMessage;
 import com.nexusmall.cart.infrastructure.messaging.CartSyncProducer;
 import com.nexusmall.cart.interfaces.dto.CartItemVO;
 import com.nexusmall.cart.interfaces.dto.CartSummaryVO;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +88,7 @@ public class CartService {
             // 尝试加锁，最多等待3秒，锁定10秒后自动释放
             boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
             if (!locked) {
-                throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
+                throw new CartException(ResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
             }
 
             // 2. 校验购物车容量
@@ -110,12 +110,12 @@ public class CartService {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             log.error("【添加购物车】加锁中断, userId={}, skuId={}", userId, skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统异常");
+            throw new CartException(ResultCode.SYSTEM_ERROR, "系统异常");
         } catch (CartException e) {
             throw e;
         } catch (Exception e) {
             log.error("【添加购物车】失败, userId={}, skuId={}", userId, skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "添加购物车失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "添加购物车失败: " + e.getMessage());
         } finally {
             // 释放锁
             if (lock.isHeldByCurrentThread()) {
@@ -192,7 +192,7 @@ public class CartService {
             return summary;
         } catch (Exception e) {
             log.error("【查询购物车汇总】失败, userId={}", userId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "查询购物车失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "查询购物车失败: " + e.getMessage());
         }
     }
 
@@ -204,7 +204,7 @@ public class CartService {
         log.info("【更新数量】userId={}, skuId={}, quantity={}", userId, skuId, quantity);
 
         if (quantity <= 0) {
-            throw new CartException(CommonResultCode.PARAM_INVALID, "数量必须大于0");
+            throw new CartException(ResultCode.PARAM_INVALID, "数量必须大于0");
         }
 
         String lockKey = LOCK_KEY_PREFIX + userId;
@@ -213,7 +213,7 @@ public class CartService {
         try {
             boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
             if (!locked) {
-                throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
+                throw new CartException(ResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
             }
 
             String cartKey = CART_KEY_PREFIX + userId;
@@ -222,7 +222,7 @@ public class CartService {
             // 1. 检查是否存在
             Boolean exists = redisTemplate.opsForHash().hasKey(cartKey, field);
             if (!Boolean.TRUE.equals(exists)) {
-                throw new CartException(CommonResultCode.PARAM_INVALID, "商品不在购物车中");
+                throw new CartException(ResultCode.PARAM_INVALID, "商品不在购物车中");
             }
 
             // 2. 获取商品信息并检查库存
@@ -242,12 +242,12 @@ public class CartService {
             log.info("【更新数量】成功, userId={}, skuId={}", userId, skuId);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统异常");
+            throw new CartException(ResultCode.SYSTEM_ERROR, "系统异常");
         } catch (CartException e) {
             throw e;
         } catch (Exception e) {
             log.error("【更新数量】失败, userId={}, skuId={}", userId, skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "更新数量失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "更新数量失败: " + e.getMessage());
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -277,7 +277,7 @@ public class CartService {
             log.info("【删除购物车】成功, userId={}, skuId={}", userId, skuId);
         } catch (Exception e) {
             log.error("【删除购物车】失败, userId={}, skuId={}", userId, skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "删除购物车商品失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "删除购物车商品失败: " + e.getMessage());
         }
     }
 
@@ -304,7 +304,7 @@ public class CartService {
             log.info("【批量删除】成功, userId={}, count={}", userId, skuIds.size());
         } catch (Exception e) {
             log.error("【批量删除】失败, userId={}, skuIds={}", userId, skuIds, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "批量删除失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "批量删除失败: " + e.getMessage());
         }
     }
 
@@ -328,7 +328,7 @@ public class CartService {
             log.info("【清空购物车】成功, userId={}", userId);
         } catch (Exception e) {
             log.error("【清空购物车】失败, userId={}", userId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "清空购物车失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "清空购物车失败: " + e.getMessage());
         }
     }
 
@@ -344,7 +344,7 @@ public class CartService {
 
             Object existingValue = redisTemplate.opsForHash().get(cartKey, field);
             if (existingValue == null) {
-                throw new CartException(CommonResultCode.PARAM_INVALID, "商品不在购物车中");
+                throw new CartException(ResultCode.PARAM_INVALID, "商品不在购物车中");
             }
 
             Map<String, Object> item = JSON.parseObject(JSON.toJSONString(existingValue), Map.class);
@@ -354,7 +354,7 @@ public class CartService {
             log.info("【切换选中状态】成功, userId={}, skuId={}", userId, skuId);
         } catch (Exception e) {
             log.error("【切换选中状态】失败, userId={}, skuId={}", userId, skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "操作失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "操作失败: " + e.getMessage());
         }
     }
 
@@ -377,7 +377,7 @@ public class CartService {
             log.info("【全选/全不选】成功, userId={}", userId);
         } catch (Exception e) {
             log.error("【全选/全不选】失败, userId={}", userId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "操作失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "操作失败: " + e.getMessage());
         }
     }
 
@@ -405,7 +405,7 @@ public class CartService {
         try {
             boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
             if (!locked) {
-                throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
+                throw new CartException(ResultCode.SYSTEM_ERROR, "系统繁忙，请稍后重试");
             }
 
             String anonymousCartKey = CART_KEY_PREFIX + anonymousUserId;
@@ -432,7 +432,7 @@ public class CartService {
             long currentSize = existingSkuIds.size();
             long newSize = anonymousItems.size();
             if (currentSize + newSize > MAX_CART_ITEMS) {
-                throw new CartException(CommonResultCode.PARAM_INVALID,
+                throw new CartException(ResultCode.PARAM_INVALID,
                         "合并后超过购物车容量限制（最多" + MAX_CART_ITEMS + "种商品）");
             }
 
@@ -482,13 +482,13 @@ public class CartService {
                     loggedInUserId, mergedCount, addedCount);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "系统异常");
+            throw new CartException(ResultCode.SYSTEM_ERROR, "系统异常");
         } catch (CartException e) {
             throw e;
         } catch (Exception e) {
             log.error("【合并购物车】失败, loggedInUserId={}, anonymousUserId={}",
                     loggedInUserId, anonymousUserId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "合并购物车失败: " + e.getMessage());
+            throw new CartException(ResultCode.SYSTEM_ERROR, "合并购物车失败: " + e.getMessage());
         } finally {
             if (lock.isHeldByCurrentThread()) {
                 lock.unlock();
@@ -508,7 +508,7 @@ public class CartService {
         Long size = redisTemplate.opsForHash().size(cartKey);
         
         if (size != null && size >= MAX_CART_ITEMS) {
-            throw new CartException(CommonResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID, 
                     "购物车已满，最多可添加" + MAX_CART_ITEMS + "种商品");
         }
     }
@@ -522,12 +522,12 @@ public class CartService {
                     productFeignClient.batchQuerySkus(Collections.singletonList(skuId));
             
             if (result == null || !result.isSuccess() || result.getData() == null) {
-                throw new CartException(CommonResultCode.PARAM_INVALID, "商品不存在或已下架");
+                throw new CartException(ResultCode.PARAM_INVALID, "商品不存在或已下架");
             }
 
             ProductFeignClient.SkuInfo skuInfo = result.getData().get(skuId);
             if (skuInfo == null) {
-                throw new CartException(CommonResultCode.PARAM_INVALID, "商品不存在或已下架");
+                throw new CartException(ResultCode.PARAM_INVALID, "商品不存在或已下架");
             }
 
             return skuInfo;
@@ -535,7 +535,7 @@ public class CartService {
             throw e;
         } catch (Exception e) {
             log.error("【查询商品信息】失败, skuId={}", skuId, e);
-            throw new CartException(CommonResultCode.SYSTEM_ERROR, "查询商品信息失败");
+            throw new CartException(ResultCode.SYSTEM_ERROR, "查询商品信息失败");
         }
     }
 
@@ -544,11 +544,11 @@ public class CartService {
      */
     private void checkStock(Long skuId, Integer quantity, ProductFeignClient.SkuInfo skuInfo) {
         if (skuInfo.getStockStatus() == 0) {
-            throw new CartException(CommonResultCode.PARAM_INVALID, "商品已售罄");
+            throw new CartException(ResultCode.PARAM_INVALID, "商品已售罄");
         }
         
         if (skuInfo.getStockQuantity() < quantity) {
-            throw new CartException(CommonResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID, 
                     "库存不足，仅剩" + skuInfo.getStockQuantity() + "件");
         }
     }
@@ -558,7 +558,7 @@ public class CartService {
      */
     private void checkPurchaseLimit(Long userId, Long skuId, Integer quantity, ProductFeignClient.SkuInfo skuInfo) {
         if (skuInfo.getMaxPurchaseLimit() != null && quantity > skuInfo.getMaxPurchaseLimit()) {
-            throw new CartException(CommonResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID, 
                     "超过限购数量，单次最多购买" + skuInfo.getMaxPurchaseLimit() + "件");
         }
     }

@@ -26,20 +26,20 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/payments")  // RESTful资源路径：支付单集合
 @RequiredArgsConstructor
-@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
+@ApiVersion("v1")  // 标记此Controller支持v1版本
 @Tag(name = "支付单管理", description = "支付单的创建、查询、回调等接口")
 public class PayOrderController {
 
     private final PayOrderService payOrderService;
 
     /**
-     * 创建支付单 V1
+     * 创建支付单V1
      *
      * @param request 创建支付单请求
      * @return 支付表单HTML或二维码URL
      */
     @PostMapping(value = "/", headers = "X-API-Version=v1")
-    @Operation(summary = "创建支付单 V1", description = "V1版本：基础支付功能")
+    @Operation(summary = "创建支付单V1", description = "V1版本：基础支付功能")
     public Result<String> createPayOrderV1(@RequestBody CreatePayOrderRequest request) {
         log.info("【V1 创建支付单】orderNo={}, channel={}", request.getOrderNo(), request.getChannelCode());
         
@@ -48,13 +48,13 @@ public class PayOrderController {
     }
 
     /**
-     * 查询支付单 V1
+     * 查询支付单V1
      *
      * @param paymentNo 支付单号
      * @return 支付单详情
      */
     @GetMapping(value = "/{paymentNo}", headers = "X-API-Version=v1")
-    @Operation(summary = "查询支付单 V1", description = "V1版本：基础查询功能")
+    @Operation(summary = "查询支付单V1", description = "V1版本：基础查询功能")
     public Result<PayOrderResponse> queryPayOrderV1(
             @Parameter(description = "支付单号", required = true)
             @PathVariable String paymentNo) {
