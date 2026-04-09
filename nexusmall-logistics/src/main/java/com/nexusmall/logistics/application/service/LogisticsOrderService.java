@@ -6,7 +6,7 @@ import com.nexusmall.logistics.domain.entity.LogisticsOrder;
 /**
  * 物流订单服务接口
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持物流订单CRUD
  * - 支持物流状态流?
  * - 支持轨迹同步
@@ -36,7 +36,7 @@ public interface LogisticsOrderService extends IService<LogisticsOrder> {
     /**
      * 创建物流订单（发货）
      * <p>
-     * 业界标准?
+     * 业界标准：
      * - 生成快递单?
      * - 初始化物流状态为"已发?
      * - 记录发货时间

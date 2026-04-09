@@ -3,7 +3,7 @@ package com.nexusmall.auth.application.service;
 /**
  * Token 黑名单服务接?(基于 Redis)
  * <p>
- * 业界标准?
+ * 业界标准：
  * - JWT 本身不可撤销,通过黑名单实现即时失?
  * - Access Token 登出时加入黑名单
  * - Refresh Token 撤销时加入黑名单

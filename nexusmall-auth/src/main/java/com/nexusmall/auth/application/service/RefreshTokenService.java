@@ -6,7 +6,7 @@ import com.nexusmall.auth.domain.entity.User;
 /**
  * Refresh Token 服务接口
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持刷新 Access Token
  * - 支持主动撤销 (用户登出)
  * - 支持设备管理 (查看/撤销特定设备?Token)

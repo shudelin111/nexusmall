@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Token 黑名单服务实?(基于 Redis)
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 使用 Redis SET 结构存储黑名?
  * - Key 格式: token:blacklist:{jti}
  * - TTL = Token 剩余有效?(自动过期清理)

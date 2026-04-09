@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 /**
  * 运费计算服务接口
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持多种计费方式
  * - 支持包邮规则
  * - 支持首重续重计费模型
@@ -22,7 +22,7 @@ public interface LogisticsFreightTemplateService extends IService<LogisticsFreig
     /**
      * 计算运费
      * <p>
-     * 业界标准?
+     * 业界标准：
      * - 按重量：首重费用 + (总重?- 首重) / 续重 * 续重费用
      * - 按体积：类似按重量计?
      * - 按件数：件数 * 单价

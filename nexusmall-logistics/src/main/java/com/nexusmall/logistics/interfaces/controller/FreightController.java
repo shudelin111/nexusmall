@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 运费计算 Controller
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持多种计费方式
  * - 实时计算运费
  * - 返回详细计费说明

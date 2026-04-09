@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 /**
  * 订单服务 Feign 客户?
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 用于查询订单详细信息
  * - 物流状态变更时通知订单服务
  * </p>

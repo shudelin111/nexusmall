@@ -207,7 +207,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     /**
      * 发布物流状态变更事?
      * <p>
-     * 业界标准?
+     * 业界标准：
      * - 状态变更后立即发布事件
      * - 异步通知其他微服务（订单、通知等）
      * - 即使发布失败也不影响主流程（记录日志?

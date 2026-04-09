@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 /**
  * 物流缓存配置
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 缓存仓库信息（变化频率低?
  * - 缓存运费模板（变化频率低?
  * - 设置合理的过期时?

@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 /**
  * 物流应用服务
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 编排领域服务
  * - DTO/VO转换
  * - 事务边界控制

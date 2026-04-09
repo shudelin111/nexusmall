@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 /**
  * Refresh Token 实体?
  * <p>
- * 业界标准?
+ * 业界标准：
  * - Refresh Token 需要持久化存储 (数据?Redis)
  * - 支持主动撤销 (用户登出时删?
  * - 记录设备信息 (用于安全管理)

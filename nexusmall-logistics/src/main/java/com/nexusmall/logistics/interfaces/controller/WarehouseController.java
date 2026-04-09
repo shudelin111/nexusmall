@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 仓库管理 Controller
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持仓库CRUD
  * - 支持智能仓库分配
  * - 支持仓库启用/禁用

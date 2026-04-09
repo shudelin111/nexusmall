@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 /**
  * 订单发货事件监听?
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 监听订单服务的发货事?
  * - 自动创建物流订单
  * - 智能分配仓库

@@ -22,7 +22,7 @@ import java.util.UUID;
 /**
  * JWT 工具?(RS256 非对称加?
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 使用 RS256 算法 (RSA + SHA256)
  * - 私钥签发 Token，公钥验?Token
  * - 强制验证算法白名单，防止算法混淆攻击
