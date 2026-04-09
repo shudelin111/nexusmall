@@ -1,2 +1,28 @@
+# Shell scripts
 /mvnw text eol=lf
 *.cmd text eol=crlf
+*.sh text eol=lf
+
+# Java source files - force UTF-8 without BOM
+*.java text diff=java encoding=utf-8
+
+# Configuration files
+*.xml text encoding=utf-8
+*.yml text encoding=utf-8
+*.yaml text encoding=utf-8
+*.properties text encoding=utf-8
+
+# Documentation
+*.md text encoding=utf-8
+*.txt text encoding=utf-8
+
+# Binary files (no conversion)
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.jar binary
+*.war binary
+*.ear binary
+*.class binary
