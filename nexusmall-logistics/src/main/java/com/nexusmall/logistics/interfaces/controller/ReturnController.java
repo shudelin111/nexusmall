@@ -33,7 +33,7 @@ import java.util.List;
 @RequestMapping("/returns")
 @RequiredArgsConstructor
 @ApiVersion("v1")
-@Tag(name = "退货管?, description = "退货申请、审核、物流跟?)
+@Tag(name = "退货管理", description = "退货申请、审核、物流跟踪")
 public class ReturnController {
 
     private final LogisticsReturnApplyService returnApplyService;
@@ -42,11 +42,11 @@ public class ReturnController {
      * 提交退货申?
      *
      * @param userId  用户ID（从Header获取?
-     * @param request 退货申请信?
-     * @return 退货申?
+     * @param request 退货申请信息
+     * @return 退货申请
      */
     @PostMapping(value = "/apply", headers = "X-API-Version=v1")
-    @Operation(summary = "提交退货申?, description = "用户提交退货申请，等待商家审核")
+    @Operation(summary = "提交退货申请", description = "用户提交退货申请，等待商家审核")
     public Result<LogisticsReturnApply> submitReturnApply(
             @Parameter(description = "用户ID", required = true)
             @RequestHeader("X-User-ID") Long userId,
@@ -63,19 +63,19 @@ public class ReturnController {
             );
             return Result.success(apply);
         } catch (RuntimeException e) {
-            log.error("【提交退货申请失败?, e);
+            log.error("【提交退货申请失败】", e);
             return Result.failure("400", e.getMessage());
         }
     }
 
     /**
-     * 查询用户的退货申请列?
+     * 查询用户的退货申请列表
      *
      * @param userId 用户ID
-     * @return 退货申请列?
+     * @return 退货申请列表
      */
     @GetMapping(value = "/my-returns", headers = "X-API-Version=v1")
-    @Operation(summary = "查询我的退货申?, description = "查询当前用户的所有退货申?)
+    @Operation(summary = "查询我的退货申请", description = "查询当前用户的所有退货申请")
     public Result<List<LogisticsReturnApply>> listMyReturns(
             @Parameter(description = "用户ID", required = true)
             @RequestHeader("X-User-ID") Long userId) {
@@ -85,13 +85,13 @@ public class ReturnController {
     }
 
     /**
-     * 根据订单编号查询退货申?
+     * 根据订单编号查询退货申请
      *
      * @param orderSn 订单编号
-     * @return 退货申请列?
+     * @return 退货申请列表
      */
     @GetMapping(value = "/order/{orderSn}", headers = "X-API-Version=v1")
-    @Operation(summary = "根据订单查询退?, description = "查询指定订单的退货申?)
+    @Operation(summary = "根据订单查询退货", description = "查询指定订单的退货申请")
     public Result<List<LogisticsReturnApply>> listByOrderSn(
             @Parameter(description = "订单编号", required = true)
             @PathVariable String orderSn) {
@@ -101,13 +101,13 @@ public class ReturnController {
     }
 
     /**
-     * 审核退货申请（同意? 管理员接?
+     * 审核退货申请（同意）- 管理员接口
      *
      * @param id 退货申请ID
      * @return 是否成功
      */
     @PostMapping(value = "/{id}/approve", headers = "X-API-Version=v1")
-    @Operation(summary = "同意退货申?, description = "商家同意用户的退货申?)
+    @Operation(summary = "同意退货申请", description = "商家同意用户的退货申请")
     public Result<Void> approveReturnApply(
             @Parameter(description = "退货申请ID", required = true)
             @PathVariable Long id) {
@@ -117,14 +117,14 @@ public class ReturnController {
     }
 
     /**
-     * 审核退货申请（拒绝? 管理员接?
+     * 审核退货申请（拒绝）- 管理员接口
      *
      * @param id     退货申请ID
      * @param reason 拒绝原因
      * @return 是否成功
      */
     @PostMapping(value = "/{id}/reject", headers = "X-API-Version=v1")
-    @Operation(summary = "拒绝退货申?, description = "商家拒绝用户的退货申?)
+    @Operation(summary = "拒绝退货申请", description = "商家拒绝用户的退货申请")
     public Result<Void> rejectReturnApply(
             @Parameter(description = "退货申请ID", required = true)
             @PathVariable Long id,
@@ -136,14 +136,14 @@ public class ReturnController {
     }
 
     /**
-     * 填写退货物流信?
+     * 填写退货物流信息
      *
      * @param id      退货申请ID
      * @param request 物流信息
      * @return 是否成功
      */
     @PutMapping(value = "/{id}/logistics", headers = "X-API-Version=v1")
-    @Operation(summary = "填写退货物?, description = "用户填写退货快递信?)
+    @Operation(summary = "填写退货物流", description = "用户填写退货快递信息")
     public Result<Void> fillReturnLogistics(
             @Parameter(description = "退货申请ID", required = true)
             @PathVariable Long id,
@@ -158,13 +158,13 @@ public class ReturnController {
     }
 
     /**
-     * 确认收到退?- 管理员接?
+     * 确认收到退货 - 管理员接口
      *
      * @param id 退货申请ID
      * @return 是否成功
      */
     @PostMapping(value = "/{id}/confirm-receive", headers = "X-API-Version=v1")
-    @Operation(summary = "确认收到退?, description = "商家确认收到退货，触发退款流?)
+    @Operation(summary = "确认收到退货", description = "商家确认收到退货，触发退款流程")
     public Result<Void> confirmReturnReceive(
             @Parameter(description = "退货申请ID", required = true)
             @PathVariable Long id) {

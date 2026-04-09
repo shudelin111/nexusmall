@@ -63,7 +63,7 @@ public class LogisticsTrackServiceImpl extends ServiceImpl<LogisticsTrackMapper,
                 logisticsOrderId, expressNo, tracks.size());
 
         if (tracks == null || tracks.isEmpty()) {
-            log.warn("【批量添加物流轨迹】轨迹列表为?);
+            log.warn("【批量添加物流轨迹】轨迹列表为空");
             return false;
         }
 

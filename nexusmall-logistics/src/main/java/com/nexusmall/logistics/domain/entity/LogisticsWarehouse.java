@@ -58,9 +58,9 @@ public class LogisticsWarehouse implements Serializable {
     private String city;
 
     /**
-     * ?
+     * 区域
      */
-    @Schema(description = "?)
+    @Schema(description = "区域")
     private String region;
 
     /**
@@ -70,9 +70,9 @@ public class LogisticsWarehouse implements Serializable {
     private String detailAddress;
 
     /**
-     * 联系?
+     * 联系人
      */
-    @Schema(description = "联系?)
+    @Schema(description = "联系人")
     private String contactPerson;
 
     /**

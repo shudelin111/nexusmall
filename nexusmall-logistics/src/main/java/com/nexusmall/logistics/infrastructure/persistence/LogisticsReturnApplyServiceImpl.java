@@ -35,7 +35,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
             if (apply.getStatus().equals(ReturnStatusEnum.APPLYING.getCode()) 
                     || apply.getStatus().equals(ReturnStatusEnum.APPROVED.getCode())) {
                 log.warn("【提交退货申请】订单已有进行中的退货申请，applyId={}", apply.getId());
-                throw new RuntimeException("订单已有进行中的退货申?);
+                throw new RuntimeException("订单已有进行中的退货申请");
             }
         }
 
@@ -158,7 +158,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
         }
 
         if (apply.getExpressNo() == null || apply.getExpressNo().isEmpty()) {
-            log.error("【确认收到退货】未填写退货物流信?);
+            log.error("【确认收到退货】未填写退货物流信息");
             return false;
         }
 

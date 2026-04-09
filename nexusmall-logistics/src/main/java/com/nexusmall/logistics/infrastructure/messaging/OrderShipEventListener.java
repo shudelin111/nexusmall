@@ -46,7 +46,7 @@ public class OrderShipEventListener implements RocketMQListener<String> {
             // 1. 解析事件
             OrderShipEvent event = JSON.parseObject(message, OrderShipEvent.class);
             if (event == null || event.getOrderSn() == null) {
-                log.error("【订单发货事件】事件数据无?);
+                log.error("【订单发货事件】事件数据无效");
                 return;
             }
 

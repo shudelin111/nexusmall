@@ -51,7 +51,7 @@ public class LogisticsApplicationService {
             if (defaultTemplate != null) {
                 templateId = defaultTemplate.getId();
             } else {
-                throw new RuntimeException("没有可用的运费模?);
+                throw new RuntimeException("没有可用的运费模板");
             }
         }
 
@@ -61,7 +61,7 @@ public class LogisticsApplicationService {
             throw new RuntimeException("运费模板不存在，templateId=" + templateId);
         }
 
-        // 3. 调用领域计算器计算运?
+        // 3. 调用领域计算器计算运费
         BigDecimal freight = freightCalculator.calculate(
                 template,
                 request.getWeight(),
@@ -91,26 +91,26 @@ public class LogisticsApplicationService {
                                           CalculateFreightRequest request, 
                                           BigDecimal freight) {
         if (freight.compareTo(BigDecimal.ZERO) == 0) {
-            return String.format("订单金额%.2f元，满足包邮条件（满%.2f元包邮），运??,
+            return String.format("订单金额%.2f元，满足包邮条件（满%.2f元包邮），运费0元",
                     request.getOrderAmount(), template.getFreeThreshold());
         }
 
         switch (template.getChargeType()) {
-            case 1: // 按重?
-                return String.format("按重量计费：首重%.2fkg费用%.2f元，续重?.2fkg费用%.2f元，总重?.2fkg，运?.2f?,
+            case 1: // 按重量
+                return String.format("按重量计费：首重%.2fkg费用%.2f元，续重每%.2fkg费用%.2f元，总重%.2fkg，运费%.2f元",
                         template.getFirstWeight(), template.getFirstFee(),
                         template.getContinuedWeight(), template.getContinuedFee(),
                         request.getWeight(), freight);
-            case 2: // 按体?
-                return String.format("按体积计费：首体?.2fm³费用%.2f元，续体积每%.2fm³费用%.2f元，总体?.2fm³，运?.2f?,
+            case 2: // 按体积
+                return String.format("按体积计费：首体积%.2fm³费用%.2f元，续体积每%.2fm³费用%.2f元，总体积%.2fm³，运费%.2f元",
                         template.getFirstWeight(), template.getFirstFee(),
                         template.getContinuedWeight(), template.getContinuedFee(),
                         request.getVolume(), freight);
-            case 3: // 按件?
-                return String.format("按件数计费：每件%.2f元，?d件，运费%.2f?,
+            case 3: // 按件数
+                return String.format("按件数计费：每件%.2f元，%d件，运费%.2f元",
                         template.getFirstFee(), request.getPieceCount(), freight);
             default:
-                return "运费? + freight + "?;
+                return "运费" + freight + "元";
         }
     }
 }
