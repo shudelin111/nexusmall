@@ -8,7 +8,6 @@ import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.AnnotationUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 
@@ -38,7 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @since 2026-04-09
  */
 @Slf4j
-@Component
 public class ApiVersionInterceptor implements HandlerInterceptor {
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
