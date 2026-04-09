@@ -1,5 +1,6 @@
 package com.nexusmall.common.exception;
 
+import com.nexusmall.common.constant.ErrorMessageConstants;
 import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -251,7 +252,7 @@ public class GlobalExceptionHandler {
         if (isDevEnvironment()) {
             // 开发/测试环境：返回详细错误信息
             return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), 
-                    ex.getMessage() != null ? ex.getMessage() : "系统内部错误");
+                    ex.getMessage() != null ? ex.getMessage() : ErrorMessageConstants.System.INTERNAL_ERROR);
         } else {
             // 生产环境：返回通用提示
             return Result.failure(CommonResultCode.SYSTEM_ERROR);

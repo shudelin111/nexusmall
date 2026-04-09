@@ -54,4 +54,19 @@ public class ErrorMessageConstants {
             // 防止实例化
         }
     }
+
+    /**
+     * 系统异常相关错误消息
+     */
+    public static class System {
+        
+        /**
+         * 默认系统内部错误提示（用于开发环境兜底）
+         */
+        public static final String INTERNAL_ERROR = "系统内部错误";
+
+        private System() {
+            // 防止实例化
+        }
+    }
 }
