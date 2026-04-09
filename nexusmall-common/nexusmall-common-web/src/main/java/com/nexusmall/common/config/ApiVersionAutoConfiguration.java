@@ -1,7 +1,8 @@
 package com.nexusmall.common.config;
 
 import com.nexusmall.common.interceptor.ApiVersionInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -31,13 +32,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class ApiVersionAutoConfiguration implements WebMvcConfigurer {
 
-    @Autowired
-    private ApiVersionInterceptor apiVersionInterceptor;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 API 版本拦截器
-        registry.addInterceptor(apiVersionInterceptor)
+        registry.addInterceptor(apiVersionInterceptor())
                 .addPathPatterns("/**")  // 拦截所有业务接口
                 .excludePathPatterns(
                         // 排除监控端点
@@ -52,5 +50,21 @@ public class ApiVersionAutoConfiguration implements WebMvcConfigurer {
                         "/ready",
                         "/live"
                 );
+    }
+
+    /**
+     * 创建 API 版本拦截器 Bean
+     * <p>
+     * 使用 @Bean + @ConditionalOnMissingBean 确保：
+     * 1. 全局只有一个实例
+     * 2. 允许用户自定义覆盖
+     * </p>
+     *
+     * @return ApiVersionInterceptor
+     */
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiVersionInterceptor apiVersionInterceptor() {
+        return new ApiVersionInterceptor();
     }
 }

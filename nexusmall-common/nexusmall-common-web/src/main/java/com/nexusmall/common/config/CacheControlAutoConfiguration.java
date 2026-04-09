@@ -29,13 +29,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class CacheControlAutoConfiguration implements WebMvcConfigurer {
 
-    @Autowired
-    private CacheControlInterceptor cacheControlInterceptor;
-
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         // 注册 HTTP 缓存控制拦截器
-        registry.addInterceptor(cacheControlInterceptor)
+        registry.addInterceptor(cacheControlInterceptor())
                 .addPathPatterns("/**")  // 拦截所有请求
                 .excludePathPatterns(
                         // 排除监控端点
