@@ -39,7 +39,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
             }
         }
 
-        // 2. 创建退货申?
+        // 2. 创建退货申请
         LogisticsReturnApply returnApply = new LogisticsReturnApply();
         returnApply.setOrderSn(orderSn);
         returnApply.setMemberId(memberId);
@@ -58,7 +58,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean approveReturnApply(Long id) {
-        log.info("【审核退货申?同意】id={}", id);
+        log.info("【审核退货申请同意】id={}", id);
 
         LogisticsReturnApply apply = this.getById(id);
         if (apply == null) {
@@ -68,7 +68,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
 
         // 只有申请中的才能审核
         if (!ReturnStatusEnum.APPLYING.getCode().equals(apply.getStatus())) {
-            log.error("【审核退货申请】申请状态不正确，当前状?{}", apply.getStatus());
+            log.error("【审核退货申请】申请状态不正确，当前状态{}", apply.getStatus());
             return false;
         }
 
@@ -77,7 +77,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
         boolean success = this.updateById(apply);
 
         if (success) {
-            log.info("【审核退货申?同意成功】id={}", id);
+            log.info("【审核退货申请同意成功】id={}", id);
         }
 
         return success;
@@ -86,7 +86,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean rejectReturnApply(Long id, String reason) {
-        log.info("【审核退货申?拒绝】id={}, reason={}", id, reason);
+        log.info("【审核退货申请拒绝】id={}, reason={}", id, reason);
 
         LogisticsReturnApply apply = this.getById(id);
         if (apply == null) {
@@ -96,17 +96,17 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
 
         // 只有申请中的才能审核
         if (!ReturnStatusEnum.APPLYING.getCode().equals(apply.getStatus())) {
-            log.error("【审核退货申请】申请状态不正确，当前状?{}", apply.getStatus());
+            log.error("【审核退货申请】申请状态不正确，当前状态{}", apply.getStatus());
             return false;
         }
 
         apply.setStatus(ReturnStatusEnum.REJECTED.getCode());
         apply.setHandleTime(LocalDateTime.now());
-        apply.setReturnDescription(reason); // 将拒绝原因存入说明字?
+        apply.setReturnDescription(reason); // 将拒绝原因存入说明字段
         boolean success = this.updateById(apply);
 
         if (success) {
-            log.info("【审核退货申?拒绝成功】id={}", id);
+            log.info("【审核退货申请拒绝成功】id={}", id);
         }
 
         return success;
@@ -125,7 +125,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
 
         // 只有已同意的才能填写物流
         if (!ReturnStatusEnum.APPROVED.getCode().equals(apply.getStatus())) {
-            log.error("【填写退货物流】申请状态不正确，当前状?{}", apply.getStatus());
+            log.error("【填写退货物流】申请状态不正确，当前状态{}", apply.getStatus());
             return false;
         }
 
@@ -153,7 +153,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
 
         // 只有已同意且已填写物流的才能确认收货
         if (!ReturnStatusEnum.APPROVED.getCode().equals(apply.getStatus())) {
-            log.error("【确认收到退货】申请状态不正确，当前状?{}", apply.getStatus());
+            log.error("【确认收到退货】申请状态不正确，当前状态{}", apply.getStatus());
             return false;
         }
 

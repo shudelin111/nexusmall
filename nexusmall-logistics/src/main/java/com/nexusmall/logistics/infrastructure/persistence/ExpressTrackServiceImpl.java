@@ -477,7 +477,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             
             return hexString.toString().toUpperCase();
         } catch (Exception e) {
-            log.error("【生成签名失败?, e);
+            log.error("【生成签名失败】", e);
             return "";
         }
     }

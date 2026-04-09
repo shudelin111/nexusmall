@@ -40,9 +40,9 @@ public class LogisticsTrack implements Serializable {
     private Long logisticsOrderId;
 
     /**
-     * 快递单?
+     * 快递单号
      */
-    @Schema(description = "快递单?)
+    @Schema(description = "快递单号")
     private String expressNo;
 
     /**
@@ -64,9 +64,9 @@ public class LogisticsTrack implements Serializable {
     private String trackLocation;
 
     /**
-     * 轨迹状态：1=已揽件，2=运输中，3=派送中?=已签?
+     * 轨迹状态：1=已揽件，2=运输中，3=派送中，4=已签收
      */
-    @Schema(description = "轨迹状态：1=已揽件，2=运输中，3=派送中?=已签?)
+    @Schema(description = "轨迹状态：1=已揽件，2=运输中，3=派送中，4=已签收")
     private Integer trackStatus;
 
     /**

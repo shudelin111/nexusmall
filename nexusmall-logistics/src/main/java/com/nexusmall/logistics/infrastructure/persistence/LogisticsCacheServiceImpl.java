@@ -50,7 +50,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         String key = cacheConfig.getWarehouse().getKeyPrefix() + "id:" + id;
         
         try {
-            // 1. 尝试从缓存获?
+            // 1. 尝试从缓存获取
             RBucket<String> bucket = redissonClient.getBucket(key);
             String cachedValue = bucket.get();
             
@@ -59,7 +59,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
                 return JSON.parseObject(cachedValue, LogisticsWarehouse.class);
             }
 
-            // 2. 缓存未命中，查询数据?
+            // 2. 缓存未命中，查询数据库
             log.debug("【仓库缓存未命中】id={}，查询数据库", id);
             LogisticsWarehouse warehouse = warehouseMapper.selectById(id);
             
@@ -90,7 +90,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         String key = cacheConfig.getWarehouse().getKeyPrefix() + "code:" + warehouseCode;
         
         try {
-            // 1. 尝试从缓存获?
+            // 1. 尝试从缓存获取
             RBucket<String> bucket = redissonClient.getBucket(key);
             String cachedValue = bucket.get();
             
@@ -99,7 +99,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
                 return JSON.parseObject(cachedValue, LogisticsWarehouse.class);
             }
 
-            // 2. 缓存未命中，查询数据?
+            // 2. 缓存未命中，查询数据库
             log.debug("【仓库缓存未命中】code={}，查询数据库", warehouseCode);
             LambdaQueryWrapper<LogisticsWarehouse> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(LogisticsWarehouse::getWarehouseCode, warehouseCode);
@@ -134,17 +134,17 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         String key = cacheConfig.getWarehouse().getKeyPrefix() + "list:enabled";
         
         try {
-            // 1. 尝试从缓存获?
+            // 1. 尝试从缓存获取
             RBucket<String> bucket = redissonClient.getBucket(key);
             String cachedValue = bucket.get();
             
             if (cachedValue != null) {
-                log.debug("【仓库列表缓存命中?);
+                log.debug("【仓库列表缓存命中】");
                 return JSON.parseArray(cachedValue, LogisticsWarehouse.class);
             }
 
-            // 2. 缓存未命中，查询数据?
-            log.debug("【仓库列表缓存未命中】，查询数据?);
+            // 2. 缓存未命中，查询数据库
+            log.debug("【仓库列表缓存未命中】，查询数据库");
             LambdaQueryWrapper<LogisticsWarehouse> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(LogisticsWarehouse::getStatus, 1);
             List<LogisticsWarehouse> warehouses = warehouseMapper.selectList(wrapper);
@@ -160,7 +160,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
             return warehouses != null ? warehouses : Collections.emptyList();
             
         } catch (Exception e) {
-            log.error("【仓库列表缓存读取失败】，降级查询数据?, e);
+            log.error("【仓库列表缓存读取失败】，降级查询数据库", e);
             // 缓存失败降级到数据库查询
             LambdaQueryWrapper<LogisticsWarehouse> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(LogisticsWarehouse::getStatus, 1);
@@ -180,7 +180,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
             String keyById = cacheConfig.getWarehouse().getKeyPrefix() + "id:" + id;
             redissonClient.getBucket(keyById).delete();
             
-            // 删除仓库列表缓存（因为列表可能包含该仓库?
+            // 删除仓库列表缓存（因为列表可能包含该仓库）
             String keyList = cacheConfig.getWarehouse().getKeyPrefix() + "list:enabled";
             redissonClient.getBucket(keyList).delete();
             
@@ -197,13 +197,13 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         }
 
         try {
-            // 使用模式匹配删除所有仓库相关缓?
+            // 使用模式匹配删除所有仓库相关缓存
             String pattern = cacheConfig.getWarehouse().getKeyPrefix() + "*";
             redissonClient.getKeys().deleteByPattern(pattern);
             
-            log.info("【清除所有仓库缓存?);
+            log.info("【清除所有仓库缓存】");
         } catch (Exception e) {
-            log.error("【清除所有仓库缓存失败?, e);
+            log.error("【清除所有仓库缓存失败】", e);
         }
     }
 
@@ -216,7 +216,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         String key = cacheConfig.getFreightTemplate().getKeyPrefix() + "id:" + id;
         
         try {
-            // 1. 尝试从缓存获?
+            // 1. 尝试从缓存获取
             RBucket<String> bucket = redissonClient.getBucket(key);
             String cachedValue = bucket.get();
             
@@ -225,7 +225,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
                 return JSON.parseObject(cachedValue, LogisticsFreightTemplate.class);
             }
 
-            // 2. 缓存未命中，查询数据?
+            // 2. 缓存未命中，查询数据库
             log.debug("【运费模板缓存未命中】id={}，查询数据库", id);
             LogisticsFreightTemplate template = freightTemplateMapper.selectById(id);
             
@@ -257,24 +257,24 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         String key = cacheConfig.getFreightTemplate().getKeyPrefix() + "default";
         
         try {
-            // 1. 尝试从缓存获?
+            // 1. 尝试从缓存获取
             RBucket<String> bucket = redissonClient.getBucket(key);
             String cachedValue = bucket.get();
             
             if (cachedValue != null) {
-                log.debug("【默认运费模板缓存命中?);
+                log.debug("【默认运费模板缓存命中】");
                 return JSON.parseObject(cachedValue, LogisticsFreightTemplate.class);
             }
 
-            // 2. 缓存未命中，查询数据?
-            log.debug("【默认运费模板缓存未命中】，查询数据?);
+            // 2. 缓存未命中，查询数据库
+            log.debug("【默认运费模板缓存未命中】，查询数据库");
             LambdaQueryWrapper<LogisticsFreightTemplate> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(LogisticsFreightTemplate::getIsDefault, 1);
             wrapper.last("LIMIT 1");
             LogisticsFreightTemplate template = freightTemplateMapper.selectOne(wrapper);
             
             if (template != null) {
-                // 3. 写入缓存（更长的TTL，因为访问频率高?
+                // 3. 写入缓存（更长的TTL，因为访问频率高）
                 String jsonValue = JSON.toJSONString(template);
                 bucket.set(jsonValue, cacheConfig.getFreightTemplate().getDefaultTtlSeconds(), TimeUnit.SECONDS);
                 log.debug("【默认运费模板缓存写入】ttl={}s", cacheConfig.getFreightTemplate().getDefaultTtlSeconds());
@@ -283,7 +283,7 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
             return template;
             
         } catch (Exception e) {
-            log.error("【默认运费模板缓存读取失败】，降级查询数据?, e);
+            log.error("【默认运费模板缓存读取失败】，降级查询数据库", e);
             // 缓存失败降级到数据库查询
             LambdaQueryWrapper<LogisticsFreightTemplate> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(LogisticsFreightTemplate::getIsDefault, 1);
@@ -303,12 +303,12 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
             String keyById = cacheConfig.getFreightTemplate().getKeyPrefix() + "id:" + id;
             redissonClient.getBucket(keyById).delete();
             
-            // 如果是默认模板，也删除默认模板缓?
+            // 如果是默认模板，也删除默认模板缓存
             LogisticsFreightTemplate template = freightTemplateMapper.selectById(id);
             if (template != null && template.getIsDefault() != null && template.getIsDefault() == 1) {
                 String keyDefault = cacheConfig.getFreightTemplate().getKeyPrefix() + "default";
                 redissonClient.getBucket(keyDefault).delete();
-                log.info("【清除默认运费模板缓存?);
+                log.info("【清除默认运费模板缓存】");
             }
             
             log.info("【清除运费模板缓存】id={}", id);
@@ -324,13 +324,13 @@ public class LogisticsCacheServiceImpl implements LogisticsCacheService {
         }
 
         try {
-            // 使用模式匹配删除所有运费模板相关缓?
+            // 使用模式匹配删除所有运费模板相关缓存
             String pattern = cacheConfig.getFreightTemplate().getKeyPrefix() + "*";
             redissonClient.getKeys().deleteByPattern(pattern);
             
-            log.info("【清除所有运费模板缓存?);
+            log.info("【清除所有运费模板缓存】");
         } catch (Exception e) {
-            log.error("【清除所有运费模板缓存失败?, e);
+            log.error("【清除所有运费模板缓存失败】", e);
         }
     }
 }

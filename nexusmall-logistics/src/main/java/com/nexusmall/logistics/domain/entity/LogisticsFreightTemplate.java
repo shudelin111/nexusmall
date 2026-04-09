@@ -41,45 +41,45 @@ public class LogisticsFreightTemplate implements Serializable {
     private String templateName;
 
     /**
-     * 计费方式?=按重量，2=按体积，3=按件?
+     * 计费方式：1=按重量，2=按体积，3=按件数
      */
-    @Schema(description = "计费方式?=按重量，2=按体积，3=按件?)
+    @Schema(description = "计费方式：1=按重量，2=按体积，3=按件数")
     private Integer chargeType;
 
     /**
-     * 首重（kg?
+     * 首重（kg）
      */
-    @Schema(description = "首重（kg?)
+    @Schema(description = "首重（kg）")
     private BigDecimal firstWeight;
 
     /**
-     * 首重费用（元?
+     * 首重费用（元）
      */
-    @Schema(description = "首重费用（元?)
+    @Schema(description = "首重费用（元）")
     private BigDecimal firstFee;
 
     /**
-     * 续重（kg?
+     * 续重（kg）
      */
-    @Schema(description = "续重（kg?)
+    @Schema(description = "续重（kg）")
     private BigDecimal continuedWeight;
 
     /**
-     * 续重费用（元?
+     * 续重费用（元）
      */
-    @Schema(description = "续重费用（元?)
+    @Schema(description = "续重费用（元）")
     private BigDecimal continuedFee;
 
     /**
-     * 包邮门槛（元?
+     * 包邮门槛（元）
      */
-    @Schema(description = "包邮门槛（元?)
+    @Schema(description = "包邮门槛（元）")
     private BigDecimal freeThreshold;
 
     /**
-     * 是否默认模板?=否，1=?
+     * 是否默认模板：0=否，1=是
      */
-    @Schema(description = "是否默认模板?=否，1=?)
+    @Schema(description = "是否默认模板：0=否，1=是")
     private Integer isDefault;
 
     /**

@@ -49,7 +49,7 @@ public class ReturnApplicationService {
             throw new RuntimeException("该订单已存在退货申?);
         }
 
-        // 2. 创建退货申?
+        // 2. 创建退货申请
         LogisticsReturnApply apply = new LogisticsReturnApply();
         apply.setOrderSn(request.getOrderSn());
         apply.setMemberId(userId);
