@@ -138,49 +138,7 @@ public class CommonWebAutoConfiguration {
         return new AuditLogAspect();
     }
 
-    /**
-     * 注册HTTP缓存控制拦截器
-     * <p>
-     * 生产级实践：
-     * 1. 为静态资源添加强缓存（7天）
-     * 2. 为API响应添加协商缓存或禁止缓存
-     * 3. 支持ETag验证
-     * </p>
-     *
-     * @return CacheControlInterceptor
-     */
-    @Bean
-    @ConditionalOnMissingBean
-    public CacheControlInterceptor cacheControlInterceptor() {
-        return new CacheControlInterceptor();
-    }
 
-    /**
-     * 注册HTTP缓存控制拦截器配置
-     * <p>
-     * 生产级实践：
-     * 1. 自动注册到所有业务模块，无需手动配置
-     * 2. 排除健康检查和错误页面
-     * </p>
-     *
-     * @param cacheControlInterceptor 缓存控制拦截器
-     * @return WebMvcConfigurer
-     */
-    @Bean
-    @ConditionalOnMissingBean(name = "cacheControlWebMvcConfigurer")
-    public WebMvcConfigurer cacheControlWebMvcConfigurer(CacheControlInterceptor cacheControlInterceptor) {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                registry.addInterceptor(cacheControlInterceptor)
-                        .addPathPatterns("/**")  // 拦截所有请求
-                        .excludePathPatterns(
-                                "/actuator/**",  // 排除健康检查
-                                "/error"         // 排除错误页面
-                        );
-            }
-        };
-    }
 
     /**
      * 注册分布式锁工具类

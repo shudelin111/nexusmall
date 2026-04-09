@@ -13,4 +13,5 @@ com.nexusmall.common.config.XssFilterConfig,\
 com.nexusmall.common.config.JacksonConfig,\
 com.nexusmall.common.config.TimeZoneConfig,\
 com.nexusmall.common.config.CommonWebAutoConfiguration,\
-com.nexusmall.common.config.ApiVersionAutoConfiguration
+com.nexusmall.common.config.ApiVersionAutoConfiguration,\
+com.nexusmall.common.config.CacheControlAutoConfiguration
