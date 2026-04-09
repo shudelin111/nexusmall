@@ -47,7 +47,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public void saveRefreshToken(User user, String token, String jti, String deviceInfo, String ipAddress) {
         // 计算过期时间
         LocalDateTime expireTime = LocalDateTime.now().plusSeconds(
-                604800L // 7 �?
+                604800L // 7 ?
         );
 
         RefreshToken refreshToken = RefreshToken.builder()
@@ -68,7 +68,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public String refreshAccessToken(String refreshTokenStr) {
-        // 1. 验证 Refresh Token 格式和签�?
+        // 1. 验证 Refresh Token 格式和签?
         if (!jwtUtil.validateToken(refreshTokenStr)) {
             throw new AuthException(ResultCode.TOKEN_INVALID);
         }
@@ -90,7 +90,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new AuthException(ResultCode.REFRESH_TOKEN_INVALID);
         }
 
-        // 5. 检查是否过�?
+        // 5. 检查是否过?
         if (storedToken.getExpireTime().isBefore(LocalDateTime.now())) {
             throw new AuthException(ResultCode.TOKEN_EXPIRED);
         }
@@ -104,7 +104,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 7. 生成新的 Access Token + Refresh Token
         String newAccessToken = jwtUtil.generateAccessToken(
                 user.getUsername(),
-                Collections.emptyList(), // TODO: 从数据库加载角色和权�?
+                Collections.emptyList(), // TODO: 从数据库加载角色和权?
                 Collections.emptyList()
         );
         String newRefreshToken = jwtUtil.generateRefreshToken(user.getUsername());
@@ -126,8 +126,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 1. 数据库标记为无效
         int rows = refreshTokenMapper.invalidateToken(userId, jti);
         
-        // 2. 加入 Redis 黑名�?
-        // 获取 Token 剩余有效�?
+        // 2. 加入 Redis 黑名?
+        // 获取 Token 剩余有效?
         RefreshToken token = refreshTokenMapper.findByJti(jti);
         if (token != null) {
             long remainingTime = java.time.Duration.between(
@@ -149,7 +149,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 1. 获取所有有效的 Token JTI
         java.util.List<RefreshToken> validTokens = refreshTokenMapper.findValidByUserId(userId);
         
-        // 2. 将所�?JTI 加入黑名�?
+        // 2. 将所?JTI 加入黑名?
         for (RefreshToken token : validTokens) {
             long remainingTime = java.time.Duration.between(
                     LocalDateTime.now(), 
@@ -164,7 +164,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         // 3. 数据库批量标记为无效
         int rows = refreshTokenMapper.invalidateAllTokens(userId);
         
-        log.info("用户所�?Refresh Token 已撤销，userId: {}, 影响行数: {}", userId, rows);
+        log.info("用户所?Refresh Token 已撤销，userId: {}, 影响行数: {}", userId, rows);
     }
 
     @Override
@@ -176,7 +176,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Transactional(rollbackFor = Exception.class)
     public int cleanExpiredTokens() {
         int count = refreshTokenMapper.cleanExpiredTokens();
-        log.info("已清理过�?Refresh Token，数�? {}", count);
+        log.info("已清理过?Refresh Token，数? {}", count);
         return count;
     }
 }

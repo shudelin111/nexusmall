@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 /**
  * 运费计算 Controller
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 支持多种计费方式
  * - 实时计算运费
  * - 返回详细计费说明
@@ -29,7 +29,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/freight")
 @RequiredArgsConstructor
 @ApiVersion("v1")
-@Tag(name = "运费计算", description = "运费计算、运费模板查�?)
+@Tag(name = "运费计算", description = "运费计算、运费模板查?)
 public class FreightController {
 
     private final LogisticsApplicationService logisticsApplicationService;
@@ -41,7 +41,7 @@ public class FreightController {
      * @return 运费结果
      */
     @PostMapping(value = "/calculate", headers = "X-API-Version=v1")
-    @Operation(summary = "计算运费", description = "根据重量/体积/件数计算运费，支持包邮规�?)
+    @Operation(summary = "计算运费", description = "根据重量/体积/件数计算运费，支持包邮规?)
     public Result<FreightResultVO> calculateFreight(@Validated @RequestBody CalculateFreightRequest request) {
         log.info("【计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
                 request.getWeight(), request.getVolume(), request.getPieceCount(), request.getOrderAmount());

@@ -6,13 +6,13 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * NexusMall 会员服务启动�?
+ * NexusMall 会员服务启动?
  * <p>
- * 职责�?
- * - 会员档案管理（昵�?头像/生日/性别�?
+ * 职责?
+ * - 会员档案管理（昵?头像/生日/性别?
  * - 收货地址管理
- * - 会员等级/积分/成长值管�?
- * - 监听用户注册事件，自动创建会员档�?
+ * - 会员等级/积分/成长值管?
+ * - 监听用户注册事件，自动创建会员档?
  * </p>
  *
  * @author shudl

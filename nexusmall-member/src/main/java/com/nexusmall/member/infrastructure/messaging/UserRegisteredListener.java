@@ -13,12 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 用户注册事件监听�?
+ * 用户注册事件监听?
  * <p>
- * 业界标准（方案二：异步创建）�?
+ * 业界标准（方案二：异步创建）?
  * - 监听 Auth 服务发送的用户注册事件
  * - 自动为新用户创建会员档案
- * - 实现最终一致性，提升系统吞吐�?
+ * - 实现最终一致性，提升系统吞吐?
  * </p>
  *
  * @author shudl
@@ -60,7 +60,7 @@ public class UserRegisteredListener implements RocketMQListener<UserRegisteredEv
                 .phone(event.getPhone())
                 .email(event.getEmail())
                 .gender(0) // 默认未知
-                .memberLevelId(1L) // 默认普通会员等�?
+                .memberLevelId(1L) // 默认普通会员等?
                 .growthPoint(0)
                 .integration(0)
                 .status(1)

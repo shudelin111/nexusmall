@@ -15,17 +15,17 @@ public interface CategoryMapper {
     Category selectById(@Param("id") Long id);
 
     /**
-     * 查询所有分�?
+     * 查询所有分?
      */
     List<Category> list();
 
     /**
-     * 查询一级分�?
+     * 查询一级分?
      */
     List<Category> listFirstLevel();
 
     /**
-     * 根据�?ID 查询子分�?
+     * 根据?ID 查询子分?
      */
     List<Category> listByParentId(@Param("parentId") Long parentId);
 
@@ -50,7 +50,7 @@ public interface CategoryMapper {
     List<Category> listByLevel(@Param("level") Integer level);
 
     /**
-     * 根据状态查询分�?
+     * 根据状态查询分?
      */
     List<Category> listByStatus(@Param("status") Integer status);
 }

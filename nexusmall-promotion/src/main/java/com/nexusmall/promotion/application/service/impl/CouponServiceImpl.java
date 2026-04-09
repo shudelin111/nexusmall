@@ -27,9 +27,9 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean receiveCoupon(Long couponId, Long userId) {
-        log.info("领取优惠�? couponId={}, userId={}", couponId, userId);
+        log.info("领取优惠? couponId={}, userId={}", couponId, userId);
         
-        // 1. 查询优惠券信�?
+        // 1. 查询优惠券信?
         Coupon coupon = this.getById(couponId);
         if (coupon == null) {
             log.warn("优惠券不存在: couponId={}", couponId);
@@ -38,14 +38,14 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         
         // 2. 检查优惠券状态（0=未开始，1=进行中）
         if (coupon.getStatus() == null || coupon.getStatus() != 1) {
-            log.warn("优惠券不可领�? couponId={}, status={}", couponId, coupon.getStatus());
+            log.warn("优惠券不可领? couponId={}, status={}", couponId, coupon.getStatus());
             return false;
         }
         
         // 3. 检查有效期
         LocalDateTime now = LocalDateTime.now();
         if (coupon.getValidStart() != null && now.isBefore(coupon.getValidStart())) {
-            log.warn("优惠券未到开始时�? couponId={}", couponId);
+            log.warn("优惠券未到开始时? couponId={}", couponId);
             return false;
         }
         if (coupon.getValidEnd() != null && now.isAfter(coupon.getValidEnd())) {
@@ -53,7 +53,7 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
             return false;
         }
         
-        // 4. 检查库�?
+        // 4. 检查库?
         if (coupon.getTotalStock() != null && coupon.getReceivedCount() != null 
                 && coupon.getReceivedCount() >= coupon.getTotalStock()) {
             log.warn("优惠券已领完: couponId={}", couponId);
@@ -65,26 +65,26 @@ public class CouponServiceImpl extends ServiceImpl<CouponMapper, Coupon> impleme
         boolean success = this.updateById(coupon);
         
         if (success) {
-            log.info("优惠券领取成�? couponId={}, userId={}", couponId, userId);
+            log.info("优惠券领取成? couponId={}, userId={}", couponId, userId);
             
-            // TODO: 6. 创建用户优惠券记录（通过CouponUserRecordService�?
+            // TODO: 6. 创建用户优惠券记录（通过CouponUserRecordService?
             // couponUserRecordService.createRecord(couponId, userId);
             
             return true;
         } else {
-            log.error("优惠券领取失�? couponId={}, userId={}", couponId, userId);
+            log.error("优惠券领取失? couponId={}, userId={}", couponId, userId);
             return false;
         }
     }
 
     @Override
     public List<Coupon> listAvailableCoupons(Long userId) {
-        log.info("查询用户可领取的优惠券列�? userId={}", userId);
+        log.info("查询用户可领取的优惠券列? userId={}", userId);
         
         LocalDateTime now = LocalDateTime.now();
         
         LambdaQueryWrapper<Coupon> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(Coupon::getStatus, 1)  // 进行�?
+        wrapper.eq(Coupon::getStatus, 1)  // 进行?
                .and(w -> w.isNull(Coupon::getValidStart).or().le(Coupon::getValidStart, now))
                .and(w -> w.isNull(Coupon::getValidEnd).or().ge(Coupon::getValidEnd, now))
                .and(w -> w.isNull(Coupon::getTotalStock).or()

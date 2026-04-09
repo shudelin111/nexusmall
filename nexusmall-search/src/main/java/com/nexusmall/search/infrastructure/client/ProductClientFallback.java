@@ -9,7 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * Product 服务 Feign 客户端降级处�?
+ * Product 服务 Feign 客户端降级处?
  */
 @Component
 public class ProductClientFallback implements ProductClient {

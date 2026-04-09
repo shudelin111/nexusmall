@@ -22,9 +22,9 @@ import java.util.*;
 /**
  * 第三方物流查询服务实现类
  * <p>
- * 业界标准�?
- * - 支持快递鸟和快�?00两家主流服务�?
- * - 策略模式：根据配置自动选择服务�?
+ * 业界标准?
+ * - 支持快递鸟和快?00两家主流服务?
+ * - 策略模式：根据配置自动选择服务?
  * - 失败降级：主服务商失败时切换到备用服务商
  * </p>
  *
@@ -45,7 +45,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
         log.info("【查询物流轨迹】expressCompany={}, expressNo={}", expressCompany, expressNo);
 
         try {
-            // 1. 根据配置选择服务�?
+            // 1. 根据配置选择服务?
             String provider = expressApiConfig.getDefaultProvider();
             List<LogisticsTrack> tracks;
 
@@ -58,7 +58,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
 
             // 2. 如果查询失败，尝试备用服务商
             if (tracks == null || tracks.isEmpty()) {
-                log.warn("【查询物流轨迹】主服务商查询失败，尝试备用服务�?);
+                log.warn("【查询物流轨迹】主服务商查询失败，尝试备用服务?);
                 tracks = queryByBackupProvider(expressCompany, expressNo);
             }
 
@@ -67,7 +67,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
                 log.info("【查询物流轨迹成功】count={}", tracks.size());
                 return tracks;
             } else {
-                log.warn("【查询物流轨迹】未查询到轨迹信�?);
+                log.warn("【查询物流轨迹】未查询到轨迹信?);
                 return Collections.emptyList();
             }
 
@@ -91,7 +91,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
                 return subscribeByKuaiDiNiao(expressCompany, expressNo, callbackUrl);
             }
         } catch (Exception e) {
-            log.error("【订阅物流轨迹失败�?, e);
+            log.error("【订阅物流轨迹失败?, e);
             return false;
         }
     }
@@ -100,7 +100,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     public boolean unsubscribeExpressTrack(String expressCompany, String expressNo) {
         log.info("【取消订阅物流轨迹】expressCompany={}, expressNo={}", expressCompany, expressNo);
         
-        // 快递鸟和快�?00都不需要显式取消订阅，订阅会自动过�?
+        // 快递鸟和快?00都不需要显式取消订阅，订阅会自动过?
         return true;
     }
 
@@ -142,7 +142,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JSONObject result = JSON.parseObject(response.getBody());
                 
-                // 检查是否成�?
+                // 检查是否成?
                 if ("true".equals(result.getString("Success"))) {
                     return parseKuaiDiNiaoTracks(result.getJSONArray("Traces"), expressNo);
                 } else {
@@ -153,13 +153,13 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             return Collections.emptyList();
 
         } catch (Exception e) {
-            log.error("【快递鸟查询异常�?, e);
+            log.error("【快递鸟查询异常?, e);
             return Collections.emptyList();
         }
     }
 
     /**
-     * 使用快�?00查询物流轨迹
+     * 使用快?00查询物流轨迹
      * <p>
      * API文档：https://www.kuaidi100.com/openapi/api_poll.shtml
      * </p>
@@ -183,35 +183,35 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             if (response.getStatusCode() == HttpStatus.OK && response.getBody() != null) {
                 JSONObject result = JSON.parseObject(response.getBody());
                 
-                // 检查是否成�?
+                // 检查是否成?
                 if ("200".equals(result.getString("returnCode"))) {
                     return parseKuaiDi100Tracks(result.getJSONArray("data"), expressNo);
                 } else {
-                    log.warn("【快�?00查询失败】message={}", result.getString("message"));
+                    log.warn("【快?00查询失败】message={}", result.getString("message"));
                 }
             }
 
             return Collections.emptyList();
 
         } catch (Exception e) {
-            log.error("【快�?00查询异常�?, e);
+            log.error("【快?00查询异常?, e);
             return Collections.emptyList();
         }
     }
 
     /**
-     * 使用备用服务商查�?
+     * 使用备用服务商查?
      */
     private List<LogisticsTrack> queryByBackupProvider(String expressCompany, String expressNo) {
         String provider = expressApiConfig.getDefaultProvider();
         
         if ("kuaidiniao".equals(provider)) {
-            // 主用快递鸟，备用快�?00
+            // 主用快递鸟，备用快?00
             if (expressApiConfig.getKuaidi100().isEnabled()) {
                 return queryByKuaiDi100(expressCompany, expressNo);
             }
         } else {
-            // 主用快�?00，备用快递鸟
+            // 主用快?00，备用快递鸟
             return queryByKuaiDiNiao(expressCompany, expressNo);
         }
         
@@ -230,7 +230,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             requestData.put("OrderCode", "");
             requestData.put("ShipperCode", getShipperCode(expressCompany));
             requestData.put("LogisticCode", expressNo);
-            requestData.put("PayType", "0"); // 运费支付方式�?=现付
+            requestData.put("PayType", "0"); // 运费支付方式?=现付
             requestData.put("Callback", callbackUrl);
 
             String requestDataJson = JSON.toJSONString(requestData);
@@ -260,13 +260,13 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             return false;
 
         } catch (Exception e) {
-            log.error("【快递鸟订阅异常�?, e);
+            log.error("【快递鸟订阅异常?, e);
             return false;
         }
     }
 
     /**
-     * 快�?00订阅物流轨迹
+     * 快?00订阅物流轨迹
      */
     private boolean subscribeByKuaiDi100(String expressCompany, String expressNo, String callbackUrl) {
         try {
@@ -293,7 +293,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             return false;
 
         } catch (Exception e) {
-            log.error("【快�?00订阅异常�?, e);
+            log.error("【快?00订阅异常?, e);
             return false;
         }
     }
@@ -314,7 +314,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             LogisticsTrack track = new LogisticsTrack();
             track.setExpressNo(expressNo);
             track.setTrackContent(trace.getString("AcceptStation"));
-            track.setTrackLocation(""); // 快递鸟不返回地�?
+            track.setTrackLocation(""); // 快递鸟不返回地?
             track.setTrackTime(LocalDateTime.parse(
                     trace.getString("AcceptTime"),
                     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
@@ -330,7 +330,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 解析快�?00轨迹数据
+     * 解析快?00轨迹数据
      */
     private List<LogisticsTrack> parseKuaiDi100Tracks(com.alibaba.fastjson.JSONArray data, String expressNo) {
         List<LogisticsTrack> tracks = new ArrayList<>();
@@ -361,16 +361,16 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 获取快递鸟快递公司编�?
+     * 获取快递鸟快递公司编?
      */
     private String getShipperCode(String expressCompany) {
-        // 常见快递公司编码映�?
+        // 常见快递公司编码映?
         Map<String, String> codeMap = new HashMap<>();
         codeMap.put("顺丰速运", "SF");
-        codeMap.put("圆通速�?, "YTO");
-        codeMap.put("申通快�?, "STO");
-        codeMap.put("中通快�?, "ZTO");
-        codeMap.put("韵达快�?, "YD");
+        codeMap.put("圆通速?, "YTO");
+        codeMap.put("申通快?, "STO");
+        codeMap.put("中通快?, "ZTO");
+        codeMap.put("韵达快?, "YD");
         codeMap.put("EMS", "EMS");
         codeMap.put("京东物流", "JD");
         
@@ -378,15 +378,15 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 获取快�?00快递公司编�?
+     * 获取快?00快递公司编?
      */
     private String getKuaidi100ComCode(String expressCompany) {
         Map<String, String> codeMap = new HashMap<>();
         codeMap.put("顺丰速运", "shunfeng");
-        codeMap.put("圆通速�?, "yuantong");
-        codeMap.put("申通快�?, "shentong");
-        codeMap.put("中通快�?, "zhongtong");
-        codeMap.put("韵达快�?, "yunda");
+        codeMap.put("圆通速?, "yuantong");
+        codeMap.put("申通快?, "shentong");
+        codeMap.put("中通快?, "zhongtong");
+        codeMap.put("韵达快?, "yunda");
         codeMap.put("EMS", "ems");
         codeMap.put("京东物流", "jd");
         
@@ -394,16 +394,16 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 映射快递鸟状�?
+     * 映射快递鸟状?
      */
     private Integer mapKuaiDiNiaoStatus(String acceptStation) {
         if (acceptStation == null) {
             return TrackStatusEnum.IN_TRANSIT.getCode();
         }
         
-        if (acceptStation.contains("签收") || acceptStation.contains("已签�?)) {
+        if (acceptStation.contains("签收") || acceptStation.contains("已签?)) {
             return TrackStatusEnum.SIGNED.getCode();
-        } else if (acceptStation.contains("派�?)) {
+        } else if (acceptStation.contains("派?)) {
             return TrackStatusEnum.DELIVERING.getCode();
         } else if (acceptStation.contains("揽件") || acceptStation.contains("取件")) {
             return TrackStatusEnum.PICKED_UP.getCode();
@@ -413,14 +413,14 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 映射快�?00状�?
+     * 映射快?00状?
      */
     private Integer mapKuaiDi100Status(Integer status) {
         if (status == null) {
             return TrackStatusEnum.IN_TRANSIT.getCode();
         }
         
-        // 快�?00状态码�?=在途，1=揽件�?=疑难�?=签收�?=退签，5=派件�?=退�?
+        // 快?00状态码?=在途，1=揽件?=疑难?=签收?=退签，5=派件?=退?
         switch (status) {
             case 1:
                 return TrackStatusEnum.PICKED_UP.getCode();
@@ -434,7 +434,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 快递鸟数据签名（MD5加密�?
+     * 快递鸟数据签名（MD5加密?
      */
     private String encrypt(String content, String key, String charset) throws Exception {
         String signStr = content + key;
@@ -455,7 +455,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 快�?00签名生成
+     * 快?00签名生成
      */
     private String generateSign(String expressCompany, String expressNo, String key) {
         String param = String.format("{\"com\":\"%s\",\"num\":\"%s\"}", 
@@ -477,7 +477,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             
             return hexString.toString().toUpperCase();
         } catch (Exception e) {
-            log.error("【生成签名失败�?, e);
+            log.error("【生成签名失败?, e);
             return "";
         }
     }

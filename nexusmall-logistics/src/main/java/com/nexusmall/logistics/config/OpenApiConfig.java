@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * OpenAPI 3.0 配置�?(SpringDoc + Knife4j)
+ * OpenAPI 3.0 配置?(SpringDoc + Knife4j)
  */
 @Configuration
 public class OpenApiConfig {

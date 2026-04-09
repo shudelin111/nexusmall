@@ -13,10 +13,10 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 订单发货事件监听�?
+ * 订单发货事件监听?
  * <p>
- * 业界标准�?
- * - 监听订单服务的发货事�?
+ * 业界标准?
+ * - 监听订单服务的发货事?
  * - 自动创建物流订单
  * - 智能分配仓库
  * - 幂等性保证（重复消息不重复处理）
@@ -46,7 +46,7 @@ public class OrderShipEventListener implements RocketMQListener<String> {
             // 1. 解析事件
             OrderShipEvent event = JSON.parseObject(message, OrderShipEvent.class);
             if (event == null || event.getOrderSn() == null) {
-                log.error("【订单发货事件】事件数据无�?);
+                log.error("【订单发货事件】事件数据无?);
                 return;
             }
 

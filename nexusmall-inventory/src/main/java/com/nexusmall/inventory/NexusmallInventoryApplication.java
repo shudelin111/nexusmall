@@ -6,14 +6,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * NexusMall 库存服务启动�?
+ * NexusMall 库存服务启动?
  * <p>
- * 主要功能�?
+ * 主要功能?
  * - SKU库存管理（查询、扣减、回滚、确认）
- * - 库存流水记录与追�?
- * - 库存预警机制（低库存提醒�?
- * - 分布式锁防超�?乐观锁并发控�?
- * - 库存数据一致性保�?
+ * - 库存流水记录与追?
+ * - 库存预警机制（低库存提醒?
+ * - 分布式锁防超?乐观锁并发控?
+ * - 库存数据一致性保?
  * </p>
  *
  * @author shudl

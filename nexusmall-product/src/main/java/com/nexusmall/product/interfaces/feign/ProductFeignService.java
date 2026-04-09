@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * 商品服务 Feign 客户端（供其他微服务调用�?
+ * 商品服务 Feign 客户端（供其他微服务调用?
  */
 @FeignClient(name = "nexusmall-product", fallback = ProductFeignFallback.class)
 public interface ProductFeignService {
@@ -33,7 +33,7 @@ public interface ProductFeignService {
                                    @RequestParam("count") Integer count);
 
     /**
-     * 检查库存是否充�?
+     * 检查库存是否充?
      * @param productId 商品 ID
      * @param count 数量
      * @return 库存是否充足

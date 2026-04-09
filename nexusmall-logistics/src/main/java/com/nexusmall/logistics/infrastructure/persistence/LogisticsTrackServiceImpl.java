@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 物流轨迹服务实现�?
+ * 物流轨迹服务实现?
  *
  * @author shudl
  * @since 2026-04-07
@@ -63,7 +63,7 @@ public class LogisticsTrackServiceImpl extends ServiceImpl<LogisticsTrackMapper,
                 logisticsOrderId, expressNo, tracks.size());
 
         if (tracks == null || tracks.isEmpty()) {
-            log.warn("【批量添加物流轨迹】轨迹列表为�?);
+            log.warn("【批量添加物流轨迹】轨迹列表为?);
             return false;
         }
 

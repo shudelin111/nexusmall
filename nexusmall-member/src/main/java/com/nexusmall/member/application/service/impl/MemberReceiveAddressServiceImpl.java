@@ -14,7 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 会员收货地址服务实现�?
+ * 会员收货地址服务实现?
  *
  * @author shudl
  * @since 2026-04-06
@@ -41,13 +41,13 @@ public class MemberReceiveAddressServiceImpl extends ServiceImpl<MemberReceiveAd
     public boolean setDefaultAddress(Long addressId, Long memberId) {
         log.info("设置默认收货地址: addressId={}, memberId={}", addressId, memberId);
         
-        // 1. 取消该会员所有地址的默认状�?
+        // 1. 取消该会员所有地址的默认状?
         LambdaUpdateWrapper<MemberReceiveAddress> cancelWrapper = new LambdaUpdateWrapper<>();
         cancelWrapper.eq(MemberReceiveAddress::getMemberId, memberId)
                      .set(MemberReceiveAddress::getDefaultStatus, 0);
         this.update(cancelWrapper);
         
-        // 2. 设置指定地址为默�?
+        // 2. 设置指定地址为默?
         LambdaUpdateWrapper<MemberReceiveAddress> setWrapper = new LambdaUpdateWrapper<>();
         setWrapper.eq(MemberReceiveAddress::getId, addressId)
                   .eq(MemberReceiveAddress::getMemberId, memberId)

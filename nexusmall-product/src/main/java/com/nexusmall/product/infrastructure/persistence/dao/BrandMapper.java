@@ -15,7 +15,7 @@ public interface BrandMapper {
     Brand selectById(@Param("id") Long id);
 
     /**
-     * 查询所有品�?
+     * 查询所有品?
      */
     List<Brand> list();
 
@@ -40,12 +40,12 @@ public interface BrandMapper {
     int deleteById(@Param("id") Long id);
 
     /**
-     * 根据状态查询品�?
+     * 根据状态查询品?
      */
     List<Brand> listByStatus(@Param("status") Integer status);
 
     /**
-     * 根据首字母查询品�?
+     * 根据首字母查询品?
      */
     List<Brand> listByFirstLetter(@Param("firstLetter") String firstLetter);
 }

@@ -8,13 +8,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 
 /**
- * 运费计算器（领域服务�?
+ * 运费计算器（领域服务?
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 纯业务逻辑，无外部依赖
- * - 支持多种计费策略（按重量/体积/件数�?
+ * - 支持多种计费策略（按重量/体积/件数?
  * - 包邮规则判断
- * - 可在单元测试中独立测�?
+ * - 可在单元测试中独立测?
  * </p>
  *
  * @author shudl
@@ -26,16 +26,16 @@ public class FreightCalculator {
     /**
      * 计算运费
      * <p>
-     * 业界标准计费模型�?
-     * - 按重量：首重费用 + ceil((总重�?- 首重) / 续重) * 续重费用
-     * - 按体积：类似按重�?
+     * 业界标准计费模型?
+     * - 按重量：首重费用 + ceil((总重?- 首重) / 续重) * 续重费用
+     * - 按体积：类似按重?
      * - 按件数：件数 * 单价
-     * - 包邮规则：订单金�?>= 包邮门槛时，运费�?
+     * - 包邮规则：订单金?>= 包邮门槛时，运费?
      * </p>
      *
      * @param template   运费模板
-     * @param weight     重量（kg�?
-     * @param volume     体积（m³�?
+     * @param weight     重量（kg?
+     * @param volume     体积（m³?
      * @param pieceCount 件数
      * @param orderAmount 订单金额
      * @return 运费
@@ -50,7 +50,7 @@ public class FreightCalculator {
             return BigDecimal.TEN;
         }
 
-        // 1. 检查是否满足包邮条�?
+        // 1. 检查是否满足包邮条?
         if (isFreeShipping(template, orderAmount)) {
             log.info("【运费计算】满足包邮条件，orderAmount={}, freeThreshold={}", 
                     orderAmount, template.getFreeThreshold());
@@ -86,10 +86,10 @@ public class FreightCalculator {
     }
 
     /**
-     * 按重量计算运�?
+     * 按重量计算运?
      * <p>
-     * 公式：首重费�?+ ceil((总重�?- 首重) / 续重) * 续重费用
-     * 如果总重�?<= 首重，则只收首重费用
+     * 公式：首重费?+ ceil((总重?- 首重) / 续重) * 续重费用
+     * 如果总重?<= 首重，则只收首重费用
      * </p>
      */
     private BigDecimal calculateByWeight(LogisticsFreightTemplate template, BigDecimal weight) {
@@ -111,7 +111,7 @@ public class FreightCalculator {
     }
 
     /**
-     * 按体积计算运�?
+     * 按体积计算运?
      * <p>
      * 公式：类似按重量计算
      * </p>
@@ -121,12 +121,12 @@ public class FreightCalculator {
             return template.getFirstFee();
         }
 
-        // 如果体积不超过首体积，只收首重费�?
+        // 如果体积不超过首体积，只收首重费?
         if (volume.compareTo(template.getFirstWeight()) <= 0) {
             return template.getFirstFee();
         }
 
-        // 计算续体积部�?
+        // 计算续体积部?
         BigDecimal remainingVolume = volume.subtract(template.getFirstWeight());
         BigDecimal continuedUnits = remainingVolume.divide(
                 template.getContinuedWeight(), 0, RoundingMode.CEILING);
@@ -135,9 +135,9 @@ public class FreightCalculator {
     }
 
     /**
-     * 按件数计算运�?
+     * 按件数计算运?
      * <p>
-     * 公式：件�?* 首重费用（作为单价）
+     * 公式：件?* 首重费用（作为单价）
      * </p>
      */
     private BigDecimal calculateByPiece(LogisticsFreightTemplate template, Integer pieceCount) {

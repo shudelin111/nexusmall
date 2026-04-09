@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * JWT 工具�?(RS256 非对称加�?
+ * JWT 工具?(RS256 非对称加?
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 使用 RS256 算法 (RSA + SHA256)
- * - 私钥签发 Token，公钥验�?Token
+ * - 私钥签发 Token，公钥验?Token
  * - 强制验证算法白名单，防止算法混淆攻击
  * - 包含标准 Claims (iss, sub, aud, exp, iat, jti)
  * </p>
@@ -48,7 +48,7 @@ public class JwtUtil {
     /**
      * 生成 Access Token
      *
-     * @param username    用户�?
+     * @param username    用户?
      * @param roles       角色列表
      * @param permissions 权限列表
      * @return JWT Token
@@ -60,16 +60,16 @@ public class JwtUtil {
 
         return Jwts.builder()
                 // 标准 Claims
-                .setIssuer(rsaKeyProperties.getIssuer())           // iss: 签发�?
+                .setIssuer(rsaKeyProperties.getIssuer())           // iss: 签发?
                 .setAudience(rsaKeyProperties.getAudience())       // aud: 受众
-                .setSubject(username)                               // sub: 主题(用户�?
+                .setSubject(username)                               // sub: 主题(用户?
                 .setId(jti)                                         // jti: 唯一标识
                 .setIssuedAt(now)                                   // iat: 签发时间
                 .setExpiration(expiryDate)                          // exp: 过期时间
-                // 自定�?Claims
+                // 自定?Claims
                 .claim("roles", roles)
                 .claim("permissions", permissions)
-                .claim("token_type", "access")                      // 标记�?Access Token
+                .claim("token_type", "access")                      // 标记?Access Token
                 // 签名 (RS256)
                 .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
@@ -78,7 +78,7 @@ public class JwtUtil {
     /**
      * 生成 Refresh Token
      *
-     * @param username 用户�?
+     * @param username 用户?
      * @return Refresh Token
      */
     public String generateRefreshToken(String username) {
@@ -93,16 +93,16 @@ public class JwtUtil {
                 .setId(jti)
                 .setIssuedAt(now)
                 .setExpiration(expiryDate)
-                .claim("token_type", "refresh")  // 标记�?Refresh Token
+                .claim("token_type", "refresh")  // 标记?Refresh Token
                 .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
                 .compact();
     }
 
     /**
-     * �?Token 中获取用户名
+     * ?Token 中获取用户名
      *
      * @param token JWT Token
-     * @return 用户�?
+     * @return 用户?
      */
     public String getUsernameFromToken(String token) {
         Claims claims = parseToken(token);
@@ -110,7 +110,7 @@ public class JwtUtil {
     }
 
     /**
-     * �?Token 中获�?JTI (用于黑名�?
+     * ?Token 中获?JTI (用于黑名?
      *
      * @param token JWT Token
      * @return JTI
@@ -121,7 +121,7 @@ public class JwtUtil {
     }
 
     /**
-     * �?Token 中获取角色列�?
+     * ?Token 中获取角色列?
      *
      * @param token JWT Token
      * @return 角色列表
@@ -133,7 +133,7 @@ public class JwtUtil {
     }
 
     /**
-     * �?Token 中获取权限列�?
+     * ?Token 中获取权限列?
      *
      * @param token JWT Token
      * @return 权限列表
@@ -161,7 +161,7 @@ public class JwtUtil {
     }
 
     /**
-     * 检�?Token 是否�?Access Token
+     * 检?Token 是否?Access Token
      *
      * @param token JWT Token
      * @return true=Access Token
@@ -176,7 +176,7 @@ public class JwtUtil {
     }
 
     /**
-     * 检�?Token 是否�?Refresh Token
+     * 检?Token 是否?Refresh Token
      *
      * @param token JWT Token
      * @return true=Refresh Token
@@ -191,7 +191,7 @@ public class JwtUtil {
     }
 
     /**
-     * 解析 Token (强制验证算法白名�?
+     * 解析 Token (强制验证算法白名?
      *
      * @param token JWT Token
      * @return Claims
@@ -199,8 +199,8 @@ public class JwtUtil {
     private Claims parseToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getPublicKey())
-                // 关键：强制指定允许的算法，防止算法混淆攻�?
-                .requireIssuer(rsaKeyProperties.getIssuer())      // 验证签发�?
+                // 关键：强制指定允许的算法，防止算法混淆攻?
+                .requireIssuer(rsaKeyProperties.getIssuer())      // 验证签发?
                 .requireAudience(rsaKeyProperties.getAudience())  // 验证受众
                 .build()
                 .parseClaimsJws(token)

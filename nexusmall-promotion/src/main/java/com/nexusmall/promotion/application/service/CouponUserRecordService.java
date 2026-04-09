@@ -7,7 +7,7 @@ import com.nexusmall.promotion.interfaces.dto.UserCouponVO;
 import java.util.List;
 
 /**
- * 用户优惠券领取记�?Service 接口
+ * 用户优惠券领取记?Service 接口
  *
  * @author shudl
  * @since 2026-04-07
@@ -18,8 +18,8 @@ public interface CouponUserRecordService extends IService<CouponUserRecord> {
      * 查询用户的优惠券列表（按状态分类）
      *
      * @param userId    用户ID
-     * @param useStatus 使用状态（null表示查询全部�?
-     * @return 优惠券列�?
+     * @param useStatus 使用状态（null表示查询全部?
+     * @return 优惠券列?
      */
     List<UserCouponVO> listUserCoupons(Long userId, Integer useStatus);
 
@@ -33,7 +33,7 @@ public interface CouponUserRecordService extends IService<CouponUserRecord> {
     boolean useCoupon(Long recordId, Long orderId);
 
     /**
-     * 锁定优惠券（下单未支付时�?
+     * 锁定优惠券（下单未支付时?
      *
      * @param recordId 领取记录ID
      * @return 是否成功
@@ -41,7 +41,7 @@ public interface CouponUserRecordService extends IService<CouponUserRecord> {
     boolean lockCoupon(Long recordId);
 
     /**
-     * 释放优惠券（取消订单或支付失败时�?
+     * 释放优惠券（取消订单或支付失败时?
      *
      * @param recordId 领取记录ID
      * @return 是否成功
@@ -49,7 +49,7 @@ public interface CouponUserRecordService extends IService<CouponUserRecord> {
     boolean releaseCoupon(Long recordId);
 
     /**
-     * 回退优惠券（退款时�?
+     * 回退优惠券（退款时?
      *
      * @param recordId 领取记录ID
      * @return 是否成功

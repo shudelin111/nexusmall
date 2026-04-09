@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 /**
- * 商品服务 Feign 客户�?
+ * 商品服务 Feign 客户?
  */
 @FeignClient(name = "nexusmall-product", fallback = ProductFeignFallback.class)
 public interface ProductFeignService {

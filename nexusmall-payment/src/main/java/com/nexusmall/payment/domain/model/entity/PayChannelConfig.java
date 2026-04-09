@@ -7,7 +7,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 支付渠道配置实体�?
+ * 支付渠道配置实体?
  * <p>
  * 对应表：pay_channel_config
  * </p>
@@ -38,12 +38,12 @@ public class PayChannelConfig implements Serializable {
     private String channelName;
 
     /**
-     * 应用ID（AppID�?
+     * 应用ID（AppID?
      */
     private String appId;
 
     /**
-     * 商户ID（MchID�?
+     * 商户ID（MchID?
      */
     private String mchId;
 
@@ -73,7 +73,7 @@ public class PayChannelConfig implements Serializable {
     private String gatewayUrl;
 
     /**
-     * 是否启用�?=禁用�?=启用
+     * 是否启用?=禁用?=启用
      */
     private Integer enabled;
 
@@ -88,7 +88,7 @@ public class PayChannelConfig implements Serializable {
     private String remark;
 
     /**
-     * 逻辑删除�?=未删除，1=已删�?
+     * 逻辑删除?=未删除，1=已删?
      */
     @TableLogic
     private Integer deleted;

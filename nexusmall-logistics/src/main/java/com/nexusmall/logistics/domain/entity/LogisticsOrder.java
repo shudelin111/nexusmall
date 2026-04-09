@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 /**
  * 物流订单实体
  * <p>
- * 业界标准�?
- * - 关联订单系统，记录完整物流信�?
- * - 支持多仓库发�?
- * - 跟踪物流状态流�?
+ * 业界标准?
+ * - 关联订单系统，记录完整物流信?
+ * - 支持多仓库发?
+ * - 跟踪物流状态流?
  * </p>
  *
  * @author shudl
@@ -53,27 +53,27 @@ public class LogisticsOrder implements Serializable {
     private Long warehouseId;
 
     /**
-     * 快递公司名�?
+     * 快递公司名称
      */
-    @Schema(description = "快递公司名�?)
+    @Schema(description = "快递公司名称")
     private String expressCompany;
 
     /**
-     * 快递单�?
+     * 快递单号
      */
-    @Schema(description = "快递单�?)
+    @Schema(description = "快递单号")
     private String expressNo;
 
     /**
-     * 收货人姓�?
+     * 收货人姓名
      */
-    @Schema(description = "收货人姓�?)
+    @Schema(description = "收货人姓名")
     private String receiverName;
 
     /**
-     * 收货人电�?
+     * 收货人电话
      */
-    @Schema(description = "收货人电�?)
+    @Schema(description = "收货人电话")
     private String receiverPhone;
 
     /**

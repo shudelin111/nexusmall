@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * 仓库管理 Controller
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 支持仓库CRUD
  * - 支持智能仓库分配
  * - 支持仓库启用/禁用
@@ -30,7 +30,7 @@ import java.util.List;
 @RequestMapping("/warehouses")
 @RequiredArgsConstructor
 @ApiVersion("v1")
-@Tag(name = "仓库管理", description = "仓库信息查询、智能分�?)
+@Tag(name = "仓库管理", description = "仓库信息查询、智能分配")
 public class WarehouseController {
 
     private final LogisticsWarehouseService warehouseService;
@@ -41,9 +41,9 @@ public class WarehouseController {
      * @return 仓库列表
      */
     @GetMapping(value = "/enabled", headers = "X-API-Version=v1")
-    @Operation(summary = "查询启用的仓�?, description = "获取所有可用仓库列�?)
+    @Operation(summary = "查询启用的仓库", description = "获取所有可用仓库列表")
     public Result<List<LogisticsWarehouse>> listEnabledWarehouses() {
-        log.info("【查询启用的仓库�?);
+        log.info("【查询启用的仓库】");
         List<LogisticsWarehouse> warehouses = warehouseService.listEnabledWarehouses();
         return Result.success(warehouses);
     }
@@ -62,7 +62,7 @@ public class WarehouseController {
         log.info("【查询仓库】warehouseCode={}", warehouseCode);
         LogisticsWarehouse warehouse = warehouseService.getByWarehouseCode(warehouseCode);
         if (warehouse == null) {
-            return Result.failure("404", "仓库不存�?);
+            return Result.failure("404", "仓库不存在");
         }
         return Result.success(warehouse);
     }
@@ -75,7 +75,7 @@ public class WarehouseController {
      * @return 仓库ID
      */
     @GetMapping(value = "/assign", headers = "X-API-Version=v1")
-    @Operation(summary = "智能分配仓库", description = "根据收货地址自动分配最优仓�?)
+    @Operation(summary = "智能分配仓库", description = "根据收货地址自动分配最优仓库")
     public Result<Long> assignWarehouse(
             @Parameter(description = "省份", required = true)
             @RequestParam String province,
@@ -96,14 +96,14 @@ public class WarehouseController {
      * @return 仓库信息
      */
     @GetMapping(value = "/{id}", headers = "X-API-Version=v1")
-    @Operation(summary = "根据ID查询仓库", description = "查询指定仓库的详细信�?)
+    @Operation(summary = "根据ID查询仓库", description = "查询指定仓库的详细信息")
     public Result<LogisticsWarehouse> getById(
             @Parameter(description = "仓库ID", required = true)
             @PathVariable Long id) {
         log.info("【查询仓库】id={}", id);
         LogisticsWarehouse warehouse = warehouseService.getById(id);
         if (warehouse == null) {
-            return Result.failure("404", "仓库不存�?);
+            return Result.failure("404", "仓库不存在");
         }
         return Result.success(warehouse);
     }

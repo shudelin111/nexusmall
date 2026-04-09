@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Map;
 
 /**
- * 订单服务 Feign 客户�?
+ * 订单服务 Feign 客户?
  * <p>
  * 业界标准：微服务间通过Feign调用
  * </p>

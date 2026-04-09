@@ -33,7 +33,7 @@ public interface NotificationService extends IService<Notification> {
     List<Notification> listUnreadNotifications(Long userId);
 
     /**
-     * 标记消息为已�?
+     * 标记消息为已?
      *
      * @param notificationId 消息ID
      * @param userId         用户ID
@@ -42,7 +42,7 @@ public interface NotificationService extends IService<Notification> {
     boolean markAsRead(Long notificationId, Long userId);
 
     /**
-     * 批量标记为已�?
+     * 批量标记为已?
      *
      * @param userId 用户ID
      * @return 影响行数

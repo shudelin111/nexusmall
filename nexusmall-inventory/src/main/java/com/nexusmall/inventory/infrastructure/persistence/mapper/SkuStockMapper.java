@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Update;
 public interface SkuStockMapper extends BaseMapper<SkuStock> {
 
     /**
-     * 扣减库存（乐观锁�?
+     * 扣减库存（乐观锁?
      *
      * @param skuId SKU ID
      * @param warehouseId 仓库ID
@@ -53,7 +53,7 @@ public interface SkuStockMapper extends BaseMapper<SkuStock> {
                       @Param("version") Integer version);
 
     /**
-     * 锁定库存转已售（订单支付成功�?
+     * 锁定库存转已售（订单支付成功?
      *
      * @param skuId SKU ID
      * @param warehouseId 仓库ID

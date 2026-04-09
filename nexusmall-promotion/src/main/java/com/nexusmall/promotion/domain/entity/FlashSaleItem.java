@@ -11,9 +11,9 @@ import java.time.LocalDateTime;
 /**
  * 秒杀商品实体
  * <p>
- * 业界标准�?
- * - 支持独立秒杀�?
- * - 支持库存隔离（不影响正常库存�?
+ * 业界标准：
+ * - 支持独立秒杀活动
+ * - 支持库存隔离（不影响正常库存?
  * - 支持每人限购
  * - 支持排序
  * </p>
@@ -48,7 +48,7 @@ public class FlashSaleItem implements Serializable {
     private Long skuId;
 
     /**
-     * 商品名称（冗余字段，方便查询�?
+     * 商品名称（冗余字段，方便查询?
      */
     @Schema(description = "商品名称")
     private String productName;
@@ -66,13 +66,13 @@ public class FlashSaleItem implements Serializable {
     private BigDecimal originalPrice;
 
     /**
-     * 秒杀�?
+     * 秒杀价
      */
-    @Schema(description = "秒杀�?)
+    @Schema(description = "秒杀价")
     private BigDecimal flashPrice;
 
     /**
-     * 秒杀库存（独立于正常库存�?
+     * 秒杀库存（独立于正常库存）
      */
     @Schema(description = "秒杀库存")
     private Integer stock;
@@ -84,13 +84,13 @@ public class FlashSaleItem implements Serializable {
     private Integer soldCount;
 
     /**
-     * 每人限购数量�?表示不限制）
+     * 每人限购数量?表示不限制）
      */
     @Schema(description = "每人限购数量")
     private Integer limitPerUser;
 
     /**
-     * 排序（数字越小越靠前�?
+     * 排序（数字越小越靠前?
      */
     @Schema(description = "排序")
     private Integer sortOrder;
@@ -99,7 +99,7 @@ public class FlashSaleItem implements Serializable {
      * 版本号（乐观锁）
      */
     @Version
-    @Schema(description = "版本�?)
+    @Schema(description = "版本号")
     private Integer version;
 
     /**

@@ -3,7 +3,7 @@ package com.nexusmall.common.constants;
 /**
  * 消息队列 Topic 常量
  * <p>
- * 统一管理所�?Kafka/RocketMQ �?Topic 名称
+ * 统一管理所?Kafka/RocketMQ ?Topic 名称
  * </p>
  *
  * @author shudl
@@ -12,7 +12,7 @@ package com.nexusmall.common.constants;
 public class MQTopicConstants {
 
     private MQTopicConstants() {
-        // 防止实例�?
+        // 防止实例?
     }
 
     /**
@@ -41,7 +41,7 @@ public class MQTopicConstants {
     public static final String USER_BEHAVIOR_LOG = "user-behavior-log";
 
     /**
-     * 应用日志收集 Topic（用�?ELK�?
+     * 应用日志收集 Topic（用?ELK?
      */
     public static final String APP_LOGS = "app-logs";
 }

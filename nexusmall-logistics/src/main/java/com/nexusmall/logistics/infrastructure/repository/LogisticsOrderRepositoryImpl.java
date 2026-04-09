@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 /**
  * 物流订单仓储实现（基础设施层）
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 实现Domain层定义的Repository接口
  * - 使用MyBatis-Plus Mapper进行数据访问
  * </p>

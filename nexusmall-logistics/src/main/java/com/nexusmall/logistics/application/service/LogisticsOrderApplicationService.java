@@ -19,7 +19,7 @@ import java.util.List;
 /**
  * 物流订单应用服务
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 编排领域服务创建物流订单
  * - 智能分配仓库
  * - 事务边界控制
@@ -46,7 +46,7 @@ public class LogisticsOrderApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public LogisticsOrder createLogisticsOrder(CreateLogisticsOrderRequest request) {
-        log.info("【应用服�?创建物流订单】orderSn={}, memberId={}", 
+        log.info("【应用服?创建物流订单】orderSn={}, memberId={}", 
                 request.getOrderSn(), request.getMemberId());
 
         // 1. 检查是否已存在物流订单
@@ -63,7 +63,7 @@ public class LogisticsOrderApplicationService {
             log.info("【创建物流订单】智能分配仓库，warehouseId={}", warehouseId);
         }
 
-        // 3. 计算运费（如果未提供�?
+        // 3. 计算运费（如果未提供?
         if (request.getFreightAmount() == null) {
             BigDecimal freightAmount = calculateFreight(request);
             request.setFreightAmount(freightAmount);
@@ -82,7 +82,7 @@ public class LogisticsOrderApplicationService {
         order.setFreightAmount(request.getFreightAmount());
         order.setRemark(request.getRemark());
 
-        // TODO: 调用领域服务生成快递单号并设置状�?
+        // TODO: 调用领域服务生成快递单号并设置状?
         // order.generateExpressNo();
         // order.ship();
 
@@ -100,7 +100,7 @@ public class LogisticsOrderApplicationService {
      * 智能分配仓库
      */
     private Long assignWarehouse(String province, String city) {
-        // 策略1：优先匹配同省仓�?
+        // 策略1：优先匹配同省仓?
         List<LogisticsWarehouse> warehouses = warehouseRepository.findAllEnabled();
         LogisticsWarehouse sameProvince = warehouses.stream()
                 .filter(w -> w.getProvince().equals(province))
@@ -111,7 +111,7 @@ public class LogisticsOrderApplicationService {
             return sameProvince.getId();
         }
 
-        // 策略2：其次匹配同城仓�?
+        // 策略2：其次匹配同城仓?
         LogisticsWarehouse sameCity = warehouses.stream()
                 .filter(w -> w.getCity().equals(city))
                 .findFirst()
@@ -126,7 +126,7 @@ public class LogisticsOrderApplicationService {
             return warehouses.get(0).getId();
         }
 
-        throw new RuntimeException("没有可用的仓�?);
+        throw new RuntimeException("没有可用的仓?);
     }
 
     /**
@@ -136,10 +136,10 @@ public class LogisticsOrderApplicationService {
         // 获取默认运费模板
         LogisticsFreightTemplate template = freightTemplateRepository.findDefault();
         if (template == null) {
-            throw new RuntimeException("没有可用的运费模�?);
+            throw new RuntimeException("没有可用的运费模?);
         }
 
-        // TODO: 从订单服务获取商品重�?体积/件数
+        // TODO: 从订单服务获取商品重?体积/件数
         // 这里暂时返回默认运费
         return java.math.BigDecimal.TEN;
     }

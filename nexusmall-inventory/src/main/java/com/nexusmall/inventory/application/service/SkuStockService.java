@@ -24,7 +24,7 @@ public interface SkuStockService extends IService<SkuStock> {
     SkuStockVO getSkuStock(Long skuId, Long warehouseId);
 
     /**
-     * 扣减库存（锁定库存，用于下单�?
+     * 扣减库存（锁定库存，用于下单?
      * <p>
      * 使用 Redisson 分布式锁防止超卖
      * </p>
@@ -54,11 +54,11 @@ public interface SkuStockService extends IService<SkuStock> {
     boolean confirmStock(Long skuId, Long warehouseId, Integer quantity, String businessSn);
 
     /**
-     * 检查库存是否充�?
+     * 检查库存是否充?
      *
      * @param skuId SKU ID
      * @param warehouseId 仓库ID
-     * @param quantity 需求数�?
+     * @param quantity 需求数?
      * @return 是否充足
      */
     boolean checkStockSufficient(Long skuId, Long warehouseId, Integer quantity);

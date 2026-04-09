@@ -16,10 +16,10 @@ import java.util.List;
 /**
  * 消息通知控制器（RESTful标准版）
  * <p>
- * RESTful资源设计�?
+ * RESTful资源设计?
  * - GET    /notifications/unread          - 查询未读消息列表
- * - POST   /notifications/{id}/read       - 标记单条消息为已�?
- * - PATCH  /notifications/read-all        - 全部标记为已�?
+ * - POST   /notifications/{id}/read       - 标记单条消息为已?
+ * - PATCH  /notifications/read-all        - 全部标记为已?
  * </p>
  *
  * @author shudl
@@ -42,7 +42,7 @@ public class NotificationController {
      * @return 未读消息列表
      */
     @GetMapping(value = "/unread", headers = "X-API-Version=v1")
-    @Operation(summary = "查询未读消息列表", description = "获取当前用户的所有未读消�?)
+    @Operation(summary = "查询未读消息列表", description = "获取当前用户的所有未读消息")
     public Result<List<Notification>> listUnreadNotifications(
             @Parameter(description = "用户ID", required = true)
             @RequestHeader("X-User-ID") Long userId) {
@@ -52,14 +52,14 @@ public class NotificationController {
     }
 
     /**
-     * 标记单条消息为已�?
+     * 标记单条消息为已读
      *
      * @param id     消息ID
      * @param userId 用户ID
      * @return 是否成功
      */
     @PostMapping(value = "/{id}/read", headers = "X-API-Version=v1")
-    @Operation(summary = "标记消息为已�?, description = "将指定消息标记为已读状�?)
+    @Operation(summary = "标记消息为已读", description = "将指定消息标记为已读状态")
     public Result<Void> markAsRead(
             @Parameter(description = "消息ID", required = true)
             @PathVariable Long id,
@@ -71,13 +71,13 @@ public class NotificationController {
     }
 
     /**
-     * 全部标记为已�?
+     * 全部标记为已读
      *
      * @param userId 用户ID
      * @return 影响行数
      */
     @PatchMapping(value = "/read-all", headers = "X-API-Version=v1")
-    @Operation(summary = "全部标记为已�?, description = "将当前用户的所有未读消息标记为已读")
+    @Operation(summary = "全部标记为已读", description = "将当前用户的所有未读消息标记为已读")
     public Result<Integer> markAllAsRead(
             @Parameter(description = "用户ID", required = true)
             @RequestHeader("X-User-ID") Long userId) {

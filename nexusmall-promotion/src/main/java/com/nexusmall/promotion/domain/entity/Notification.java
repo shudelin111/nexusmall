@@ -10,11 +10,11 @@ import java.time.LocalDateTime;
 /**
  * 消息通知实体
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 支持多种通知类型（站内信、短信、邮件、推送）
  * - 支持消息模板
- * - 支持已读/未读状�?
- * - 支持批量发�?
+ * - 支持已读/未读状?
+ * - 支持批量发?
  * </p>
  *
  * @author shudl
@@ -35,19 +35,19 @@ public class Notification implements Serializable {
     private Long id;
 
     /**
-     * 用户ID�?表示全员通知�?
+     * 用户ID?表示全员通知?
      */
     @Schema(description = "用户ID")
     private Long userId;
 
     /**
-     * 通知类型�?-优惠券到�?2-秒杀开�?3-活动提醒 4-系统公告
+     * 通知类型?-优惠券到?2-秒杀开?3-活动提醒 4-系统公告
      */
     @Schema(description = "通知类型")
     private Integer type;
 
     /**
-     * 通知渠道�?-站内�?2-短信 3-邮件 4-APP推�?
+     * 通知渠道?-站内?2-短信 3-邮件 4-APP推?
      */
     @Schema(description = "通知渠道")
     private Integer channel;
@@ -77,21 +77,21 @@ public class Notification implements Serializable {
     private String extraData;
 
     /**
-     * 状态：0-未发�?1-已发�?2-发送失�?
+     * 状态：0-未发送 1-已发送 2-发送失败
      */
-    @Schema(description = "状�?)
+    @Schema(description = "状态")
     private Integer status;
 
     /**
-     * 是否已读�?-未读 1-已读
+     * 是否已读?-未读 1-已读
      */
     @Schema(description = "是否已读")
     private Integer isRead;
 
     /**
-     * 发送时�?
+     * 发送时间
      */
-    @Schema(description = "发送时�?)
+    @Schema(description = "发送时间")
     private LocalDateTime sendTime;
 
     /**

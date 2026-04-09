@@ -12,10 +12,10 @@ import java.time.LocalDateTime;
 /**
  * 营销数据统计实体（按天聚合）
  * <p>
- * 业界标准�?
- * - 支持多维度统计（优惠券、秒杀、满减）
- * - 支持按天/�?月聚�?
- * - 支持实时统计和离线统�?
+ * 业界标准：
+ * - 支持多维度统计（优惠券券、秒杀、满减）
+ * - 支持按天/?月聚?
+ * - 支持实时统计和离线统?
  * </p>
  *
  * @author shudl
@@ -42,13 +42,13 @@ public class PromotionStatistics implements Serializable {
     private LocalDate statDate;
 
     /**
-     * 统计类型�?-优惠�?2-秒杀 3-满减 4-综合
+     * 统计类型?-优惠券2-秒杀 3-满减 4-综合
      */
     @Schema(description = "统计类型")
     private Integer statType;
 
     /**
-     * 活动ID�?表示汇总）
+     * 活动ID?表示汇总）
      */
     @Schema(description = "活动ID")
     private Long activityId;
@@ -66,7 +66,7 @@ public class PromotionStatistics implements Serializable {
     private Long clickCount;
 
     /**
-     * 领取数量（优惠券�?
+     * 领取数量（优惠券券
      */
     @Schema(description = "领取数量")
     private Integer receiveCount;
@@ -90,31 +90,31 @@ public class PromotionStatistics implements Serializable {
     private BigDecimal gmv;
 
     /**
-     * 优惠金额
+     * 优惠券金额
      */
-    @Schema(description = "优惠金额")
+    @Schema(description = "优惠券金额")
     private BigDecimal discountAmount;
 
     /**
-     * 转化率（点击/曝光�?
+     * 转化率（点击/曝光）
      */
-    @Schema(description = "转化�?)
+    @Schema(description = "转化率")
     private BigDecimal clickRate;
 
     /**
-     * 领取率（领取/点击�?
+     * 领取率（领取/点击）
      */
-    @Schema(description = "领取�?)
+    @Schema(description = "领取率")
     private BigDecimal receiveRate;
 
     /**
-     * 使用率（使用/领取�?
+     * 使用率（使用/领取）
      */
-    @Schema(description = "使用�?)
+    @Schema(description = "使用率")
     private BigDecimal useRate;
 
     /**
-     * ROI（成交金�?优惠金额�?
+     * ROI（成交金额/优惠券金额
      */
     @Schema(description = "ROI")
     private BigDecimal roi;

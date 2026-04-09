@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 物流事件发布服务实现�?
+ * 物流事件发布服务实现?
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 使用RocketMQ发布事件
- * - 保证消息可靠投�?
+ * - 保证消息可靠投?
  * - 支持事务消息（可选）
  * </p>
  *
@@ -38,7 +38,7 @@ public class LogisticsEventPublisherServiceImpl implements LogisticsEventPublish
         try {
             // 1. 验证事件数据
             if (event == null || event.getOrderSn() == null) {
-                log.error("【发布物流事件】事件数据无�?);
+                log.error("【发布物流事件】事件数据无?);
                 return false;
             }
 
@@ -56,7 +56,7 @@ public class LogisticsEventPublisherServiceImpl implements LogisticsEventPublish
             org.apache.rocketmq.client.producer.SendResult sendResult = 
                     rocketMQTemplate.syncSend(destination, message);
 
-            // 4. 检查发送结�?
+            // 4. 检查发送结?
             if (sendResult != null && sendResult.getSendStatus() == 
                     org.apache.rocketmq.client.producer.SendStatus.SEND_OK) {
                 log.info("【发布物流事件成功】orderSn={}, expressNo={}, oldStatus={}, newStatus={}, msgId={}",
@@ -82,7 +82,7 @@ public class LogisticsEventPublisherServiceImpl implements LogisticsEventPublish
     @Override
     public int batchPublishStatusChangeEvents(List<LogisticsStatusChangeEvent> events) {
         if (events == null || events.isEmpty()) {
-            log.warn("【批量发布物流事件】事件列表为�?);
+            log.warn("【批量发布物流事件】事件列表为?);
             return 0;
         }
 

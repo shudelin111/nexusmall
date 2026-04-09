@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * Web MVC 配置
  * <p>
- * 注册全局拦截�?
+ * 注册全局拦截?
  * </p>
  *
  * @author shudl
@@ -23,7 +23,7 @@ public class WebConfig implements WebMvcConfigurer {
     private final SeataHandlerInterceptor seataHandlerInterceptor;
 
     /**
-     * 创建 API 版本拦截�?Bean
+     * 创建 API 版本拦截?Bean
      */
     @Bean
     public ApiVersionInterceptor apiVersionInterceptor() {
@@ -32,13 +32,13 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        // 注册 Seata XID 拦截器（使用已注册的 Bean�?
+        // 注册 Seata XID 拦截器（使用已注册的 Bean?
         registry.addInterceptor(seataHandlerInterceptor)
                 .addPathPatterns("/**");
         
-        // 注册 API 版本拦截�?
+        // 注册 API 版本拦截?
         registry.addInterceptor(apiVersionInterceptor())
-                .addPathPatterns("/**", "/brands/**", "/categories/**")  // 拦截所有业务接�?
-                .excludePathPatterns("/actuator/**", "/doc.html", "/swagger-resources/**", "/v3/api-docs/**");  // 排除监控和文�?
+                .addPathPatterns("/**", "/brands/**", "/categories/**")  // 拦截所有业务接?
+                .excludePathPatterns("/actuator/**", "/doc.html", "/swagger-resources/**", "/v3/api-docs/**");  // 排除监控和文?
     }
 }

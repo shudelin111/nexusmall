@@ -9,10 +9,10 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 库存流水实体�?
+ * 库存流水实体?
  * <p>
  * 对应数据库表：inventory_stock_log
- * 用于记录所有库存变动操作，便于追踪和审�?
+ * 用于记录所有库存变动操作，便于追踪和审?
  * </p>
  *
  * @author shudl
@@ -41,17 +41,17 @@ public class StockLog implements Serializable {
     private Long warehouseId;
 
     /**
-     * 变动数量（正数表示增加，负数表示减少�?
+     * 变动数量（正数表示增加，负数表示减少?
      */
     private Integer changeQuantity;
 
     /**
-     * 变动前库�?
+     * 变动前库?
      */
     private Integer beforeStock;
 
     /**
-     * 变动后库�?
+     * 变动后库?
      */
     private Integer afterStock;
 

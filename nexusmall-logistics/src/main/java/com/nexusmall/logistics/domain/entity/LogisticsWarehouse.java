@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 /**
  * 仓库实体
  * <p>
- * 业界标准�?
- * - 支持多仓库管�?
+ * 业界标准?
+ * - 支持多仓库管?
  * - 智能仓库分配策略
  * - 仓库启用/禁用控制
  * </p>
@@ -58,9 +58,9 @@ public class LogisticsWarehouse implements Serializable {
     private String city;
 
     /**
-     * �?
+     * ?
      */
-    @Schema(description = "�?)
+    @Schema(description = "?)
     private String region;
 
     /**
@@ -70,9 +70,9 @@ public class LogisticsWarehouse implements Serializable {
     private String detailAddress;
 
     /**
-     * 联系�?
+     * 联系?
      */
-    @Schema(description = "联系�?)
+    @Schema(description = "联系?)
     private String contactPerson;
 
     /**
@@ -82,9 +82,9 @@ public class LogisticsWarehouse implements Serializable {
     private String contactPhone;
 
     /**
-     * 状态：0=禁用�?=启用
+     * 状态：0=禁用?=启用
      */
-    @Schema(description = "状态：0=禁用�?=启用")
+    @Schema(description = "状态：0=禁用?=启用")
     private Integer status;
 
     /**

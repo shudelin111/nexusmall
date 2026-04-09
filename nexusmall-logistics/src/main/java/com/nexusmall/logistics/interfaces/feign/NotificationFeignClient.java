@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import java.util.Map;
 
 /**
- * 通知服务 Feign 客户�?
+ * 通知服务 Feign 客户?
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - 物流状态变更时发送通知
  * - 支持短信、邮件、Push等多种通知方式
  * </p>

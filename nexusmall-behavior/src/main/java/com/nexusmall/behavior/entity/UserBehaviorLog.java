@@ -12,7 +12,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 用户行为日志实体�? * 
+ * 用户行为日志实体? * 
  * @author shudl
  * @since 2026-03-25
  */
@@ -42,7 +42,7 @@ public class UserBehaviorLog implements Serializable {
     private String userName;
 
     /**
-     * 行为类型（如：PLACE_ORDER-下单�?     */
+     * 行为类型（如：PLACE_ORDER-下单?     */
     private String behaviorType;
 
     /**
@@ -51,11 +51,11 @@ public class UserBehaviorLog implements Serializable {
     private String behaviorDesc;
 
     /**
-     * 业务对象 ID（如商品 ID、订�?ID�?     */
+     * 业务对象 ID（如商品 ID、订?ID?     */
     private Long objectId;
 
     /**
-     * 业务对象类型（如：product_id、order_id�?     */
+     * 业务对象类型（如：product_id、order_id?     */
     private String objectType;
 
     /**
@@ -64,7 +64,7 @@ public class UserBehaviorLog implements Serializable {
     private String objectName;
 
     /**
-     * 额外信息（JSON 格式�?     */
+     * 额外信息（JSON 格式?     */
     private String extraData;
 
     /**

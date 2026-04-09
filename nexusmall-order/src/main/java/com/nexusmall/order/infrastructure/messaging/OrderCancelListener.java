@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 /**
- * 订单取消消息消费者（监听延迟消息�?
+ * 订单取消消息消费者（监听延迟消息?
  */
 @Slf4j
 @Component

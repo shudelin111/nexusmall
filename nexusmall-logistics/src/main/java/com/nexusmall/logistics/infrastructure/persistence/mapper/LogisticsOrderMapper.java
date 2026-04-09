@@ -23,9 +23,9 @@ public interface LogisticsOrderMapper extends BaseMapper<LogisticsOrder> {
     LogisticsOrder selectByOrderSn(@Param("orderSn") String orderSn);
 
     /**
-     * 根据快递单号查询物流订�?
+     * 根据快递单号查询物流订?
      *
-     * @param expressNo 快递单�?
+     * @param expressNo 快递单?
      * @return 物流订单
      */
     LogisticsOrder selectByExpressNo(@Param("expressNo") String expressNo);

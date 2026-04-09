@@ -13,12 +13,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
- * 会员信息实体�?
+ * 会员信息实体?
  * <p>
- * 业界标准�?
- * - �?Auth 模块�?sys_user 通过 user_id 关联
- * - 存储用户业务数据（昵�?头像/会员等级等）
- * - 不存储认证信息（密码�?Auth 管理�?
+ * 业界标准?
+ * - ?Auth 模块?sys_user 通过 user_id 关联
+ * - 存储用户业务数据（昵?头像/会员等级等）
+ * - 不存储认证信息（密码?Auth 管理?
  * </p>
  *
  * @author shudl
@@ -38,12 +38,12 @@ public class Member {
     private Long id;
 
     /**
-     * 用户 ID（关�?sys_user.id�?
+     * 用户 ID（关?sys_user.id?
      */
     private Long userId;
 
     /**
-     * 用户�?
+     * 用户?
      */
     private String username;
 
@@ -58,7 +58,7 @@ public class Member {
     private String avatar;
 
     /**
-     * 性别�?=未知�?=男，2=�?
+     * 性别?=未知?=男，2=?
      */
     private Integer gender;
 
@@ -68,7 +68,7 @@ public class Member {
     private LocalDate birthday;
 
     /**
-     * 手机�?
+     * 手机?
      */
     private String phone;
 
@@ -83,7 +83,7 @@ public class Member {
     private Long memberLevelId;
 
     /**
-     * 成长�?
+     * 成长?
      */
     private Integer growthPoint;
 
@@ -98,7 +98,7 @@ public class Member {
     private BigDecimal balance;
 
     /**
-     * 状态：0=禁用�?=正常
+     * 状态：0=禁用?=正常
      */
     private Integer status;
 

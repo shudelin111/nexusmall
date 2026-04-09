@@ -8,12 +8,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 退货申请实�?
+ * 退货申请实?
  * <p>
- * 业界标准�?
- * - 完整的退货流程管�?
- * - 支持退货物流跟�?
- * - 退货凭证图片存�?
+ * 业界标准?
+ * - 完整的退货流程管?
+ * - 支持退货物流跟?
+ * - 退货凭证图片存?
  * </p>
  *
  * @author shudl
@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
  */
 @Data
 @TableName("logistics_return_apply")
-@Schema(description = "退货申�?)
+@Schema(description = "退货申?)
 public class LogisticsReturnApply implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -46,39 +46,39 @@ public class LogisticsReturnApply implements Serializable {
     private Long memberId;
 
     /**
-     * 退货原�?
+     * 退货原?
      */
-    @Schema(description = "退货原�?)
+    @Schema(description = "退货原?)
     private String returnReason;
 
     /**
-     * 退货说�?
+     * 退货说?
      */
-    @Schema(description = "退货说�?)
+    @Schema(description = "退货说?)
     private String returnDescription;
 
     /**
-     * 退货凭证图片（JSON数组�?
+     * 退货凭证图片（JSON数组?
      */
-    @Schema(description = "退货凭证图片（JSON数组�?)
+    @Schema(description = "退货凭证图片（JSON数组?)
     private String returnImages;
 
     /**
-     * 状态：0=申请中，1=已同意，2=已拒绝，3=已完�?
+     * 状态：0=申请中，1=已同意，2=已拒绝，3=已完?
      */
-    @Schema(description = "状态：0=申请中，1=已同意，2=已拒绝，3=已完�?)
+    @Schema(description = "状态：0=申请中，1=已同意，2=已拒绝，3=已完?)
     private Integer status;
 
     /**
-     * 退货快递公司名�?
+     * 退货快递公司名?
      */
-    @Schema(description = "退货快递公司名�?)
+    @Schema(description = "退货快递公司名?)
     private String expressCompany;
 
     /**
-     * 退货快递单�?
+     * 退货快递单?
      */
-    @Schema(description = "退货快递单�?)
+    @Schema(description = "退货快递单?)
     private String expressNo;
 
     /**

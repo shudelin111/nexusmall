@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.Map;
 
 /**
- * Member 服务 Feign 客户�?
+ * Member 服务 Feign 客户?
  * <p>
- * 业界标准�?
+ * 业界标准?
  * - Order 服务通过 Feign 调用 Member 服务
  * - 获取会员信息和收货地址
  * </p>
