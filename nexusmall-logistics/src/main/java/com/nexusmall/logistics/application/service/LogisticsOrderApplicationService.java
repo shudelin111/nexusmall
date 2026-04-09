@@ -126,7 +126,7 @@ public class LogisticsOrderApplicationService {
             return warehouses.get(0).getId();
         }
 
-        throw new RuntimeException("没有可用的仓?);
+        throw new RuntimeException("没有可用的仓库");
     }
 
     /**
@@ -136,10 +136,10 @@ public class LogisticsOrderApplicationService {
         // 获取默认运费模板
         LogisticsFreightTemplate template = freightTemplateRepository.findDefault();
         if (template == null) {
-            throw new RuntimeException("没有可用的运费模?);
+            throw new RuntimeException("没有可用的运费模板");
         }
 
-        // TODO: 从订单服务获取商品重?体积/件数
+        // TODO: 从订单服务获取商品重量/体积/件数
         // 这里暂时返回默认运费
         return java.math.BigDecimal.TEN;
     }
