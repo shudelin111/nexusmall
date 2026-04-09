@@ -2,6 +2,7 @@ package com.nexusmall.common.config;
 
 import com.nexusmall.common.interceptor.CacheControlInterceptor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -60,7 +61,7 @@ public class CacheControlAutoConfiguration implements WebMvcConfigurer {
      * @return CacheControlInterceptor
      */
     @Bean
-    @org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
+    @ConditionalOnMissingBean
     public CacheControlInterceptor cacheControlInterceptor() {
         return new CacheControlInterceptor();
     }
