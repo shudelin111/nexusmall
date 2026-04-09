@@ -20,12 +20,12 @@ import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
- * 物流缓存服务实现?
+ * 物流缓存服务实现类
  * <p>
  * 业界标准：
  * - Cache-Aside模式（旁路缓存）
  * - 先查缓存，命中则返回；未命中则查数据库并写入缓存
- * - 更新时删除缓存，保证数据一致?
+ * - 更新时删除缓存，保证数据一一致性
  * </p>
  *
  * @author shudl

@@ -54,7 +54,7 @@ public class ElasticsearchSuggestRepository implements SuggestRepository {
                 return completionResults;
             }
             
-            // 降级方案：使?matchPhrasePrefixQuery
+            // 降级方案：使用 matchPhrasePrefixQuery
             return suggestWithFallback(keyword, limit);
         } catch (IOException ex) {
             throw new IllegalStateException("Failed to execute suggest request", ex);
@@ -91,7 +91,7 @@ public class ElasticsearchSuggestRepository implements SuggestRepository {
     }
 
     /**
-     * 降级方案：使?matchPhrasePrefixQuery
+     * 降级方案：使用 matchPhrasePrefixQuery
      */
     private List<SuggestItem> suggestWithFallback(String keyword, int limit) throws IOException {
         SearchSourceBuilder sourceBuilder = new SearchSourceBuilder()
@@ -149,7 +149,7 @@ public class ElasticsearchSuggestRepository implements SuggestRepository {
                 
                 String text = option.getText().string();
                 if (values.add(type + ":" + text)) {
-                    // Completion Suggester 不返?score，使用固定?
+                    // Completion Suggester 不返回 score，使用固指定
                     items.add(new SuggestItem(text, type, 1.0, 1L));
                 }
             }

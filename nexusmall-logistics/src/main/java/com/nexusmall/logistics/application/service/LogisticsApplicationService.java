@@ -40,7 +40,7 @@ public class LogisticsApplicationService {
      * @return 运费结果
      */
     public FreightResultVO calculateFreight(CalculateFreightRequest request) {
-        log.info("【应用服?计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
+        log.info("【应用服务计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
                 request.getWeight(), request.getVolume(), request.getPieceCount(), request.getOrderAmount());
 
         // 1. 获取运费模板

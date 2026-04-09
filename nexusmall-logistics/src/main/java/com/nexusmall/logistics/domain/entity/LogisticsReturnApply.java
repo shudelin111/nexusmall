@@ -8,12 +8,12 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 退货申请实?
+ * 退货申请实现(基于 Redis)
  * <p>
  * 业界标准：
- * - 完整的退货流程管?
- * - 支持退货物流跟?
- * - 退货凭证图片存?
+ * - 完整的退货流程管理
+ * - 支持退货物流跟踪
+ * - 退货凭证图片存储
  * </p>
  *
  * @author shudl

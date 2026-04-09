@@ -28,10 +28,10 @@ public interface MemberService extends IService<Member> {
     boolean updateMemberProfile(Member member);
 
     /**
-     * 增加成长?
+     * 增加成长值
      *
      * @param memberId   会员 ID
-     * @param growthPoint 成长值数?
+     * @param growthPoint 成长值数量
      * @param sourceType  来源类型(ORDER/REVIEW/SIGN_IN)
      * @param sourceId    来源 ID
      * @param note        备注

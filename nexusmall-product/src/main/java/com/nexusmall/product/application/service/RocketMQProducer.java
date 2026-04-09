@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * RocketMQ 消息生产?
+ * RocketMQ 消息生生产者
  */
 @Slf4j
 @Service
@@ -17,7 +17,7 @@ public class RocketMQProducer {
     private RocketMQTemplate rocketMQTemplate;
 
     /**
-     * 发送库存扣减成功消?
+     * 发送库存扣减成功消息
      * 
      * @param skuId 商品 ID
      * @param count 扣减数量
@@ -34,7 +34,7 @@ public class RocketMQProducer {
             // 发送到库存 Topic
             String destination = MQConstants.Stock.TOPIC + ":" + MQConstants.Stock.DECREASED_TAG;
             
-            // 发送普通消?
+            // 发送普通消息
             rocketMQTemplate.convertAndSend(destination, message);
             
             log.info("库存扣减消息发送成功，skuId: {}, count: {}", skuId, count);

@@ -16,10 +16,10 @@ import java.util.List;
 /**
  * 消息通知控制器（RESTful标准版）
  * <p>
- * RESTful资源设计?
+ * RESTful资源设计：
  * - GET    /notifications/unread          - 查询未读消息列表
- * - POST   /notifications/{id}/read       - 标记单条消息为已?
- * - PATCH  /notifications/read-all        - 全部标记为已?
+ * - POST   /notifications/{id}/read       - 标记单条消息为已读
+ * - PATCH  /notifications/read-all        - 全部标记为已读
  * </p>
  *
  * @author shudl

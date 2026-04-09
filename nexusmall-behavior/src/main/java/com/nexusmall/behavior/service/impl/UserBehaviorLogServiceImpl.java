@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 
 /**
- * 用户行为日志 Service 实现? * 
+ * 用户行为日志 Service 实现类 * 
  * @author shudl
  * @since 2026-03-25
  */

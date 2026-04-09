@@ -24,14 +24,14 @@ import java.util.stream.Collectors;
 /**
  * 优惠券控制器（RESTful标准版）
  * <p>
- * RESTful资源设计?
- * - GET    /coupons          - 查询可领取的优惠券列?
- * - GET    /coupons/{id}     - 查询单个优惠券详?
+ * RESTful资源设计：
+ * - GET    /coupons          - 查询可领取的优惠券列表
+ * - GET    /coupons/{id}     - 查询单个优惠券详情
  * - POST   /coupons          - 创建优惠券（管理员）
  * - PUT    /coupons/{id}     - 更新优惠券（管理员）
  * - DELETE /coupons/{id}     - 删除优惠券（管理员）
- * - POST   /coupons/{id}/receive - 领取优惠?
- * - GET    /users/{userId}/coupons - 查询用户已领取的优惠?
+ * - POST   /coupons/{id}/receive - 领取优惠券
+ * - GET    /users/{userId}/coupons - 查询用户已领取的优惠券
  * </p>
  *
  * @author shudl

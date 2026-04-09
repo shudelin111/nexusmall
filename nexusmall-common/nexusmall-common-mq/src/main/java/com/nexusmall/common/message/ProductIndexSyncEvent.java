@@ -26,12 +26,12 @@ public class ProductIndexSyncEvent extends BaseMessage {
     private Long productId;
 
     /**
-     * 事件类型（CREATE/UPDATE/DELETE?
+     * 事件类型（CREATE/UPDATE/DELETE）
      */
     private ProductIndexSyncEventType eventType;
 
     /**
-     * 事件发生时间?
+     * 事件发生时间
      */
     private Long occurredAt;
 

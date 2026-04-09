@@ -15,11 +15,11 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 /**
- * 物流事件发布服务实现?
+ * 物流事件发布服务实现类
  * <p>
  * 业界标准：
  * - 使用RocketMQ发布事件
- * - 保证消息可靠投?
+ * - 保证消息可靠投递
  * - 支持事务消息（可选）
  * </p>
  *

@@ -54,7 +54,7 @@ public class BloomFilterService {
     /**
      * 应用启动时初始化布隆过滤器
      * <p>
-     * 从数据库加载所有有效的SKU ID和优惠券券ID到布隆过滤器
+     * 从数据库加载所有有效的SKU ID和优惠券ID到布隆过滤器
      * </p>
      */
     @PostConstruct
@@ -101,10 +101,10 @@ public class BloomFilterService {
     }
 
     /**
-     * 初始化优惠券券布隆过滤器
+     * 初始化优惠券布隆过滤器
      */
     private void initCouponBloomFilter() {
-        log.info("【布隆过滤器】加载优惠券券ID...");
+        log.info("【布隆过滤器】加载优惠券ID...");
 
         List<Coupon> coupons = couponService.lambdaQuery()
                 .in(Coupon::getStatus, 0, 1)  // 未开始或进行中

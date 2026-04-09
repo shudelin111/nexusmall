@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 /**
- * 用户优惠券领取记?Mapper 接口
+ * 用户优惠券领取记录 Mapper 接口
  *
  * @author shudl
  * @since 2026-04-07

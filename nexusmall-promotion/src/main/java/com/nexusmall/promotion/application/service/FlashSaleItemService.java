@@ -23,11 +23,11 @@ public interface FlashSaleItemService extends IService<FlashSaleItem> {
     /**
      * 秒杀下单（核心方法）
      * <p>
-     * 业界标准实现?
-     * 1. Redis预减库存（高性能?
-     * 2. 分布式锁防超?
-     * 3. 数据库乐观锁最终一致?
-     * 4. 异步创建订单（RocketMQ?
+     * 业界标准实现类
+     * 1. Redis预减库存（高性能)
+     * 2. 分布式锁防超卖
+     * 3. 数据库乐观锁最终一一致性
+     * 4. 异步创建订单（RocketMQ）
      * </p>
      *
      * @param skuId  SKU ID

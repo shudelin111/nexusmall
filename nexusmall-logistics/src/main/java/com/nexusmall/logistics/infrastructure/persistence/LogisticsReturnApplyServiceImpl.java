@@ -29,7 +29,7 @@ public class LogisticsReturnApplyServiceImpl extends ServiceImpl<LogisticsReturn
                                                    String returnDescription, String returnImages) {
         log.info("【提交退货申请】orderSn={}, memberId={}, reason={}", orderSn, memberId, returnReason);
 
-        // 1. 检查是否已有进行中的退货申?
+        // 1. 检查是否已有进行中的退货申请
         List<LogisticsReturnApply> existingApplies = this.listByOrderSn(orderSn);
         for (LogisticsReturnApply apply : existingApplies) {
             if (apply.getStatus().equals(ReturnStatusEnum.APPLYING.getCode()) 

@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 会员等级实体?
+ * 会员等级实体类
  * <p>
- * 业界标准?
- * - 定义会员等级体系（普?黄金/铂金/钻石?
- * - 每个等级对应不同的权益（折扣/免运费门槛等?
+ * 业界标准：
+ * - 定义会员等级体系（普通/黄金/铂金/钻石）
+ * - 每个等级对应不同的权益（折扣/免运费门槛等）
  * </p>
  *
  * @author shudl
@@ -41,7 +41,7 @@ public class MemberLevel {
     private String levelName;
 
     /**
-     * 所需成长?
+     * 所需成长值
      */
     private Integer growthPointThreshold;
 
@@ -51,7 +51,7 @@ public class MemberLevel {
     private BigDecimal discount;
 
     /**
-     * 免运费门?
+     * 免运费门槛
      */
     private BigDecimal freeShippingThreshold;
 
@@ -61,7 +61,7 @@ public class MemberLevel {
     private String description;
 
     /**
-     * 状态：0=禁用?=正常
+     * 状态：0=禁用 1=正常
      */
     private Integer status;
 

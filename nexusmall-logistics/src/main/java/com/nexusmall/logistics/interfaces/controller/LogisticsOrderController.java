@@ -42,7 +42,7 @@ public class LogisticsOrderController {
      * 根据订单编号查询物流信息
      *
      * @param orderSn 订单编号
-     * @return 物流订单及轨?
+     * @return 物流订单及轨迹
      */
     @GetMapping(value = "/order/{orderSn}", headers = "X-API-Version=v1")
     @Operation(summary = "根据订单编号查询物流", description = "查询指定订单的物流信息及轨迹")
@@ -61,7 +61,7 @@ public class LogisticsOrderController {
      * 根据快递单号查询物流信息
      *
      * @param expressNo 快递单号
-     * @return 物流订单及轨?
+     * @return 物流订单及轨迹
      */
     @GetMapping(value = "/express/{expressNo}", headers = "X-API-Version=v1")
     @Operation(summary = "根据快递单号查询物流", description = "查询指定快递单号的物流信息及轨迹")

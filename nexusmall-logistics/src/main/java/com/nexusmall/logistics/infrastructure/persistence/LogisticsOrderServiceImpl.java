@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 物流订单服务实现?
+ * 物流订单服务实现类
  *
  * @author shudl
  * @since 2026-04-07
@@ -54,7 +54,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
             return existOrder;
         }
 
-        // 2. 生成快递单号（业界标准：快递公司编?+ 时间?+ 随机数）
+        // 2. 生成快递单号（业界标准：快递公司编号 + 日期时间 + 随机数）
         String expressNo = generateExpressNo(expressCompany);
 
         // 3. 创建物流订单
@@ -67,7 +67,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
         logisticsOrder.setReceiverName(receiverName);
         logisticsOrder.setReceiverPhone(receiverPhone);
         logisticsOrder.setReceiverAddress(receiverAddress);
-        logisticsOrder.setStatus(LogisticsStatusEnum.SHIPPED.getCode()); // 初始状态：已发?
+        logisticsOrder.setStatus(LogisticsStatusEnum.SHIPPED.getCode()); // 初始状态：已发货
         logisticsOrder.setShipTime(LocalDateTime.now());
         logisticsOrder.setFreightAmount(freightAmount != null ? freightAmount : BigDecimal.ZERO);
 
@@ -88,9 +88,9 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
             return false;
         }
 
-        // 验证状态流转合法?
+        // 验证状态流转合法性
         if (!isValidStatusTransition(order.getStatus(), status)) {
-            log.error("【更新物流状态】非法的状态流转，当前状?{}, 目标状?{}", order.getStatus(), status);
+            log.error("【更新物流状态】非法的状态流转，当前状态{}, 目标状态{}", order.getStatus(), status);
             return false;
         }
 
@@ -99,9 +99,9 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
         boolean success = this.updateById(order);
 
         if (success) {
-            log.info("【更新物流状态成功】id={}, 旧状?{}, 新状?{}", id, oldStatus, status);
+            log.info("【更新物流状态成功】id={}, 旧状态{}, 新状态{}", id, oldStatus, status);
             
-            // 发布物流状态变更事?
+            // 发布物流状态变更事件
             publishStatusChangeEvent(order, oldStatus, status);
         }
 
@@ -121,7 +121,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
 
         // 只有运输中的订单才能签收
         if (!LogisticsStatusEnum.IN_TRANSIT.getCode().equals(order.getStatus())) {
-            log.error("【确认签收】订单状态不正确，当前状?{}", order.getStatus());
+            log.error("【确认签收】订单状态不正确，当前状态{}", order.getStatus());
             return false;
         }
 
@@ -133,7 +133,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
         if (success) {
             log.info("【确认签收成功】id={}", id);
             
-            // 发布物流状态变更事?
+            // 发布物流状态变更事件
             publishStatusChangeEvent(order, oldStatus, LogisticsStatusEnum.SIGNED.getCode());
         }
 
@@ -141,14 +141,14 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     }
 
     /**
-     * 生成快递单?
+     * 生成快递单号
      * <p>
-     * 业界标准格式：快递公司编?2? + 年月?8? + 序列?6?
+     * 业界标准格式：快递公司编号2位 + 年月日8位 + 序列号6位
      * 例如：SF20260407000001（顺丰）
      * </p>
      *
-     * @param expressCompany 快递公司名?
-     * @return 快递单?
+     * @param expressCompany 快递公司名称
+     * @return 快递单号
      */
     private String generateExpressNo(String expressCompany) {
         // 提取快递公司编码（取前2个大写字母）
@@ -159,7 +159,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
             prefix = prefix + "0";
         }
 
-        // 生成时间戳部?
+        // 生成时间戳部分
         String datePart = LocalDateTime.now().toString().substring(0, 10).replace("-", "");
 
         // 生成随机序列号（6位）
@@ -169,34 +169,34 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     }
 
     /**
-     * 验证状态流转合法?
+     * 验证状态流转合法性
      * <p>
-     * 合法流转?
-     * - 待发?0) -> 已发?1)
-     * - 已发?1) -> 运输?2)
-     * - 运输?2) -> 已签?3)
-     * - 运输?2) -> 异常(4)
-     * - 异常(4) -> 运输?2)（异常恢复）
+     * 合法流转规则：
+     * - 待发货(0) -> 已发货(1)
+     * - 已发货(1) -> 运输中(2)
+     * - 运输中(2) -> 已签收(3)
+     * - 运输中(2) -> 异常(4)
+     * - 异常(4) -> 运输中(2)（异常恢复）
      * </p>
      *
-     * @param currentStatus 当前状?
-     * @param targetStatus  目标状?
+     * @param currentStatus 当前状态
+     * @param targetStatus  目标状态
      * @return 是否合法
      */
     private boolean isValidStatusTransition(Integer currentStatus, Integer targetStatus) {
         if (currentStatus.equals(targetStatus)) {
-            return false; // 不允许相同状?
+            return false; // 不允许相同状态
         }
 
         switch (currentStatus) {
-            case 0: // 待发?
-                return targetStatus == 1; // 只能转为已发?
-            case 1: // 已发?
-                return targetStatus == 2; // 只能转为运输?
-            case 2: // 运输?
-                return targetStatus == 3 || targetStatus == 4; // 可转为已签收或异?
-            case 3: // 已签?
-                return false; // 已签收是终态，不能再流?
+            case 0: // 待发货
+                return targetStatus == 1; // 只能转为已发货
+            case 1: // 已发货
+                return targetStatus == 2; // 只能转为运输中
+            case 2: // 运输中
+                return targetStatus == 3 || targetStatus == 4; // 可转为已签收或异常
+            case 3: // 已签收
+                return false; // 已签收是终态，不能再流转
             case 4: // 异常
                 return targetStatus == 2; // 异常恢复为运输中
             default:
@@ -205,12 +205,12 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     }
 
     /**
-     * 发布物流状态变更事?
+     * 发布物流状态变更事件
      * <p>
      * 业界标准：
      * - 状态变更后立即发布事件
      * - 异步通知其他微服务（订单、通知等）
-     * - 即使发布失败也不影响主流程（记录日志?
+     * - 即使发布失败也不影响主流程（记录日志：
      * </p>
      */
     private void publishStatusChangeEvent(LogisticsOrder order, Integer oldStatus, Integer newStatus) {

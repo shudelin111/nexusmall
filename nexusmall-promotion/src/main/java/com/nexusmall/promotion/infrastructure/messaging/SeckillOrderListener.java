@@ -8,7 +8,7 @@ import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
 
 /**
- * 秒杀订单创建监听?
+ * 秒杀订单创建监听器
  * <p>
  * 业界标准：异步解耦，提升秒杀响应速度
  * </p>

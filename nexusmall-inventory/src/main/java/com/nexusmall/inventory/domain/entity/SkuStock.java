@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * SKU库存实体?
+ * SKU库存实体类
  * <p>
  * 对应数据库表：inventory_sku_stock
  * </p>
@@ -45,7 +45,7 @@ public class SkuStock implements Serializable {
     private Integer stock;
 
     /**
-     * 锁定库存数量（下单后锁定?
+     * 锁定库存数量（下单后锁指定
      */
     private Integer lockedStock;
 
@@ -55,7 +55,7 @@ public class SkuStock implements Serializable {
     private Integer actualStock;
 
     /**
-     * 库存预警阈?
+     * 库存预警阈值
      */
     private Integer warningThreshold;
 

@@ -9,10 +9,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 /**
- * NexusMall 营销服务启动?
+ * NexusMall 营销服务启动类
  * <p>
- * 职责?
- * - 优惠券管理（发放/领取/使用/过期?
+ * 职责：
+ * - 优惠券管理（发放/领取/使用/过期)
  * - 秒杀活动管理
  * - 满减/折扣活动
  * - 积分商城

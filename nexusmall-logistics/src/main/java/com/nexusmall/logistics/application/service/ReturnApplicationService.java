@@ -14,10 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 /**
- * 退货应用服?
+ * 退货应用服务
  * <p>
  * 业界标准：
- * - 编排退货流?
+ * - 编排退货流程
  * - 事务边界控制
  * </p>
  *
@@ -33,15 +33,15 @@ public class ReturnApplicationService {
     private final LogisticsWarehouseRepository warehouseRepository;
 
     /**
-     * 提交退货申?
+     * 提交退货申请
      *
      * @param userId  用户ID
-     * @param request 退货申请信?
-     * @return 退货申?
+     * @param request 退货申请信息
+     * @return 退货申请
      */
     @Transactional(rollbackFor = Exception.class)
     public LogisticsReturnApply submitReturnApply(Long userId, SubmitReturnApplyRequest request) {
-        log.info("【应用服?提交退货申请】userId={}, orderSn={}", userId, request.getOrderSn());
+        log.info("【应用服务提交退货申请】userId={}, orderSn={}", userId, request.getOrderSn());
 
         // 1. 检查是否已存在退货申请
         List<LogisticsReturnApply> existingApplies = returnApplyRepository.findByOrderSn(request.getOrderSn());

@@ -14,15 +14,15 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 库存管理控制器?
+ * 库存管理控制器类
  *
  * @author shudl
  * @since 2026-04-06
  */
 @Slf4j
 @RestController
-@RequestMapping("/stocks")  // RESTful资源路径：库存集合?
-@ApiVersion("v1")  // 标记此?Controller 支持 v1 版本
+@RequestMapping("/stocks")  // RESTful资源路径：库存集合
+@ApiVersion("v1")  // 标记此 ControllerController 支持 v1 版本
 @RequiredArgsConstructor
 @Tag(name = "库存管理", description = "SKU库存查询、扣减、回滚等操作")
 public class InventoryController {
@@ -47,12 +47,12 @@ public class InventoryController {
     }
 
     /**
-     * 检查库存存是否充足?
+     * 检查库存是否充足
      *
      * @param skuId SKU ID
      * @param warehouseId 仓库ID
-     * @param quantity 需求数量?
-     * @return 是否充足足
+     * @param quantity 需求数量
+     * @return 是否充足
      */
     @GetMapping(value = "/{skuId}/availability", headers = "X-API-Version=v1")
     @Operation(summary = "检查库存是否充足", description = "判断指定SKU的库存是否满足需求数量")
@@ -66,7 +66,7 @@ public class InventoryController {
     }
 
     /**
-     * 扣减库存（锁定库存，用于下单）?
+     * 扣减库存（锁定库存，用于下单）
      *
      * @param skuId SKU ID
      * @param request 扣减请求

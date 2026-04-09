@@ -155,7 +155,7 @@ public class PayOrderControllerV2 {
         wechatPayment.put("channel", "WECHAT");
         wechatPayment.put("amount", wechatAmount);
         wechatPayment.put("status", "WAITING");
-        wechatPayment.put("codeUrl", "weixin://wxpay/bizpayurl?pr=" + request.getOrderNo());
+        wechatPayment.put("codeUrl", "weixin://wxpay/bizpayURL：pr=" + request.getOrderNo());
         payments.add(wechatPayment);
         
         result.put("payments", payments);

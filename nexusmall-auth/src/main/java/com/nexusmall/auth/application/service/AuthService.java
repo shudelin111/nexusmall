@@ -36,12 +36,12 @@ public interface AuthService {
     boolean deleteUser(Long userId);
     
     /**
-     * 为用户分配角?
+     * 为用户分配角色
      */
     boolean assignRolesToUser(Long userId, List<Long> roleIds);
     
     /**
-     * 为角色分配权?
+     * 为角色分配权限
      */
     boolean assignPermissionsToRole(Long roleId, List<Long> permissionIds);
 }

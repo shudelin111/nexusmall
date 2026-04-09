@@ -46,7 +46,7 @@ public class LogisticsOrderApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public LogisticsOrder createLogisticsOrder(CreateLogisticsOrderRequest request) {
-        log.info("【应用服?创建物流订单】orderSn={}, memberId={}", 
+        log.info("【应用服务创建物流订单】orderSn={}, memberId={}", 
                 request.getOrderSn(), request.getMemberId());
 
         // 1. 检查是否已存在物流订单
@@ -63,7 +63,7 @@ public class LogisticsOrderApplicationService {
             log.info("【创建物流订单】智能分配仓库，warehouseId={}", warehouseId);
         }
 
-        // 3. 计算运费（如果未提供?
+        // 3. 计算运费（如果未提供)
         if (request.getFreightAmount() == null) {
             BigDecimal freightAmount = calculateFreight(request);
             request.setFreightAmount(freightAmount);
@@ -82,7 +82,7 @@ public class LogisticsOrderApplicationService {
         order.setFreightAmount(request.getFreightAmount());
         order.setRemark(request.getRemark());
 
-        // TODO: 调用领域服务生成快递单号并设置状?
+        // TODO: 调用领域服务生成快递单号并设置状态
         // order.generateExpressNo();
         // order.ship();
 
@@ -100,7 +100,7 @@ public class LogisticsOrderApplicationService {
      * 智能分配仓库
      */
     private Long assignWarehouse(String province, String city) {
-        // 策略1：优先匹配同省仓?
+        // 策略1：优先匹配同省仓库
         List<LogisticsWarehouse> warehouses = warehouseRepository.findAllEnabled();
         LogisticsWarehouse sameProvince = warehouses.stream()
                 .filter(w -> w.getProvince().equals(province))
@@ -111,7 +111,7 @@ public class LogisticsOrderApplicationService {
             return sameProvince.getId();
         }
 
-        // 策略2：其次匹配同城仓?
+        // 策略2：其次匹配同城仓库
         LogisticsWarehouse sameCity = warehouses.stream()
                 .filter(w -> w.getCity().equals(city))
                 .findFirst()

@@ -17,7 +17,7 @@ import java.util.List;
 public interface LogisticsTrackMapper extends BaseMapper<LogisticsTrack> {
 
     /**
-     * 根据物流订单ID查询轨迹列表（按时间倒序?
+     * 根据物流订单ID查询轨迹列表（按时间倒序)
      *
      * @param logisticsOrderId 物流订单ID
      * @return 轨迹列表
@@ -25,9 +25,9 @@ public interface LogisticsTrackMapper extends BaseMapper<LogisticsTrack> {
     List<LogisticsTrack> selectByLogisticsOrderId(@Param("logisticsOrderId") Long logisticsOrderId);
 
     /**
-     * 根据快递单号查询轨迹列表（按时间倒序?
+     * 根据快递单号查询轨迹列表（按时间倒序)
      *
-     * @param expressNo 快递单?
+     * @param expressNo 快递单号
      * @return 轨迹列表
      */
     List<LogisticsTrack> selectByExpressNo(@Param("expressNo") String expressNo);

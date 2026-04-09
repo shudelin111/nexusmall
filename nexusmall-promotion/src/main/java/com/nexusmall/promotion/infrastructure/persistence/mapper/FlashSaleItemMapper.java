@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Update;
 public interface FlashSaleItemMapper extends BaseMapper<FlashSaleItem> {
 
     /**
-     * 扣减秒杀库存（乐观锁?
+     * 扣减秒杀库存（乐观锁）
      *
      * @param skuId SKU ID
      * @return 影响行数

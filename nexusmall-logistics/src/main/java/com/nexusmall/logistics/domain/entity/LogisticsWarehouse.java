@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
  * 仓库实体
  * <p>
  * 业界标准：
- * - 支持多仓库管?
+ * - 支持多仓库管理
  * - 智能仓库分配策略
  * - 仓库启用/禁用控制
  * </p>
@@ -82,9 +82,9 @@ public class LogisticsWarehouse implements Serializable {
     private String contactPhone;
 
     /**
-     * 状态：0=禁用?=启用
+     * 状态：0=禁用 1=启用
      */
-    @Schema(description = "状态：0=禁用?=启用")
+    @Schema(description = "状态：0=禁用 1=启用")
     private Integer status;
 
     /**

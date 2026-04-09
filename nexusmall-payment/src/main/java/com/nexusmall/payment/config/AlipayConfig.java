@@ -5,7 +5,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 /**
- * 支付宝支付配?
+ * 支付宝支付配置
  *
  * @author shudl
  * @since 2026-04-06
@@ -26,7 +26,7 @@ public class AlipayConfig {
     private String merchantPrivateKey;
 
     /**
-     * 支付宝公?
+     * 支付宝公钥
      */
     private String alipayPublicKey;
 

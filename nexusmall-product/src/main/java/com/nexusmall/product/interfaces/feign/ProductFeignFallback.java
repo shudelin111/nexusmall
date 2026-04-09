@@ -17,7 +17,7 @@ public class ProductFeignFallback implements ProductFeignService {
      */
     @Override
     public Result<Boolean> decreaseStock(Long productId, Integer count) {
-        log.error("扣减库存失败，商?ID: {}, 数量：{}", productId, count);
+        log.error("扣减库存失败，商品ID: {}, 数量：{}", productId, count);
         return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
@@ -26,12 +26,12 @@ public class ProductFeignFallback implements ProductFeignService {
      */
     @Override
     public Result<Boolean> increaseStock(Long productId, Integer count) {
-        log.error("增加库存失败，商?ID: {}, 数量：{}", productId, count);
+        log.error("增加库存失败，商品ID: {}, 数量：{}", productId, count);
         return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
-     * 检查库存失败降?
+     * 检查库存失败降级
      */
     @Override
     public Result<Boolean> checkStock(Long productId, Integer count) {

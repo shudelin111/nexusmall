@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * 会员收货地址实体?
+ * 会员收货地址实体类
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 一个用户可以有多个收货地址
  * - 支持设置默认地址
  * </p>
@@ -40,12 +40,12 @@ public class MemberReceiveAddress {
     private Long memberId;
 
     /**
-     * 收货人姓?
+     * 收货人姓名
      */
     private String name;
 
     /**
-     * 收货人电?
+     * 收货人电话
      */
     private String phoneNumber;
 
@@ -55,7 +55,7 @@ public class MemberReceiveAddress {
     private String postCode;
 
     /**
-     * 省份/直辖?
+     * 省份/直辖市
      */
     private String province;
 
@@ -65,7 +65,7 @@ public class MemberReceiveAddress {
     private String city;
 
     /**
-     * ?
+     * 区/县
      */
     private String region;
 
@@ -75,7 +75,7 @@ public class MemberReceiveAddress {
     private String detailAddress;
 
     /**
-     * 是否为默认地址?=否，1=?
+     * 是否为默认地址：0=否，1=是
      */
     private Integer defaultStatus;
 

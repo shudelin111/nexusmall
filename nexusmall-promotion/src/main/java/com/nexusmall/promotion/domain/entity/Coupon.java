@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 优惠券券实?
+ * 优惠券实体(基于 Redis)
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 支持多种优惠券类型（满减、折扣、立减）
  * - 支持使用范围（全场、指定分类、指定商品）
  * - 支持领取限制（每人限领、总库存）
- * - 支持有效期设?
+ * - 支持有效期设置
  * </p>
  *
  * @author shudl
@@ -29,10 +29,10 @@ public class Coupon implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     * 优惠券券ID
+     * 优惠券ID
      */
     @TableId(value = "id", type = IdType.AUTO)
-    @Schema(description = "优惠券券ID")
+    @Schema(description = "优惠券ID")
     private Long id;
 
     /**
@@ -48,9 +48,9 @@ public class Coupon implements Serializable {
     private String code;
 
     /**
-     * 优惠券类型?-满减 2-折扣 3-立减
+     * 优惠券类型-满减 2-折扣 3-立减
      */
-    @Schema(description = "优惠券类型?-满减 2-折扣 3-立减")
+    @Schema(description = "优惠券类型-满减 2-折扣 3-立减")
     private Integer type;
 
     /**
@@ -72,13 +72,13 @@ public class Coupon implements Serializable {
     private BigDecimal maxDiscount;
 
     /**
-     * 使用范围?-全场 1-指定分类 2-指定商品
+     * 使用范围 0-全场 1-指定分类 2-指定商品
      */
-    @Schema(description = "使用范围?-全场 1-指定分类 2-指定商品")
+    @Schema(description = "使用范围 0-全场 1-指定分类 2-指定商品")
     private Integer scope;
 
     /**
-     * 适用范围JSON（分类ID列表或商品ID列表?
+     * 适用范围JSON（分类ID列表或商品ID列表）
      */
     @Schema(description = "适用范围JSON")
     private String scopeData;
@@ -96,7 +96,7 @@ public class Coupon implements Serializable {
     private Integer receivedCount;
 
     /**
-     * 每人限领数量?表示不限制）
+     * 每人限领数量 0表示不限制）
      */
     @Schema(description = "每人限领数量")
     private Integer perLimit;

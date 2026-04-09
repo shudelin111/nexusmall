@@ -15,7 +15,7 @@ public interface ProductMapper {
     Product selectById(@Param("skuId") Long skuId);
 
     /**
-     * 查询所有商?
+     * 查询所有商品
      */
     List<Product> list();
 
@@ -63,7 +63,7 @@ public interface ProductMapper {
     int batchIncreaseStock(@Param("list") List<ProductStockDTO> stockDTOS);
 
     /**
-     * 检查库存是否充?
+     * 检查库存是否充足
      */
     boolean checkStock(@Param("skuId") Long skuId, @Param("count") Integer count);
 

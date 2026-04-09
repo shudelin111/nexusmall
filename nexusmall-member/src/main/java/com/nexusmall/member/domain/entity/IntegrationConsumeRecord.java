@@ -12,11 +12,11 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 积分兑换记录实体?
+ * 积分兑换记录实体类
  * <p>
- * 业界标准?
- * - 记录每次积分兑换的详细信?
- * - 支持兑换商品/优惠?现金?
+ * 业界标准：
+ * - 记录每次积分兑换的详细信息
+ * - 支持兑换商品/优惠券/现金
  * </p>
  *
  * @author shudl
@@ -41,17 +41,17 @@ public class IntegrationConsumeRecord {
     private Long memberId;
 
     /**
-     * 消耗积分数?
+     * 消耗积分数量
      */
     private Integer integration;
 
     /**
-     * 兑换类型：COUPON(优惠?/PRODUCT(商品)/CASH(现金)
+     * 兑换类型：COUPON(优惠券)/PRODUCT(商品)/CASH(现金)
      */
     private String consumeType;
 
     /**
-     * 兑换对象 ID（如优惠券ID/商品ID?
+     * 兑换对象 ID（如优惠券ID/商品id)
      */
     private Long objectId;
 
@@ -61,12 +61,12 @@ public class IntegrationConsumeRecord {
     private String objectName;
 
     /**
-     * 抵扣金额（如果是现金兑换?
+     * 抵扣金额（如果是现金兑换）
      */
     private BigDecimal amount;
 
     /**
-     * 状态：0=待处理，1=已完成，2=已取?
+     * 状态：0=待处理，1=已完成，2=已取消
      */
     private Integer status;
 

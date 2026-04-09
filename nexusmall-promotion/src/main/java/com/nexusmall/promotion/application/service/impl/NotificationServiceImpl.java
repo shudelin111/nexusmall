@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * 消息通知服务实现?
+ * 消息通知服务实现类
  *
  * @author shudl
  * @since 2026-04-06
@@ -41,9 +41,9 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Not
         boolean success = this.save(notification);
         
         if (success) {
-            log.info("站内信发送成? notificationId={}, userId={}", notification.getId(), userId);
+            log.info("站内信发送成功 notificationId={}, userId={}", notification.getId(), userId);
         } else {
-            log.error("站内信发送失? userId={}", userId);
+            log.error("站内信发送失败 userId={}", userId);
         }
         
         return success;
@@ -64,7 +64,7 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Not
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean markAsRead(Long notificationId, Long userId) {
-        log.info("标记消息为已? notificationId={}, userId={}", notificationId, userId);
+        log.info("标记消息为已读 notificationId={}, userId={}", notificationId, userId);
         
         LambdaUpdateWrapper<Notification> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Notification::getId, notificationId)
@@ -75,9 +75,9 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Not
         boolean success = this.update(wrapper);
         
         if (success) {
-            log.info("消息标记为已读成? notificationId={}", notificationId);
+            log.info("消息标记为已读成功 notificationId={}", notificationId);
         } else {
-            log.warn("消息标记为已读失? notificationId={}", notificationId);
+            log.warn("消息标记为已读失败 notificationId={}", notificationId);
         }
         
         return success;
@@ -86,7 +86,7 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Not
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int markAllAsRead(Long userId) {
-        log.info("批量标记为已? userId={}", userId);
+        log.info("批量标记为已读 userId={}", userId);
         
         LambdaUpdateWrapper<Notification> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Notification::getUserId, userId)
@@ -96,7 +96,7 @@ public class NotificationServiceImpl extends ServiceImpl<NotificationMapper, Not
         
         int count = this.getBaseMapper().update(null, wrapper);
         
-        log.info("批量标记为已读完? userId={}, 影响行数={}", userId, count);
+        log.info("批量标记为已读完成 userId={}, 影响行数={}", userId, count);
         
         return count;
     }

@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 退货申?Mapper 接口
+ * 退货申请Mapper 接口
  *
  * @author shudl
  * @since 2026-04-07
@@ -17,18 +17,18 @@ import java.util.List;
 public interface LogisticsReturnApplyMapper extends BaseMapper<LogisticsReturnApply> {
 
     /**
-     * 根据订单编号查询退货申请列?
+     * 根据订单编号查询退货申请列表
      *
      * @param orderSn 订单编号
-     * @return 退货申请列?
+     * @return 退货申请列表
      */
     List<LogisticsReturnApply> selectByOrderSn(@Param("orderSn") String orderSn);
 
     /**
-     * 根据会员ID查询退货申请列?
+     * 根据会员ID查询退货申请列表
      *
      * @param memberId 会员ID
-     * @return 退货申请列?
+     * @return 退货申请列表
      */
     List<LogisticsReturnApply> selectByMemberId(@Param("memberId") Long memberId);
 }

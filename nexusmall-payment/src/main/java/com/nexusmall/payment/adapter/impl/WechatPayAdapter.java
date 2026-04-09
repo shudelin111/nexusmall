@@ -53,7 +53,7 @@ public class WechatPayAdapter implements PayChannelAdapter {
             resultData.put("amount", payOrder.getPayAmount());
             resultData.put("subject", request.getSubject());
             resultData.put("channel", PayChannelCode.WECHAT_PAY);
-            resultData.put("codeUrl", "weixin://wxpay/bizpayurl?pr=MOCK_" + payOrder.getPaymentNo());
+            resultData.put("codeUrl", "weixin://wxpay/bizpayURL：pr=MOCK_" + payOrder.getPaymentNo());
             resultData.put("prepayId", "MOCK_PREPAY_" + payOrder.getPaymentNo());
             resultData.put("qrCodeImage", "https://mock.qrcode.com/" + payOrder.getPaymentNo());
             resultData.put("expireTime", 1800);

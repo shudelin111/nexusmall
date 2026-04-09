@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 /**
  * 成长值变化历史记录实体类
  * <p>
- * 业界标准?
+ * 业界标准：
  * - 记录每次成长值变化的详细信息
- * - 支持审计和追?
+ * - 支持审计和追溯
  * </p>
  *
  * @author shudl
@@ -40,7 +40,7 @@ public class GrowthChangeHistory {
     private Long memberId;
 
     /**
-     * 变化类型?=增加?=减少
+     * 变化类型 0=增加 1=减少
      */
     private Integer changeType;
 
@@ -55,7 +55,7 @@ public class GrowthChangeHistory {
     private String sourceType;
 
     /**
-     * 来源 ID（如订单ID?
+     * 来源 ID（如订单ID）
      */
     private Long sourceId;
 

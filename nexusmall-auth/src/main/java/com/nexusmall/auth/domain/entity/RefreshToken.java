@@ -11,11 +11,11 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDateTime;
 
 /**
- * Refresh Token 实体?
+ * Refresh Token 实体类
  * <p>
  * 业界标准：
- * - Refresh Token 需要持久化存储 (数据?Redis)
- * - 支持主动撤销 (用户登出时删?
+ * - Refresh Token 需要持久化存储 (数据库/Redis)
+ * - 支持主动撤销 (用户登出时删除)
  * - 记录设备信息 (用于安全管理)
  * </p>
  *
@@ -41,7 +41,7 @@ public class RefreshToken {
     private Long userId;
 
     /**
-     * 用户?
+     * 用户名
      */
     private String username;
 
@@ -61,12 +61,12 @@ public class RefreshToken {
     private LocalDateTime expireTime;
 
     /**
-     * 设备信息 (可?
+     * 设备信息 (可选)
      */
     private String deviceInfo;
 
     /**
-     * IP 地址 (可?
+     * IP 地址 (可选)
      */
     private String ipAddress;
 

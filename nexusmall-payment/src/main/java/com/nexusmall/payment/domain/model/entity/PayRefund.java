@@ -29,7 +29,7 @@ public class PayRefund implements Serializable {
     private Long id;
 
     /**
-     * 退款单号（业务唯一标识?
+     * 退款单号（业务唯一标识）
      */
     private String refundNo;
 
@@ -39,7 +39,7 @@ public class PayRefund implements Serializable {
     private String paymentNo;
 
     /**
-     * 订单?
+     * 订单号
      */
     private String orderNo;
 
@@ -49,17 +49,17 @@ public class PayRefund implements Serializable {
     private Long userId;
 
     /**
-     * 退款金?
+     * 退款金额
      */
     private BigDecimal refundAmount;
 
     /**
-     * 退款原?
+     * 退款原因
      */
     private String reason;
 
     /**
-     * 退款状态：0=待审核，1=审核通过?=审核拒绝?=退款中?=退款成功，5=退款失?
+     * 退款状态：0=待审核，1=审核通过 2=审核拒绝 3=退款中 4=退款成功，5=退款失败
      */
     private Integer status;
 
@@ -69,7 +69,7 @@ public class PayRefund implements Serializable {
     private String refundTradeNo;
 
     /**
-     * 退款完成时?
+     * 退款完成时间
      */
     private LocalDateTime refundTime;
 
@@ -79,7 +79,7 @@ public class PayRefund implements Serializable {
     private Long auditorId;
 
     /**
-     * 审核人姓?
+     * 审核人姓名
      */
     private String auditorName;
 
@@ -94,7 +94,7 @@ public class PayRefund implements Serializable {
     private String auditRemark;
 
     /**
-     * 第三方回调原始数?
+     * 第三方回调原始内容
      */
     private String callbackContent;
 
@@ -104,7 +104,7 @@ public class PayRefund implements Serializable {
     private LocalDateTime callbackTime;
 
     /**
-     * 逻辑删除?=未删除，1=已删?
+     * 逻辑删除 0=未删除，1=已删除
      */
     @TableLogic
     private Integer deleted;

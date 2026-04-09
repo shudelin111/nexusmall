@@ -9,13 +9,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 用户优惠券券领取记录实?
+ * 用户优惠券领取记录实体
  * <p>
- * 业界标准?
- * - 记录每个用户的每张优惠券券
- * - 支持状态流转（未使用用→已锁定定→已使用?已过期期）
- * - 支持订单关联（核销时记录订单ID?
- * - 支持退款回退（释放优惠券惠券券?
+ * 业界标准：
+ * - 记录每个用户的每张优惠券
+ * - 支持状态流转（未使用 → 已锁定 → 已使用 / 已过期）
+ * - 支持订单关联（核销时记录订单ID）
+ * - 支持退款回退（释放优惠券）
  * </p>
  *
  * @author shudl
@@ -36,9 +36,9 @@ public class CouponUserRecord implements Serializable {
     private Long id;
 
     /**
-     * 优惠券券ID
+     * 优惠券ID
      */
-    @Schema(description = "优惠券券ID")
+    @Schema(description = "优惠券ID")
     private Long couponId;
 
     /**
@@ -54,9 +54,9 @@ public class CouponUserRecord implements Serializable {
     private String couponName;
 
     /**
-     * 优惠券类型?-满减 2-折扣 3-立减
+     * 优惠券类型-满减 2-折扣 3-立减
      */
-    @Schema(description = "优惠券类型?-满减 2-折扣 3-立减")
+    @Schema(description = "优惠券类型-满减 2-折扣 3-立减")
     private Integer couponType;
 
     /**
@@ -78,9 +78,9 @@ public class CouponUserRecord implements Serializable {
     private BigDecimal maxDiscount;
 
     /**
-     * 使用范围?-全场 1-指定分类 2-指定商品
+     * 使用范围 0-全场 1-指定分类 2-指定商品
      */
-    @Schema(description = "使用范围?-全场 1-指定分类 2-指定商品")
+    @Schema(description = "使用范围 0-全场 1-指定分类 2-指定商品")
     private Integer scope;
 
     /**

@@ -6,14 +6,14 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * NexusMall 物流服务启动?
+ * NexusMall 物流服务启动类
  * <p>
- * 职责?
+ * 职责：
  * - 物流订单管理
- * - 物流轨迹跟踪（对接第三方物流API?
+ * - 物流轨迹跟踪（对接第三方物流API）
  * - 运费计算
  * - 仓库管理
- * - 发货/退货管?
+ * - 发货/退货管理
  * </p>
  *
  * @author shudl

@@ -6,11 +6,11 @@ import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
 /**
- * Product 服务启动?
+ * Product 服务启动类
  */
-@SpringBootApplication // 标记?Spring Boot 应用，启用自动配置和组件扫描
+@SpringBootApplication // 标记为 Spring Boot 应用，启用自动配置和组件扫描
 @EnableDiscoveryClient // 启用服务发现，向 Nacos 注册服务
-@EnableFeignClients // 启用 Feign 客户端，扫描并注?Feign 接口
+@EnableFeignClients // 启用 Feign 客户端，扫描并注入 Feign 接口
 public class NexusmallProductApplication {
 
     public static void main(String[] args) {

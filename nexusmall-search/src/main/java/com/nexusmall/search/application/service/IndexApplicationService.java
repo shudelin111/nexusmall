@@ -51,7 +51,7 @@ public class IndexApplicationService {
         String operationId = UUID.randomUUID().toString();
         LocalDateTime startTime = LocalDateTime.now();
         
-        log.info("[索引操作-{}] 开始清除商品索? productId={}", operationId, command.getProductId());
+        log.info("[索引操作-{}] 开始清除商品索引 productId={}", operationId, command.getProductId());
         
         try {
             indexDomainService.remove(command.getProductId());
@@ -68,12 +68,12 @@ public class IndexApplicationService {
     }
 
     /**
-     * 批量清除商品索引（生产级?
+     * 批量清除商品索引（生产级）
      * <p>
      * 特性：
      * - 优雅降级：单个失败不影响其他
-     * - 详细审计：记录成?失败数量
-     * - 性能优化：批量操作减少网络往?
+     * - 详细审计：记录成功失败数量
+     * - 性能优化：批量操作减少网络往返
      * </p>
      *
      * @param command 批量清除命令
@@ -84,7 +84,7 @@ public class IndexApplicationService {
         LocalDateTime startTime = LocalDateTime.now();
         List<Long> productIds = command.getProductIds();
         
-        log.info("[索引操作-{}] 开始批量清除商品索? count={}, operator={}, reason={}", 
+        log.info("[索引操作-{}] 开始批量清除商品索引 count={}, operator={}, reason={}", 
                 operationId, productIds.size(), command.getOperator(), command.getReason());
         
         int successCount = 0;
