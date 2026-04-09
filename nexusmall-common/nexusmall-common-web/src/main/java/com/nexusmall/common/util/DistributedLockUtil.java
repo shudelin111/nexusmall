@@ -4,7 +4,6 @@ import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.NexusmallException;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
@@ -15,12 +14,11 @@ import java.util.function.Supplier;
  * 生产级实践：
  * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
  * 2. 使用构造器注入，便于单元测试
- * 3. 条件化加载，仅在Redisson存在时生效
+ * 3. 条件化加载由配置类中的@ConditionalOnClass控制
  * </p>
  * 
  * @author shudl
  */
-@ConditionalOnClass(RedissonClient.class)
 public class DistributedLockUtil {
 
     private final RedissonClient redissonClient;

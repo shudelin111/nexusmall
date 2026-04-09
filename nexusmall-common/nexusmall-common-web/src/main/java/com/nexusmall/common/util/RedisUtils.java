@@ -1,6 +1,5 @@
 package com.nexusmall.common.util;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Collection;
@@ -14,13 +13,12 @@ import java.util.concurrent.TimeUnit;
  * 生产级实践：
  * 1. 通过@Configuration类中的@Bean方法注册，而非@Component自动扫描
  * 2. 使用构造器注入，便于单元测试
- * 3. 条件化加载，仅在Redis存在时生效
+ * 3. 条件化加载由配置类中的@ConditionalOnClass控制
  * </p>
  *
  * @author shudl
  * @since 2026-04-09
  */
-@ConditionalOnClass(RedisTemplate.class)
 public class RedisUtils {
 
     private final RedisTemplate<String, Object> redisTemplate;
