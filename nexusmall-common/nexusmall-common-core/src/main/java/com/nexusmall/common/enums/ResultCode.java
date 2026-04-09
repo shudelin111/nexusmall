@@ -434,7 +434,13 @@ public enum ResultCode {
     /**
      * 服务不可用
      */
-    SERVICE_UNAVAILABLE(503, "140501", "error.service.unavailable", "服务暂时不可用");
+    SERVICE_UNAVAILABLE(503, "140501", "error.service.unavailable", "服务暂时不可用"),
+    
+    // ===== API 版本错误 =====
+    /**
+     * API 版本不支持
+     */
+    API_VERSION_NOT_SUPPORTED(406, "010005", "error.api.version.not.supported", "API 版本不支持");
 
     /**
      * HTTP 状态码（用于协议层）
