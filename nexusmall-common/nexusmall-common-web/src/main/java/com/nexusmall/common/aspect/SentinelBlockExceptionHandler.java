@@ -7,6 +7,7 @@ import com.nexusmall.common.enums.CommonResultCode;
 import com.nexusmall.common.enums.SentinelBlockType;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 
@@ -17,7 +18,10 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Sentinel 全局流控异常处理器
  * <p>
- * 统一处理所有被 Sentinel 拦截的请求（限流、熔断、降级等）
+ * 生产级实践：
+ * 1. 使用 @ConditionalOnClass 确保只有在引入 Sentinel 依赖时才创建此 Bean
+ * 2. 避免在未使用 Sentinel 的模块中因缺少依赖导致启动失败
+ * 3. 统一处理所有被 Sentinel 拦截的请求（限流、熔断、降级等）
  * </p>
  *
  * @author shudl
@@ -25,6 +29,7 @@ import javax.servlet.http.HttpServletResponse;
  */
 @Slf4j
 @Component
+@ConditionalOnClass(BlockExceptionHandler.class)
 public class SentinelBlockExceptionHandler implements BlockExceptionHandler {
 
     private static final ObjectMapper objectMapper = new ObjectMapper();

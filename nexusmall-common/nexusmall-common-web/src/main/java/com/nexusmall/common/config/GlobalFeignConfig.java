@@ -31,11 +31,24 @@ public class GlobalFeignConfig {
     }
 
     /**
-     * 配置 Feign 日志级别（全局通用）
+     * 配置 Feign 日志级别（根据环境动态调整）
+     * <p>
+     * 生产级实践：
+     * - dev/test 环境：FULL（完整日志，便于调试）
+     * - prod 环境：BASIC（基本日志，减少性能开销）
+     * </p>
      */
     @Bean
     public Logger.Level feignLoggerLevel() {
-        return Logger.Level.FULL;
+        // 根据 Spring Profile 动态设置日志级别
+        String activeProfile = System.getProperty("spring.profiles.active", 
+                                  System.getenv("SPRING_PROFILES_ACTIVE"));
+        
+        if ("prod".equalsIgnoreCase(activeProfile)) {
+            return Logger.Level.BASIC; // 生产环境使用 BASIC
+        } else {
+            return Logger.Level.FULL; // 开发/测试环境使用 FULL
+        }
     }
 
     /**

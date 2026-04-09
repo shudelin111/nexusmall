@@ -18,13 +18,13 @@ import org.springframework.context.annotation.Configuration;
 @ConditionalOnClass(RedissonClient.class)
 public class RedissonConfig {
 
-    @Value("${spring.redis.host:10.10.1.1}")
+    @Value("${spring.redis.host}")
     private String redisHost;
 
-    @Value("${spring.redis.port:6379}")
+    @Value("${spring.redis.port}")
     private int redisPort;
 
-    @Value("${spring.redis.password:123456}")
+    @Value("${spring.redis.password:}")
     private String redisPassword;
 
     @Value("${spring.redis.database:0}")

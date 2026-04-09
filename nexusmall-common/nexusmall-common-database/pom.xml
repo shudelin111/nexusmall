@@ -23,6 +23,13 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- MyBatis-Plus 持久层框架 -->
         <dependency>
             <groupId>com.baomidou</groupId>

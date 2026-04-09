@@ -32,9 +32,12 @@ public enum CommonResultCode implements ResultCode {
     USER_DISABLED(403, "20303", "用户已被禁用"),
     
     NOT_FOUND(404, "20401", "资源不存在"),
+    RESOURCE_NOT_FOUND(404, "20405", "请求的资源不存在"),
     USER_NOT_FOUND(404, "20402", "用户不存在"),
     ROLE_NOT_FOUND(404, "20403", "角色不存在"),
     PERMISSION_NOT_FOUND(404, "20404", "权限不存在"),
+    
+    METHOD_NOT_ALLOWED(405, "20501", "请求方法不支持"),
     
     // ===== Sentinel 流控 (429/503) =====
     SENTINEL_FLOW(429, "21001", "访问过于频繁，请稍后再试"),
