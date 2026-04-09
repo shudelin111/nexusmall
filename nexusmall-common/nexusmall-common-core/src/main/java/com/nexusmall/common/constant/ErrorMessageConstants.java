@@ -69,4 +69,29 @@ public class ErrorMessageConstants {
             // 防止实例化
         }
     }
+
+    /**
+     * 环境配置相关常量
+     */
+    public static class Environment {
+        
+        /**
+         * 开发环境标识
+         */
+        public static final String DEV = "dev";
+        
+        /**
+         * 测试环境标识
+         */
+        public static final String TEST = "test";
+        
+        /**
+         * 生产环境标识
+         */
+        public static final String PROD = "prod";
+
+        private Environment() {
+            // 防止实例化
+        }
+    }
 }

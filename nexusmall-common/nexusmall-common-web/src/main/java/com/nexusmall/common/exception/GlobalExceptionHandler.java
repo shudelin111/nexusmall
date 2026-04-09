@@ -43,15 +43,29 @@ public class GlobalExceptionHandler {
 
     /**
      * 当前激活的环境配置
+     * <p>
+     * 生产级实践：
+     * 1. 默认值为空字符串，未配置时视为开发环境（更安全）
+     * 2. 生产环境必须通过 K8s/Docker 显式设置 SPRING_PROFILES_ACTIVE=prod
+     * 3. 避免开发人员本地启动时误用生产配置
+     * </p>
      */
-    @Value("${spring.profiles.active:prod}")
+    @Value("${spring.profiles.active:}")
     private String activeProfile;
 
     /**
      * 是否显示详细错误信息（仅开发/测试环境）
+     * <p>
+     * 未配置 profile 时默认视为开发环境，返回详细错误便于调试
+     * </p>
      */
     private boolean isDevEnvironment() {
-        return "dev".equalsIgnoreCase(activeProfile) || "test".equalsIgnoreCase(activeProfile);
+        // 未配置或为空时，默认视为开发环境（Fail-Safe 原则）
+        if (activeProfile == null || activeProfile.isEmpty()) {
+            return true;
+        }
+        return ErrorMessageConstants.Environment.DEV.equalsIgnoreCase(activeProfile) 
+                || ErrorMessageConstants.Environment.TEST.equalsIgnoreCase(activeProfile);
     }
 
     // ==================== 业务异常处理 ====================

@@ -11,10 +11,10 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * Common Web 模块自动配置入口
  * <p>
- * 负责注册全局通用的 Filter、Aspect 和 Utility 组件。
+ * 负责注册全局通用的 Filter、Aspect、Utility 和 ExceptionHandler 组件。
  * 注意：
  * 1. 拦截器（HandlerInterceptor）不在此自动注册，由各业务模块 WebConfig 根据路径需求手动注册。
- * 2. GlobalExceptionHandler 不在此扫描，由各业务模块自行定义。
+ * 2. GlobalExceptionHandler 会被自动扫描并注册为默认实现，业务模块可通过定义自己的 Handler 来覆盖。
  * </p>
  *
  * @author shudl
@@ -24,7 +24,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @ConditionalOnClass(WebMvcConfigurer.class)
 @ComponentScan(basePackages = {
         "com.nexusmall.common.aspect",
-        "com.nexusmall.common.util"
+        "com.nexusmall.common.util",
+        "com.nexusmall.common.exception"  // 扫描全局异常处理器
 })
 public class CommonWebAutoConfiguration {
 
