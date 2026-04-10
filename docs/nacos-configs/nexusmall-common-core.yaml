@@ -1,0 +1,66 @@
+# =====================================================
+# NexusMall 平台公共配置 - 核心配置（所有服务共享）
+# =====================================================
+# Data ID: nexusmall-common-core.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：存放所有微服务共用的核心基础配置
+# 对应模块：nexusmall-common-core
+# 包含：Jackson 序列化、文件上传、Tomcat 基础配置
+# =====================================================
+
+# ===============================
+# Spring Jackson 序列化配置
+# ===============================
+spring:
+  # Jackson 序列化配置（全局 JSON 处理）
+  jackson:
+    # 时区设置（北京时间）
+    time-zone: GMT+8
+    # 日期格式化（统一标准）
+    date-format: yyyy-MM-dd HH:mm:ss
+    # 序列化配置
+    serialization:
+      # 格式化输出（开发环境方便调试，生产环境建议关闭以提升性能）
+      indent-output: true
+      # 写入单值数组时 unwrapped
+      write-single-elem-arrays-unwrapped: false
+    # 反序列化配置
+    deserialization:
+      # 允许未知属性（提高接口兼容性）
+      fail-on-unknown-properties: false
+      # 接受单值作为数组
+      accept-single-value-as-array: true
+    # 地区设置
+    locale: zh_CN
+
+  # 文件上传配置（全局统一限制）
+  servlet:
+    multipart:
+      # 是否启用文件上传
+      enabled: true
+      # 单个文件最大大小
+      max-file-size: 10MB
+      # 请求最大大小（支持多文件上传）
+      max-request-size: 100MB
+      # 文件大小阈值（超过此值写入临时文件）
+      file-size-threshold: 1MB
+
+# ===============================
+# Tomcat 服务器基础配置
+# ===============================
+server:
+  # 监听所有网络接口
+  address: 0.0.0.0
+  # Tomcat 线程池配置
+  tomcat:
+    # URI 编码
+    uri-encoding: UTF-8
+    # 最大工作线程数
+    max-threads: 200
+    # 最小空闲线程数
+    min-spare-threads: 10
+    # 最大连接数
+    max-connections: 8192
+    # 连接超时时间（毫秒）
+    connection-timeout: 20000

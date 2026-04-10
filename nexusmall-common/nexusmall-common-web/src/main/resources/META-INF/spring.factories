@@ -1,8 +1,5 @@
 # Common Web 模块自动配置
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.nexusmall.common.config.KafkaConfig,\
-com.nexusmall.common.config.KafkaLoggingProperties,\
-com.nexusmall.common.config.KafkaLoggingConfig,\
 com.nexusmall.common.config.GlobalFeignConfig,\
 com.nexusmall.common.config.RedisConfig,\
 com.nexusmall.common.config.RedissonConfig,\

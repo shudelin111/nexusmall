@@ -33,45 +33,6 @@
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 		</dependency>
 
-		<!-- Seata 分布式事务 -->
-		<dependency>
-			<groupId>io.seata</groupId>
-			<artifactId>seata-spring-boot-starter</artifactId>
-		</dependency>
-
-		<!-- Kryo 4.0.2 for Seata 1.5.2 -->
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.javakaffee</groupId>
-			<artifactId>kryo-serializers</artifactId>
-		</dependency>
-		<!-- FST for Redisson Codec -->
-		<dependency>
-			<groupId>de.ruedigermoeller</groupId>
-			<artifactId>fst</artifactId>
-		</dependency>
-
-		<!-- Redisson 分布式锁 -->
-		<dependency>
-			<groupId>org.redisson</groupId>
-			<artifactId>redisson-spring-boot-starter</artifactId>
-		</dependency>
-
-		<!-- Redis（Behavior 模块必需） -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-data-redis</artifactId>
-		</dependency>
-
-		<!-- OpenFeign 服务调用 -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-openfeign</artifactId>
-		</dependency>
-
 		<!-- RocketMQ -->
 		<dependency>
 			<groupId>org.apache.rocketmq</groupId>
@@ -141,7 +102,7 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- 公共 Web 模块（Redis、Feign、Sentinel） -->
+		<!-- 公共 Web 模块（Sentinel、异常处理） -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>
 			<artifactId>nexusmall-common-web</artifactId>

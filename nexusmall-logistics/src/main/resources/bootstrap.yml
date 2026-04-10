@@ -28,7 +28,20 @@ spring:
         max-retry: 3
         
         shared-configs:
-          - data-id: nexusmall-common.yaml
+          # 1. 核心配置（Jackson、文件上传、Tomcat）
+          - data-id: nexusmall-common-core.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 2. 数据库配置（MyBatis-Plus、连接池）
+          - data-id: nexusmall-common-database.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 3. 消息队列配置（RocketMQ、Kafka）
+          - data-id: nexusmall-common-mq.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 4. Web 组件配置（Sentinel、Actuator、Sleuth）
+          - data-id: nexusmall-common-web.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
         

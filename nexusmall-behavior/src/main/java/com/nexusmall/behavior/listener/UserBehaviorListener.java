@@ -51,13 +51,13 @@ public class UserBehaviorListener implements RocketMQListener<String> {
     /**
      * 是否启用 Elasticsearch 存储
      */
-    @Value("${user.behavior.es.enabled:true}")
+    @Value("${user.behavior.es.enabled}")
     private Boolean esEnabled;
 
     /**
      * 是否启用 Kafka 发送
      */
-    @Value("${user.behavior.kafka.enabled:true}")
+    @Value("${user.behavior.kafka.enabled}")
     private Boolean kafkaEnabled;
 
     /**

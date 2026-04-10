@@ -113,7 +113,7 @@ spring:
     
     # Kafka 配置（用于日志收集）
     kafka:
-      bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
+      bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
       producer:
         acks: 1
         retries: 3

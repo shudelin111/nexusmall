@@ -1,16 +1,13 @@
 # =====================================================
-# NexusMall 认证服务配置文件
+# NexusMall 用户行为服务 - Bootstrap 配置
 # =====================================================
-# 模块职责：
-# 1. 用户注册、登录、登出
-# 2. JWT Token 生成与验证
-# 3. 用户权限管理
-# 4. OAuth2 第三方登录（预留）
+# 用途：配置 Nacos 连接信息（优先级最高，最先加载）
+# 说明：此文件仅包含 Nacos 连接相关配置
 # =====================================================
 
 spring:
   application:
-    name: nexusmall-auth
+    name: nexusmall-behavior
   
   cloud:
     nacos:
@@ -65,21 +62,24 @@ spring:
           - data-id: nexusmall-common-database.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # 3. Web 组件配置（Sentinel、Actuator、Sleuth）
+          # 3. 消息队列配置（RocketMQ、Kafka）
+          - data-id: nexusmall-common-mq.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 4. Web 组件配置（Sentinel、Actuator、Sleuth）
           - data-id: nexusmall-common-web.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # ⚠️ 注意：Auth 不需要 mq 配置
         
         # ===============================
         # 扩展配置（服务专属）
         # ===============================
         extension-configs:
-          # auth 服务通用配置（所有环境共享）
-          - data-id: nexusmall-auth.yaml
+          # Behavior 服务通用配置（所有环境共享）
+          - data-id: nexusmall-behavior.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # auth 服务环境特定配置（根据 Profile 动态加载）
-          - data-id: nexusmall-auth-${spring.profiles.active}.yaml
+          # Behavior 服务环境特定配置（根据 Profile 动态加载）
+          - data-id: nexusmall-behavior-${spring.profiles.active}.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true

@@ -56,10 +56,15 @@ public class KafkaLoggingConfig implements ApplicationListener<ApplicationReadyE
 
     private static final String KAFKA_APPENDER_NAME = "async_kafka";
     
-    @Value("${spring.application.name:unknown}")
+    @Value("${spring.application.name}")
     private String appName;
     
-    @Value("${KAFKA_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}")
+    /**
+     * Kafka 服务器地址
+     * 复用 spring.kafka.bootstrap-servers 配置，避免重复定义
+     * 生产级标准：所有 Kafka 相关配置统一使用 spring.kafka.* 前缀
+     */
+    @Value("${spring.kafka.bootstrap-servers}")
     private String kafkaServers;
     
     private final KafkaLoggingProperties kafkaLoggingProperties;

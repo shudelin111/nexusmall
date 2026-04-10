@@ -39,10 +39,10 @@ import java.util.Map;
 @ConditionalOnClass(name = "org.springframework.kafka.config.KafkaListenerContainerFactory")
 public class KafkaConfig {
 
-    @Value("${spring.kafka.bootstrap-servers:10.10.1.1:31000}")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @Value("${spring.kafka.consumer.group-id:log-consumer-group}")
+    @Value("${spring.kafka.consumer.group-id}")
     private String groupId;
 
     // ===============================

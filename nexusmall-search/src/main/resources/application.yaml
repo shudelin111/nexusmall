@@ -25,8 +25,8 @@ spring:
     timeout-per-shutdown-phase: 30s
   elasticsearch:
     uris: ${ELASTICSEARCH_URIS:http://es-cluster-es-http.nexusmall-infra.svc:9200}
-    username: ${ES_USERNAME:elastic}
-    password: ${ES_PASSWORD:G2M9CI4OHL1T9E4j123vIq9M} # 建议用环境变量或 Nacos 秘钥存放你获取的新密码
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:G2M9CI4OHL1T9E4j123vIq9M} # 建议用环境变量或 Nacos 秘钥存放你获取的新密码
   # Redis 缓存配置（搜索建议缓存）
   cache:
     type: redis

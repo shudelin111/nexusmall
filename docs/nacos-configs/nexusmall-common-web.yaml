@@ -1,0 +1,151 @@
+# =====================================================
+# NexusMall 平台公共配置 - Web 组件配置（所有 Web 服务共享）
+# =====================================================
+# Data ID: nexusmall-common-web.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：存放所有微服务共用的 Web 基础配置
+# 对应模块：nexusmall-common-web
+# 包含：Actuator 监控、Sentinel 熔断限流、Sleuth 链路追踪、日志配置
+# =====================================================
+
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+management:
+  # 端点暴露配置
+  endpoints:
+    web:
+      # 暴露的端点列表
+      # 开发环境：暴露所有端点
+      # 生产环境：只暴露 health,info,prometheus
+      exposure:
+        include: "*"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 显示健康检查详情
+      show-details: always
+      # 【关键】启用 K8s 健康检查探针端点（/actuator/health/readiness 和 /actuator/health/liveness）
+      probes:
+        enabled: true
+    info:
+      # 启用 info 端点
+      enabled: true
+  # 环境变量配置
+  info:
+    env:
+      # 在 info 端点中显示环境变量
+      enabled: true
+  # 健康检查配置
+  health:
+    # 【关键】启用 K8s 存活状态检查
+    livenessState:
+      enabled: true
+    # 【关键】启用 K8s 就绪状态检查
+    readinessState:
+      enabled: true
+    # 数据库健康检查
+    db:
+      enabled: true
+    # Redis 健康检查
+    redis:
+      enabled: true
+    # 磁盘空间健康检查
+    disk-space:
+      enabled: true
+      # 磁盘空间阈值（字节）
+      threshold: 10485760  # 10MB
+
+# ===============================
+# Sentinel 熔断限流配置（通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在各服务的 nexusmall-{service}-{profile}.yaml 中定义：
+# - spring.cloud.sentinel.transport.dashboard（Dashboard 地址）
+# - spring.cloud.sentinel.datasource.*（数据源配置）
+spring:
+  cloud:
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # 本地通信端口（用于接收 Dashboard 规则推送）
+      transport:
+        port: 8719
+
+# ===============================
+# Sleuth 链路追踪配置
+# ===============================
+sleuth:
+  # 1. 启用链路追踪
+  enabled: true
+  # 2. 采样率（开发环境 100%，生产环境建议 0.1）
+  sampler:
+    probability: 1.0
+  # 3. 日志配置
+  log:
+    # 启用日志中的链路追踪信息
+    enabled: true
+    # SLF4J MDC 白名单（让 traceId 显示在日志中）
+    slf4j:
+      whitelisted-mdc-keys:
+        - traceId
+        - spanId
+        - user-id
+  # 4. 传播类型（支持 B3 和 W3C 标准）
+  propagation:
+    type: B3,W3C
+  # 5. Baggage 配置（自定义传递字段）
+  baggage-keys:
+    - user-id
+    - request-id
+
+# Zipkin 链路追踪可视化配置（默认关闭）
+zipkin:
+  # 是否启用 Zipkin
+  # true: 发送追踪数据到 Zipkin Server（需要 Zipkin 运行）
+  # false: 禁用 Zipkin，不发送数据（开发环境推荐）
+  enabled: false
+  # Zipkin Server 地址（当 enabled=true 时生效）
+  base-url: http://localhost:9411
+  # 发送方式
+  sender:
+    type: web
+
+# ===============================
+# 日志配置
+# ===============================
+logging:
+  # 日志级别（全局统一）
+  level:
+    # 根日志级别
+    root: INFO
+    # Spring 框架日志
+    org.springframework: WARN
+    org.springframework.web: INFO
+    # MyBatis-Plus 日志
+    com.baomidou.mybatisplus: DEBUG
+    # 连接池日志
+    com.zaxxer.hikari: WARN
+    # Redis 日志
+    org.springframework.data.redis: WARN
+    # RocketMQ 日志
+    org.apache.rocketmq: INFO
+    # Kafka 日志
+    org.springframework.kafka: WARN
+    # Sentinel 日志
+    com.alibaba.csp.sentinel: INFO
+    # Seata 分布式事务日志
+    io.seata: INFO
+    # Nacos 客户端日志
+    com.alibaba.nacos: WARN
+    # Sleuth 链路追踪日志
+    org.springframework.cloud.sleuth: DEBUG
+    # Brave（Sleuth 底层库）日志
+    brave: DEBUG
+
+  # 日志文件配置（Spring Boot 官方标准）
+  file:
+    # 日志文件路径（可通过环境变量 LOG_PATH 覆盖）
+    path: ${LOG_PATH:./logs}

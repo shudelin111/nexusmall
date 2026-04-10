@@ -1,0 +1,127 @@
+# =====================================================
+# NexusMall 用户行为服务 - 生产环境配置
+# =====================================================
+# Data ID: nexusmall-behavior-prod.yaml
+# Group: MALL_GROUP
+# Namespace: prod
+# Profile: prod
+# 用途：生产环境专属配置（优先级高于 nexusmall-behavior.yaml）
+# 说明：
+# - 此文件仅包含生产环境特有的差异化配置
+# - 共享配置已在 nexusmall-common.yaml 中定义
+# - 业务通用配置已在 nexusmall-behavior.yaml 中定义
+# =====================================================
+
+# ===============================
+# 数据库连接配置（生产环境）
+# ===============================
+spring:
+  # 数据库连接配置（完整配置，符合业界标准）
+  datasource:
+    # JDBC 驱动类名
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
+    type: com.zaxxer.hikari.HikariDataSource
+    # JDBC 连接 URL（用户行为服务专用数据库）
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/nexusmall_behavior?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
+    # 数据库用户名
+    username: ${MYSQL_USERNAME}
+    # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
+    password: ${MYSQL_PASSWORD}
+  
+  # Elasticsearch 配置（生产环境）
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS}
+    username: ${ELASTICSEARCH_USERNAME}
+    password: ${ELASTICSEARCH_PASSWORD}
+  
+  # Kafka 配置（生产环境）
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS}
+  
+  # Spring Cloud 配置（生产环境）
+  cloud:
+    # Sentinel 配置（生产环境）
+    # ⚠️ 注意：Sentinel 数据源完整配置（包括 server-addr、namespace、username、password、dataId、groupId、rule-type、data-type）
+    sentinel:
+      transport:
+        # Sentinel Dashboard 地址（生产环境）
+        dashboard: ${SENTINEL_DASHBOARD}
+        port: 8719
+      # Sentinel 规则数据源配置（Push 模式，从 Nacos 拉取规则）
+      datasource:
+        # 流控规则数据源
+        ds1:
+          nacos:
+            server-addr: ${NACOS_SERVER}
+            namespace: ${NACOS_NAMESPACE}
+            username: ${NACOS_USERNAME}
+            password: ${NACOS_PASSWORD}
+            dataId: nexusmall-behavior-flow-rule.json
+            groupId: ${NACOS_GROUP}
+            rule-type: flow
+            data-type: json
+        # 熔断降级规则数据源
+        ds2:
+          nacos:
+            server-addr: ${NACOS_SERVER}
+            namespace: ${NACOS_NAMESPACE}
+            username: ${NACOS_USERNAME}
+            password: ${NACOS_PASSWORD}
+            dataId: nexusmall-behavior-degrade-rule.json
+            groupId: ${NACOS_GROUP}
+            rule-type: degrade
+            data-type: json
+        # 系统自适应保护规则数据源
+        ds3:
+          nacos:
+            server-addr: ${NACOS_SERVER}
+            namespace: ${NACOS_NAMESPACE}
+            username: ${NACOS_USERNAME}
+            password: ${NACOS_PASSWORD}
+            dataId: nexusmall-behavior-system-rule.json
+            groupId: ${NACOS_GROUP}
+            rule-type: system
+            data-type: json
+
+# ===============================
+# 用户行为日志存储策略配置（生产环境）
+# ===============================
+user:
+  behavior:
+    # 生产环境开启所有存储（用于数据分析与实时流处理）
+    es:
+      enabled: true
+    kafka:
+      enabled: true
+
+# ===============================
+# RocketMQ 配置（生产环境）
+# ===============================
+# ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-behavior.yaml 中定义
+rocketmq:
+  # NameServer 地址
+  name-server: ${ROCKETMQ_NAMESRV}
+  # 生产者配置
+  producer:
+    group: behavior-producer-group-prod
+
+# ===============================
+# 日志级别配置（生产环境）
+# ===============================
+logging:
+  level:
+    root: INFO
+    com.alibaba.csp.sentinel: INFO
+    com.nexusmall.behavior: INFO
+    com.nexusmall.common: INFO
+    com.nexusmall.behavior.dao: INFO
+
+# ===============================
+# Kafka 日志收集配置（生产环境）
+# ===============================
+# 生产环境必须启用 Kafka 日志收集，用于 ELK 集中式日志分析
+nexusmall:
+  logging:
+    kafka:
+      enabled: true

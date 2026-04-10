@@ -133,16 +133,16 @@ spec:
                   name: nexusmall-search-secret
                   key: NACOS_PASSWORD
             # Elasticsearch 凭证
-            - name: ES_USERNAME
+            - name: ELASTICSEARCH_USERNAME
               valueFrom:
                 secretKeyRef:
                   name: nexusmall-search-secret
-                  key: ES_USERNAME
-            - name: ES_PASSWORD
+                  key: ELASTICSEARCH_USERNAME
+            - name: ELASTICSEARCH_PASSWORD
               valueFrom:
                 secretKeyRef:
                   name: nexusmall-search-secret
-                  key: ES_PASSWORD
+                  key: ELASTICSEARCH_PASSWORD
           
           # -------------------------------------------------------------------
           # 资源配额管理：防止资源争抢，保障集群稳定性
