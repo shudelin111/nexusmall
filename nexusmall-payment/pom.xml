@@ -147,14 +147,7 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
-        <!-- 公共核心模块 -->
-        <dependency>
-            <groupId>com.nexusmall</groupId>
-            <artifactId>nexusmall-common-core</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <!-- 公共 Web 模块 -->
+        <!-- 公共 Web 模块（已包含 core） -->
         <dependency>
             <groupId>com.nexusmall</groupId>
             <artifactId>nexusmall-common-web</artifactId>
