@@ -150,12 +150,6 @@
                 <artifactId>redisson-spring-boot-starter</artifactId>
                 <version>3.21.3</version>
             </dependency>
-            <!-- Kafka 支持 -->
-            <dependency>
-                <groupId>org.springframework.kafka</groupId>
-                <artifactId>spring-kafka</artifactId>
-                <version>2.8.11</version>
-            </dependency>
             <!-- 强制使用新版 kafka-clients (避免旧版本的 InterruptedException 问题) -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
@@ -283,32 +277,26 @@
                 <artifactId>jsoup</artifactId>
                 <version>1.15.3</version>
             </dependency>
+            <!-- Spring Kafka（日志收集，按需引入） -->
+            <dependency>
+                <groupId>org.springframework.kafka</groupId>
+                <artifactId>spring-kafka</artifactId>
+                <version>2.8.11</version>
+            </dependency>
+            <!-- Logstash Logback Encoder（JSON 格式化） -->
+            <dependency>
+                <groupId>net.logstash.logback</groupId>
+                <artifactId>logstash-logback-encoder</artifactId>
+                <version>7.2</version>
+            </dependency>
+            <!-- Logback Kafka Appender（日志发送到 Kafka） -->
+            <dependency>
+                <groupId>com.github.danielwegener</groupId>
+                <artifactId>logback-kafka-appender</artifactId>
+                <version>0.2.0-RC2</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
-
-    <!-- ========================================
-         全局依赖（所有子模块自动继承）
-         生产级标准：Kafka 日志收集为必需功能
-         ======================================== -->
-    <dependencies>
-        <!-- Spring Kafka（日志收集） -->
-        <dependency>
-            <groupId>org.springframework.kafka</groupId>
-            <artifactId>spring-kafka</artifactId>
-        </dependency>
-        
-        <!-- Logstash Logback Encoder（JSON 格式化） -->
-        <dependency>
-            <groupId>net.logstash.logback</groupId>
-            <artifactId>logstash-logback-encoder</artifactId>
-        </dependency>
-        
-        <!-- Logback Kafka Appender（日志发送到 Kafka） -->
-        <dependency>
-            <groupId>com.github.danielwegener</groupId>
-            <artifactId>logback-kafka-appender</artifactId>
-        </dependency>
-    </dependencies>
 
     <build>
         <pluginManagement>
