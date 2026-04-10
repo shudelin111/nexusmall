@@ -17,55 +17,21 @@ spring:
   
   # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # 连接超时时间（毫秒）
-    timeout: 5000  # 5 秒
-    # Lettuce 连接池配置
+    timeout: 5000
     lettuce:
       pool:
-        # 最大活跃连接数
         max-active: 16
-        # 最大空闲连接数
         max-idle: 8
-        # 最小空闲连接数
         min-idle: 0
-        # 获取连接的最大等待时间（毫秒）
-        max-wait: 1000ms  # 1 秒
+        max-wait: 1000ms
 
   # Spring Cloud 配置
   cloud:
-    # OpenFeign 服务调用配置
-    openfeign:
-      sentinel:
-        enabled: true
-      client:
-        config:
-          default:
-            # 连接超时
-            connectTimeout: 5000
-            # 读取超时
-            readTimeout: 5000
-      compression:
-        request:
-          enabled: true
-        response:
-          enabled: true
-
-    # Sentinel 熔断限流配置（通用参数）
     sentinel:
-      # 启用 Sentinel
-      enabled: true
-      # 取消控制台懒加载（启动时立即注册到 Dashboard）
-      eager: true
-      # ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义：
-      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
-      # - spring.cloud.sentinel.transport.port (本地通信端口)
-      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
-      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-third-party-{profile}.yaml 中定义
             dataId: nexusmall-third-party-flow-rule.json
             groupId: MALL_GROUP
             rule-type: flow
@@ -94,35 +60,11 @@ spring:
             password: ${NACOS_PASSWORD:nacos}
 
 # ===============================
-# Seata 分布式事务配置（Third-Party 模块可选使用 Seata）
+# Seata 分布式事务配置
 # ===============================
 seata:
-  enabled: false  # 默认禁用，如需启用请在环境配置中覆盖
+  enabled: false
   application-id: nexusmall-third-party
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义（如果启用 Seata）：
-  # - seata.registry.nacos.server-addr (Seata Server 地址)
-  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
-  # - seata.registry.nacos.group (Seata Server 所在分组)
-  # - seata.config.nacos.server-addr (Seata 配置中心地址)
-  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
-  # - seata.config.nacos.group (Seata 配置所在分组)
-  registry:
-    type: nacos
-    nacos:
-      cluster: default
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      application: seata-server
-  config:
-    type: nacos
-    nacos:
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      data-id: seataServer.properties
 
 # ===============================
 # MinIO 对象存储配置（通用参数）
@@ -224,23 +166,10 @@ third-party:
       bucket-name: ${ALIYUN_OSS_BUCKET:}
 
 # ===============================
-# SpringDoc OpenAPI 文档配置（Third-Party 使用 SpringDoc，不是 Knife4j）
+# SpringDoc OpenAPI 文档配置
 # ===============================
-# ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义：
-# - springdoc.api-docs.enabled (API 文档启用开关)
-# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
 springdoc:
-  # OpenAPI 文档路径
-  api-docs:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /v3/api-docs
-  # Swagger UI 配置
-  swagger-ui:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /swagger-ui.html
-  # 扫描的包路径(所有环境相同)
   packages-to-scan: com.nexusmall.thirdparty.controller
-  # 分组配置(微服务架构下推荐)
   group-configs:
     - group: 'default'
       paths-to-match: '/**'

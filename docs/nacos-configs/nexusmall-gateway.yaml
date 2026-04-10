@@ -119,6 +119,24 @@ spring:
           filters:
             - RewritePath=/search/(?<segment>.*), /$\{segment}
             - PreserveHostHeader
+        
+        # 通知服务
+        - id: notification-service
+          uri: lb://nexusmall-notification
+          predicates:
+            - Path=/notification/**
+          filters:
+            - RewritePath=/notification/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 物流服务
+        - id: logistics-service
+          uri: lb://nexusmall-logistics
+          predicates:
+            - Path=/logistics/**
+          filters:
+            - RewritePath=/logistics/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
       
       # CORS 跨域配置
       globalcors:
@@ -168,4 +186,10 @@ knife4j:
       - name: 购物车服务
         service-name: nexusmall-cart
         url: /cart/v3/api-docs?group=default
+      - name: 通知服务
+        service-name: nexusmall-notification
+        url: /notification/v3/api-docs?group=default
+      - name: 物流服务
+        service-name: nexusmall-logistics
+        url: /logistics/v3/api-docs?group=default
     sort-order: 0

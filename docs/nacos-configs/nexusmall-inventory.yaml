@@ -10,10 +10,9 @@
 # =====================================================
 
 # ===============================
-# Seata 分布式事务配置
+# Seata 分布式事务配置（服务特定）
 # ===============================
 seata:
-  # ⚠️ 注意：其他 Seata 通用参数已在 nexusmall-common-web.yaml 中定义
   application-id: nexusmall-inventory
 
 # ===============================
@@ -26,29 +25,25 @@ spring:
         # 流控规则
         ds1:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            data-id: ${spring.application.name}-flow-rules
+            dataId: ${spring.application.name}-flow-rules
             group-id: DEFAULT_GROUP
             rule-type: flow
         # 降级规则
         ds2:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            data-id: ${spring.application.name}-degrade-rules
+            dataId: ${spring.application.name}-degrade-rules
             group-id: DEFAULT_GROUP
             rule-type: degrade
         # 系统规则
         ds3:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            data-id: ${spring.application.name}-system-rules
+            dataId: ${spring.application.name}-system-rules
             group-id: DEFAULT_GROUP
             rule-type: system
 
 # ===============================
 # SpringDoc + Knife4j API 文档配置（模块特定）
 # ===============================
-# ⚠️ 注意：通用配置（path、enable、language）已在 nexusmall-common-web.yaml 中定义
 springdoc:
   # 扫描的包路径（Inventory 模块特定）
   packages-to-scan: com.nexusmall.inventory

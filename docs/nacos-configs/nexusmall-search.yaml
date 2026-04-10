@@ -33,55 +33,21 @@ spring:
   
   # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # 连接超时时间（毫秒）
-    timeout: 5000  # 5 秒
-    # Lettuce 连接池配置
+    timeout: 5000
     lettuce:
       pool:
-        # 最大活跃连接数
         max-active: 16
-        # 最大空闲连接数
         max-idle: 8
-        # 最小空闲连接数
         min-idle: 0
-        # 获取连接的最大等待时间（毫秒）
-        max-wait: 1000ms  # 1 秒
+        max-wait: 1000ms
 
   # Spring Cloud 配置
   cloud:
-    # OpenFeign 服务调用配置
-    openfeign:
-      sentinel:
-        enabled: true
-      client:
-        config:
-          default:
-            # 连接超时
-            connectTimeout: 5000
-            # 读取超时
-            readTimeout: 5000
-      compression:
-        request:
-          enabled: true
-        response:
-          enabled: true
-
-    # Sentinel 熔断限流配置（通用参数）
     sentinel:
-      # 启用 Sentinel
-      enabled: true
-      # 取消控制台懒加载（启动时立即注册到 Dashboard）
-      eager: true
-      # ⚠️ 注意：以下环境相关配置在 nexusmall-search-{profile}.yaml 中定义：
-      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
-      # - spring.cloud.sentinel.transport.port (本地通信端口)
-      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
-      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-search-{profile}.yaml 中定义
             dataId: nexusmall-search-flow-rule.json
             groupId: MALL_GROUP
             rule-type: flow
@@ -110,41 +76,14 @@ spring:
             password: ${NACOS_PASSWORD:nacos}
 
 # ===============================
-# Seata 分布式事务配置（Search 模块不使用 Seata）
+# SpringDoc + Knife4j API 文档配置
 # ===============================
-# ⚠️ 注意：Search 模块没有引入 Seata 依赖，因此不需要配置 Seata
-
-# ===============================
-# SpringDoc + Knife4j API 文档配置（通用参数）
-# ===============================
-# ⚠️ 注意：以下环境相关配置在 nexusmall-search-{profile}.yaml 中定义：
-# - springdoc.api-docs.enabled (API 文档启用开关)
-# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
-# - knife4j.enable (Knife4j 启用开关)
-# - knife4j.production (生产模式开关)
 springdoc:
-  # OpenAPI 文档路径
-  api-docs:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /v3/api-docs
-  # Swagger UI 配置
-  swagger-ui:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /swagger-ui/index.html
-  # 扫描的包路径(所有环境相同)
   packages-to-scan: com.nexusmall.search.interfaces.rest
-  # 分组配置(微服务架构下推荐)
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
       packages-to-scan: com.nexusmall.search.interfaces.rest
-
-# Knife4j 增强配置（通用参数）
-knife4j:
-  # ⚠️ 注意：enable 和 production 在环境特定配置中定义
-  # 设置文档语言（所有环境相同）
-  setting:
-    language: zh_cn
 
 # ===============================
 # Search 业务配置（通用参数）
