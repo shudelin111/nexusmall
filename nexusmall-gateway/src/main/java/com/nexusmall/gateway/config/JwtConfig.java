@@ -26,5 +26,5 @@ public class JwtConfig {
     /**
      * Token 过期时间（毫秒）
      */
-    private long expireTimeInMs;
+    private Long expireTimeInMs;
 }

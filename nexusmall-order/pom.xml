@@ -8,9 +8,7 @@
         <version>0.0.1-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
-    <groupId>com.nexusmall</groupId>
     <artifactId>nexusmall-order</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
     <name>nexusmall-order</name>
     <description>nexusmall-order</description>
 
@@ -58,6 +56,18 @@
             <artifactId>fst</artifactId>
         </dependency>
 
+        <!-- Redisson 分布式锁 -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- Redis（Order 模块必需） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <!-- OpenFeign 服务调用 -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
@@ -93,7 +103,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
-            <!-- 版本由父工程 dependencyManagement 统一管理 -->
         </dependency>
 
         <!-- 验证框架 -->
@@ -139,10 +148,24 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
-        <!-- 公共模块 -->
+        <!-- 公共 Web 模块（已包含 core） -->
         <dependency>
             <groupId>com.nexusmall</groupId>
-            <artifactId>nexusmall-common</artifactId>
+            <artifactId>nexusmall-common-web</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共数据库模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共消息队列模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-mq</artifactId>
             <version>${project.version}</version>
         </dependency>
 

@@ -137,11 +137,37 @@
             <artifactId>spring-cloud-sleuth-zipkin</artifactId>
         </dependency>
 
-        <!-- 公共模块 -->
+        <!-- 公共 Web 模块（已包含 core） -->
         <dependency>
             <groupId>com.nexusmall</groupId>
-            <artifactId>nexusmall-common</artifactId>
+            <artifactId>nexusmall-common-web</artifactId>
             <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共数据库模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        
+        <!-- 公共消息队列模块 -->
+        <dependency>
+            <groupId>com.nexusmall</groupId>
+            <artifactId>nexusmall-common-mq</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Redis（Cart 模块必需） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
+        <!-- Redisson 分布式锁（Cart 模块必需） -->
+        <dependency>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
         </dependency>
 
         <!-- Lombok -->

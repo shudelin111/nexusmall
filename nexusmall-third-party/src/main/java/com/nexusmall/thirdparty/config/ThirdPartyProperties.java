@@ -32,7 +32,7 @@ public class ThirdPartyProperties {
 
     public static class Sms {
         /** 是否启用短信能力 */
-        private boolean enabled;
+        private Boolean enabled;
         /** 短信服务商，如 aliyun/tencent/huawei */
         private String provider;
         /** 阿里云短信参数 */
@@ -65,7 +65,7 @@ public class ThirdPartyProperties {
 
     public static class Storage {
         /** 是否启用对象存储能力 */
-        private boolean enabled;
+        private Boolean enabled;
         /** 存储服务商，如 qiniu/aliyun-oss/tencent-cos */
         private String provider;
         /** 阿里云 OSS 参数 */

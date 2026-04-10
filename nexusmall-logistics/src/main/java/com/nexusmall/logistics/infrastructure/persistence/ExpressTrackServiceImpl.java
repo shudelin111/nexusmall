@@ -23,8 +23,8 @@ import java.util.*;
  * 第三方物流查询服务实现类
  * <p>
  * 业界标准：
- * - 支持快递鸟和快递100两家主流服务商
- * - 策略模式：根据配置自动选择服务商
+ * - 支持快递鸟和快递100两家主流服务：
+ * - 策略模式：根据配置自动选择服务：
  * - 失败降级：主服务商失败时切换到备用服务商
  * </p>
  *
@@ -45,7 +45,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
         log.info("【查询物流轨迹】expressCompany={}, expressNo={}", expressCompany, expressNo);
 
         try {
-            // 1. 根据配置选择服务商
+            // 1. 根据配置选择服务：
             String provider = expressApiConfig.getDefaultProvider();
             List<LogisticsTrack> tracks;
 
@@ -230,7 +230,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             requestData.put("OrderCode", "");
             requestData.put("ShipperCode", getShipperCode(expressCompany));
             requestData.put("LogisticCode", expressNo);
-            requestData.put("PayType", "0"); // 运费支付方式：0=现付
+            requestData.put("PayType", "0"); // 运费支付方方式=现付
             requestData.put("Callback", callbackUrl);
 
             String requestDataJson = JSON.toJSONString(requestData);
@@ -403,7 +403,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
         
         if (acceptStation.contains("签收") || acceptStation.contains("已签收")) {
             return TrackStatusEnum.SIGNED.getCode();
-        } else if (acceptStation.contains("派送")) {
+        } else if (acceptStation.contains("派件")) {
             return TrackStatusEnum.DELIVERING.getCode();
         } else if (acceptStation.contains("揽件") || acceptStation.contains("取件")) {
             return TrackStatusEnum.PICKED_UP.getCode();
@@ -420,7 +420,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
             return TrackStatusEnum.IN_TRANSIT.getCode();
         }
         
-        // 快递100状态码：0=在途，1=揽件，2=疑难，3=签收，4=退签，5=派件，6=退回
+        // 快递100状态码由=在途，1=揽件数 *=疑疑难=签成功后=退签，5=派件数 *=退款
         switch (status) {
             case 1:
                 return TrackStatusEnum.PICKED_UP.getCode();
@@ -434,7 +434,7 @@ public class ExpressTrackServiceImpl implements ExpressTrackService {
     }
 
     /**
-     * 快递鸟数据签名（MD5加密）
+     * 快递鸟数据签名（MD5加密)
      */
     private String encrypt(String content, String key, String charset) throws Exception {
         String signStr = content + key;

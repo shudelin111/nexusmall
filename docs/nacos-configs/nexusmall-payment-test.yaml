@@ -1,0 +1,108 @@
+# =====================================================
+# NexusMall Payment Service - Test Environment Configuration
+# 支付服务 - 测试环境配置
+# =====================================================
+# Data ID: nexusmall-payment-test.yaml
+# Group: MALL_GROUP
+# Namespace: test
+# Profile: test
+# 用途：测试环境专属配置（优先级高于 nexusmall-payment.yaml）
+# 说明：
+# - 此文件仅包含测试环境特有的差异化配置
+# - 共享配置已在 nexusmall-common*.yaml 中定义
+# - 业务通用配置已在 nexusmall-payment.yaml 中定义
+# =====================================================
+
+# ===============================
+# 数据库连接配置（测试环境）
+# ===============================
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_payment?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=3000&socketTimeout=5000
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+
+  # Redis 配置（测试环境）
+  redis:
+    host: ${REDIS_HOST:10.10.1.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
+    password: ${REDIS_PASSWORD:123456}
+    timeout: 3000ms
+
+  # Spring Cloud 配置（测试环境）
+  cloud:
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:nexusmall-sentinel.test.svc:8080}
+        port: ${SENTINEL_TRANSPORT_PORT:8719}
+
+  # Kafka 配置（测试环境）
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
+
+# ===============================
+# RocketMQ 配置（测试环境）
+# ===============================
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
+  producer:
+    group: payment-producer-group-test
+
+# ===============================
+# Seata 分布式事务配置（测试环境）
+# ===============================
+seata:
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      cluster: default
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      data-id: seataServer.properties
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（测试环境）
+# ===============================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+knife4j:
+  enable: true
+  production: false
+
+# Kafka 日志收集开关（测试环境默认关闭）
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# 日志文件路径配置（测试环境）
+# ===============================
+logging:
+  file:
+    path: /var/log/nexusmall
+
+# ===============================
+# Zipkin 链路追踪配置（测试环境）
+# ===============================
+zipkin:
+  enabled: false
+  base-url: ${ZIPKIN_BASE_URL:http://zipkin.test.svc:9411}

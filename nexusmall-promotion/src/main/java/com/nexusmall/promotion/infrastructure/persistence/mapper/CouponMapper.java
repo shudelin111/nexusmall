@@ -5,7 +5,7 @@ import com.nexusmall.promotion.domain.entity.Coupon;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 优惠券 Mapper 接口
+ * 优惠券Mapper 接口
  *
  * @author shudl
  * @since 2026-04-06

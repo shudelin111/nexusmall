@@ -1,0 +1,73 @@
+# =====================================================
+# NexusMall Gateway Service - Development Environment Configuration
+# 网关服务 - 开发环境配置
+# =====================================================
+# Data ID: nexusmall-gateway-dev.yaml
+# Group: MALL_GROUP
+# Namespace: dev
+# Profile: dev
+# 用途：开发环境专属配置（优先级高于 nexusmall-gateway.yaml）
+# 说明：
+# - 此文件仅包含开发环境特有的差异化配置
+# - 共享配置已在 nexusmall-common.yaml 中定义
+# - 业务通用配置已在 nexusmall-gateway.yaml 中定义
+# =====================================================
+
+# ===============================
+# Spring Cloud 配置（开发环境）
+# ===============================
+spring:
+  # Sleuth 链路追踪配置（开发环境覆盖）
+  sleuth:
+    # 开发环境 100% 采样（便于调试）
+    sampler:
+      probability: 1.0
+
+# ===============================
+# Actuator 监控端点配置（开发环境覆盖）
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        # 开发环境暴露所有端点（便于调试）
+        include: "*"
+  endpoint:
+    health:
+      # 开发环境始终显示健康检查详情
+      show-details: always
+
+# ===============================
+# 日志配置（开发环境）
+# ===============================
+logging:
+  level:
+    # 开发环境 Gateway 和 Common 模块日志设为 DEBUG（便于调试）
+    com.nexusmall.gateway: DEBUG
+    com.nexusmall.common: DEBUG
+  file:
+    path: ./logs
+
+# ===============================
+# Zipkin 链路追踪配置（开发环境）
+# ===============================
+zipkin:
+  # 开发环境默认关闭
+  enabled: false
+  # Zipkin Server 地址（本地开发）
+  base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}
+
+# ===============================
+# Kafka 日志收集开关（开发环境默认关闭）
+# ===============================
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# Knife4j API 文档配置（开发环境）
+# ===============================
+knife4j:
+  gateway:
+    enabled: true

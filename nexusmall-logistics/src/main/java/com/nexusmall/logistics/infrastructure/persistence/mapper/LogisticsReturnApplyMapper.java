@@ -8,7 +8,7 @@ import org.apache.ibatis.annotations.Param;
 import java.util.List;
 
 /**
- * 退货申请 Mapper 接口
+ * 退货申请Mapper 接口
  *
  * @author shudl
  * @since 2026-04-07

@@ -54,7 +54,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
             return existOrder;
         }
 
-        // 2. 生成快递单号（业界标准：快递公司编码 + 时间戳 + 随机数）
+        // 2. 生成快递单号（业界标准：快递公司编号 + 日期时间 + 随机数）
         String expressNo = generateExpressNo(expressCompany);
 
         // 3. 创建物流订单
@@ -90,7 +90,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
 
         // 验证状态流转合法性
         if (!isValidStatusTransition(order.getStatus(), status)) {
-            log.error("【更新物流状态】非法的状态流转，当前状态={}, 目标状态={}", order.getStatus(), status);
+            log.error("【更新物流状态】非法的状态流转，当前状态{}, 目标状态{}", order.getStatus(), status);
             return false;
         }
 
@@ -99,7 +99,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
         boolean success = this.updateById(order);
 
         if (success) {
-            log.info("【更新物流状态成功】id={}, 旧状态={}, 新状态={}", id, oldStatus, status);
+            log.info("【更新物流状态成功】id={}, 旧状态{}, 新状态{}", id, oldStatus, status);
             
             // 发布物流状态变更事件
             publishStatusChangeEvent(order, oldStatus, status);
@@ -121,7 +121,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
 
         // 只有运输中的订单才能签收
         if (!LogisticsStatusEnum.IN_TRANSIT.getCode().equals(order.getStatus())) {
-            log.error("【确认签收】订单状态不正确，当前状态={}", order.getStatus());
+            log.error("【确认签收】订单状态不正确，当前状态{}", order.getStatus());
             return false;
         }
 
@@ -143,7 +143,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     /**
      * 生成快递单号
      * <p>
-     * 业界标准格式：快递公司编码(2位) + 年月日(8位) + 序列号(6位)
+     * 业界标准格式：快递公司编号2位 + 年月日8位 + 序列号6位
      * 例如：SF20260407000001（顺丰）
      * </p>
      *
@@ -171,7 +171,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
     /**
      * 验证状态流转合法性
      * <p>
-     * 合法流转：
+     * 合法流转规则：
      * - 待发货(0) -> 已发货(1)
      * - 已发货(1) -> 运输中(2)
      * - 运输中(2) -> 已签收(3)
@@ -210,7 +210,7 @@ public class LogisticsOrderServiceImpl extends ServiceImpl<LogisticsOrderMapper,
      * 业界标准：
      * - 状态变更后立即发布事件
      * - 异步通知其他微服务（订单、通知等）
-     * - 即使发布失败也不影响主流程（记录日志）
+     * - 即使发布失败也不影响主流程（记录日志：
      * </p>
      */
     private void publishStatusChangeEvent(LogisticsOrder order, Integer oldStatus, Integer newStatus) {

@@ -8,7 +8,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 /**
- * 退货申请实体
+ * 退货申请实现(基于 Redis)
  * <p>
  * 业界标准：
  * - 完整的退货流程管理

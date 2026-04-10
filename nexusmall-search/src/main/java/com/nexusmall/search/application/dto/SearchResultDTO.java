@@ -8,9 +8,9 @@ public class SearchResultDTO {
     private List<SearchItemDTO> items = new ArrayList<SearchItemDTO>();
     private List<AggregationDTO> aggregations = new ArrayList<AggregationDTO>();
     private List<String> correctedKeywords = new ArrayList<String>();
-    private long total;
-    private int pageNo;
-    private int pageSize;
+    private Long total;
+    private Integer pageNo;
+    private Integer pageSize;
 
     public List<SearchItemDTO> getItems() {
         return items;
@@ -36,27 +36,27 @@ public class SearchResultDTO {
         this.correctedKeywords = correctedKeywords;
     }
 
-    public long getTotal() {
+    public Long getTotal() {
         return total;
     }
 
-    public void setTotal(long total) {
+    public void setTotal(Long total) {
         this.total = total;
     }
 
-    public int getPageNo() {
+    public Integer getPageNo() {
         return pageNo;
     }
 
-    public void setPageNo(int pageNo) {
+    public void setPageNo(Integer pageNo) {
         this.pageNo = pageNo;
     }
 
-    public int getPageSize() {
+    public Integer getPageSize() {
         return pageSize;
     }
 
-    public void setPageSize(int pageSize) {
+    public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
     }
 }

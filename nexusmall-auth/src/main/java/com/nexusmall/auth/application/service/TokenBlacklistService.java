@@ -1,10 +1,10 @@
 package com.nexusmall.auth.application.service;
 
 /**
- * Token 黑名单服务接口 (基于 Redis)
+ * Token 黑名单服务接口（基于 Redis）
  * <p>
  * 业界标准：
- * - JWT 本身不可撤销,通过黑名单实现即时失效
+ * - JWT 本身不可撤销，通过黑名单实现即时失效
  * - Access Token 登出时加入黑名单
  * - Refresh Token 撤销时加入黑名单
  * - 黑名单过期时间 = Token 剩余有效期
@@ -32,7 +32,7 @@ public interface TokenBlacklistService {
     boolean isBlacklisted(String jti);
 
     /**
-     * 从黑名单中移除 Token (可选,通常不需要)
+     * 从黑名单中移除Token (可选)通常不需要
      *
      * @param jti Token JTI
      */

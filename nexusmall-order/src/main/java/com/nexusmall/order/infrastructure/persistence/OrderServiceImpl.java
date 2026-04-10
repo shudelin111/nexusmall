@@ -1,7 +1,7 @@
 package com.nexusmall.order.infrastructure.persistence;
 
 import com.nexusmall.common.constant.MQConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
 import com.nexusmall.common.exception.OrderException;
 import com.nexusmall.common.vo.Result;
@@ -138,7 +138,7 @@ public class OrderServiceImpl implements OrderService {
         Result<Boolean> stockResult = productFeignService.decreaseStock(request.getProductId(), request.getCount());
         if (!stockResult.isSuccess() || !stockResult.getData()) {
             log.error("库存扣减失败：{}", stockResult.getMessage());
-            throw new OrderException(CommonResultCode.INSUFFICIENT_STOCK.getErrorCode(), CommonResultCode.INSUFFICIENT_STOCK.getMessage());
+            throw new OrderException(ResultCode.PARAM_INVALID);
         }
 
         // 4. 计算实际支付金额（应用会员折扣）
@@ -170,10 +170,10 @@ public class OrderServiceImpl implements OrderService {
         int insertResult = orderMapper.insert(order);
         if (insertResult <= 0) {
             log.error("创建订单失败，插入主表数据为 0");
-            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getErrorCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
+            throw new OrderException(ResultCode.SYSTEM_ERROR);
         }
 
-        // 4. 创建订单项
+        // 6. 创建订单项
         OrderItem orderItem = new OrderItem();
         orderItem.setOrderId(order.getId());
         orderItem.setOrderSn(orderSn);
@@ -187,7 +187,7 @@ public class OrderServiceImpl implements OrderService {
         int itemInsertResult = orderItemMapper.insert(orderItem);
         if (itemInsertResult <= 0) {
             log.error("创建订单失败，插入订单项数据为 0");
-            throw new OrderException(CommonResultCode.ORDER_CREATE_FAILED.getErrorCode(), CommonResultCode.ORDER_CREATE_FAILED.getMessage());
+            throw new OrderException(ResultCode.SYSTEM_ERROR);
         }
 
         log.info("订单创建成功，订单号：{}", orderSn);
@@ -209,7 +209,7 @@ public class OrderServiceImpl implements OrderService {
             log.error("【发送下单行为失败】userId: {}, orderId: {}", request.getMemberId(), order.getId(), e);
         }
         
-        // 5. 发送延迟消息（30 分钟后检查支付状态）
+        // 7. 发送延迟消息（30 分钟后检查支付状态）
         rocketMQProducer.sendOrderCancelDelayMessage(order.getId(), MQConstants.Order.DELAY_LEVEL_30MIN);
         
         return order;

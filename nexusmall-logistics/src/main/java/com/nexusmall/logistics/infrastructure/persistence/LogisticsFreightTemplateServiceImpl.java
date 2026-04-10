@@ -17,10 +17,10 @@ import java.math.BigDecimal;
  * 运费计算服务实现类
  * <p>
  * 业界标准计费模型：
- * - 按重量：首重费用 + ceil((总重量 - 首重) / 续重) * 续重费用
+ * - 按重量：首重费用 + ceil((总重量- 首重) / 续重) * 续重费用
  * - 按体积：类似按重量
  * - 按件数：件数 * 单价（首重费用作为单价）
- * - 包邮规则：订单金额 >= 包邮门槛时，运费为0
+ * - 包邮规则：订单金额>= 包邮门槛时，运费用
  * </p>
  *
  * @author shudl
@@ -40,7 +40,7 @@ public class LogisticsFreightTemplateServiceImpl extends ServiceImpl<LogisticsFr
         log.info("【计算运费】templateId={}, weight={}, volume={}, pieceCount={}, orderAmount={}",
                 templateId, weight, volume, pieceCount, orderAmount);
 
-        // 1. 获取运费模板（带缓存）
+        // 1. 获取运费模板（带缓存：
         LogisticsFreightTemplate template = cacheService.getFreightTemplateWithCache(templateId);
         
         // 2. 使用领域计算器计算运费

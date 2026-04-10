@@ -1,6 +1,6 @@
 package com.nexusmall.order.interfaces.feign;
 
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -20,12 +20,12 @@ public class MemberFeignFallback implements MemberFeignClient {
     @Override
     public Result<Map<String, Object>> getMemberInfo(Long userId) {
         log.error("获取会员信息失败，userId: {}", userId);
-        return Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     @Override
     public Result<Map<String, Object>> getDefaultAddress(Long userId) {
         log.error("获取默认收货地址失败，userId: {}", userId);
-        return Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return Result.failure(ResultCode.SYSTEM_ERROR);
     }
 }

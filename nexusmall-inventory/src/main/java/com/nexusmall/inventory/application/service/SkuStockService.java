@@ -24,7 +24,7 @@ public interface SkuStockService extends IService<SkuStock> {
     SkuStockVO getSkuStock(Long skuId, Long warehouseId);
 
     /**
-     * 扣减库存（锁定库存，用于下单）
+     * 扣减库存（锁定库存，用于下单号
      * <p>
      * 使用 Redisson 分布式锁防止超卖
      * </p>

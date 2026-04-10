@@ -1,164 +1,195 @@
 # =====================================================
-# NexusMall 网关服务配置（Nacos 托管）
+# NexusMall Gateway Service - Nacos Configuration
+# 网关服务 Nacos 托管配置
 # =====================================================
-# 说明：此文件存储在 Nacos 配置中心，Data ID 为 nexusmall-gateway.yaml
-# 用途：Gateway 服务的通用业务配置（所有环境共享）
+# 配置说明：
+# - Data ID: nexusmall-gateway.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
 # =====================================================
 
 # ===============================
-# 服务器配置
-# ===============================
-server:
-  port: 9000
-
-# ===============================
-# Spring 应用配置
+# Spring Cloud Gateway 路由配置
 # ===============================
 spring:
-  # ------------------------------
-  # Redis 缓存配置
-  # ------------------------------
-  redis:
-    host: ${REDIS_HOST:10.10.1.1}
-    port: ${REDIS_PORT:6379}
-    database: 0
-    password: "123456"
-    timeout: 5000ms
-    lettuce:
-      pool:
-        max-active: 16
-        max-idle: 8
-        min-idle: 0
-        max-wait: 1000ms
-  
-  # ------------------------------
-  # Spring Cloud 配置
-  # ------------------------------
   cloud:
-    # Sentinel 熔断限流配置
-    sentinel:
-      # 取消控制台懒加载（启动时立即注册到 Dashboard）
-      eager: true
-      transport:
-        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-        port: 8719
-      datasource:
-        # 流控规则数据源
-        ds1:
-          nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
-            dataId: nexusmall-gateway-flow-rule.json
-            groupId: DEFAULT_GROUP
-            rule-type: flow
-            data-type: json
-            username: nacos
-            password: nacos
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      
+      routes:
+        # 订单服务
+        - id: order-service
+          uri: lb://nexusmall-order
+          predicates:
+            - Path=/order/**
+          filters:
+            - RewritePath=/order/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+
+        # 认证服务
+        - id: auth-service
+          uri: lb://nexusmall-auth
+          predicates:
+            - Path=/auth/**
+          filters:
+            - RewritePath=/auth/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
         
-        # 熔断降级规则数据源
-        ds2:
-          nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
-            dataId: nexusmall-gateway-degrade-rule.json
-            groupId: DEFAULT_GROUP
-            rule-type: degrade
-            data-type: json
-            username: nacos
-            password: nacos
+        # 商品服务
+        - id: product-service
+          uri: lb://nexusmall-product
+          predicates:
+            - Path=/product/**
+          filters:
+            - RewritePath=/product/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
         
-        # 系统自适应保护规则数据源
-        ds3:
-          nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
-            dataId: nexusmall-gateway-system-rule.json
-            groupId: DEFAULT_GROUP
-            rule-type: system
-            data-type: json
-            username: nacos
-            password: nacos
-    
-    # Kafka 配置（用于日志收集）
-    kafka:
-      bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-      producer:
-        acks: 1
-        retries: 3
-        batch-size: 16384
-        buffer-memory: 33554432
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-        value-serializer: org.apache.kafka.common.serialization.StringSerializer
+        # 会员服务
+        - id: member-service
+          uri: lb://nexusmall-member
+          predicates:
+            - Path=/member/**
+          filters:
+            - RewritePath=/member/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 支付服务
+        - id: payment-service
+          uri: lb://nexusmall-payment
+          predicates:
+            - Path=/payment/**
+          filters:
+            - RewritePath=/payment/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 购物车服务
+        - id: cart-service
+          uri: lb://nexusmall-cart
+          predicates:
+            - Path=/cart/**
+          filters:
+            - RewritePath=/cart/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 行为服务
+        - id: behavior-service
+          uri: lb://nexusmall-behavior
+          predicates:
+            - Path=/behavior/**
+          filters:
+            - RewritePath=/behavior/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 第三方服务
+        - id: third-party-service
+          uri: lb://nexusmall-third-party
+          predicates:
+            - Path=/third-party/**
+          filters:
+            - RewritePath=/third-party/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 库存服务
+        - id: inventory-service
+          uri: lb://nexusmall-inventory
+          predicates:
+            - Path=/inventory/**
+          filters:
+            - RewritePath=/inventory/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 营销服务
+        - id: promotion-service
+          uri: lb://nexusmall-promotion
+          predicates:
+            - Path=/promotion/**
+          filters:
+            - RewritePath=/promotion/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 搜索服务
+        - id: search-service
+          uri: lb://nexusmall-search
+          predicates:
+            - Path=/search/**
+          filters:
+            - RewritePath=/search/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 通知服务
+        - id: notification-service
+          uri: lb://nexusmall-notification
+          predicates:
+            - Path=/notification/**
+          filters:
+            - RewritePath=/notification/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+        
+        # 物流服务
+        - id: logistics-service
+          uri: lb://nexusmall-logistics
+          predicates:
+            - Path=/logistics/**
+          filters:
+            - RewritePath=/logistics/(?<segment>.*), /$\{segment}
+            - PreserveHostHeader
+      
+      # CORS 跨域配置
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods: "*"
+            allowedHeaders: "*"
+            allowCredentials: true
 
 # ===============================
-# Seata 分布式事务配置
+# JWT 安全配置
 # ===============================
-seata:
-  enabled: true
-  application-id: nexusmall-gateway
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
-  registry:
-    type: nacos
-    nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
-      cluster: default
-      username: nacos
-      password: nacos
-      application: seata-server
-  config:
-    type: nacos
-    nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
-      username: nacos
-      password: nacos
-      data-id: seataServer.properties
+security:
+  jwt:
+    rsa:
+      public-key: |
+        -----BEGIN PUBLIC KEY-----
+        MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArCCkHxMtFQVXocqNfUal
+        vy6ra77FyJmK3jFKIlcBNlXvWjzoJr8zbPh2COrkxRNpxWg2v4Htsva/jTboop4M
+        8XOWb+16Fyjk+y/4be/UBaHB1NLqCkuHglihQHZMJjONAxIN66VyzkLgEymqxS57
+        3cZfbyUiFzhjXfoU50MPbT630qwWCuzWF9NPFShVaIhsEg2dtL6YSBlg56QIhlTT
+        RvN71nPnV97tUrdHALCrio0GIfnGT3VW3iZdkloGHzKdzA0O5r+uLsbPRDxuQyoh
+        T254rLgY1m1wcVyqqe397j45SW+JZz1XtU6fUNa7o9WjsMuTlR70vVxPqupETH5H
+        fwIDAQAB
+        -----END PUBLIC KEY-----
+      issuer: nexusmall-auth
+      audience: nexusmall-services
 
 # ===============================
-# Actuator 监控端点配置
+# Knife4j Gateway API 文档聚合配置
 # ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-    info:
-      enabled: true
-  info:
-    env:
-      enabled: true
-
-# ===============================
-# 日志级别配置
-# ===============================
-logging:
-  level:
-    root: INFO
-    io.seata: INFO
-    com.alibaba.csp.sentinel: DEBUG
-    com.nexusmall.gateway: DEBUG
-    com.nexusmall.common: DEBUG
-
-# ===============================
-# Kafka 日志收集开关（Logback Appender）
-# ===============================
-KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
-
-# ===============================
-# 应用元信息配置
-# ===============================
-info:
-  app:
-    name: nexusmall-gateway
-    description: NexusMall 网关服务
-    version: 0.0.1-SNAPSHOT
-  java.version: 1.8
+knife4j:
+  gateway:
+    enabled: true
+    strategy: discover
+    routes:
+      - name: 认证服务
+        service-name: nexusmall-auth
+        url: /auth/v3/api-docs?group=default
+      - name: 商品服务
+        service-name: nexusmall-product
+        url: /product/v3/api-docs?group=default
+      - name: 订单服务
+        service-name: nexusmall-order
+        url: /order/v3/api-docs?group=default
+      - name: 购物车服务
+        service-name: nexusmall-cart
+        url: /cart/v3/api-docs?group=default
+      - name: 通知服务
+        service-name: nexusmall-notification
+        url: /notification/v3/api-docs?group=default
+      - name: 物流服务
+        service-name: nexusmall-logistics
+        url: /logistics/v3/api-docs?group=default
+    sort-order: 0

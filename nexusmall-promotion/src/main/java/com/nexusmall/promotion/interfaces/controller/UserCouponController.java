@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 用户优惠券 Controller
+ * 用户优惠券Controller
  * <p>
  * 业界标准：提供完整的用户优惠券管理接口
  * </p>
@@ -36,15 +36,15 @@ public class UserCouponController {
      * 查询用户的优惠券列表
      *
      * @param userId    用户ID
-     * @param useStatus 使用状态（0-未使用 1-已使用 2-已过期 3-已锁定，null表示全部）
+     * @param useStatus 使用状态（0-未使用,1-已使用,2-已过期,3-已锁定，null表示全部）
      * @return 优惠券列表
      */
     @GetMapping(value = "/", headers = "X-API-Version=v1")
-    @Operation(summary = "查询用户优惠券列表", description = "支持按状态筛选：未使用/已使用/已过期/已锁定")
+    @Operation(summary = "查询用户优惠券列表", description = "支持按状态筛选：未使用、已使用、已过期、已锁定")
     public Result<List<UserCouponVO>> listUserCoupons(
             @Parameter(description = "用户ID", required = true)
             @RequestHeader("X-User-ID") Long userId,
-            @Parameter(description = "使用状态（0-未使用 1-已使用 2-已过期 3-已锁定，null表示全部）")
+            @Parameter(description = "使用状态（0-未使用,1-已使用,2-已过期,3-已锁定，null表示全部）")
             @RequestParam(required = false) Integer useStatus) {
         log.info("【查询用户优惠券列表】userId={}, useStatus={}", userId, useStatus);
         List<UserCouponVO> coupons = couponUserRecordService.listUserCoupons(userId, useStatus);

@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * JWT 工具类 (RS256 非对称加密)
+ * JWT 工具类(RS256 非对称加密
  * <p>
  * 业界标准：
  * - 使用 RS256 算法 (RSA + SHA256)
- * - 私钥签发 Token，公钥验证 Token
+ * - 私钥签发 Token，公钥验证Token
  * - 强制验证算法白名单，防止算法混淆攻击
  * - 包含标准 Claims (iss, sub, aud, exp, iat, jti)
  * </p>
@@ -62,11 +62,11 @@ public class JwtUtil {
                 // 标准 Claims
                 .setIssuer(rsaKeyProperties.getIssuer())           // iss: 签发者
                 .setAudience(rsaKeyProperties.getAudience())       // aud: 受众
-                .setSubject(username)                               // sub: 主题(用户名)
+                .setSubject(username)                               // sub: 主题(用户名
                 .setId(jti)                                         // jti: 唯一标识
                 .setIssuedAt(now)                                   // iat: 签发时间
                 .setExpiration(expiryDate)                          // exp: 过期时间
-                // 自定义 Claims
+                // 自指定Claims
                 .claim("roles", roles)
                 .claim("permissions", permissions)
                 .claim("token_type", "access")                      // 标记为 Access Token
@@ -110,7 +110,7 @@ public class JwtUtil {
     }
 
     /**
-     * 从 Token 中获取 JTI (用于黑名单)
+     * 从 Token 中获取 JTI (用于黑名单
      *
      * @param token JWT Token
      * @return JTI
@@ -161,7 +161,7 @@ public class JwtUtil {
     }
 
     /**
-     * 检查 Token 是否为 Access Token
+     * 检查 Token 是否为Access Token
      *
      * @param token JWT Token
      * @return true=Access Token
@@ -176,7 +176,7 @@ public class JwtUtil {
     }
 
     /**
-     * 检查 Token 是否为 Refresh Token
+     * 检查 Token 是否为Refresh Token
      *
      * @param token JWT Token
      * @return true=Refresh Token
@@ -191,7 +191,7 @@ public class JwtUtil {
     }
 
     /**
-     * 解析 Token (强制验证算法白名单)
+     * 解析 Token (强制验证算法白名单
      *
      * @param token JWT Token
      * @return Claims

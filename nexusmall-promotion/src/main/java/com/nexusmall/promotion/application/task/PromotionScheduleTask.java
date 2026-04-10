@@ -39,14 +39,14 @@ public class PromotionScheduleTask {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 1. 更新优惠券状态：未开始 → 进行中
+        // 1. 更新优惠券状态：未开始→进行中
         LambdaUpdateWrapper<Coupon> couponWrapper = new LambdaUpdateWrapper<>();
         couponWrapper.eq(Coupon::getStatus, ActivityStatusEnum.NOT_STARTED.getCode())
                 .le(Coupon::getValidStart, now)
                 .set(Coupon::getStatus, ActivityStatusEnum.IN_PROGRESS.getCode());
         couponService.update(couponWrapper);
 
-        // 2. 更新秒杀活动状态：未开始 → 进行中
+        // 2. 更新秒杀活动状态：未开始→进行中
         // TODO: 实现秒杀活动状态更新
 
         log.info("【定时任务】活动状态检查完成");
@@ -61,7 +61,7 @@ public class PromotionScheduleTask {
 
         LocalDateTime now = LocalDateTime.now();
 
-        // 更新已过期的优惠券状态：进行中 → 已结束
+        // 更新已过期的优惠券状态：进行中→已结束
         LambdaUpdateWrapper<Coupon> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(Coupon::getStatus, ActivityStatusEnum.IN_PROGRESS.getCode())
                 .lt(Coupon::getValidEnd, now)
@@ -79,7 +79,7 @@ public class PromotionScheduleTask {
         log.info("【定时任务】聚合昨日统计数据");
 
         // TODO: 从Redis读取昨日数据，聚合到数据库
-        // 1. 统计优惠券领取/使用数据
+        // 1. 统计优惠券领取使用数据
         // 2. 统计秒杀成交数据
         // 3. 计算转化率、ROI等指标
 

@@ -1,0 +1,227 @@
+# ==============================================================================
+# NexusMall Behavior Service Deployment Configuration
+# NexusMall 用户行为日志服务 Kubernetes 部署配置
+# ==============================================================================
+# 文件用途：定义用户行为日志服务在 Kubernetes 集群中的部署规格
+# 维护团队：平台架构组
+# 更新频率：随版本发布更新
+# ==============================================================================
+
+apiVersion: apps/v1  # Kubernetes API 版本，使用稳定的 apps/v1
+kind: Deployment     # 资源类型：无状态应用部署控制器
+metadata:
+  # 部署资源名称，全局唯一标识符
+  name: nexusmall-behavior
+  
+  # 命名空间配置：将资源隔离在 nexusmall 命名空间中
+  # ArgoCD 持续部署目标命名空间，所有微服务统一在此命名空间下管理
+  namespace: nexusmall
+  
+  # 元数据注解：配置自动化工具的行为参数
+  annotations:
+    # -------------------------------------------------------------------------
+    # ArgoCD 同步控制配置
+    # -------------------------------------------------------------------------
+    # 同步波次设置："0" 表示优先部署此资源（数值越小优先级越高）
+    # 应用场景：确保基础服务先于依赖服务启动
+    argocd.argoproj.io/sync-wave: "0"
+    
+    # 钩子类型：PostSync 表示在主同步完成后执行
+    # 典型用途：部署后任务，如数据迁移、配置验证等
+    argocd.argoproj.io/hook: "PostSync"
+    
+    # -------------------------------------------------------------------------
+    # ArgoCD 镜像自动更新器配置
+    # -------------------------------------------------------------------------
+    # 镜像更新列表：指定需要监控和更新的容器镜像
+    # 过滤策略：~^sha- 表示只匹配以 sha- 开头的标签（对应 master 分支构建）
+    # 格式：<alias>=<image-url>:<tag-filter>
+    argocd-image-updater.argoproj.io/image-list: "nexusmall-behavior=docker.io/shudlsys/nexusmall-behavior:~^sha-"
+    
+    # 更新策略：name 表示按标签名称排序并取最新
+    # 生产环境实践：结合 sha- 标签，实现按提交顺序自动滚动更新
+    argocd-image-updater.argoproj.io/nexusmall-behavior.update-strategy: "name"
+  
+  # 资源标签：用于资源分类、选择和监控
+  labels:
+    # 应用标识：简洁的应用名称
+    app: nexusmall-behavior
+    # Kubernetes 推荐标签规范 (app.kubernetes.io/*)
+    app.kubernetes.io/name: nexusmall-behavior           # 应用名称
+    app.kubernetes.io/part-of: nexusmall              # 所属项目/系统
+
+spec:
+  # ---------------------------------------------------------------------------
+  # 副本数配置：生产环境建议根据负载设置多副本实现高可用
+  # ---------------------------------------------------------------------------
+  # 当前设置：1 副本（适用于开发/测试环境）
+  # 生产环境建议：3+ 副本配合 HPA (水平 Pod 自动伸缩)
+  replicas: 1
+  
+  # 选择器：定义如何识别属于此 Deployment 的 Pod
+  selector:
+    matchLabels:
+      # 必须与 Pod template 中的 labels 完全匹配
+      app: nexusmall-behavior
+  
+  # Pod 模板：定义新创建的 Pod 的规格
+  template:
+    metadata:
+      # Pod 标签：用于服务发现、监控和日志收集
+      labels:
+        app: nexusmall-behavior
+        app.kubernetes.io/name: nexusmall-behavior
+    
+    spec:
+      # 容器定义列表：一个 Pod 可包含多个容器（主容器 + 辅助容器）
+      containers:
+        - name: nexusmall-behavior  # 容器名称，在同一 Pod 内必须唯一
+          
+          # -------------------------------------------------------------------
+          # 容器镜像配置
+          # -------------------------------------------------------------------
+          # 镜像来源：Docker Hub (docker.io)
+          # 分支策略：
+          #   - dev 分支：latest（开发环境，自动拉取最新）
+          #   - master 分支：sha-{commit}（生产环境，版本可追溯）
+          #   - 语义化版本：v1.0.0, v1.2.3 等（发布版本使用）
+          # 最佳实践：生产环境应使用固定版本号而非 latest
+          image: docker.io/shudlsys/nexusmall-behavior:latest
+          
+          # 端口暴露：声明容器运行时监听的端口
+          ports:
+            - containerPort: 14000  # Spring Boot 应用默认端口
+              protocol: TCP         # 协议类型（默认为 TCP，可省略）
+          
+          # -------------------------------------------------------------------
+          # 环境变量配置：从 ConfigMap 和 Secret 注入运行时配置参数
+          # -------------------------------------------------------------------
+          envFrom:
+            # 从 ConfigMap 加载非敏感配置（地址、端口等）
+            # 优势：配置与部署分离，便于多环境管理
+            - configMapRef:
+                name: nexusmall-behavior-config
+          
+          # 敏感配置从 Secret 加载（密码、密钥等）
+          env:
+            # MySQL 凭证
+            - name: MYSQL_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: MYSQL_USERNAME
+            - name: MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: MYSQL_PASSWORD
+            # Redis 凭证
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: REDIS_PASSWORD
+            # Nacos 凭证
+            - name: NACOS_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: NACOS_USERNAME
+            - name: NACOS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: NACOS_PASSWORD
+            # Elasticsearch 凭证
+            - name: ELASTICSEARCH_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: ELASTICSEARCH_USERNAME
+            - name: ELASTICSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: nexusmall-behavior-secret
+                  key: ELASTICSEARCH_PASSWORD
+          
+          # -------------------------------------------------------------------
+          # 资源配额管理：防止资源争抢，保障集群稳定性
+          # -------------------------------------------------------------------
+          # requests：Pod 调度时的最小资源保证值
+          # limits：容器允许使用的资源上限（超出可能被 OOM Kill）
+          # 容量规划参考：
+          #   - Java 应用建议预留堆外内存（通常堆内存的 25%-50%）
+          #   - CPU 限制需考虑应用峰值负载的 1.5-2 倍余量
+          resources:
+            requests:
+              memory: "2Gi"   # 申请内存：2 GiB（调度依据）
+              cpu: "500m"     # 申请 CPU：500 毫核（0.5 核）
+            limits:
+              memory: "4Gi"   # 内存上限：4 GiB（超出触发 OOMKilled）
+              cpu: "1000m"    # CPU 上限：1000 毫核（1 核，可突发）
+          
+          # -------------------------------------------------------------------
+          # 健康检查探针：保障服务可用性和自愈能力
+          # -------------------------------------------------------------------
+          
+          # 存活探针 (Liveness Probe)
+          # 作用：检测应用是否处于正常运行状态
+          # 失败后果：kubelet 将重启容器（不修复 Bug，仅恢复服务）
+          # 适用场景：死锁、线程池耗尽、内存泄漏等不可恢复错误
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness  # Spring Actuator 端点
+              port: 14000
+              scheme: HTTP                      # HTTP 协议（也可用 HTTPS）
+            initialDelaySeconds: 120            # 初始延迟：120 秒（给 JVM 启动留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败判定为不健康
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复健康（默认值）
+          
+          # 就绪探针 (Readiness Probe)
+          # 作用：检测应用是否准备好接收流量
+          # 失败后果：从 Service 的 Endpoints 中移除，不再转发流量
+          # 适用场景：启动未完成、依赖服务未就绪、临时过载等可恢复状态
+          # 
+          # 💡 关键优化：
+          # - initialDelaySeconds: 120 秒（2 分钟），给依赖初始化留足时间
+          # - periodSeconds: 10 秒，降低检查频率，减少启动压力
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 14000
+              scheme: HTTP
+            initialDelaySeconds: 100            # 初始延迟：100 秒（给依赖初始化留足时间）
+            periodSeconds: 10                   # 检查间隔：10 秒（降低频率）
+            timeoutSeconds: 5                   # 超时时间：5 秒
+            failureThreshold: 5                 # 失败阈值：连续 5 次失败即下线
+            successThreshold: 1                 # 成功阈值：1 次成功即恢复上线
+          
+          # -------------------------------------------------------------------
+          # 生命周期钩子：在容器状态变化时执行特定操作
+          # -------------------------------------------------------------------
+          lifecycle:
+            # preStop 钩子：容器停止前执行的命令
+            # 核心用途：实现优雅关闭，配合 terminationGracePeriodSeconds
+            # 执行时机：收到 SIGTERM 信号后、容器停止前
+            # 典型场景：
+            #   - 等待在请求处理完成
+            #   - 从注册中心注销
+            #   - 刷新本地缓存到持久化存储
+            preStop:
+              exec:
+                # 延迟 10 秒再关闭，配合 Spring Boot 的优雅关闭配置
+                # 目的：让负载均衡层有时间更新路由规则，避免流量损失
+                command: ["/bin/sh", "-c", "sleep 10"]
+          
+          # 优雅终止宽限期：从发送 SIGTERM 到强制 SIGKILL 的等待时间
+          # 计算逻辑：preStop 执行时间 + 应用关闭钩子时间 + 安全余量
+          # 默认值：30 秒；长时间任务建议延长至 60-120 秒
+          terminationGracePeriodSeconds: 60
+      
+      # 重启策略
+      restartPolicy: Always
+      
+      # 调度策略
+      schedulerName: default-scheduler

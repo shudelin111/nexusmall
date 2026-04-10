@@ -5,7 +5,7 @@ import com.nexusmall.payment.domain.model.entity.PayOrder;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 支付单 Mapper 接口
+ * 支付：Mapper 接口
  *
  * @author shudl
  * @since 2026-04-06

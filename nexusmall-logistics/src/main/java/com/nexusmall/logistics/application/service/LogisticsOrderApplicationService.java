@@ -46,7 +46,7 @@ public class LogisticsOrderApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public LogisticsOrder createLogisticsOrder(CreateLogisticsOrderRequest request) {
-        log.info("【应用服务-创建物流订单】orderSn={}, memberId={}", 
+        log.info("【应用服务创建物流订单】orderSn={}, memberId={}", 
                 request.getOrderSn(), request.getMemberId());
 
         // 1. 检查是否已存在物流订单
@@ -63,7 +63,7 @@ public class LogisticsOrderApplicationService {
             log.info("【创建物流订单】智能分配仓库，warehouseId={}", warehouseId);
         }
 
-        // 3. 计算运费（如果未提供）
+        // 3. 计算运费（如果未提供)
         if (request.getFreightAmount() == null) {
             BigDecimal freightAmount = calculateFreight(request);
             request.setFreightAmount(freightAmount);

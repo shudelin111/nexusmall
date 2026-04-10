@@ -1,0 +1,126 @@
+# =====================================================
+# NexusMall Third-Party Service - Development Environment Configuration
+# 第三方服务集成 - 开发环境配置
+# =====================================================
+# Data ID: nexusmall-third-party-dev.yaml
+# Group: MALL_GROUP
+# Namespace: dev
+# Profile: dev
+# 用途：开发环境专属配置（优先级高于 nexusmall-third-party.yaml）
+# 说明：
+# - 此文件仅包含开发环境特有的差异化配置
+# - 共享配置已在 nexusmall-common*.yaml 中定义
+# - 业务通用配置已在 nexusmall-third-party.yaml 中定义
+# =====================================================
+
+# ===============================
+# Redis 配置（开发环境）
+# ===============================
+spring:
+  redis:
+    host: ${REDIS_HOST:10.10.1.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
+    password: ${REDIS_PASSWORD:}
+    timeout: 3000ms
+
+  # Spring Cloud 配置（开发环境）
+  cloud:
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
+        port: ${SENTINEL_TRANSPORT_PORT:8719}
+
+  # Kafka 配置（开发环境）
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
+
+# ===============================
+# RocketMQ 配置（开发环境）
+# ===============================
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
+  producer:
+    group: third-party-producer-group-dev
+
+# ===============================
+# Seata 分布式事务配置（开发环境，默认禁用）
+# ===============================
+seata:
+  enabled: false
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      cluster: default
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      data-id: seataServer.properties
+
+# ===============================
+# MinIO 对象存储配置（开发环境）
+# ===============================
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:minioadmin}
+  secret-key: ${MINIO_SECRET_KEY:minioadmin}
+
+# ===============================
+# 第三方服务业务配置（开发环境）
+# ===============================
+third-party:
+  sms:
+    aliyun:
+      access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+      access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+  
+  storage:
+    minio:
+      endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+      access-key: ${MINIO_ACCESS_KEY:minioadmin}
+      secret-key: ${MINIO_SECRET_KEY:minioadmin}
+    aliyun-oss:
+      endpoint: ${ALIYUN_OSS_ENDPOINT:}
+      access-key-id: ${ALIYUN_ACCESS_KEY_ID:}
+      access-key-secret: ${ALIYUN_ACCESS_KEY_SECRET:}
+      bucket-name: ${ALIYUN_OSS_BUCKET:}
+
+# ===============================
+# SpringDoc OpenAPI 文档配置（开发环境）
+# ===============================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+# Kafka 日志收集开关（开发环境默认关闭）
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# 日志文件路径配置（开发环境）
+# ===============================
+logging:
+  file:
+    path: ./logs
+
+# ===============================
+# Zipkin 链路追踪配置（开发环境）
+# ===============================
+zipkin:
+  enabled: false
+  base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}

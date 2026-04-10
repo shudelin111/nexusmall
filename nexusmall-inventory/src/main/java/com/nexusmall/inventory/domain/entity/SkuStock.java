@@ -45,7 +45,7 @@ public class SkuStock implements Serializable {
     private Integer stock;
 
     /**
-     * 锁定库存数量（下单后锁定）
+     * 锁定库存数量（下单后锁指定
      */
     private Integer lockedStock;
 

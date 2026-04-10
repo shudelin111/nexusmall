@@ -24,7 +24,7 @@ public class SeataHandlerInterceptor implements HandlerInterceptor {
         String xid = request.getHeader("XID");
         if (xid != null && !xid.isEmpty()) {
             RootContext.bind(xid);
-            log.info("====== Product 服务从 HTTP Header 中绑定 XID: {} ======", xid);
+            log.info("====== Product 服务：HTTP Header 中绑定 XID: {} ======", xid);
         } else {
             log.info("====== Product 服务未从 HTTP Header 中找到 XID ======");
         }

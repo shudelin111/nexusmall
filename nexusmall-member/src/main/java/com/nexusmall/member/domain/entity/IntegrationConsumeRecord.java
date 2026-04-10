@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
  * <p>
  * 业界标准：
  * - 记录每次积分兑换的详细信息
- * - 支持兑换商品/优惠券/现金等
+ * - 支持兑换商品/优惠券/现金
  * </p>
  *
  * @author shudl
@@ -51,7 +51,7 @@ public class IntegrationConsumeRecord {
     private String consumeType;
 
     /**
-     * 兑换对象 ID（如优惠券ID/商品ID）
+     * 兑换对象 ID（如优惠券ID/商品id)
      */
     private Long objectId;
 

@@ -18,10 +18,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * 秒杀商品服务实现类
  * <p>
- * 业界标准实现：
- * - Redis预减库存（高性能）
+ * 业界标准实现类
+ * - Redis预减库存（高性能)
  * - 分布式锁防超卖
- * - 数据库乐观锁最终一致性
+ * - 数据库乐观锁最终一一致性
  * </p>
  *
  * @author shudl
@@ -38,7 +38,7 @@ public class FlashSaleItemServiceImpl extends ServiceImpl<FlashSaleItemMapper, F
     public List<FlashSaleItem> listActiveItems() {
         log.info("查询活动中的秒杀商品列表");
         
-        // 查询所有秒杀商品（活动状态由 FlashSale 控制，这里只返回商品列表）
+        // 查询所有秒杀商品（活动状态由 FlashSale 控制，这里只返回商品列表)
         LambdaQueryWrapper<FlashSaleItem> wrapper = new LambdaQueryWrapper<>();
         wrapper.gt(FlashSaleItem::getStock, 0)
                .orderByDesc(FlashSaleItem::getSortOrder);
@@ -51,7 +51,7 @@ public class FlashSaleItemServiceImpl extends ServiceImpl<FlashSaleItemMapper, F
     public boolean seckill(Long skuId, Long userId) {
         log.info("秒杀下单: skuId={}, userId={}", skuId, userId);
         
-        // 1. 检查用户是否已购买（防止重复秒杀）
+        // 1. 检查用户是否已购买（防止重复秒秒杀
         String userKey = "seckill:user:" + skuId + ":" + userId;
         Boolean hasPurchased = redisTemplate.hasKey(userKey);
         if (Boolean.TRUE.equals(hasPurchased)) {
@@ -90,7 +90,7 @@ public class FlashSaleItemServiceImpl extends ServiceImpl<FlashSaleItemMapper, F
             boolean success = this.updateById(item);
             
             if (success) {
-                // 4. 标记用户已购买（设置过期时间为24小时）
+                // 4. 标记用户已购买（设置过期时时间4小时间
                 redisTemplate.opsForValue().set(userKey, "1", 24, TimeUnit.HOURS);
                 
                 log.info("秒杀成功: skuId={}, userId={}, 剩余库存={}", skuId, userId, item.getStock() - 1);
@@ -102,7 +102,7 @@ public class FlashSaleItemServiceImpl extends ServiceImpl<FlashSaleItemMapper, F
             } else {
                 // 数据库更新失败，恢复Redis计数
                 redisTemplate.opsForValue().increment(stockKey);
-                log.error("秒杀数据库更新失败: skuId={}", skuId);
+                log.error("秒杀数据库更新失败 skuId={}", skuId);
                 return false;
             }
             

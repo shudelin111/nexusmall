@@ -23,12 +23,12 @@ public class HotSearchService {
     private final StringRedisTemplate redisTemplate;
     
     /**
-     * Redis Key: 热门搜索词 ZSET
+     * Redis Key: 热门搜索：ZSET
      */
     private static final String HOT_SEARCH_KEY = "search:hot:keywords";
     
     /**
-     * 保留最近 N 小时的热门搜索数据
+     * 保留最多N 小时的热门搜索数量
      */
     private static final long TTL_HOURS = 24;
 
@@ -38,7 +38,7 @@ public class HotSearchService {
 
     @PostConstruct
     public void init() {
-        // 设置过期时间（24小时自动清理）
+        // 设置过期时间 24小时自动清理
         redisTemplate.expire(HOT_SEARCH_KEY, TTL_HOURS, TimeUnit.HOURS);
     }
 
@@ -90,9 +90,9 @@ public class HotSearchService {
     }
 
     /**
-     * 获取热门搜索词 Top N（简化版，只返回关键词）
+     * 获取热门搜索 Top N（简化版，只返回关键词）
      *
-     * @param topN 前 N 个
+     * @param topN Top N 数量
      * @return 关键词列表
      */
     public List<String> getTopKeywords(int topN) {
@@ -103,7 +103,7 @@ public class HotSearchService {
     }
 
     /**
-     * 清空热门搜索统计（管理后台用）
+     * 清空热门搜索统计（管理后台调用）
      */
     public void clearHotKeywords() {
         redisTemplate.delete(HOT_SEARCH_KEY);

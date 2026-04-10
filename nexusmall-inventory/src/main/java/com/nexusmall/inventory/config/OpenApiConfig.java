@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * OpenAPI 3.0 配置类 (SpringDoc + Knife4j)
+ * OpenAPI 3.0 配置类(SpringDoc + Knife4j)
  * <p>
  * 业界标准配置,遵循 OpenAPI 3.0 规范
  * 官方文档: https://springdoc.org/

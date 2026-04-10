@@ -40,7 +40,7 @@ public class IntegrationChangeHistory {
     private Long memberId;
 
     /**
-     * 变化类型：0=增加，1=减少
+     * 变化类型 0=增加 1=减少
      */
     private Integer changeType;
 

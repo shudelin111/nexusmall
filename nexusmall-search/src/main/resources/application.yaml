@@ -24,7 +24,9 @@ spring:
   lifecycle:
     timeout-per-shutdown-phase: 30s
   elasticsearch:
-    uris: ${ELASTICSEARCH_URIS:http://127.0.0.1:9200}
+    uris: ${ELASTICSEARCH_URIS:http://es-cluster-es-http.nexusmall-infra.svc:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:G2M9CI4OHL1T9E4j123vIq9M} # 建议用环境变量或 Nacos 秘钥存放你获取的新密码
   # Redis 缓存配置（搜索建议缓存）
   cache:
     type: redis
@@ -35,6 +37,10 @@ spring:
       cache-null-values: false  # 不缓存空值
 
 nexusmall:
+  # Kafka 日志收集配置（生产级标准）
+  logging:
+    kafka:
+      enabled: true  # 启用 Kafka 日志收集到 ELK
   search:
     index-alias: nexusmall_product
     default-page-no: 1

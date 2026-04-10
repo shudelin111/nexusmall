@@ -7,7 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
- * RocketMQ 消息生产者
+ * RocketMQ 消息生生产者
  */
 @Slf4j
 @Service

@@ -7,7 +7,7 @@ import com.nexusmall.auth.domain.entity.Permission;
 import com.nexusmall.auth.domain.entity.Role;
 import com.nexusmall.auth.domain.entity.User;
 import com.nexusmall.common.constant.ErrorMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

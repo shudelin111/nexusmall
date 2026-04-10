@@ -1,0 +1,4 @@
+# Common Database 模块自动配置
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.nexusmall.common.database.config.MybatisPlusConfig,\
+com.nexusmall.common.database.handler.AutoFillMetaObjectHandler

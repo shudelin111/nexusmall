@@ -9,6 +9,7 @@ import com.nexusmall.auth.interfaces.dto.AuthResponse;
 import com.nexusmall.auth.interfaces.dto.RegisterRequest;
 import com.nexusmall.auth.interfaces.dto.UserUpdateRequest;
 import com.nexusmall.common.annotation.ApiVersion;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.extern.slf4j.Slf4j;
@@ -48,7 +49,7 @@ public class AuthController {
     @PostMapping(value = "/login", headers = "X-API-Version=v1")
     public Result<AuthResponse> login(@RequestBody AuthRequest request) {
         log.info("收到登录请求，username: {}", request.getUsername());
-        
+
         AuthResponse response = authService.login(request);
         log.info("用户登录成功，username: {}", request.getUsername());
         return Result.success(response);
@@ -88,19 +89,19 @@ public class AuthController {
     @PostMapping(value = "/refresh", headers = "X-API-Version=v1")
     public Result<Map<String, Object>> refreshToken(@RequestBody Map<String, String> request) {
         String refreshToken = request.get("refreshToken");
-        
+
         if (refreshToken == null || refreshToken.isEmpty()) {
             log.warn("Refresh Token 不能为空");
-            return Result.failure("400", "Refresh Token 不能为空");
+            return Result.failure(ResultCode.PARAM_INVALID);
         }
-        
+
         log.info("收到刷新 Token 请求");
         String newAccessToken = authService.refreshAccessToken(refreshToken);
-        
+
         Map<String, Object> response = new LinkedHashMap<>();
         response.put("accessToken", newAccessToken);
         response.put("expireTime", System.currentTimeMillis() + 1800000L); // 30分钟
-        
+
         log.info("Token 刷新成功");
         return Result.success(response);
     }
@@ -121,13 +122,13 @@ public class AuthController {
     public Result<Boolean> register(@Validated @RequestBody RegisterRequest request) {
         long startTime = System.currentTimeMillis();
         log.info("【管理操作】注册用户: {}", request.getUsername());
-        
+
         try {
             User user = new User();
             BeanUtils.copyProperties(request, user);
-            
+
             boolean success = authService.register(user, request.getRoleIds());
-            
+
             // 记录审计日志
             AdminAuditLog auditLog = auditService.createSuccessLog(
                 "REGISTER_USER",
@@ -141,7 +142,7 @@ public class AuthController {
                 startTime
             );
             auditService.logAudit(auditLog);
-            
+
             return Result.success(success);
         } catch (Exception e) {
             // 记录失败审计日志
@@ -158,7 +159,7 @@ public class AuthController {
                 startTime
             );
             auditService.logAudit(auditLog);
-            
+
             throw e;
         }
     }
@@ -179,16 +180,16 @@ public class AuthController {
             @PathVariable Long userId,
             @Validated @RequestBody UserUpdateRequest request) {
         log.info("管理后台更新用户信息: userId={}", userId);
-        
+
         User user = new User();
         user.setId(userId);
         BeanUtils.copyProperties(request, user);
-        
+
         // 转换 status 为 Integer
         if (request.getStatus() != null) {
             user.setStatus(Integer.parseInt(request.getStatus()));
         }
-        
+
         boolean success = authService.updateUser(user);
         return Result.success(success);
     }
@@ -207,10 +208,10 @@ public class AuthController {
     public Result<Boolean> deleteUser(@PathVariable Long userId) {
         long startTime = System.currentTimeMillis();
         log.info("【管理操作】删除用户: userId={}", userId);
-        
+
         try {
             boolean success = authService.deleteUser(userId);
-            
+
             // 记录审计日志
             AdminAuditLog auditLog = auditService.createSuccessLog(
                 "DELETE_USER",
@@ -224,7 +225,7 @@ public class AuthController {
                 startTime
             );
             auditService.logAudit(auditLog);
-            
+
             return Result.success(success);
         } catch (Exception e) {
             AdminAuditLog auditLog = auditService.createFailedLog(
@@ -240,7 +241,7 @@ public class AuthController {
                 startTime
             );
             auditService.logAudit(auditLog);
-            
+
             throw e;
         }
     }

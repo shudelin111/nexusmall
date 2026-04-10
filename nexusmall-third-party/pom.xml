@@ -8,24 +8,9 @@
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
-	<groupId>com.nexusmall</groupId>
 	<artifactId>nexusmall-third-party</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
 	<name>nexusmall-third-party</name>
 	<description>nexusmall-third-party</description>
-	<url/>
-	<licenses>
-		<license/>
-	</licenses>
-	<developers>
-		<developer/>
-	</developers>
-	<scm>
-		<connection/>
-		<developerConnection/>
-		<tag/>
-		<url/>
-	</scm>
 	<properties>
 		<java.version>8</java.version>
 	</properties>
@@ -63,12 +48,7 @@
 			<groupId>de.javakaffee</groupId>
 			<artifactId>kryo-serializers</artifactId>
 		</dependency>
-		<!-- FST for Redisson Codec -->
-		<dependency>
-			<groupId>de.ruedigermoeller</groupId>
-			<artifactId>fst</artifactId>
-		</dependency>
-	
+		
 		<!-- OpenFeign 服务调用 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
@@ -122,28 +102,11 @@
 			<artifactId>aliyun-java-sdk-dysmsapi</artifactId>
 		</dependency>
 
-		<!-- 公共模块 -->
+		<!-- 公共 Web 模块（已包含 core） -->
 		<dependency>
 			<groupId>com.nexusmall</groupId>
-			<artifactId>nexusmall-common</artifactId>
+			<artifactId>nexusmall-common-web</artifactId>
 			<version>${project.version}</version>
-			<exclusions>
-				<!-- 排除 MySQL 驱动 -->
-				<exclusion>
-					<groupId>mysql</groupId>
-					<artifactId>mysql-connector-java</artifactId>
-				</exclusion>
-				<!-- 排除 JDBC Starter -->
-				<exclusion>
-					<groupId>org.springframework.boot</groupId>
-					<artifactId>spring-boot-starter-jdbc</artifactId>
-				</exclusion>
-				<!-- 排除 Redisson（第三方服务不需要分布式锁） -->
-				<exclusion>
-					<groupId>org.redisson</groupId>
-					<artifactId>redisson-spring-boot-starter</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!-- Actuator 监控 -->

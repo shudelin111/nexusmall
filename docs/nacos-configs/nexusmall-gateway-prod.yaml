@@ -1,0 +1,51 @@
+# =====================================================
+# NexusMall Gateway Service - Production Environment Configuration
+# 网关服务 - 生产环境配置
+# =====================================================
+# Data ID: nexusmall-gateway-prod.yaml
+# Group: MALL_GROUP
+# Namespace: prod
+# Profile: prod
+# 用途：生产环境专属配置（优先级高于 nexusmall-gateway.yaml）
+# 说明：
+# - 此文件仅包含生产环境特有的差异化配置
+# - 共享配置已在 nexusmall-common.yaml 中定义
+# - 业务通用配置已在 nexusmall-gateway.yaml 中定义
+# =====================================================
+
+# ===============================
+# Spring Cloud 配置（生产环境）
+# ===============================
+spring:
+  # Sleuth 链路追踪配置（生产环境使用 Common 默认值 0.1）
+
+# ===============================
+# 日志配置（生产环境）
+# ===============================
+logging:
+  file:
+    path: /data/logs/nexusmall
+
+# ===============================
+# Zipkin 链路追踪配置（生产环境）
+# ===============================
+zipkin:
+  # 生产环境启用
+  enabled: true
+  # Zipkin Server 地址（K8s 内部服务地址）
+  base-url: ${ZIPKIN_BASE_URL:http://zipkin.prod.svc:9411}
+
+# ===============================
+# Kafka 日志收集开关（生产环境启用）
+# ===============================
+nexusmall:
+  logging:
+    kafka:
+      enabled: true
+
+# ===============================
+# Knife4j API 文档配置（生产环境）
+# ===============================
+knife4j:
+  gateway:
+    enabled: false

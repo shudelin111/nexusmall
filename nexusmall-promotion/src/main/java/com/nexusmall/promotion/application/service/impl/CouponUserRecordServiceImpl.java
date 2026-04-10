@@ -30,7 +30,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
 
     @Override
     public List<UserCouponVO> listUserCoupons(Long userId, Integer useStatus) {
-        log.info("查询用户优惠券列表: userId={}, useStatus={}", userId, useStatus);
+        log.info("查询用户优惠券列表 userId={}, useStatus={}", userId, useStatus);
         
         LambdaQueryWrapper<CouponUserRecord> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(CouponUserRecord::getUserId, userId);
@@ -49,7 +49,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean useCoupon(Long recordId, Long orderId) {
-        log.info("核销优惠券: recordId={}, orderId={}", recordId, orderId);
+        log.info("核销优惠券 recordId={}, orderId={}", recordId, orderId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
@@ -72,7 +72,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean lockCoupon(Long recordId) {
-        log.info("锁定优惠券: recordId={}", recordId);
+        log.info("锁定优惠券 recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
@@ -82,9 +82,9 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
         boolean success = this.update(wrapper);
         
         if (success) {
-            log.info("优惠券锁定成功: recordId={}", recordId);
+            log.info("优惠券锁定成功 recordId={}", recordId);
         } else {
-            log.warn("优惠券锁定失败: recordId={}", recordId);
+            log.warn("优惠券锁定失败 recordId={}", recordId);
         }
         
         return success;
@@ -93,7 +93,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean releaseCoupon(Long recordId) {
-        log.info("释放优惠券: recordId={}", recordId);
+        log.info("释放优惠券 recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)
@@ -103,9 +103,9 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
         boolean success = this.update(wrapper);
         
         if (success) {
-            log.info("优惠券释放成功: recordId={}", recordId);
+            log.info("优惠券释放成功 recordId={}", recordId);
         } else {
-            log.warn("优惠券释放失败: recordId={}", recordId);
+            log.warn("优惠券释放失败 recordId={}", recordId);
         }
         
         return success;
@@ -114,7 +114,7 @@ public class CouponUserRecordServiceImpl extends ServiceImpl<CouponUserRecordMap
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean refundCoupon(Long recordId) {
-        log.info("回退优惠券: recordId={}", recordId);
+        log.info("回退优惠券 recordId={}", recordId);
         
         LambdaUpdateWrapper<CouponUserRecord> wrapper = new LambdaUpdateWrapper<>();
         wrapper.eq(CouponUserRecord::getId, recordId)

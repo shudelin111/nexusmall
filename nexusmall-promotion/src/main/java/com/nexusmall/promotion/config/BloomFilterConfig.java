@@ -43,7 +43,7 @@ public class BloomFilterConfig {
             0.0001      // 误判率（0.01%）
         );
         
-        log.info("【布隆过滤器初始化】秒杀商品布隆过滤器创建成功，预期容量=100万，误判率=0.01%");
+        log.info("【布隆过滤器初始化】秒杀商品布隆过滤器创建成功，预期容量=100万，误判率0.01%");
         return bloomFilter;
     }
 
@@ -64,7 +64,7 @@ public class BloomFilterConfig {
             0.0001     // 误判率（0.01%）
         );
         
-        log.info("【布隆过滤器初始化】优惠券布隆过滤器创建成功，预期容量=10万，误判率=0.01%");
+        log.info("【布隆过滤器初始化】优惠券布隆过滤器创建成功，预期容量=10万，误判率0.01%");
         return bloomFilter;
     }
 }

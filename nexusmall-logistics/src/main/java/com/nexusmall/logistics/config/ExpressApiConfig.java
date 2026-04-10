@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component;
  * 业界标准：
  * - 支持多家快递公司API对接
  * - 配置化API密钥和端点
- * - 便于切换物流服务商
+ * - 便于切换物流服务提供商
  * </p>
  *
  * @author shudl

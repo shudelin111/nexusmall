@@ -1,0 +1,41 @@
+﻿* - 存储用户业务数据（昵?头像/会员等级等）
+* - 定义会员等级体系（普?黄金/铂金/钻石?
+* - 会员档案管理（昵?头像/生日/性别)
+* 变化类型?=增加?=减少
+* 检?Refresh Token 是否在黑名单号
+* 检?Token 是否在黑名单号
+* 快?00 API配置
+* 逻辑删除?=未删除，1=已删除
+* 默认模板缓存TTL（秒），默认2小时（访问频率高?
+* 热门搜索词服?
+* 通知类型?-优惠券到期2-秒杀开始3-活动提醒 4-系统公告
+* 通知渠道?-站内信2-短信 3-邮件 4-APP推送
+* 统计类型?-优惠券2-秒杀 3-满减 4-综合
+* 统一管理所?Kafka/RocketMQ Topic 名称
+* 退货应用服?
+* 退款状态：0=待审核，1=审核通过?=审核拒绝)=退款中=退款成功，5=退款失?
+* 用从HTTP Header 中提?XID 并绑定到 RootContext
+* 用于限制 Token 的使用范?
+* 优惠券类型?-满减 2-折扣 3-立减
+* 支付宝支付配?
+// 1. 检查是否满足包邮条?
+// 2. 将所?JTI 加入黑名单
+// 2. 设置指定地址为默?
+// 请求完成后清?XID
+@Schema(description = "优惠券类型?-满减 2-折扣 3-立减")
+{} ======", xid);
+{}", userId);
+existingUser.setStatus(0); // 0=禁用（逻辑删除?
+getStatus, 1)  // 进行?
+log.error("优惠券领取失? couponId={}, userId={}", couponId, userId);
+log.error("站内信发送失? userId={}", userId);
+log.info("[索引操作-{}] 开始批量清除商品索? count={}, operator={}, reason={}",
+log.info("[索引操作-{}] 开始清除商品索? productId={}", operationId, command.getProductId());
+log.info("【布隆过滤器初始化】秒杀商品布隆过滤器创建成功，预期容量=100万，误判?0.01%");
+log.info("【布隆过滤器初始化】优惠券布隆过滤器创建成功，预期容量=10万，误判?0.01%");
+log.info("【应用服?创建物流订单】orderSn={}, memberId={}",
+log.info("【应用服?计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
+log.info("【应用服?提交退货申请】userId={}, orderSn={}", userId, request.getOrderSn());
+log.info("批量标记为已读完? userId={}, 影响行数={}", userId, count);
+log.info("已清理过?Refresh Token，数量 {}", count);
+按分数降序获取前 N 个元?

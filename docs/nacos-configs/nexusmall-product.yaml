@@ -1,225 +1,76 @@
 # =====================================================
-# NexusMall 商品服务配置（Nacos 托管）
+# NexusMall Product Service - Nacos Configuration
+# 商品服务 Nacos 托管配置
 # =====================================================
-# 说明：此文件存储在 Nacos 配置中心，Data ID 为 nexusmall-product.yaml
-# 用途：Product 服务的通用业务配置（所有环境共享）
+# 配置说明：
+# - Data ID: nexusmall-product.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
 # =====================================================
 
 # ===============================
 # Spring 应用配置
 # ===============================
 spring:
-  # ------------------------------
-  # 数据源配置（HikariCP 连接池）
-  # ------------------------------
-  datasource:
-    # JDBC 驱动类名
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    # 数据源类型：HikariCP
-    type: com.zaxxer.hikari.HikariDataSource
-    # JDBC 连接 URL
-    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_product?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    username: root
-    password: "123456"
-    # HikariCP 连接池参数
-    hikari:
-      minimum-idle: 5
-      maximum-pool-size: 20
-      idle-timeout: 30000
-      max-lifetime: 1800000
-      connection-timeout: 30000
-      connection-test-query: SELECT 1
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
   
-  # ------------------------------
-  # Redis 缓存配置
-  # ------------------------------
+  # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    host: ${REDIS_HOST:10.10.1.1}
-    port: ${REDIS_PORT:6379}
-    database: 0
-    password: "123456"
-    timeout: 5000ms
+    timeout: 5000
     lettuce:
       pool:
         max-active: 16
         max-idle: 8
         min-idle: 0
         max-wait: 1000ms
-  
-  # ------------------------------
+
   # Spring Cloud 配置
-  # ------------------------------
   cloud:
-    # OpenFeign 服务调用配置
-    openfeign:
-      sentinel:
-        enabled: true
-      client:
-        config:
-          default:
-            connectTimeout: 5000
-            readTimeout: 5000
-      httpclient:
-        enabled: true
-      compression:
-        request:
-          enabled: true
-        response:
-          enabled: true
-    
-    # Sentinel 熔断限流配置
     sentinel:
-      # 取消控制台懒加载（启动时立即注册到 Dashboard）
-      eager: true
-      transport:
-        dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-        port: 8719
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
             dataId: nexusmall-product-flow-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: flow
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-        
+
         # 熔断降级规则数据源
         ds2:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
             dataId: nexusmall-product-degrade-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: degrade
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-        
+
         # 系统自适应保护规则数据源
         ds3:
           nacos:
-            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-            namespace: ""
             dataId: nexusmall-product-system-rule.json
-            groupId: DEFAULT_GROUP
+            groupId: MALL_GROUP
             rule-type: system
             data-type: json
             username: ${NACOS_USERNAME:nacos}
             password: ${NACOS_PASSWORD:nacos}
-    
-    # Kafka 配置（用于日志收集）
-    kafka:
-      bootstrap-servers: mall-kafka-ok-kafka-bootstrap.kafka.svc.cluster.local:9092
-      producer:
-        acks: 1
-        retries: 3
-        batch-size: 16384
-        buffer-memory: 33554432
-        key-serializer: org.apache.kafka.common.serialization.StringSerializer
-        value-serializer: org.apache.kafka.common.serialization.StringSerializer
-
-# ===============================
-# MyBatis-Plus ORM 配置
-# ===============================
-mybatis-plus:
-  mapper-locations: classpath*:/mapper/**/*.xml
-  type-aliases-package: com.nexusmall.product.entity
-  configuration:
-    map-underscore-to-camel-case: true
-    cache-enabled: false
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-  global-config:
-    db-config:
-      id-type: auto
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-
-# ===============================
-# RocketMQ 消息队列配置
-# ===============================
-rocketmq:
-  name-server: ${ROCKETMQ_NAME_SERVER:10.10.1.1:9876}
-  producer:
-    group: product-producer-group
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
 
 # ===============================
 # Seata 分布式事务配置
 # ===============================
 seata:
-  enabled: true
   application-id: nexusmall-product
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
-  registry:
-    type: nacos
-    nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
-      cluster: default
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      application: seata-server
-  config:
-    type: nacos
-    nacos:
-      server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-      namespace: ""
-      group: SEATA_GROUP
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      data-id: seataServer.properties
 
 # ===============================
-# Actuator 监控端点配置
+# SpringDoc + Knife4j API 文档配置
 # ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: "*"
-  endpoint:
-    health:
-      show-details: always
-    info:
-      enabled: true
-  info:
-    env:
-      enabled: true
-
-# ===============================
-# 日志级别配置
-# ===============================
-logging:
-  level:
-    root: INFO
-    io.seata: INFO
-    com.alibaba.csp.sentinel: DEBUG
-    com.nexusmall.product: DEBUG
-    com.nexusmall.common: DEBUG
-    com.nexusmall.product.dao: DEBUG
-
-# ===============================
-# Kafka 日志收集开关（Logback Appender）
-# ===============================
-KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
-
-# ===============================
-# 应用元信息配置
-# ===============================
-info:
-  app:
-    name: nexusmall-product
-    description: NexusMall 商品服务
-    version: 0.0.1-SNAPSHOT
-  java.version: 1.8
+springdoc:
+  packages-to-scan: com.nexusmall.product.controller
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.nexusmall.product.controller

@@ -1,9 +1,10 @@
 package com.nexusmall.product.interfaces.controller;
 
 import com.nexusmall.common.annotation.ApiVersion;
+import com.nexusmall.common.annotation.AuditLog;
 import com.nexusmall.common.constant.LogMessageConstants;
 import com.nexusmall.common.constant.ResponseMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.enums.UserBehaviorType;
 import com.nexusmall.common.message.ProductIndexSyncEvent;
 import com.nexusmall.common.message.ProductIndexSyncEventType;
@@ -130,7 +131,7 @@ public class ProductController {
                 UserBehaviorVO behaviorVO = UserBehaviorVO.builder()
                     .userId(userId)
                     .behaviorType(UserBehaviorType.SEARCH_PRODUCT.getCode())
-                    .objectId(null) // 搜索行为没有具体的对象 ID
+                    .objectId(null) // 搜索行为没有具体的对象ID
                     .objectType("keyword")
                     .extraData("{\"keyword\":\"" + keyword + "\"}") // 将搜索词存入 extraData
                     .occurTime(LocalDateTime.now())
@@ -150,6 +151,7 @@ public class ProductController {
     /**
      * 新增商品
      */
+    @AuditLog(module = "商品管理", operation = "新增商品")
     @PostMapping(value = "/", headers = "X-API-Version=v1")
     public Result<Integer> saveProduct(@RequestBody ProductVO productVO) {
         log.info("新增商品，productName: {}, categoryId: {}", productVO.getSkuName(), productVO.getCategoryId());
@@ -160,13 +162,14 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.ADD_SUCCESS, result);
         } else {
             log.error("商品添加失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
     /**
      * 更新商品
      */
+    @AuditLog(module = "商品管理", operation = "更新商品")
     @PutMapping(value = "/{skuId}", headers = "X-API-Version=v1")
     public Result<Integer> updateProduct(@PathVariable Long skuId, @RequestBody ProductVO productVO) {
         log.info("更新商品，skuId: {}, productName: {}", skuId, productVO.getSkuName());
@@ -178,13 +181,14 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.UPDATE_SUCCESS, result);
         } else {
             log.error("商品更新失败，skuId: {}", productVO.getSkuId());
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
     /**
      * 删除商品
      */
+    @AuditLog(module = "商品管理", operation = "删除商品")
     @DeleteMapping(value = "/{skuId}", headers = "X-API-Version=v1")
     public Result<Integer> deleteProduct(@PathVariable Long skuId) {
         log.info("删除商品，skuId: {}", skuId);
@@ -195,7 +199,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.DELETE_SUCCESS, result);
         } else {
             log.error("商品删除失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -215,7 +219,7 @@ public class ProductController {
             log.error(LogMessageConstants.Product.XID_NOT_RECEIVED);
         }
         boolean result = productService.decreaseStock(productId, count);
-        return result ? Result.success(ResponseMessageConstants.Product.STOCK_DECREASE_SUCCESS, true) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result ? Result.success(ResponseMessageConstants.Product.STOCK_DECREASE_SUCCESS, true) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -232,7 +236,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.STOCK_INCREASE_SUCCESS, true);
         } else {
             log.error("库存增加失败，productId: {}, count: {}", productId, count);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -262,7 +266,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.PUT_ON_SALE_SUCCESS, true);
         } else {
             log.error("商品上架失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -279,7 +283,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.PUT_OFF_SALE_SUCCESS, true);
         } else {
             log.error("商品下架失败，skuId: {}", skuId);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -295,7 +299,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.BATCH_DECREASE_STOCK_SUCCESS, true);
         } else {
             log.error("批量扣减库存失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -311,7 +315,7 @@ public class ProductController {
             return Result.success(ResponseMessageConstants.Product.BATCH_INCREASE_STOCK_SUCCESS, true);
         } else {
             log.error("批量增加库存失败");
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
     private void publishIndexSyncEvent(Long productId, ProductIndexSyncEventType eventType) {

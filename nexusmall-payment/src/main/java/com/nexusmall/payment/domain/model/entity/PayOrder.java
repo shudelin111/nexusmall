@@ -29,12 +29,12 @@ public class PayOrder implements Serializable {
     private Long id;
 
     /**
-     * 支付单号（业务唯一标识）
+     * 支付单号（业务唯一标标识)
      */
     private String paymentNo;
 
     /**
-     * 订单号（关联订单服务）
+     * 订单号（关联订单服务：
      */
     private String orderNo;
 
@@ -79,12 +79,12 @@ public class PayOrder implements Serializable {
     private String channelName;
 
     /**
-     * 第三方交易号（支付宝/微信返回）
+     * 第三方交易号（支付宝/微信返回写
      */
     private String tradeNo;
 
     /**
-     * 支付状态：0=待支付，1=支付中，2=支付成功，3=支付失败，4=已关闭，5=已退款
+     * 支付状态：0=待支付，1=支付中，2=支付成功后的处理=支付失败时的处理=已关闭，5=已退款
      */
     private Integer status;
 
@@ -99,7 +99,7 @@ public class PayOrder implements Serializable {
     private LocalDateTime expireTime;
 
     /**
-     * 第三方支付回调原始数据
+     * 第三方支付回调原始数量
      */
     private String callbackContent;
 
@@ -129,7 +129,7 @@ public class PayOrder implements Serializable {
     private String userAgent;
 
     /**
-     * 逻辑删除：0=未删除，1=已删除
+     * 逻辑删除 0=未删除，1=已删除
      */
     @TableLogic
     private Integer deleted;

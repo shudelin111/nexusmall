@@ -54,11 +54,23 @@ spring:
         max-retry: 3
         
         # ===============================
-        # 共享配置（所有服务共用）
+        # 共享配置（按需加载，符合最小权限原则）
         # ===============================
         shared-configs:
-          # 1. 平台公共配置
-          - data-id: nexusmall-common.yaml
+          # 1. 核心配置（Jackson、文件上传、Tomcat）
+          - data-id: nexusmall-common-core.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 2. 数据库配置（MyBatis-Plus、连接池）
+          - data-id: nexusmall-common-database.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 3. Web 组件配置（Actuator、日志）
+          - data-id: nexusmall-common-web.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # 4. MQ 配置（RocketMQ - 用于发送用户注册事件）
+          - data-id: nexusmall-common-mq.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
         

@@ -2,7 +2,7 @@ package com.nexusmall.gateway.exception;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.GatewayException;
 import com.nexusmall.common.vo.Result;
 import lombok.extern.slf4j.Slf4j;
@@ -53,7 +53,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
         // 1. JWT Token 相关异常 - 返回 401
         if (isJwtException(ex)) {
             httpStatus = HttpStatus.UNAUTHORIZED;
-            result = Result.failure(CommonResultCode.UNAUTHORIZED);
+            result = Result.failure(ResultCode.UNAUTHORIZED);
             log.warn("JWT Token 验证失败：path={}, method={}, error={}", 
                     exchange.getRequest().getPath(), 
                     exchange.getRequest().getMethod(),
@@ -73,7 +73,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
         // 3. 其他系统异常 - 返回 500
         else {
             httpStatus = HttpStatus.INTERNAL_SERVER_ERROR;
-            result = Result.failure(CommonResultCode.SYSTEM_ERROR);
+            result = Result.failure(ResultCode.SYSTEM_ERROR);
             log.error("系统异常：path={}, method={}, error={}", 
                     exchange.getRequest().getPath(),
                     exchange.getRequest().getMethod(),
@@ -102,7 +102,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
             return false;
         }
         GatewayException ge = (GatewayException) ex;
-        return CommonResultCode.UNAUTHORIZED.getErrorCode().equals(ge.getCode());
+        return ResultCode.UNAUTHORIZED.getErrorCode().equals(ge.getCode());
     }
 
     /**
@@ -122,13 +122,13 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
                 return HttpStatus.INTERNAL_SERVER_ERROR;
             }
             
-            if (CommonResultCode.UNAUTHORIZED.getErrorCode().equals(code)) {
+            if (ResultCode.UNAUTHORIZED.getErrorCode().equals(code)) {
                 return HttpStatus.UNAUTHORIZED;
-            } else if (CommonResultCode.FORBIDDEN.getErrorCode().equals(code)) {
+            } else if (ResultCode.FORBIDDEN.getErrorCode().equals(code)) {
                 return HttpStatus.FORBIDDEN;
-            } else if (CommonResultCode.NOT_FOUND.getErrorCode().equals(code)) {
+            } else if (ResultCode.NOT_FOUND.getErrorCode().equals(code)) {
                 return HttpStatus.NOT_FOUND;
-            } else if (CommonResultCode.PARAM_INVALID.getErrorCode().equals(code)) {
+            } else if (ResultCode.PARAM_INVALID.getErrorCode().equals(code)) {
                 return HttpStatus.BAD_REQUEST;
             } else {
                 return HttpStatus.INTERNAL_SERVER_ERROR;
@@ -154,15 +154,15 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
         String message = ge.getMessage() != null ? ge.getMessage() : "请求失败";
         
         if (httpStatus == HttpStatus.BAD_REQUEST) {
-            return Result.failure(CommonResultCode.PARAM_INVALID);
+            return Result.failure(ResultCode.PARAM_INVALID);
         } else if (httpStatus == HttpStatus.UNAUTHORIZED) {
-            return Result.failure(CommonResultCode.UNAUTHORIZED);
+            return Result.failure(ResultCode.UNAUTHORIZED);
         } else if (httpStatus == HttpStatus.FORBIDDEN) {
-            return Result.failure(CommonResultCode.FORBIDDEN);
+            return Result.failure(ResultCode.FORBIDDEN);
         } else if (httpStatus == HttpStatus.NOT_FOUND) {
-            return Result.failure(CommonResultCode.NOT_FOUND);
+            return Result.failure(ResultCode.NOT_FOUND);
         } else {
-            return Result.failure(String.valueOf(httpStatus.value()), message);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
     
@@ -183,8 +183,7 @@ public class GlobalErrorWebExceptionHandler implements ErrorWebExceptionHandler 
         } catch (JsonProcessingException e) {
             // ObjectMapper 序列化失败属于系统异常，记录日志后抛出网关业务异常
             log.error("JSON 序列化失败，result={}", result, e);
-            throw new GatewayException(CommonResultCode.JSON_SERIALIZE_FAILED.getErrorCode(), 
-                    CommonResultCode.JSON_SERIALIZE_FAILED.getMessage(), e);
+            throw new GatewayException(ResultCode.JSON_SERIALIZE_FAILED, e);
         }
         
         DataBufferFactory bufferFactory = response.bufferFactory();

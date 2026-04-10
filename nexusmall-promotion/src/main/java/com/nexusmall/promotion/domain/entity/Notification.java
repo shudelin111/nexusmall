@@ -35,19 +35,19 @@ public class Notification implements Serializable {
     private Long id;
 
     /**
-     * 用户ID（0表示全员通知）
+     * 用户id 0表示全员通知
      */
     @Schema(description = "用户ID")
     private Long userId;
 
     /**
-     * 通知类型：1-优惠券到期 2-秒杀开始 3-活动提醒 4-系统公告
+     * 通知类型 1-优惠券到期 2-秒杀开始 3-活动提醒 4-系统公告
      */
     @Schema(description = "通知类型")
     private Integer type;
 
     /**
-     * 通知渠道：1-站内信 2-短信 3-邮件 4-APP推送
+     * 通知渠道 1-站内信 2-短信 3-邮件 4-APP推送
      */
     @Schema(description = "通知渠道")
     private Integer channel;
@@ -83,7 +83,7 @@ public class Notification implements Serializable {
     private Integer status;
 
     /**
-     * 是否已读：0-未读 1-已读
+     * 是否已读 0-未读 1-已读
      */
     @Schema(description = "是否已读")
     private Integer isRead;

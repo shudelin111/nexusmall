@@ -83,7 +83,7 @@ public class LogisticsOrderController {
      * @return 轨迹列表（按时间倒序）
      */
     @GetMapping(value = "/{orderId}/tracks", headers = "X-API-Version=v1")
-    @Operation(summary = "查询物流轨迹", description = "查询指定物流订单的完整轨迹链路")
+    @Operation(summary = "查询物流轨迹", description = "查询指定物流订单的完整轨迹链条")
     public Result<List<LogisticsTrack>> listTracks(
             @Parameter(description = "物流订单ID", required = true)
             @PathVariable Long orderId) {

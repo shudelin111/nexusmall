@@ -6,7 +6,7 @@ import com.nexusmall.order.domain.entity.Order;
 import com.nexusmall.order.interfaces.controller.OrderController;
 import com.nexusmall.order.interfaces.dto.OrderCreateRequest;
 import com.nexusmall.order.interfaces.dto.OrderQueryRequest;
-import com.nexusmall.order.interfaces.exception.GlobalExceptionHandler;
+import com.nexusmall.order.interfaces.exception.OrderSpecificExceptionHandler;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -41,7 +41,7 @@ class OrderControllerTest {
         OrderController controller = new OrderController();
         ReflectionTestUtils.setField(controller, "orderService", orderService);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
-                .setControllerAdvice(new GlobalExceptionHandler())
+                .setControllerAdvice(new OrderSpecificExceptionHandler())
                 .build();
     }
 

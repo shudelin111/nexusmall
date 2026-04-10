@@ -37,16 +37,16 @@ public class MinioService {
     @Value("${minio.bucket-name}")
     private String bucketName;
     
-    @Value("${minio.auto-create-bucket:true}")
+    @Value("${minio.auto-create-bucket}")
     private Boolean autoCreateBucket;
     
-    @Value("${minio.max-file-size:104857600}")
+    @Value("${minio.max-file-size}")
     private Long maxFileSize;
     
-    @Value("${minio.allowed-extensions:.jpg,.jpeg,.png,.gif,.bmp,.webp,.mp4,.avi,.mov,.pdf,.doc,.docx,.xls,.xlsx}")
+    @Value("${minio.allowed-extensions}")
     private List<String> allowedExtensions;
     
-    @Value("${minio.endpoint:http://localhost:9000}")
+    @Value("${minio.endpoint}")
     private String endpoint;
 
     public MinioService(MinioClient minioClient) {

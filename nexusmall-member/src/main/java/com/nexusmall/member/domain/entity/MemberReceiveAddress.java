@@ -65,7 +65,7 @@ public class MemberReceiveAddress {
     private String city;
 
     /**
-     * 区
+     * 区/县
      */
     private String region;
 

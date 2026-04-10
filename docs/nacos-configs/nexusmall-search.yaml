@@ -1,14 +1,12 @@
 # =====================================================
-# NexusMall 搜索服务配置
+# NexusMall Search Service - Nacos Configuration
+# 搜索服务 Nacos 托管配置
 # =====================================================
-# Data ID: nexusmall-search.yaml
-# Group: MALL_GROUP
-# Namespace: dev/test/prod（根据环境选择）
-# 用途：搜索服务专属业务配置（所有环境共享）
-# 说明：
-# - 此文件存放所有环境共享的通用配置
-# - 环境特定配置请创建 nexusmall-search-{profile}.yaml
-# - 示例：nexusmall-search-dev.yaml, nexusmall-search-test.yaml
+# 配置说明：
+# - Data ID: nexusmall-search.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
 # =====================================================
 
 # ===============================
@@ -17,57 +15,39 @@
 spring:
   # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
   
+  # Elasticsearch 配置（Search 模块核心）
+  elasticsearch:
+    # ⚠️ 注意：uris、username、password 在 nexusmall-search-{profile}.yaml 中定义
+    rest:
+      connection-timeout: 5s
+      socket-timeout: 30s
+
+  # Redis 缓存配置（搜索建议缓存）
+  cache:
+    type: redis
+    redis:
+      time-to-live: 300000  # 5分钟（毫秒）
+      key-prefix: "search:cache:"  # Key 前缀
+      use-key-prefix: true
+      cache-null-values: false  # 不缓存空值
+  
   # Redis 连接池配置（通用参数，所有环境共享）
   redis:
-    # 连接超时时间（毫秒）
-    timeout: 5000  # 5 秒
-    # Lettuce 连接池配置
+    timeout: 5000
     lettuce:
       pool:
-        # 最大活跃连接数
         max-active: 16
-        # 最大空闲连接数
         max-idle: 8
-        # 最小空闲连接数
         min-idle: 0
-        # 获取连接的最大等待时间（毫秒）
-        max-wait: 1000ms  # 1 秒
+        max-wait: 1000ms
 
   # Spring Cloud 配置
   cloud:
-    # OpenFeign 服务调用配置
-    openfeign:
-      sentinel:
-        enabled: true
-      client:
-        config:
-          default:
-            # 连接超时
-            connectTimeout: 5000
-            # 读取超时
-            readTimeout: 5000
-      compression:
-        request:
-          enabled: true
-        response:
-          enabled: true
-
-    # Sentinel 熔断限流配置（通用参数）
     sentinel:
-      # 启用 Sentinel
-      enabled: true
-      # 取消控制台懒加载（启动时立即注册到 Dashboard）
-      eager: true
-      # ⚠️ 注意：以下环境相关配置在 nexusmall-search-{profile}.yaml 中定义：
-      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
-      # - spring.cloud.sentinel.transport.port (本地通信端口)
-      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
-      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
       datasource:
         # 流控规则数据源
         ds1:
           nacos:
-            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-search-{profile}.yaml 中定义
             dataId: nexusmall-search-flow-rule.json
             groupId: MALL_GROUP
             rule-type: flow
@@ -96,46 +76,31 @@ spring:
             password: ${NACOS_PASSWORD:nacos}
 
 # ===============================
-# RocketMQ 配置（通用参数）
+# SpringDoc + Knife4j API 文档配置
 # ===============================
-rocketmq:
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-search-{profile}.yaml 中定义：
-  # - rocketmq.name-server (NameServer 地址)
-  # - rocketmq.producer.group (生产者组名称)
-  # 生产者配置（通用参数）
-  producer:
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
-
-# ===============================
-# SpringDoc + Knife4j API 文档配置（通用参数）
-# ===============================
-# ⚠️ 注意：以下环境相关配置在 nexusmall-search-{profile}.yaml 中定义：
-# - springdoc.api-docs.enabled (API 文档启用开关)
-# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
-# - knife4j.enable (Knife4j 启用开关)
-# - knife4j.production (生产模式开关)
 springdoc:
-  # OpenAPI 文档路径
-  api-docs:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /v3/api-docs
-  # Swagger UI 配置
-  swagger-ui:
-    # ⚠️ 注意：enabled 在环境特定配置中定义
-    path: /swagger-ui/index.html
-  # 扫描的包路径(所有环境相同)
-  packages-to-scan: com.nexusmall.search.controller
-  # 分组配置(微服务架构下推荐)
+  packages-to-scan: com.nexusmall.search.interfaces.rest
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.nexusmall.search.controller
+      packages-to-scan: com.nexusmall.search.interfaces.rest
 
-# Knife4j 增强配置（通用参数）
-knife4j:
-  # ⚠️ 注意：enable 和 production 在环境特定配置中定义
-  # 设置文档语言（所有环境相同）
-  setting:
-    language: zh_cn
+# ===============================
+# Search 业务配置（通用参数）
+# ===============================
+nexusmall:
+  search:
+    # 索引别名
+    index-alias: nexusmall_product
+    # 默认页码
+    default-page-no: 1
+    # 默认每页大小
+    default-page-size: 20
+    # 最大每页大小
+    max-page-size: 100
+    # 索引分片数
+    index-shards: 1
+    # 索引副本数
+    index-replicas: 1
+    # 商品同步 Topic
+    product-sync-topic: PRODUCT_INDEX_SYNC_TOPIC

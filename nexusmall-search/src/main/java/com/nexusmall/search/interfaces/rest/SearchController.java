@@ -26,7 +26,7 @@ import java.util.Map;
 @Tag(name = "商品搜索", description = "提供商品全文搜索功能")
 @Validated
 @RestController
-@RequestMapping("/")  // 根路径：Gateway已处理/service前缀
+@RequestMapping("/")  // 根路径：Gateway已处理service前缀
 public class SearchController {
 
     private final SearchFacade searchFacade;

@@ -1,0 +1,41 @@
+# EditorConfig: 统一跨编辑器的代码风格
+# https://editorconfig.org/
+
+root = true
+
+# 所有文件的默认设置
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+# Java文件特殊配置
+[*.java]
+indent_size = 4
+charset = utf-8-bom  # 明确禁止BOM
+
+# XML配置文件
+[*.{xml,yml,yaml,properties}]
+indent_size = 2
+charset = utf-8-bom
+
+# Markdown文档
+[*.md]
+trim_trailing_whitespace = false
+indent_size = 2
+
+# Shell脚本
+[*.sh]
+end_of_line = lf
+indent_size = 2
+
+# Windows批处理文件
+[*.cmd]
+end_of_line = crlf
+
+# JSON文件
+[*.json]
+indent_size = 2

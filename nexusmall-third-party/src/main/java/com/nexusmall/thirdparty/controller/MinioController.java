@@ -1,7 +1,7 @@
 package com.nexusmall.thirdparty.controller;
 
 import com.nexusmall.common.annotation.ApiVersion;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.thirdparty.service.MinioService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,7 +63,7 @@ public class MinioController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("文件上传失败：{}", file.getOriginalFilename(), e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "文件上传失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -94,7 +94,7 @@ public class MinioController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("文件上传失败 [类型={}]: {}", type, file.getOriginalFilename(), e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "文件上传失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -115,7 +115,7 @@ public class MinioController {
             return Result.success(null);
         } catch (Exception e) {
             log.error("文件删除失败：{}", url, e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "文件删除失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -132,7 +132,7 @@ public class MinioController {
             @RequestParam("files") MultipartFile[] files) {
         try {
             if (files == null || files.length == 0) {
-                return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "请选择要上传的文件");
+                return Result.failure(ResultCode.PARAM_INVALID);
             }
             
             java.util.List<String> urls = new java.util.ArrayList<>();
@@ -149,7 +149,7 @@ public class MinioController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("批量上传失败", e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "批量上传失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -189,7 +189,7 @@ public class MinioController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("生成预签名 URL 失败：{}", objectName, e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "生成预签名 URL 失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -234,7 +234,7 @@ public class MinioController {
             return Result.success(result);
         } catch (Exception e) {
             log.error("生成上传预签名 URL 失败：{}", objectName, e);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR.getErrorCode(), "生成上传预签名 URL 失败：" + e.getMessage());
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 

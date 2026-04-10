@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
  * <p>
  * 业界标准：
  * - 支持多维度统计（优惠券、秒杀、满减）
- * - 支持按天/周/月聚合
+ * - 支持按天/月聚合
  * - 支持实时统计和离线统计
  * </p>
  *
@@ -42,13 +42,13 @@ public class PromotionStatistics implements Serializable {
     private LocalDate statDate;
 
     /**
-     * 统计类型：1-优惠券 2-秒杀 3-满减 4-综合
+     * 统计类型-优惠券2-秒杀 3-满减 4-综合
      */
     @Schema(description = "统计类型")
     private Integer statType;
 
     /**
-     * 活动ID（0表示汇总）
+     * 活动id 0表示汇总
      */
     @Schema(description = "活动ID")
     private Long activityId;
@@ -90,9 +90,9 @@ public class PromotionStatistics implements Serializable {
     private BigDecimal gmv;
 
     /**
-     * 优惠金额
+     * 优惠券金额
      */
-    @Schema(description = "优惠金额")
+    @Schema(description = "优惠券金额")
     private BigDecimal discountAmount;
 
     /**
@@ -114,7 +114,7 @@ public class PromotionStatistics implements Serializable {
     private BigDecimal useRate;
 
     /**
-     * ROI（成交金额/优惠金额）
+     * ROI（成交金额/优惠券金额）
      */
     @Schema(description = "ROI")
     private BigDecimal roi;

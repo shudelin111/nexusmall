@@ -1,5 +1,6 @@
 # =====================================================
-# NexusMall 搜索服务 - 开发环境配置
+# NexusMall Search Service - Development Environment Configuration
+# 搜索服务 - 开发环境配置
 # =====================================================
 # Data ID: nexusmall-search-dev.yaml
 # Group: MALL_GROUP
@@ -8,88 +9,57 @@
 # 用途：开发环境专属配置（优先级高于 nexusmall-search.yaml）
 # 说明：
 # - 此文件仅包含开发环境特有的差异化配置
-# - 共享配置已在 nexusmall-common.yaml 中定义
+# - 共享配置已在 nexusmall-common*.yaml 中定义
 # - 业务通用配置已在 nexusmall-search.yaml 中定义
 # =====================================================
 
 # ===============================
-# 数据库连接配置（开发环境）
+# Elasticsearch 配置（开发环境）
 # ===============================
-server:
-  port: 17000
-
 spring:
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://10.10.1.1:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:changeme}
+
   # Redis 配置（开发环境）
   redis:
-    # Redis 服务器地址
     host: ${REDIS_HOST:10.10.1.1}
-    # Redis 端口
     port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
     database: ${REDIS_DATABASE:0}
-    # Redis 密码
     password: ${REDIS_PASSWORD:123456}
-  
+    timeout: 3000ms
+
   # Spring Cloud 配置（开发环境）
   cloud:
-    # Sentinel 配置（开发环境）
-    # ⚠️ 注意：Sentinel 数据源规则定义（dataId、groupId、rule-type等）在 nexusmall-search.yaml 中定义
     sentinel:
       transport:
-        # Sentinel Dashboard 地址（开发环境）
         dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-        port: 8719
-      datasource:
-        ds1:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
-        ds2:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
-        ds3:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
+        port: ${SENTINEL_TRANSPORT_PORT:8719}
+
+  # Kafka 配置（开发环境）
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
 
 # ===============================
 # RocketMQ 配置（开发环境）
 # ===============================
-# ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-search.yaml 中定义
 rocketmq:
-  # NameServer 地址
   name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
-  # 生产者配置
   producer:
     group: search-producer-group-dev
 
 # ===============================
-# 日志级别配置（开发环境）
-# ===============================
-logging:
-  level:
-    root: INFO
-    com.alibaba.csp.sentinel: DEBUG
-    com.nexusmall.search: DEBUG
-    com.nexusmall.common: DEBUG
-
-# ===============================
 # SpringDoc + Knife4j API 文档配置（开发环境）
 # ===============================
-# ⚠️ 注意：API 文档通用配置（path、packages-to-scan、group-configs、language）在 nexusmall-search.yaml 中定义
 springdoc:
   api-docs:
-    # 开发环境启用 API 文档
     enabled: true
   swagger-ui:
-    # 开发环境启用 Swagger UI
     enabled: true
 
 knife4j:
-  # 开发环境启用 Knife4j
   enable: true
-  # 开发环境非生产模式
   production: false
 
 # Kafka 日志收集开关（开发环境默认关闭）
@@ -97,3 +67,17 @@ nexusmall:
   logging:
     kafka:
       enabled: false
+
+# ===============================
+# 日志文件路径配置（开发环境）
+# ===============================
+logging:
+  file:
+    path: ./logs
+
+# ===============================
+# Zipkin 链路追踪配置（开发环境）
+# ===============================
+zipkin:
+  enabled: false
+  base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}

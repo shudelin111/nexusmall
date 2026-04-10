@@ -67,10 +67,10 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
         RLock lock = redissonClient.getLock(lockKey);
         
         try {
-            // 获取分布式锁，最多等待5秒，锁定10秒后自动释放
+            // 获取分布式锁，最多等待 X 秒，锁定10秒后自动释放
             boolean locked = lock.tryLock(5, 10, TimeUnit.SECONDS);
             if (!locked) {
-                log.error("获取库存锁失败: {}", lockKey);
+                log.error("获取库存锁失败 {}", lockKey);
                 return false;
             }
             
@@ -120,7 +120,7 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
         try {
             boolean locked = lock.tryLock(5, 10, TimeUnit.SECONDS);
             if (!locked) {
-                log.error("获取库存锁失败: {}", lockKey);
+                log.error("获取库存锁失败 {}", lockKey);
                 return false;
             }
             
@@ -133,7 +133,7 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
             
             SkuStock stock = this.getOne(wrapper);
             if (stock == null || stock.getLockedStock() < request.getQuantity()) {
-                log.warn("回滚库存失败，锁定库存不足: skuId={}, warehouseId={}", 
+                log.warn("回滚库存失败，锁定库存不足 skuId={}, warehouseId={}", 
                         request.getSkuId(), request.getWarehouseId());
                 return false;
             }
@@ -170,7 +170,7 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
         try {
             boolean locked = lock.tryLock(5, 10, TimeUnit.SECONDS);
             if (!locked) {
-                log.error("获取库存锁失败: {}", lockKey);
+                log.error("获取库存锁失败 {}", lockKey);
                 return false;
             }
             
@@ -182,7 +182,7 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
             
             SkuStock stock = this.getOne(wrapper);
             if (stock == null || stock.getLockedStock() < quantity) {
-                log.warn("确认库存失败，锁定库存不足: skuId={}, warehouseId={}", skuId, warehouseId);
+                log.warn("确认库存失败，锁定库存不足 skuId={}, warehouseId={}", skuId, warehouseId);
                 return false;
             }
             
@@ -206,7 +206,7 @@ public class SkuStockServiceImpl extends ServiceImpl<SkuStockMapper, SkuStock> i
 
     @Override
     public boolean checkStockSufficient(Long skuId, Long warehouseId, Integer quantity) {
-        log.info("检查库存: skuId={}, warehouseId={}, quantity={}", skuId, warehouseId, quantity);
+        log.info("检查库存 skuId={}, warehouseId={}, quantity={}", skuId, warehouseId, quantity);
         
         LambdaQueryWrapper<SkuStock> wrapper = new LambdaQueryWrapper<>();
         wrapper.eq(SkuStock::getSkuId, skuId)

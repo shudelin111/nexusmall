@@ -16,9 +16,9 @@ import java.time.LocalDateTime;
  * 会员信息实体类
  * <p>
  * 业界标准：
- * - 与 Auth 模块的 sys_user 通过 user_id 关联
+ * - Auth 模块：sys_user 通过 user_id 关联
  * - 存储用户业务数据（昵称/头像/会员等级等）
- * - 不存储认证信息（密码由 Auth 管理）
+ * - 不存储认证信息（密码由Auth 管理）
  * </p>
  *
  * @author shudl
@@ -58,7 +58,7 @@ public class Member {
     private String avatar;
 
     /**
-     * 性别：0=未知，1=男，2=女
+     * 性别 0=未知 1=男，2=女
      */
     private Integer gender;
 
@@ -98,7 +98,7 @@ public class Member {
     private BigDecimal balance;
 
     /**
-     * 状态：0=禁用，1=正常
+     * 状态：0=禁用 1=正常
      */
     private Integer status;
 

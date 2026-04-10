@@ -25,7 +25,7 @@ public interface CategoryMapper {
     List<Category> listFirstLevel();
 
     /**
-     * 根据父 ID 查询子分类
+     * 根数据ID 查询子分类
      */
     List<Category> listByParentId(@Param("parentId") Long parentId);
 

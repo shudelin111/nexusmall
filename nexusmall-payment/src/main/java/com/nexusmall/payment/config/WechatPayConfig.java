@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 public class WechatPayConfig {
 
     /**
-     * 商户号
+     * 商户端
      */
     private String mchId;
 
@@ -26,7 +26,7 @@ public class WechatPayConfig {
     private String privateKeyPath;
 
     /**
-     * 商户证书序列号
+     * 商户证书序列表
      */
     private String merchantSerialNumber;
 

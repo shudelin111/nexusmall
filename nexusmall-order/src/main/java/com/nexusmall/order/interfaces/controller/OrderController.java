@@ -3,7 +3,8 @@ package com.nexusmall.order.interfaces.controller;
 import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.LogMessageConstants;
 import com.nexusmall.common.constant.ResponseMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.annotation.AuditLog;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.order.domain.entity.Order;
 import com.nexusmall.order.application.service.OrderService;
@@ -65,7 +66,7 @@ public class OrderController {
             return Result.success(order);
         } else {
             log.warn("订单不存在，orderId: {}", id);
-            return Result.failure(CommonResultCode.NOT_FOUND);
+            return Result.failure(ResultCode.NOT_FOUND);
         }
     }
 
@@ -84,7 +85,7 @@ public class OrderController {
             return Result.success(order);
         } else {
             log.warn("订单不存在，orderSn: {}", orderSn);
-            return Result.failure(CommonResultCode.NOT_FOUND);
+            return Result.failure(ResultCode.NOT_FOUND);
         }
     }
 
@@ -136,6 +137,7 @@ public class OrderController {
     /**
      * 创建订单（带分布式事务）
      */
+    @AuditLog(module = "订单管理", operation = "创建订单")
     @PostMapping(value = "/", headers = "X-API-Version=v1")
     @Operation(summary = "创建订单", description = "创建新订单，包含库存扣减和订单生成，使用 Seata 分布式事务保证数据一致性")
     public Result<Order> createOrder(
@@ -152,6 +154,7 @@ public class OrderController {
     /**
      * 更新订单
      */
+    @AuditLog(module = "订单管理", operation = "更新订单")
     @PutMapping("/{id}")
     public Result<Boolean> updateOrder(@PathVariable("id") Long id, @RequestBody Order order) {
         log.info("更新订单，orderId: {}", id);
@@ -162,13 +165,14 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.UPDATE_SUCCESS, true);
         } else {
             log.error("订单更新失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
     /**
      * 删除订单
      */
+    @AuditLog(module = "订单管理", operation = "删除订单")
     @DeleteMapping("/{id}")
     public Result<Boolean> deleteOrder(@PathVariable("id") Long id) {
         log.info("删除订单，orderId: {}", id);
@@ -178,13 +182,14 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.DELETE_SUCCESS, true);
         } else {
             log.error("订单删除失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
     /**
      * 批量删除订单
      */
+    @AuditLog(module = "订单管理", operation = "批量删除订单")
     @DeleteMapping(value = "/batch", headers = "X-API-Version=v1")
     public Result<Boolean> batchDeleteOrders(@RequestBody List<Long> ids) {
         log.info("批量删除订单，ids: {}", ids);
@@ -194,7 +199,7 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.BATCH_DELETE_SUCCESS, true);
         } else {
             log.error("批量删除失败，ids: {}", ids);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -212,7 +217,7 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.PAY_SUCCESS, true);
         } else {
             log.error("订单支付失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -228,7 +233,7 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.DELIVER_SUCCESS, true);
         } else {
             log.error("订单发货失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
@@ -244,13 +249,14 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.RECEIVE_SUCCESS, true);
         } else {
             log.error("订单确认收货失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 
     /**
      * 取消订单
      */
+    @AuditLog(module = "订单管理", operation = "取消订单")
     @PostMapping("/{id}/cancel")
     public Result<Boolean> cancelOrder(@PathVariable("id") Long id) {
         log.info("取消订单，orderId: {}", id);
@@ -260,7 +266,7 @@ public class OrderController {
             return Result.success(ResponseMessageConstants.Order.CANCEL_SUCCESS, true);
         } else {
             log.error("订单取消失败，orderId: {}", id);
-            return Result.failure(CommonResultCode.SYSTEM_ERROR);
+            return Result.failure(ResultCode.SYSTEM_ERROR);
         }
     }
 }

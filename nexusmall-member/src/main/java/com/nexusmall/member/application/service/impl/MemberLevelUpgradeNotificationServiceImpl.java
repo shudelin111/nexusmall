@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
  * <p>
  * 业界标准：
  * - 支持多渠道通知(短信/邮件/Push)
- * - 异步发送,不影响主流程
+ * - 异步发货不影响主流程
  * </p>
  *
  * @author shudl
@@ -28,7 +28,7 @@ public class MemberLevelUpgradeNotificationServiceImpl implements MemberLevelUpg
         // 2. 发送Push通知
         // 3. 记录通知历史
         
-        log.info("等级升级通知发送成功: memberId={}", memberId);
+        log.info("等级升级通知发送成功 memberId={}", memberId);
     }
 
     @Override
@@ -36,9 +36,9 @@ public class MemberLevelUpgradeNotificationServiceImpl implements MemberLevelUpg
         log.info("发送短信通知: phone={}, levelName={}", phone, levelName);
         
         // TODO: 调用短信服务发送通知
-        // smsService.send(phone, "恭喜您升级为" + levelName + "会员！");
+        // smsService.send(phone, "恭喜您升级为" + levelName + "会员");
         
-        log.info("短信通知发送成功: phone={}", phone);
+        log.info("短信通知发送成功 phone={}", phone);
     }
 
     @Override
@@ -46,8 +46,8 @@ public class MemberLevelUpgradeNotificationServiceImpl implements MemberLevelUpg
         log.info("发送邮件通知: email={}, levelName={}", email, levelName);
         
         // TODO: 调用邮件服务发送通知
-        // emailService.send(email, "会员等级升级通知", "恭喜您升级为" + levelName + "会员！");
+        // emailService.send(email, "会员等级升级通知", "恭喜您升级为" + levelName + "会员");
         
-        log.info("邮件通知发送成功: email={}", email);
+        log.info("邮件通知发送成功 email={}", email);
     }
 }

@@ -6,7 +6,7 @@ import com.nexusmall.logistics.domain.entity.LogisticsReturnApply;
 import java.util.List;
 
 /**
- * 退货申请服务接口
+ * 退货申请服务接口(基于 Redis)
  * <p>
  * 业界标准：
  * - 支持退货申请提交
@@ -27,14 +27,14 @@ public interface LogisticsReturnApplyService extends IService<LogisticsReturnApp
      * @param memberId         会员ID
      * @param returnReason     退货原因
      * @param returnDescription 退货说明
-     * @param returnImages     退货凭证图片（JSON数组）
+     * @param returnImages     退货凭证图片（JSON数组)
      * @return 退货申请
      */
     LogisticsReturnApply submitReturnApply(String orderSn, Long memberId, String returnReason,
                                             String returnDescription, String returnImages);
 
     /**
-     * 审核退货申请（同意）
+     * 审核退货申请（同同意)
      *
      * @param id 退货申请ID
      * @return 是否成功
@@ -42,7 +42,7 @@ public interface LogisticsReturnApplyService extends IService<LogisticsReturnApp
     boolean approveReturnApply(Long id);
 
     /**
-     * 审核退货申请（拒绝）
+     * 审核退货申请（拒绝)
      *
      * @param id     退货申请ID
      * @param reason 拒绝原因

@@ -38,7 +38,7 @@ public interface LogisticsOrderService extends IService<LogisticsOrder> {
      * <p>
      * 业界标准：
      * - 生成快递单号
-     * - 初始化物流状态为"已发货"
+     * - 初始化物流状态为"已发货
      * - 记录发货时间
      * </p>
      *

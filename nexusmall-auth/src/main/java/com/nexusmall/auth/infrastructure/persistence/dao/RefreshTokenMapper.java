@@ -50,7 +50,7 @@ public interface RefreshTokenMapper extends BaseMapper<RefreshToken> {
     int invalidateAllTokens(@Param("userId") Long userId);
 
     /**
-     * 清理过期的 Refresh Token
+     * 清理过期Refresh Token
      *
      * @return 影响行数
      */

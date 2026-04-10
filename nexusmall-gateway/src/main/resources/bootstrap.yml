@@ -1,0 +1,57 @@
+# =====================================================
+# NexusMall Gateway Service - Bootstrap Configuration
+# 网关服务 Bootstrap 配置
+# =====================================================
+# 用途：配置 Nacos 连接信息（优先级最高，最先加载）
+# 说明：此文件仅包含 Nacos 连接相关配置
+# =====================================================
+
+spring:
+  application:
+    name: nexusmall-gateway
+  
+  cloud:
+    nacos:
+      # ===============================
+      # 服务注册中心配置
+      # ===============================
+      discovery:
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        namespace: ${NACOS_NAMESPACE:prod}
+        group: ${NACOS_GROUP:MALL_GROUP}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+        ephemeral: true
+      
+      # ===============================
+      # 配置中心配置
+      # ===============================
+      config:
+        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+        file-extension: yaml
+        group: ${NACOS_GROUP:MALL_GROUP}
+        namespace: ${NACOS_NAMESPACE:prod}
+        username: ${NACOS_USERNAME:nacos}
+        password: ${NACOS_PASSWORD:nacos}
+        
+        # ===============================
+        # 共享配置（Gateway 只需 Web 组件配置）
+        # ===============================
+        shared-configs:
+          # Web 组件配置（Actuator、Sentinel、Sleuth、日志）
+          - data-id: nexusmall-common-web.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+        
+        # ===============================
+        # 扩展配置（服务专属）
+        # ===============================
+        extension-configs:
+          # Gateway 服务通用配置（所有环境共享）
+          - data-id: nexusmall-gateway.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
+          # Gateway 服务环境特定配置（根据 Profile 动态加载）
+          - data-id: nexusmall-gateway-${spring.profiles.active}.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true

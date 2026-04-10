@@ -2,7 +2,8 @@ package com.nexusmall.product.interfaces.controller;
 
 import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.ResponseMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.annotation.AuditLog;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.application.service.CategoryService;
 import com.nexusmall.product.interfaces.dto.CategoryVO;
@@ -49,7 +50,7 @@ public class CategoryController {
     }
 
     /**
-     * 根据父 ID 查询子分类
+     * 根据父ID 查询子分类
      */
     @GetMapping(value = "/listByParentId/{parentId}", headers = "X-API-Version=v1")
     public Result<List<CategoryVO>> listByParentId(@PathVariable Long parentId) {
@@ -62,7 +63,7 @@ public class CategoryController {
     @PostMapping(value = "/save", headers = "X-API-Version=v1")
     public Result<Integer> save(@RequestBody CategoryVO categoryVO) {
         int result = categoryService.save(categoryVO);
-        return result > 0 ? Result.success(ResponseMessageConstants.Category.ADD_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.ADD_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -71,16 +72,17 @@ public class CategoryController {
     @PutMapping(value = "/update", headers = "X-API-Version=v1")
     public Result<Integer> update(@RequestBody CategoryVO categoryVO) {
         int result = categoryService.updateById(categoryVO);
-        return result > 0 ? Result.success(ResponseMessageConstants.Category.UPDATE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.UPDATE_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
      * 删除分类
      */
+    @AuditLog(module = "商品管理", operation = "删除分类")
     @DeleteMapping(value = "/delete/{id}", headers = "X-API-Version=v1")
     public Result<Integer> delete(@PathVariable Long id) {
         int result = categoryService.deleteById(id);
-        return result > 0 ? Result.success(ResponseMessageConstants.Category.DELETE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Category.DELETE_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**

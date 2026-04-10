@@ -35,7 +35,7 @@ public interface LogisticsWarehouseService extends IService<LogisticsWarehouse> 
     LogisticsWarehouse getByWarehouseCode(String warehouseCode);
 
     /**
-     * 智能分配仓库（根据收货地址）
+     * 智能分配仓库（根据收货地址：
      * <p>
      * 业界标准：
      * - 优先匹配同省仓库

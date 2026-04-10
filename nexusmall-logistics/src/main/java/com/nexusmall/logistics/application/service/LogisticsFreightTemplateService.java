@@ -23,7 +23,7 @@ public interface LogisticsFreightTemplateService extends IService<LogisticsFreig
      * 计算运费
      * <p>
      * 业界标准：
-     * - 按重量：首重费用 + (总重量 - 首重) / 续重 * 续重费用
+     * - 按重量：首重费用 + (总重量- 首重) / 续重 * 续重费用
      * - 按体积：类似按重量计算
      * - 按件数：件数 * 单价
      * - 如果订单金额 >= 包邮门槛，则运费为0

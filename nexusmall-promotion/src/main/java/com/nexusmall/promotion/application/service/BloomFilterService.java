@@ -97,7 +97,7 @@ public class BloomFilterService {
             seckillSkuBloomFilter.put(String.valueOf(item.getSkuId()));
         }
 
-        log.info("【布隆过滤器】秒杀商品SKU ID加载完成，数量={}", items.size());
+        log.info("【布隆过滤器】秒杀商品SKU ID加载完成，数量{}", items.size());
     }
 
     /**
@@ -114,7 +114,7 @@ public class BloomFilterService {
             couponBloomFilter.put(String.valueOf(coupon.getId()));
         }
 
-        log.info("【布隆过滤器】优惠券ID加载完成，数量={}", coupons.size());
+        log.info("【布隆过滤器】优惠券ID加载完成，数量{}", coupons.size());
     }
 
     /**

@@ -28,12 +28,12 @@ public class AdminAuditService {
      * @param auditLog 审计日志对象
      */
     public void logAudit(AdminAuditLog auditLog) {
-        // 1. 生成操作 ID（如果未提供）
+        // 1. 生成操作 ID（如果未提供)
         if (auditLog.getOperationId() == null) {
             auditLog.setOperationId(UUID.randomUUID().toString());
         }
 
-        // 2. 设置操作时间（如果未提供）
+        // 2. 设置操作时间（如果未提供)
         if (auditLog.getOperateTime() == null) {
             auditLog.setOperateTime(LocalDateTime.now());
         }

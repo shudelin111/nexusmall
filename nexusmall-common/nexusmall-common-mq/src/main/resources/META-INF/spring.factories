@@ -1,0 +1,11 @@
+# =====================================================
+# Spring Boot 自动配置注册表
+# =====================================================
+# 说明：当其他模块引入 nexusmall-common-mq 依赖时，
+#       Spring Boot 会自动加载以下配置类
+# =====================================================
+
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.nexusmall.common.config.KafkaConfig,\
+com.nexusmall.common.config.KafkaLoggingConfig,\
+com.nexusmall.common.config.KafkaLoggingProperties

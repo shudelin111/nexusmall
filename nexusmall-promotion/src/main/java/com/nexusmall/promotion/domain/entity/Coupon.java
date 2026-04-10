@@ -9,10 +9,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
- * 优惠券实体
+ * 优惠券实体(基于 Redis)
  * <p>
  * 业界标准：
- * - 支持多种优惠类型（满减、折扣、立减）
+ * - 支持多种优惠券类型（满减、折扣、立减）
  * - 支持使用范围（全场、指定分类、指定商品）
  * - 支持领取限制（每人限领、总库存）
  * - 支持有效期设置
@@ -48,15 +48,15 @@ public class Coupon implements Serializable {
     private String code;
 
     /**
-     * 优惠类型：1-满减 2-折扣 3-立减
+     * 优惠券类型-满减 2-折扣 3-立减
      */
-    @Schema(description = "优惠类型：1-满减 2-折扣 3-立减")
+    @Schema(description = "优惠券类型-满减 2-折扣 3-立减")
     private Integer type;
 
     /**
-     * 面值/折扣率（满减为金额，折扣为百分比如80表示8折）
+     * 面值/折扣率（满减为金额，折扣为百分比，0.8表示8折）
      */
-    @Schema(description = "面值/折扣率")
+    @Schema(description = "面值/折扣")
     private BigDecimal value;
 
     /**
@@ -66,15 +66,15 @@ public class Coupon implements Serializable {
     private BigDecimal minAmount;
 
     /**
-     * 最高优惠金额（封顶）
+     * 最高优惠券金额（封顶）
      */
-    @Schema(description = "最高优惠金额")
+    @Schema(description = "最高优惠券金额")
     private BigDecimal maxDiscount;
 
     /**
-     * 使用范围：0-全场 1-指定分类 2-指定商品
+     * 使用范围 0-全场 1-指定分类 2-指定商品
      */
-    @Schema(description = "使用范围：0-全场 1-指定分类 2-指定商品")
+    @Schema(description = "使用范围 0-全场 1-指定分类 2-指定商品")
     private Integer scope;
 
     /**
@@ -96,7 +96,7 @@ public class Coupon implements Serializable {
     private Integer receivedCount;
 
     /**
-     * 每人限领数量（0表示不限制）
+     * 每人限领数量 0表示不限制）
      */
     @Schema(description = "每人限领数量")
     private Integer perLimit;

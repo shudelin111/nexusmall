@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 /**
- * 退货管理 Controller
+ * 退货管理Controller
  * <p>
  * 业界标准：
  * - 完整的退货流程管理
@@ -41,7 +41,7 @@ public class ReturnController {
     /**
      * 提交退货申请
      *
-     * @param userId  用户ID（从Header获取）
+     * @param userId  用户ID（从Header获获取)
      * @param request 退货申请信息
      * @return 退货申请
      */

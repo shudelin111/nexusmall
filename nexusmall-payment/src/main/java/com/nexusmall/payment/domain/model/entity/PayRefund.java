@@ -59,7 +59,7 @@ public class PayRefund implements Serializable {
     private String reason;
 
     /**
-     * 退款状态：0=待审核，1=审核通过，2=审核拒绝，3=退款中，4=退款成功，5=退款失败
+     * 退款状态：0=待审核，1=审核通过 2=审核拒绝 3=退款中 4=退款成功，5=退款失败
      */
     private Integer status;
 
@@ -94,7 +94,7 @@ public class PayRefund implements Serializable {
     private String auditRemark;
 
     /**
-     * 第三方回调原始数据
+     * 第三方回调原始内容
      */
     private String callbackContent;
 
@@ -104,7 +104,7 @@ public class PayRefund implements Serializable {
     private LocalDateTime callbackTime;
 
     /**
-     * 逻辑删除：0=未删除，1=已删除
+     * 逻辑删除 0=未删除，1=已删除
      */
     @TableLogic
     private Integer deleted;

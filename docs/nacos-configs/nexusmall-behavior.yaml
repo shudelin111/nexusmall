@@ -1,0 +1,26 @@
+# =====================================================
+# NexusMall Behavior Service - Nacos Configuration
+# 用户行为日志服务 Nacos 托管配置
+# =====================================================
+# 配置说明：
+# - Data ID: nexusmall-behavior.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
+# =====================================================
+
+# ===============================
+# 业务配置
+# ===============================
+user:
+  behavior:
+    # 是否启用 Elasticsearch 存储
+    es:
+      enabled: true
+    # 是否启用 Kafka 发送
+    kafka:
+      enabled: true
+    # 需要保存到数据库的关键行为类型
+    critical-behaviors:
+      - PLACE_ORDER
+      - ADD_TO_CART

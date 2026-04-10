@@ -1,0 +1,64 @@
+# =====================================================
+# NexusMall 平台公共配置 - 消息队列配置（所有需要 MQ 的服务共享）
+# =====================================================
+# Data ID: nexusmall-common-mq.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：存放所有微服务共用的消息队列基础配置
+# 对应模块：nexusmall-common-mq
+# 包含：RocketMQ、Kafka 通用参数
+# ⚠️ 注意：NameServer、Broker 地址等环境相关参数在各服务的 nexusmall-{service}-{profile}.yaml 中定义
+# =====================================================
+
+# ===============================
+# RocketMQ 配置（通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在各服务的 nexusmall-{service}-{profile}.yaml 中定义：
+# - rocketmq.name-server（NameServer 地址）
+# - rocketmq.producer.group（生产者组名称）
+rocketmq:
+  # 生产者配置（通用参数）
+  producer:
+    # 发送消息超时时间（毫秒）
+    send-message-timeout: 3000
+    # 同步发送失败重试次数
+    retry-times-when-send-failed: 2
+    # 异步发送失败重试次数
+    retry-times-when-send-async-failed: 2
+    # 最大消息大小（4MB）
+    max-message-size: 4194304
+
+# ===============================
+# Kafka 配置（通用参数）
+# ===============================
+# ⚠️ 注意：bootstrap-servers 在各服务的 nexusmall-{service}-{profile}.yaml 中定义
+spring:
+  kafka:
+    # 消费者配置（通用参数）
+    consumer:
+      # 消费者组 ID（使用应用名称动态生成，确保每个服务唯一）
+      group-id: ${spring.application.name}-group
+      # Key 反序列化器
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # Value 反序列化器
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      # 偏移量重置策略（latest: 从最新位置开始消费）
+      auto-offset-reset: latest
+      # 是否启用自动提交（false: 手动提交，确保消息处理成功后再提交）
+      enable-auto-commit: false
+      # 自动提交间隔（毫秒）
+      auto-commit-interval: 1000
+    # 生产者配置（通用参数）
+    producer:
+      # Key 序列化器
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # Value 序列化器
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # 发送失败后重试次数
+      retries: 3
+      # 批量发送的数据量（字节）
+      batch-size: 16384
+      # 缓冲区内存大小（字节，32MB）
+      buffer-memory: 33554432
+      # 确认模式：all 表示所有副本都确认才算是发送成功
+      acks: all

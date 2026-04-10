@@ -1,0 +1,83 @@
+# =====================================================
+# NexusMall Search Service - Test Environment Configuration
+# 搜索服务 - 测试环境配置
+# =====================================================
+# Data ID: nexusmall-search-test.yaml
+# Group: MALL_GROUP
+# Namespace: test
+# Profile: test
+# 用途：测试环境专属配置（优先级高于 nexusmall-search.yaml）
+# 说明：
+# - 此文件仅包含测试环境特有的差异化配置
+# - 共享配置已在 nexusmall-common*.yaml 中定义
+# - 业务通用配置已在 nexusmall-search.yaml 中定义
+# =====================================================
+
+# ===============================
+# Elasticsearch 配置（测试环境）
+# ===============================
+spring:
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URIS:http://es-cluster-es-http.nexusmall-infra.svc:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:G2M9CI4OHL1T9E4j123vIq9M}
+
+  # Redis 配置（测试环境）
+  redis:
+    host: ${REDIS_HOST:10.10.1.1}
+    port: ${REDIS_PORT:6379}
+    database: ${REDIS_DATABASE:0}
+    password: ${REDIS_PASSWORD:123456}
+    timeout: 3000ms
+
+  # Spring Cloud 配置（测试环境）
+  cloud:
+    sentinel:
+      transport:
+        dashboard: ${SENTINEL_DASHBOARD:nexusmall-sentinel.test.svc:8080}
+        port: ${SENTINEL_TRANSPORT_PORT:8719}
+
+  # Kafka 配置（测试环境）
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
+
+# ===============================
+# RocketMQ 配置（测试环境）
+# ===============================
+rocketmq:
+  name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
+  producer:
+    group: search-producer-group-test
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（测试环境）
+# ===============================
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    enabled: true
+
+knife4j:
+  enable: true
+  production: false
+
+# Kafka 日志收集开关（测试环境默认关闭）
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# 日志文件路径配置（测试环境）
+# ===============================
+logging:
+  file:
+    path: /var/log/nexusmall
+
+# ===============================
+# Zipkin 链路追踪配置（测试环境）
+# ===============================
+zipkin:
+  enabled: false
+  base-url: ${ZIPKIN_BASE_URL:http://zipkin.test.svc:9411}

@@ -40,7 +40,7 @@ public class LogisticsApplicationService {
      * @return 运费结果
      */
     public FreightResultVO calculateFreight(CalculateFreightRequest request) {
-        log.info("【应用服务-计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
+        log.info("【应用服务计算运费】weight={}, volume={}, pieceCount={}, orderAmount={}",
                 request.getWeight(), request.getVolume(), request.getPieceCount(), request.getOrderAmount());
 
         // 1. 获取运费模板
@@ -97,7 +97,7 @@ public class LogisticsApplicationService {
 
         switch (template.getChargeType()) {
             case 1: // 按重量
-                return String.format("按重量计费：首重%.2fkg费用%.2f元，续重每%.2fkg费用%.2f元，总重量%.2fkg，运费%.2f元",
+                return String.format("按重量计费：首重%.2fkg费用%.2f元，续重每%.2fkg费用%.2f元，总重%.2fkg，运费%.2f元",
                         template.getFirstWeight(), template.getFirstFee(),
                         template.getContinuedWeight(), template.getContinuedFee(),
                         request.getWeight(), freight);
@@ -107,10 +107,10 @@ public class LogisticsApplicationService {
                         template.getContinuedWeight(), template.getContinuedFee(),
                         request.getVolume(), freight);
             case 3: // 按件数
-                return String.format("按件数计费：每件%.2f元，共%d件，运费%.2f元",
+                return String.format("按件数计费：每件%.2f元，%d件，运费%.2f元",
                         template.getFirstFee(), request.getPieceCount(), freight);
             default:
-                return "运费：" + freight + "元";
+                return "运费" + freight + "元";
         }
     }
 }

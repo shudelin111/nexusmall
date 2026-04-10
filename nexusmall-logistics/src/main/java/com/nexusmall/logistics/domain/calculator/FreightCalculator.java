@@ -27,7 +27,7 @@ public class FreightCalculator {
      * 计算运费
      * <p>
      * 业界标准计费模型：
-     * - 按重量：首重费用 + ceil((总重量 - 首重) / 续重) * 续重费用
+     * - 按重量：首重费用 + ceil((总重量- 首重) / 续重) * 续重费用
      * - 按体积：类似按重量
      * - 按件数：件数 * 单价
      * - 包邮规则：订单金额 >= 包邮门槛时，运费为0
@@ -88,8 +88,8 @@ public class FreightCalculator {
     /**
      * 按重量计算运费
      * <p>
-     * 公式：首重费用 + ceil((总重量 - 首重) / 续重) * 续重费用
-     * 如果总重量 <= 首重，则只收首重费用
+     * 公式：首重费用+ ceil((总重量- 首重) / 续重) * 续重费用
+     * 如果总重量<= 首重，则只收首重费用
      * </p>
      */
     private BigDecimal calculateByWeight(LogisticsFreightTemplate template, BigDecimal weight) {

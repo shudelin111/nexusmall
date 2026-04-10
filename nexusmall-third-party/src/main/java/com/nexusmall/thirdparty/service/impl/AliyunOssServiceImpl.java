@@ -5,7 +5,7 @@ import com.aliyun.oss.model.ObjectMetadata;
 import com.aliyun.oss.model.PutObjectRequest;
 import com.aliyun.oss.model.PutObjectResult;
 import com.nexusmall.common.constant.ErrorMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.ThirdPartyException;
 import com.nexusmall.thirdparty.config.ThirdPartyProperties;
 import com.nexusmall.thirdparty.service.OssService;
@@ -83,8 +83,7 @@ public class AliyunOssServiceImpl implements OssService {
         } catch (IOException e) {
             log.error("OSS 文件上传失败，文件名：{}, 目录：{}, 错误：{}", 
                      file.getOriginalFilename(), dir, e.getMessage(), e);
-            throw new ThirdPartyException(CommonResultCode.FILE_UPLOAD_FAILED.getErrorCode(),
-                    ErrorMessageConstants.ThirdParty.OSS_FILE_READ_FAILED, e);
+            throw new ThirdPartyException(ResultCode.FILE_UPLOAD_FAILED, e);
         }
     }
     
@@ -95,8 +94,7 @@ public class AliyunOssServiceImpl implements OssService {
      */
     private void validateFile(MultipartFile file) {
         if (file == null || file.isEmpty()) {
-            throw new ThirdPartyException(CommonResultCode.FILE_UPLOAD_FAILED.getErrorCode(),
-                    CommonResultCode.FILE_UPLOAD_FAILED.getMessage());
+            throw new ThirdPartyException(ResultCode.FILE_UPLOAD_FAILED);
         }
     }
     
@@ -108,8 +106,7 @@ public class AliyunOssServiceImpl implements OssService {
      */
     private String validateBucket(String bucketName) {
         if (bucketName == null || bucketName.trim().isEmpty()) {
-            throw new ThirdPartyException(CommonResultCode.OSS_CONFIG_ERROR.getErrorCode(),
-                    CommonResultCode.OSS_CONFIG_ERROR.getMessage());
+            throw new ThirdPartyException(ResultCode.OSS_CONFIG_ERROR);
         }
         return bucketName.trim();
     }

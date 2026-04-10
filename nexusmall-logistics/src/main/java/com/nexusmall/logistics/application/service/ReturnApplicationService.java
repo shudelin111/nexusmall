@@ -41,7 +41,7 @@ public class ReturnApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public LogisticsReturnApply submitReturnApply(Long userId, SubmitReturnApplyRequest request) {
-        log.info("【应用服务-提交退货申请】userId={}, orderSn={}", userId, request.getOrderSn());
+        log.info("【应用服务提交退货申请】userId={}, orderSn={}", userId, request.getOrderSn());
 
         // 1. 检查是否已存在退货申请
         List<LogisticsReturnApply> existingApplies = returnApplyRepository.findByOrderSn(request.getOrderSn());
@@ -74,7 +74,7 @@ public class ReturnApplicationService {
      * @return 退货申请列表
      */
     public List<LogisticsReturnApply> listMyReturns(Long userId) {
-        log.info("【应用服务-查询我的退货申请】userId={}", userId);
+        log.info("【应用服务】查询我的退货申请】userId={}", userId);
         return returnApplyRepository.findByMemberId(userId);
     }
 
@@ -85,7 +85,7 @@ public class ReturnApplicationService {
      * @return 退货申请列表
      */
     public List<LogisticsReturnApply> listByOrderSn(String orderSn) {
-        log.info("【应用服务-查询订单退货】orderSn={}", orderSn);
+        log.info("【应用服务】查询订单退货】orderSn={}", orderSn);
         return returnApplyRepository.findByOrderSn(orderSn);
     }
 
@@ -97,7 +97,7 @@ public class ReturnApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean approveReturnApply(Long id) {
-        log.info("【应用服务-同意退货申请】id={}", id);
+        log.info("【应用服务】同意退货申请】id={}", id);
         
         LogisticsReturnApply apply = returnApplyRepository.findById(id);
         if (apply == null) {
@@ -119,7 +119,7 @@ public class ReturnApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean rejectReturnApply(Long id, String reason) {
-        log.info("【应用服务-拒绝退货申请】id={}, reason={}", id, reason);
+        log.info("【应用服务】拒绝退货申请】id={}, reason={}", id, reason);
         
         LogisticsReturnApply apply = returnApplyRepository.findById(id);
         if (apply == null) {
@@ -141,7 +141,7 @@ public class ReturnApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean fillReturnLogistics(Long id, FillReturnLogisticsRequest request) {
-        log.info("【应用服务-填写退货物流】id={}, expressNo={}", id, request.getExpressNo());
+        log.info("【应用服务】填写退货物流】id={}, expressNo={}", id, request.getExpressNo());
         
         LogisticsReturnApply apply = returnApplyRepository.findById(id);
         if (apply == null) {
@@ -162,7 +162,7 @@ public class ReturnApplicationService {
      */
     @Transactional(rollbackFor = Exception.class)
     public boolean confirmReturnReceive(Long id) {
-        log.info("【应用服务-确认收到退货】id={}", id);
+        log.info("【应用服务】确认收到退货】id={}", id);
         
         LogisticsReturnApply apply = returnApplyRepository.findById(id);
         if (apply == null) {

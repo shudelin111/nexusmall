@@ -1,0 +1,80 @@
+# ==============================================================================
+# NexusMall Third Party Service ConfigMap
+# NexusMall 第三方服务集成 Kubernetes 配置映射
+# ==============================================================================
+# 文件用途：存储第三方服务集成的环境变量配置
+# 维护团队：平台架构组
+# 更新频率：随环境配置变更更新
+# ==============================================================================
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  # ConfigMap 名称
+  name: nexusmall-third-party-config
+  
+  # 命名空间：与 Deployment 保持一致
+  namespace: nexusmall
+  
+  # 资源标签
+  labels:
+    app: nexusmall-third-party
+    app.kubernetes.io/name: nexusmall-third-party
+    app.kubernetes.io/part-of: nexusmall
+
+# 配置数据
+data:
+  # Spring Boot 激活的 Profile
+  # 可选值：dev (开发), test (测试), prod (生产)
+  SPRING_PROFILES_ACTIVE: "prod"
+  
+  # 日志路径配置（与 Dockerfile VOLUME 声明保持一致）
+  LOG_PATH: "/tmp/logs"
+  
+  # ========================================
+  # 中间件地址配置（生产环境）
+  # ========================================
+  # ⚠️ 注意：敏感信息（密码、密钥）已移至 secret.yaml
+  
+  # Redis（非敏感配置）
+  REDIS_HOST: "10.10.1.1"
+  REDIS_PORT: "6379"
+  REDIS_DATABASE: "0"  # third-party 使用 DB0
+  # REDIS_PASSWORD 在 Secret 中定义
+  
+  # Nacos（非敏感配置）
+  NACOS_SERVER_ADDR: "10.10.1.1:8848"
+  NACOS_NAMESPACE: "prod"
+  NACOS_GROUP: "MALL_GROUP"
+  # NACOS_USERNAME 和 NACOS_PASSWORD 在 Secret 中定义
+  
+  # RocketMQ
+  ROCKETMQ_NAMESRV: "10.10.1.1:9876"
+  
+  # Sentinel
+  SENTINEL_DASHBOARD: "10.10.1.1:8858"
+  SENTINEL_TRANSPORT_PORT: "8719"
+  
+  # Seata
+  SEATA_SERVER: "10.10.1.1:8848"
+  SEATA_GROUP: "MALL_GROUP"
+  SEATA_NAMESPACE: ""
+  
+  # Zipkin 链路追踪
+  ZIPKIN_BASE_URL: "http://zipkin.nexusmall-infra.svc:9411"
+  
+  # Kafka
+  KAFKA_BOOTSTRAP_SERVERS: "mall-kafka-ok-kafka-bootstrap.kafka.svc:9092"
+  
+  # ========================================
+  # 第三方服务配置（非敏感部分）
+  # ========================================
+  
+  # 阿里云短信服务配置
+  ALIYUN_SMS_REGION_ID: "cn-hangzhou"
+  ALIYUN_SMS_SIGN_NAME: "NexusMall商城"
+  ALIYUN_SMS_TEMPLATE_CODE: "SMS_123456789"
+  
+  # MinIO 对象存储配置
+  MINIO_ENDPOINT: "http://minio.nexusmall-infra.svc:9000"
+  MINIO_BUCKET: "nexusmall"

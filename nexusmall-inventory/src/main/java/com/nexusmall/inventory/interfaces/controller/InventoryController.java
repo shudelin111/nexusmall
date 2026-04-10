@@ -14,7 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 /**
- * 库存管理控制器
+ * 库存管理控制器类
  *
  * @author shudl
  * @since 2026-04-06
@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RestController
 @RequestMapping("/stocks")  // RESTful资源路径：库存集合
-@ApiVersion("v1")  // 标记此 Controller 支持 v1 版本
+@ApiVersion("v1")  // 标记此 ControllerController 支持 v1 版本
 @RequiredArgsConstructor
 @Tag(name = "库存管理", description = "SKU库存查询、扣减、回滚等操作")
 public class InventoryController {

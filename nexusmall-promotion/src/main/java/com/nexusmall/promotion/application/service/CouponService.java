@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.nexusmall.promotion.domain.entity.Coupon;
 
 /**
- * 优惠券 Service 接口
+ * 优惠券Service 接口
  *
  * @author shudl
  * @since 2026-04-06

@@ -5,7 +5,7 @@ import com.nexusmall.member.domain.entity.GrowthChangeHistory;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 成长值变化历史 Mapper
+ * 成长值变化历史MapperMapper
  *
  * @author shudl
  * @since 2026-04-06

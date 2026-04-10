@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
  * 运费模板实体
  * <p>
  * 业界标准：
- * - 支持多种计费方式（按重量/体积/件数）
+ * - 支持多种计费方式（按重量/体积/件数量
  * - 首重续重计费模型
  * - 包邮门槛设置
  * </p>
@@ -83,9 +83,9 @@ public class LogisticsFreightTemplate implements Serializable {
     private Integer isDefault;
 
     /**
-     * 状态：0=禁用，1=启用
+     * 状态：0=禁用 1=启用
      */
-    @Schema(description = "状态：0=禁用，1=启用")
+    @Schema(description = "状态：0=禁用 1=启用")
     private Integer status;
 
     /**

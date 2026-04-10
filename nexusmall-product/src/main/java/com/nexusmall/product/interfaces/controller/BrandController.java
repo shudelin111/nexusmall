@@ -2,7 +2,7 @@ package com.nexusmall.product.interfaces.controller;
 
 import com.nexusmall.common.annotation.ApiVersion;
 import com.nexusmall.common.constant.ResponseMessageConstants;
-import com.nexusmall.common.enums.CommonResultCode;
+import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.vo.Result;
 import com.nexusmall.product.application.service.BrandService;
 import com.nexusmall.product.interfaces.dto.BrandVO;
@@ -54,7 +54,7 @@ public class BrandController {
     @PostMapping(value = "/", headers = "X-API-Version=v1")
     public Result<Integer> save(@RequestBody BrandVO brandVO) {
         int result = brandService.save(brandVO);
-        return result > 0 ? Result.success(ResponseMessageConstants.Brand.ADD_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.ADD_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -64,7 +64,7 @@ public class BrandController {
     public Result<Integer> update(@PathVariable Long id, @RequestBody BrandVO brandVO) {
         brandVO.setId(id);
         int result = brandService.updateById(brandVO);
-        return result > 0 ? Result.success(ResponseMessageConstants.Brand.UPDATE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.UPDATE_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**
@@ -73,7 +73,7 @@ public class BrandController {
     @DeleteMapping(value = "/{id}", headers = "X-API-Version=v1")
     public Result<Integer> delete(@PathVariable Long id) {
         int result = brandService.deleteById(id);
-        return result > 0 ? Result.success(ResponseMessageConstants.Brand.DELETE_SUCCESS, result) : Result.failure(CommonResultCode.SYSTEM_ERROR);
+        return result > 0 ? Result.success(ResponseMessageConstants.Brand.DELETE_SUCCESS, result) : Result.failure(ResultCode.SYSTEM_ERROR);
     }
 
     /**

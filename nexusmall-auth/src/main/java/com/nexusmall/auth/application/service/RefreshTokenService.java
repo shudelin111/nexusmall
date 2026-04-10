@@ -9,7 +9,7 @@ import com.nexusmall.auth.domain.entity.User;
  * 业界标准：
  * - 支持刷新 Access Token
  * - 支持主动撤销 (用户登出)
- * - 支持设备管理 (查看/撤销特定设备的 Token)
+ * - 支持设备管理 (查看/撤销特定设备 Token)
  * </p>
  *
  * @author shudl
@@ -32,7 +32,7 @@ public interface RefreshTokenService {
      * 验证并刷新 Access Token
      * <p>
      * 流程：
-     * 1. 验证 Refresh Token 有效性
+     * 1. 验证 Refresh Token 有效
      * 2. 检查是否在黑名单中
      * 3. 生成新的 Access Token + Refresh Token
      * 4. 使旧 Refresh Token 失效
@@ -45,7 +45,7 @@ public interface RefreshTokenService {
     String refreshAccessToken(String refreshToken);
 
     /**
-     * 撤销指定的 Refresh Token (单设备登出)
+     * 撤销指定 Refresh Token (单设备登录)
      *
      * @param userId 用户ID
      * @param jti    Token JTI
@@ -53,7 +53,7 @@ public interface RefreshTokenService {
     void revokeRefreshToken(Long userId, String jti);
 
     /**
-     * 撤销用户的所有 Refresh Token (所有设备登出)
+     * 撤销用户的所有 Refresh Token (所有设备登录)
      *
      * @param userId 用户ID
      */
@@ -68,7 +68,7 @@ public interface RefreshTokenService {
     boolean isTokenRevoked(String jti);
 
     /**
-     * 清理过期的 Refresh Token (定时任务调用)
+     * 清理过期 Refresh Token (定时任务调用)
      *
      * @return 清理数量
      */

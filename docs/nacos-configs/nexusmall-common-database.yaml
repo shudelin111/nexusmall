@@ -1,0 +1,61 @@
+# =====================================================
+# NexusMall 平台公共配置 - 数据库配置（所有需要数据库的服务共享）
+# =====================================================
+# Data ID: nexusmall-common-database.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：存放所有微服务共用的数据库基础配置
+# 对应模块：nexusmall-common-database
+# 包含：MyBatis-Plus、数据库连接池通用参数
+# ⚠️ 注意：数据库地址、用户名、密码等敏感信息在各服务的 nexusmall-{service}-{profile}.yaml 中定义
+# =====================================================
+
+# ===============================
+# MyBatis-Plus ORM 配置
+# ===============================
+mybatis-plus:
+  # Mapper XML 文件位置（扫描所有模块的 mapper 目录）
+  mapper-locations: classpath*:/mapper/**/*.xml
+  # 实体类别名包路径（支持多模块扫描）
+  type-aliases-package: com.nexusmall.**.entity
+  # MyBatis 原生配置
+  configuration:
+    # 开启驼峰命名转换（数据库下划线 → Java 驼峰）
+    map-underscore-to-camel-case: true
+    # 禁用二级缓存（微服务架构下建议使用 Redis 缓存）
+    cache-enabled: false
+    # SQL 日志实现类（使用 SLF4J 统一日志输出）
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  # 全局配置
+  global-config:
+    db-config:
+      # 主键生成策略（分布式 ID，推荐 ASSIGN_ID）
+      id-type: ASSIGN_ID
+      # 逻辑删除字段名
+      logic-delete-field: deleted
+      # 逻辑删除值（已删除）
+      logic-delete-value: 1
+      # 逻辑未删除值（未删除）
+      logic-not-delete-value: 0
+
+# ===============================
+# 数据库连接池配置（HikariCP 通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在各服务的 nexusmall-{service}-{profile}.yaml 中定义：
+# - spring.datasource.url（数据库地址）
+# - spring.datasource.username（用户名）
+# - spring.datasource.password（密码）
+# - spring.datasource.driver-class-name（驱动类）
+spring:
+  datasource:
+    hikari:
+      # 最小空闲连接数（保持基础连接，避免频繁创建）
+      minimum-idle: 5
+      # 最大连接数（根据服务器配置调整，生产环境建议 20-50）
+      maximum-pool-size: 20
+      # 空闲连接超时时间（毫秒）
+      idle-timeout: 30000
+      # 连接最大生命周期（毫秒，30 分钟）
+      max-lifetime: 1800000
+      # 连接超时时间（毫秒，30 秒）
+      connection-timeout: 30000

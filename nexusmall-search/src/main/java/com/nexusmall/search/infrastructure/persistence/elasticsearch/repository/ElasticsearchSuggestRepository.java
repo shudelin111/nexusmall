@@ -149,7 +149,7 @@ public class ElasticsearchSuggestRepository implements SuggestRepository {
                 
                 String text = option.getText().string();
                 if (values.add(type + ":" + text)) {
-                    // Completion Suggester 不返回 score，使用固定值
+                    // Completion Suggester 不返回 score，使用固指定
                     items.add(new SuggestItem(text, type, 1.0, 1L));
                 }
             }

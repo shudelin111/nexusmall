@@ -13,8 +13,8 @@ import java.util.List;
  * 搜索建议应用服务
  * <p>
  * 职责：
- * - 提供搜索建议（关键字联想）
- * - Redis 缓存优化（TTL 5分钟）
+ * - 提供搜索建议（关键字联联想)
+ * - Redis 缓存优化（TTL 5分钟)
  * </p>
  */
 @Service
@@ -29,7 +29,7 @@ public class SuggestApplicationService {
     }
 
     /**
-     * 获取搜索建议（带 Redis 缓存）
+     * 获取搜索建议（带 Redis 缓存：
      * <p>
      * 缓存策略：
      * - Cache Name: searchSuggest

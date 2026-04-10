@@ -55,3 +55,18 @@ data:
   
   # Sentinel
   SENTINEL_DASHBOARD: "10.10.1.1:8858"
+  SENTINEL_TRANSPORT_PORT: "8719"
+  
+  # Seata
+  SEATA_SERVER: "10.10.1.1:8848"
+  SEATA_GROUP: "MALL_GROUP"
+  SEATA_NAMESPACE: ""
+  
+  # RocketMQ
+  ROCKETMQ_NAMESRV: "10.10.1.1:9876"
+  
+  # Zipkin 链路追踪
+  ZIPKIN_BASE_URL: "http://zipkin.nexusmall-infra.svc:9411"
+  
+  # Kafka
+  KAFKA_BOOTSTRAP_SERVERS: "mall-kafka-ok-kafka-bootstrap.kafka.svc:9092"

@@ -1,0 +1,221 @@
+# =====================================================
+# NexusMall 平台公共配置 - Web 组件配置（所有 Web 服务共享）
+# =====================================================
+# Data ID: nexusmall-common-web.yaml
+# Group: MALL_GROUP
+# Namespace: dev/test/prod（根据环境选择）
+# 用途：存放所有微服务共用的 Web 基础配置
+# 对应模块：nexusmall-common-web
+# 包含：Actuator 监控、Sentinel 熔断限流、Sleuth 链路追踪、日志配置
+# =====================================================
+
+# ===============================
+# Spring Boot Actuator 监控配置
+# ===============================
+management:
+  # 端点暴露配置
+  endpoints:
+    web:
+      # 暴露的端点列表
+      # 生产环境：只暴露 health,info,prometheus
+      exposure:
+        include: "health,info,prometheus"
+  # 端点详细配置
+  endpoint:
+    health:
+      # 显示健康检查详情（生产环境设为 when-authorized）
+      show-details: when-authorized
+      # 【关键】启用 K8s 健康检查探针端点（/actuator/health/readiness 和 /actuator/health/liveness）
+      probes:
+        enabled: true
+    info:
+      # 启用 info 端点
+      enabled: true
+    prometheus:
+      # 启用 prometheus 端点
+      enabled: true
+  # 环境变量配置
+  info:
+    env:
+      # 在 info 端点中显示环境变量
+      enabled: true
+  # 健康检查配置
+  health:
+    # 【关键】启用 K8s 存活状态检查
+    livenessState:
+      enabled: true
+    # 【关键】启用 K8s 就绪状态检查
+    readinessState:
+      enabled: true
+    # 数据库健康检查
+    db:
+      enabled: true
+    # Redis 健康检查
+    redis:
+      enabled: true
+    # 磁盘空间健康检查
+    disk-space:
+      enabled: true
+      # 磁盘空间阈值（字节）
+      threshold: 10485760  # 10MB
+  # 指标配置
+  metrics:
+    # 启用指标收集
+    enabled: true
+    tags:
+      # 应用标签（自动替换为服务名）
+      application: ${spring.application.name}
+    export:
+      prometheus:
+        # 启用 Prometheus 导出
+        enabled: true
+
+# ===============================
+# Redis 连接池配置（Lettuce 通用参数）
+# ===============================
+# ⚠️ 注意：以下环境相关配置在各服务的 nexusmall-{service}-{profile}.yaml 中定义：
+# - spring.redis.host（Redis 主机地址）
+# - spring.redis.port（Redis 端口）
+# - spring.redis.database（数据库编号）
+# - spring.redis.password（密码）
+spring:
+  redis:
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
+    lettuce:
+      pool:
+        # 最大活跃连接数
+        max-active: 50
+        # 最大空闲连接数
+        max-idle: 20
+        # 最小空闲连接数
+        min-idle: 5
+        # 获取连接最大等待时间（毫秒）
+        max-wait: 3000ms
+  
+  # Spring Cloud 配置
+  cloud:
+    # Sentinel 熔断限流配置（通用参数）
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+    # OpenFeign 服务调用配置（通用参数）
+    openfeign:
+      # 启用 Sentinel 熔断
+      sentinel:
+        enabled: true
+      # 客户端默认配置
+      client:
+        config:
+          default:
+            # 连接超时时间（毫秒）
+            connectTimeout: 5000
+            # 读取超时时间（毫秒）
+            readTimeout: 5000
+      # 启用请求/响应压缩
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
+
+# ===============================
+# Sleuth 链路追踪配置
+# ===============================
+sleuth:
+  # 1. 启用链路追踪
+  enabled: true
+  # 2. 采样率（生产环境建议 0.1，即 10% 采样）
+  sampler:
+    probability: 0.1
+  # 3. 日志配置
+  log:
+    # 启用日志中的链路追踪信息
+    enabled: true
+    # SLF4J MDC 白名单（让 traceId 显示在日志中）
+    slf4j:
+      whitelisted-mdc-keys:
+        - traceId
+        - spanId
+        - user-id
+  # 4. 传播类型（支持 B3 和 W3C 标准）
+  propagation:
+    type: B3,W3C
+  # 5. Baggage 配置（自定义传递字段）
+  baggage-keys:
+    - user-id
+    - request-id
+
+# Zipkin 链路追踪可视化配置（通用参数）
+zipkin:
+  # 发送方式（所有环境相同）
+  sender:
+    type: web
+
+# ===============================
+# 日志配置
+# ===============================
+logging:
+  # 日志级别（全局统一）
+  level:
+    # 根日志级别
+    root: INFO
+    # Spring 框架日志
+    org.springframework: WARN
+    org.springframework.web: INFO
+    # MyBatis-Plus 日志
+    com.baomidou.mybatisplus: DEBUG
+    # 连接池日志
+    com.zaxxer.hikari: WARN
+    # Redis 日志
+    org.springframework.data.redis: WARN
+    # RocketMQ 日志
+    org.apache.rocketmq: INFO
+    # Kafka 日志
+    org.springframework.kafka: WARN
+    # Sentinel 日志
+    com.alibaba.csp.sentinel: INFO
+    # Seata 分布式事务日志
+    io.seata: INFO
+    # Nacos 客户端日志
+    com.alibaba.nacos: WARN
+    # Sleuth 链路追踪日志
+    org.springframework.cloud.sleuth: DEBUG
+    # Brave（Sleuth 底层库）日志
+    brave: DEBUG
+
+# ===============================
+# Seata 分布式事务配置（通用参数）
+# ===============================
+# ⚠️ 注意：seata.application-id 在各服务的 nexusmall-{service}.yaml 中定义
+# ⚠️ 注意：seata.registry 和 seata.config 在各服务的环境配置文件中定义
+seata:
+  enabled: true
+  tx-service-group: nexusmall-tx-group
+  service:
+    vgroup-mapping:
+      nexusmall-tx-group: default
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（通用参数）
+# ===============================
+# ⚠️ 注意：以下模块特定配置在各服务的 nexusmall-{service}.yaml 中定义：
+# - springdoc.packages-to-scan（扫描的包路径）
+# - springdoc.group-configs（分组配置）
+springdoc:
+  api-docs:
+    # API 文档路径（所有模块统一）
+    path: /v3/api-docs
+  swagger-ui:
+    # Swagger UI 路径（所有模块统一）
+    path: /swagger-ui.html
+
+knife4j:
+  # 启用 Knife4j 增强功能（所有模块统一）
+  enable: true
+  # 设置语言（中文，所有模块统一）
+  setting:
+    language: zh_cn

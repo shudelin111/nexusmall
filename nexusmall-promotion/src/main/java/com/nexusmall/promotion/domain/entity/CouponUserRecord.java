@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
  * <p>
  * 业界标准：
  * - 记录每个用户的每张优惠券
- * - 支持状态流转（未使用→已锁定→已使用/已过期）
+ * - 支持状态流转（未使用 → 已锁定 → 已使用 / 已过期）
  * - 支持订单关联（核销时记录订单ID）
  * - 支持退款回退（释放优惠券）
  * </p>
@@ -54,15 +54,15 @@ public class CouponUserRecord implements Serializable {
     private String couponName;
 
     /**
-     * 优惠类型：1-满减 2-折扣 3-立减
+     * 优惠券类型-满减 2-折扣 3-立减
      */
-    @Schema(description = "优惠类型：1-满减 2-折扣 3-立减")
+    @Schema(description = "优惠券类型-满减 2-折扣 3-立减")
     private Integer couponType;
 
     /**
-     * 面值/折扣率
+     * 面值/折扣
      */
-    @Schema(description = "面值/折扣率")
+    @Schema(description = "面值/折扣")
     private BigDecimal value;
 
     /**
@@ -72,15 +72,15 @@ public class CouponUserRecord implements Serializable {
     private BigDecimal minAmount;
 
     /**
-     * 最高优惠金额
+     * 最高优惠券金额
      */
-    @Schema(description = "最高优惠金额")
+    @Schema(description = "最高优惠券金额")
     private BigDecimal maxDiscount;
 
     /**
-     * 使用范围：0-全场 1-指定分类 2-指定商品
+     * 使用范围 0-全场 1-指定分类 2-指定商品
      */
-    @Schema(description = "使用范围：0-全场 1-指定分类 2-指定商品")
+    @Schema(description = "使用范围 0-全场 1-指定分类 2-指定商品")
     private Integer scope;
 
     /**

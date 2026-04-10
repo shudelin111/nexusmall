@@ -38,12 +38,12 @@ public class PayChannelConfig implements Serializable {
     private String channelName;
 
     /**
-     * 应用ID（AppID）
+     * 应用ID（AppId）
      */
     private String appId;
 
     /**
-     * 商户ID（MchID）
+     * 商户ID（MchId）
      */
     private String mchId;
 
@@ -73,7 +73,7 @@ public class PayChannelConfig implements Serializable {
     private String gatewayUrl;
 
     /**
-     * 是否启用：0=禁用，1=启用
+     * 是否启用 0=禁用 1=启用
      */
     private Integer enabled;
 
@@ -88,7 +88,7 @@ public class PayChannelConfig implements Serializable {
     private String remark;
 
     /**
-     * 逻辑删除：0=未删除，1=已删除
+     * 逻辑删除 0=未删除，1=已删除
      */
     @TableLogic
     private Integer deleted;
