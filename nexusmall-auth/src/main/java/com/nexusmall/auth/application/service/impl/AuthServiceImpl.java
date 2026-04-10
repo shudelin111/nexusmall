@@ -7,7 +7,6 @@ import com.nexusmall.auth.domain.entity.Permission;
 import com.nexusmall.auth.domain.entity.Role;
 import com.nexusmall.auth.domain.entity.User;
 import com.nexusmall.auth.infrastructure.messaging.UserRegisteredEvent;
-import com.nexusmall.common.enums.ResultCode;
 import com.nexusmall.common.exception.AuthException;
 import com.nexusmall.auth.application.service.AuthService;
 import com.nexusmall.auth.application.service.RefreshTokenService;
@@ -329,8 +328,8 @@ public class AuthServiceImpl implements AuthService {
             for (Long roleId : roleIds) {
                 Role role = roleMapper.selectById(roleId);
                 if (role == null) {
-                    throw new AuthException(ResultCode.ROLE_NOT_FOUND, 
-                            ErrorMessageConstants.Auth.ROLE_NOT_FOUND_WITH_ID + roleId);
+                    String message = ErrorMessageConstants.Auth.ROLE_NOT_FOUND_WITH_ID + roleId;
+                    throw new AuthException(ResultCode.ROLE_NOT_FOUND, message);
                 }
                 com.nexusmall.auth.domain.entity.UserRole userRole = new com.nexusmall.auth.domain.entity.UserRole();
                 userRole.setUserId(userId);
@@ -361,8 +360,8 @@ public class AuthServiceImpl implements AuthService {
             for (Long permissionId : permissionIds) {
                 Permission permission = permissionMapper.selectById(permissionId);
                 if (permission == null) {
-                    throw new AuthException(ResultCode.PERMISSION_NOT_FOUND, 
-                            ErrorMessageConstants.Auth.PERMISSION_NOT_FOUND_WITH_ID + permissionId);
+                    String message = ErrorMessageConstants.Auth.PERMISSION_NOT_FOUND_WITH_ID + permissionId;
+                    throw new AuthException(ResultCode.PERMISSION_NOT_FOUND, message);
                 }
                 com.nexusmall.auth.domain.entity.RolePermission rolePermission = new com.nexusmall.auth.domain.entity.RolePermission();
                 rolePermission.setRoleId(roleId);

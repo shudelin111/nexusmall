@@ -156,12 +156,6 @@
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka-clients.version}</version>
             </dependency>
-            <!-- Logback Kafka Appender -->
-            <dependency>
-                <groupId>com.github.danielwegener</groupId>
-                <artifactId>logback-kafka-appender</artifactId>
-                <version>0.2.0-RC2</version>
-            </dependency>
             <!-- Spring Boot Actuator 监控 -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -235,12 +229,6 @@
                 <version>1.20.4</version>
                 <scope>test</scope>
             </dependency>
-            <!-- Logstash Logback Encoder -->
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>7.0.1</version>
-            </dependency>
             <!-- FastJSON2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
@@ -283,12 +271,12 @@
                 <artifactId>spring-kafka</artifactId>
                 <version>2.8.11</version>
             </dependency>
-            <!-- Logstash Logback Encoder（JSON 格式化） -->
-            <dependency>
-                <groupId>net.logstash.logback</groupId>
-                <artifactId>logstash-logback-encoder</artifactId>
-                <version>7.2</version>
-            </dependency>
+          <!-- Logstash Logback Encoder（JSON 格式化） -->
+          <dependency>
+            <groupId>net.logstash.logback</groupId>
+            <artifactId>logstash-logback-encoder</artifactId>
+            <version>7.2</version>
+          </dependency>
             <!-- Logback Kafka Appender（日志发送到 Kafka） -->
             <dependency>
                 <groupId>com.github.danielwegener</groupId>
@@ -318,14 +306,14 @@
                         </execution>
                     </executions>
                 </plugin>
-                    
+
                 <!-- Maven Failsafe Plugin (集成测试插件) -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>3.2.5</version>
                 </plugin>
-                    
+
                 <!-- ========================================
                      JaCoCo 代码覆盖率插件 (业界标准配置)
                      官方文档: https://www.jacoco.org/jacoco/trunk/doc/maven.html
@@ -350,7 +338,7 @@
                                 <append>true</append>
                             </configuration>
                         </execution>
-                            
+
                         <!-- 执行阶段: test -->
                         <!-- 作用: 在测试完成后生成 HTML/XML 覆盖率报告 -->
                         <execution>
@@ -377,7 +365,7 @@
                                 </excludes>
                             </configuration>
                         </execution>
-                            
+
                         <!-- 执行阶段: verify -->
                         <!-- 作用: 检查覆盖率是否达到阈值,不达标则构建失败 -->
                         <execution>

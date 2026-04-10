@@ -16,7 +16,7 @@
 # ===============================
 spring:
   # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
-  
+
   # Redis 连接池配置（通用参数，所有环境共享）
   redis:
     # 连接超时时间（毫秒）
@@ -122,19 +122,6 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # ===============================
-# RocketMQ 配置（通用参数）
-# ===============================
-rocketmq:
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-logistics-{profile}.yaml 中定义：
-  # - rocketmq.name-server (NameServer 地址)
-  # - rocketmq.producer.group (生产者组名称)
-  # 生产者配置（通用参数）
-  producer:
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
-
-# ===============================
 # Seata 分布式事务配置（通用参数）
 # ===============================
 seata:
@@ -196,3 +183,60 @@ knife4j:
   # 设置文档语言（所有环境相同）
   setting:
     language: zh_cn
+
+
+logistics:
+  cache:
+    # 是否启用缓存
+    enabled: true
+
+    # 仓库信息缓存配置
+    warehouse:
+      # 缓存前缀
+      key-prefix: "logistics:warehouse:"
+      # 单个仓库缓存TTL（秒），默认1小时
+      ttl-seconds: 3600
+      # 仓库列表缓存TTL（秒），默认30分钟
+      list-ttl-seconds: 1800
+      # 最大缓存数量
+      max-size: 100
+
+    # 运费模板缓存配置
+    freight-template:
+      # 缓存前缀
+      key-prefix: "logistics:freight:template:"
+      # 缓存TTL（秒），默认1小时
+      ttl-seconds: 3600
+      # 默认模板缓存TTL（秒），默认2小时（访问频率高）
+      default-ttl-seconds: 7200
+      # 最大缓存数量
+      max-size: 50
+  express:
+    # 默认使用的物流查询服务商：kuaidiniao（快递鸟）或 kuaidi100（快递100）
+    default-provider: kuaidiniao
+
+    # 快递鸟配置（推荐）
+    # 官网：http://www.kdniao.com
+    # 免费注册即可获得 API Key
+    kuaidiniao:
+      # 商户ID（从快递鸟后台获取）
+      business-id: your_business_id_here
+      # API密钥（从快递鸟后台获取）
+      api-key: your_api_key_here
+      # API端点（无需修改）
+      api-url: http://api.kdniao.com/Ebusiness/EbusinessOrderHandle.aspx
+      # 是否启用
+      enabled: true
+
+    # 快递100配置（备用）
+    # 官网：https://www.kuaidi100.com/openapi/
+    # 需要企业认证才能使用完整功能
+    kuaidi100:
+      # 客户ID（从快递100后台获取）
+      customer-id: your_customer_id_here
+      # API密钥（从快递100后台获取）
+      api-key: your_api_key_here
+      # API端点（无需修改）
+      api-url: https://poll.kuaidi100.com/poll/query.do
+      # 是否启用
+      enabled: false

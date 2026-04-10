@@ -1,32 +1,141 @@
 # =====================================================
-# NexusMall 第三方服务配置（专属配置）
+# NexusMall Third-Party Service - Nacos Configuration
+# 第三方服务集成 Nacos 托管配置
 # =====================================================
-# Data ID: nexusmall-third-party.yaml
-# Group: DEFAULT_GROUP
-# 用途：存放第三方服务的专属业务配置
-# 包含：MinIO 对象存储、短信服务等
+# 配置说明：
+# - Data ID: nexusmall-third-party.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
 # =====================================================
 
 # ===============================
-# MinIO 对象存储配置（业界标准）
+# Spring 应用配置
 # ===============================
-# 说明：只有 ThirdParty 服务需要此配置，其他微服务通过 Feign 调用
+spring:
+  # 注意：spring.application.name 已在 bootstrap.yml 中定义，此处无需重复
+  
+  # Redis 连接池配置（通用参数，所有环境共享）
+  redis:
+    # 连接超时时间（毫秒）
+    timeout: 5000  # 5 秒
+    # Lettuce 连接池配置
+    lettuce:
+      pool:
+        # 最大活跃连接数
+        max-active: 16
+        # 最大空闲连接数
+        max-idle: 8
+        # 最小空闲连接数
+        min-idle: 0
+        # 获取连接的最大等待时间（毫秒）
+        max-wait: 1000ms  # 1 秒
+
+  # Spring Cloud 配置
+  cloud:
+    # OpenFeign 服务调用配置
+    openfeign:
+      sentinel:
+        enabled: true
+      client:
+        config:
+          default:
+            # 连接超时
+            connectTimeout: 5000
+            # 读取超时
+            readTimeout: 5000
+      compression:
+        request:
+          enabled: true
+        response:
+          enabled: true
+
+    # Sentinel 熔断限流配置（通用参数）
+    sentinel:
+      # 启用 Sentinel
+      enabled: true
+      # 取消控制台懒加载（启动时立即注册到 Dashboard）
+      eager: true
+      # ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义：
+      # - spring.cloud.sentinel.transport.dashboard (Dashboard 地址)
+      # - spring.cloud.sentinel.transport.port (本地通信端口)
+      # - spring.cloud.sentinel.datasource.*.nacos.server-addr (Nacos 地址)
+      # - spring.cloud.sentinel.datasource.*.nacos.namespace (命名空间)
+      datasource:
+        # 流控规则数据源
+        ds1:
+          nacos:
+            # ⚠️ 注意：server-addr 和 namespace 在 nexusmall-third-party-{profile}.yaml 中定义
+            dataId: nexusmall-third-party-flow-rule.json
+            groupId: MALL_GROUP
+            rule-type: flow
+            data-type: json
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
+
+        # 熔断降级规则数据源
+        ds2:
+          nacos:
+            dataId: nexusmall-third-party-degrade-rule.json
+            groupId: MALL_GROUP
+            rule-type: degrade
+            data-type: json
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
+
+        # 系统自适应保护规则数据源
+        ds3:
+          nacos:
+            dataId: nexusmall-third-party-system-rule.json
+            groupId: MALL_GROUP
+            rule-type: system
+            data-type: json
+            username: ${NACOS_USERNAME:nacos}
+            password: ${NACOS_PASSWORD:nacos}
+
+# ===============================
+# Seata 分布式事务配置（Third-Party 模块可选使用 Seata）
+# ===============================
+seata:
+  enabled: false  # 默认禁用，如需启用请在环境配置中覆盖
+  application-id: nexusmall-third-party
+  tx-service-group: nexusmall-tx-group
+  service:
+    vgroup-mapping:
+      nexusmall-tx-group: default
+  # ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义（如果启用 Seata）：
+  # - seata.registry.nacos.server-addr (Seata Server 地址)
+  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
+  # - seata.registry.nacos.group (Seata Server 所在分组)
+  # - seata.config.nacos.server-addr (Seata 配置中心地址)
+  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
+  # - seata.config.nacos.group (Seata 配置所在分组)
+  registry:
+    type: nacos
+    nacos:
+      cluster: default
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      data-id: seataServer.properties
+
+# ===============================
+# MinIO 对象存储配置（通用参数）
+# ===============================
 minio:
-  # MinIO 服务器地址（开发环境）
-  endpoint: http://localhost:9000
-  # 访问密钥（类似用户名）
-  access-key: admin
-  # 秘密密钥（类似密码）
-  secret-key: password123
+  # ⚠️ 注意：endpoint、access-key、secret-key 在 nexusmall-third-party-{profile}.yaml 中定义
   # 默认存储桶名称
-  bucket-name: nexusmall
-  # 是否启用自动创建桶
-  # 开发环境：true（方便调试）
-  # 生产环境：false（需要手动创建，提高安全性）
-  auto-create-bucket: true
-  # 文件上传最大大小（字节）
-  max-file-size: 104857600  # 100MB
-  # 允许的文件后缀（防止上传危险文件）
+  bucket-name: ${MINIO_BUCKET:nexusmall}
+  # 是否自动创建存储桶
+  auto-create-bucket: false
+  # 文件上传最大大小（字节）- 100MB
+  max-file-size: 104857600
+  # 允许上传的文件后缀名列表
   allowed-extensions:
     - .jpg
     - .jpeg
@@ -34,49 +143,105 @@ minio:
     - .gif
     - .bmp
     - .webp
-    - .mp4
-    - .avi
-    - .mov
+    - .svg
     - .pdf
     - .doc
     - .docx
     - .xls
     - .xlsx
+    - .ppt
+    - .pptx
+    - .txt
+    - .md
+    - .zip
+    - .rar
+    - .7z
+    - .mp3
+    - .wav
+    - .mp4
+    - .avi
+    - .mov
 
 # ===============================
-# 阿里云 OSS 配置（可选，生产环境使用）
+# RocketMQ 消息队列配置（通用参数）
 # ===============================
-# 说明：如果生产环境使用阿里云 OSS，取消以下注释并配置
-# aliyun:
-#   oss:
-#     # OSS 端点地址
-#     endpoint: https://oss-cn-shanghai.aliyuncs.com
-#     # 访问密钥 ID
-#     access-key-id: ${OSS_ACCESS_KEY_ID}
-#     # 访问密钥 Secret
-#     access-key-secret: ${OSS_ACCESS_KEY_SECRET}
-#     # 存储桶名称
-#     bucket-name: nexusmall-prod
+# ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）已在 nexusmall-common-mq.yaml 中定义
+rocketmq:
+  # ⚠️ 注意：name-server 在 nexusmall-third-party-{profile}.yaml 中定义
+  producer:
+    group: third-party-producer-group
 
 # ===============================
-# 阿里云短信配置（可选）
+# 第三方服务业务配置（通用参数）
 # ===============================
-# aliyun:
-#   sms:
-#     # 短信 API 产品 ID
-#     product: Dysmsapi
-#     # 域名
-#     domain: dysmsapi.aliyuncs.com
-#     # AccessKey ID
-#     access-key-id: ${SMS_ACCESS_KEY_ID}
-#     # AccessKey Secret
-#     access-key-secret: ${SMS_ACCESS_KEY_SECRET}
-#     # 签名名称
-#     sign-name: NexusMall
-#     # 模板代码（示例）
-#     template-code: SMS_123456789
+third-party:
+  # ------------------------------
+  # 短信服务配置
+  # ------------------------------
+  sms:
+    # 是否启用短信能力
+    enabled: true
+    # 短信服务商
+    provider: aliyun
+    # 阿里云短信参数（provider=aliyun 时使用）
+    aliyun:
+      # 短信服务地域
+      region-id: ${ALIYUN_SMS_REGION_ID:cn-hangzhou}
+      # ⚠️ 注意：access-key-id、access-key-secret 在 nexusmall-third-party-{profile}.yaml 中定义
+      # 短信签名（控制台已审核通过）
+      sign-name: ${ALIYUN_SMS_SIGN_NAME:}
+      # 短信模板 CODE（控制台已审核通过）
+      template-code: ${ALIYUN_SMS_TEMPLATE_CODE:}
+  
+  # ------------------------------
+  # 支付服务配置
+  # ------------------------------
+  payment:
+    # 是否启用支付能力
+    enabled: true
+    # 启用的支付渠道列表
+    providers:
+      - alipay    # 支付宝
+      - wechatpay # 微信支付
+      - unionpay  # 银联支付
+  
+  # ------------------------------
+  # 对象存储配置
+  # ------------------------------
+  storage:
+    # 是否启用对象存储能力
+    enabled: false
+    # 存储服务商
+    provider: minio
+    # MinIO 对象存储参数（provider=minio 时使用）
+    minio:
+      # ⚠️ 注意：endpoint、access-key、secret-key 在 nexusmall-third-party-{profile}.yaml 中定义
+      bucket-name: ${MINIO_BUCKET:nexusmall}
+    # 阿里云 OSS 参数（provider=aliyun-oss 时使用）
+    aliyun-oss:
+      # ⚠️ 注意：endpoint、access-key-id、access-key-secret、bucket-name 在 nexusmall-third-party-{profile}.yaml 中定义
+      endpoint: ${ALIYUN_OSS_ENDPOINT:}
+      bucket-name: ${ALIYUN_OSS_BUCKET:}
 
 # ===============================
-# Kafka 日志收集开关（Logback Appender）
+# SpringDoc OpenAPI 文档配置（Third-Party 使用 SpringDoc，不是 Knife4j）
 # ===============================
-KAFKA_LOGGING_ENABLED: ${KAFKA_LOGGING_ENABLED:false}
+# ⚠️ 注意：以下环境相关配置在 nexusmall-third-party-{profile}.yaml 中定义：
+# - springdoc.api-docs.enabled (API 文档启用开关)
+# - springdoc.swagger-ui.enabled (Swagger UI 启用开关)
+springdoc:
+  # OpenAPI 文档路径
+  api-docs:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /v3/api-docs
+  # Swagger UI 配置
+  swagger-ui:
+    # ⚠️ 注意：enabled 在环境特定配置中定义
+    path: /swagger-ui.html
+  # 扫描的包路径(所有环境相同)
+  packages-to-scan: com.nexusmall.thirdparty.controller
+  # 分组配置(微服务架构下推荐)
+  group-configs:
+    - group: 'default'
+      paths-to-match: '/**'
+      packages-to-scan: com.nexusmall.thirdparty.controller

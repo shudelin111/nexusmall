@@ -40,17 +40,6 @@ public class NexusmallException extends RuntimeException {
     }
 
     /**
-     * 使用 ResultCode 构造异常（带异常原因）
-     *
-     * @param resultCode 结果码枚举
-     * @param cause 异常原因
-     */
-    public NexusmallException(ResultCode resultCode, Throwable cause) {
-        super(resultCode.getMessage(), cause);
-        this.resultCode = resultCode;
-    }
-
-    /**
      * 使用 ResultCode 和自定义消息构造异常
      * <p>
      * <strong>使用场景：</strong>需要在标准错误消息基础上补充具体上下文信息
@@ -72,6 +61,17 @@ public class NexusmallException extends RuntimeException {
      */
     public NexusmallException(ResultCode resultCode, String message) {
         super(message);
+        this.resultCode = resultCode;
+    }
+
+    /**
+     * 使用 ResultCode 构造异常（带异常原因）
+     *
+     * @param resultCode 结果码枚举
+     * @param cause 异常原因
+     */
+    public NexusmallException(ResultCode resultCode, Throwable cause) {
+        super(resultCode.getMessage(), cause);
         this.resultCode = resultCode;
     }
 

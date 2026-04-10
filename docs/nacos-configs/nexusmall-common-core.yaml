@@ -21,8 +21,8 @@ spring:
     date-format: yyyy-MM-dd HH:mm:ss
     # 序列化配置
     serialization:
-      # 格式化输出（开发环境方便调试，生产环境建议关闭以提升性能）
-      indent-output: true
+      # 格式化输出（生产环境关闭以提升性能）
+      indent-output: false
       # 写入单值数组时 unwrapped
       write-single-elem-arrays-unwrapped: false
     # 反序列化配置

@@ -10,231 +10,11 @@
 # =====================================================
 
 # ===============================
-# Spring 配置
-# ===============================
-spring:
-  # 数据源配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_cart?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=3000&socketTimeout=5000
-    username: ${MYSQL_USERNAME:root}
-    password: ${MYSQL_PASSWORD:123456}
-    
-    # HikariCP 连接池配置（生产环境优化）
-    hikari:
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 最大连接池大小
-      maximum-pool-size: 20
-      # 连接超时时间（毫秒）
-      connection-timeout: 30000
-      # 空闲连接最大存活时间（毫秒）
-      idle-timeout: 600000
-      # 连接最大生命周期（毫秒）
-      max-lifetime: 1800000
-      # 连接测试查询
-      connection-test-query: SELECT 1
-  
-  # Redis 配置
-  redis:
-    host: ${REDIS_HOST:10.10.1.1}
-    port: ${REDIS_PORT:6379}
-    database: ${REDIS_DATABASE:0}
-    password: ${REDIS_PASSWORD:}
-    timeout: 3000ms
-    
-    # Lettuce 连接池配置
-    lettuce:
-      pool:
-        # 最大活跃连接数
-        max-active: 50
-        # 最大空闲连接数
-        max-idle: 20
-        # 最小空闲连接数
-        min-idle: 5
-        # 获取连接最大等待时间（毫秒）
-        max-wait: 3000ms
-
-  # RocketMQ 配置
-  rocketmq:
-    name-server: ${ROCKETMQ_NAME_SERVER:10.10.1.1:9876}
-    producer:
-      # 生产者组名
-      group: cart-producer-group
-      # 消息发送超时时间（毫秒）
-      send-message-timeout: 3000
-      # 消息最大大小（字节）
-      max-message-size: 4194304
-      # 同步发送失败重试次数
-      retry-times-when-send-failed: 2
-      # 异步发送失败重试次数
-      retry-times-when-send-async-failed: 2
-
-# ===============================
-# MyBatis Plus 配置
-# ===============================
-mybatis-plus:
-  # Mapper XML 文件位置
-  mapper-locations: classpath*:/mapper/**/*.xml
-  
-  # 实体类扫描路径
-  type-aliases-package: com.nexusmall.cart.entity
-  
-  # 全局配置
-  global-config:
-    # 数据库相关配置
-    db-config:
-      # 主键策略：自增
-      id-type: AUTO
-      # 逻辑删除字段
-      logic-delete-field: deleted
-      logic-delete-value: 1
-      logic-not-delete-value: 0
-    
-    # 关闭 Banner
-    banner: false
-  
-  # 原生配置
-  configuration:
-    # 驼峰命名转换
-    map-underscore-to-camel-case: true
-    # 缓存配置
-    cache-enabled: false
-    # 日志实现
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-
-# ===============================
-# Sentinel 熔断限流配置
-# ===============================
-sentinel:
-  # 是否启用 Sentinel
-  enabled: true
-  
-  # 控制台配置
-  transport:
-    # 控制台地址
-    dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-    # 客户端监控 API 的端口
-    port: 8719
-  
-  # 数据源配置（从 Nacos 加载流控规则）
-  datasource:
-    # 流控规则
-    ds1:
-      nacos:
-        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-        namespace: ""
-        dataId: ${spring.application.name}-flow-rules
-        groupId: ${NACOS_GROUP:MALL_GROUP}
-        data-type: json
-        rule-type: flow
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
-    
-    # 降级规则
-    ds2:
-      nacos:
-        server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
-        namespace: ""
-        dataId: ${spring.application.name}-degrade-rules
-        groupId: ${NACOS_GROUP:MALL_GROUP}
-        data-type: json
-        rule-type: degrade
-        username: ${NACOS_USERNAME:nacos}
-        password: ${NACOS_PASSWORD:nacos}
-
-# ===============================
-# Seata 分布式事务配置（通用参数）
+# Seata 分布式事务配置
 # ===============================
 seata:
-  enabled: true
-  application-id: nexusmall-order
-  tx-service-group: nexusmall-tx-group
-  service:
-    vgroup-mapping:
-      nexusmall-tx-group: default
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-order-{profile}.yaml 中定义：
-  # - seata.registry.nacos.server-addr (Seata Server 地址)
-  # - seata.registry.nacos.namespace (Seata Server 注册命名空间)
-  # - seata.registry.nacos.group (Seata Server 所在分组)
-  # - seata.config.nacos.server-addr (Seata 配置中心地址)
-  # - seata.config.nacos.namespace (Seata 配置所在命名空间)
-  # - seata.config.nacos.group (Seata 配置所在分组)
-  registry:
-    type: nacos
-    nacos:
-      cluster: default
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      application: seata-server
-  config:
-    type: nacos
-    nacos:
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      data-id: seataServer.properties
-
-# ===============================
-# Feign 配置
-# ===============================
-feign:
-  # 启用压缩
-  compression:
-    request:
-      enabled: true
-      mime-types: text/xml,application/xml,application/json
-      min-request-size: 2048
-    response:
-      enabled: true
-  
-  # 客户端配置
-  client:
-    config:
-      default:
-        # 连接超时时间（毫秒）
-        connectTimeout: 3000
-        # 读取超时时间（毫秒）
-        readTimeout: 5000
-        # 日志级别
-        loggerLevel: BASIC
-
-# ===============================
-# 日志配置
-# ===============================
-logging:
-  level:
-    # Root 日志级别
-    root: INFO
-    
-    # 项目包日志级别
-    com.nexusmall.cart: DEBUG
-    
-    # MyBatis SQL 日志
-    com.nexusmall.cart.dao: DEBUG
-    
-    # Feign 日志
-    com.nexusmall.cart.feign: DEBUG
-    
-    # Sentinel 日志
-    com.alibaba.csp.sentinel: WARN
-
-# ===============================
-# 管理端点配置
-# ===============================
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,info,metrics,prometheus
-  
-  endpoint:
-    health:
-      show-details: when-authorized
-  
-  metrics:
-    export:
-      prometheus:
-        enabled: true
+  # ⚠️ 注意：其他 Seata 通用参数已在 nexusmall-common-web.yaml 中定义
+  application-id: nexusmall-cart
 
 # ===============================
 # 业务配置
@@ -251,3 +31,15 @@ cart:
   
   # 批量操作最大数量
   batch-operation-max-size: 50
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（模块特定）
+# ===============================
+# ⚠️ 注意：通用配置（path、enable、language）已在 nexusmall-common-web.yaml 中定义
+springdoc:
+  # 扫描的包路径（Cart 模块特定）
+  packages-to-scan: com.nexusmall.cart
+  group-configs:
+    - group: default
+      paths-to-match: /**
+      packages-to-scan: com.nexusmall.cart

@@ -61,6 +61,17 @@ data:
   
   # Seata
   SEATA_SERVER: "10.10.1.1:8848"
+  SEATA_GROUP: "MALL_GROUP"
+  SEATA_NAMESPACE: ""
+  
+  # Sentinel
+  SENTINEL_TRANSPORT_PORT: "8719"
+  
+  # Zipkin 链路追踪
+  ZIPKIN_BASE_URL: "http://zipkin.nexusmall-infra.svc:9411"
+  
+  # Kafka
+  KAFKA_BOOTSTRAP_SERVERS: "mall-kafka-ok-kafka-bootstrap.kafka.svc:9092"
   
   # Elasticsearch（非敏感配置）
   ELASTICSEARCH_URIS: "http://es-cluster-es-http.nexusmall-infra.svc:9200"

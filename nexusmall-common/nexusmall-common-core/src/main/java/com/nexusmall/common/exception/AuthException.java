@@ -26,10 +26,6 @@ public class AuthException extends NexusmallException {
         super(resultCode);
     }
 
-    public AuthException(ResultCode resultCode, Throwable cause) {
-        super(resultCode, cause);
-    }
-
     /**
      * 使用 ResultCode 和自定义消息构造异常
      * <p>
@@ -41,6 +37,10 @@ public class AuthException extends NexusmallException {
      */
     public AuthException(ResultCode resultCode, String message) {
         super(resultCode, message);
+    }
+
+    public AuthException(ResultCode resultCode, Throwable cause) {
+        super(resultCode, cause);
     }
 
     /**

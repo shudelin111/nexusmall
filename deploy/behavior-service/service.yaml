@@ -1,0 +1,75 @@
+# =====================================================
+# Kubernetes Service 配置 - NexusMall Behavior Service
+# =====================================================
+# 用途：定义 Cart 服务的网络访问策略
+# 功能：
+#   1. 提供服务发现（DNS 名称）
+#   2. 负载均衡（多个 Pod 实例）
+#   3. 稳定的虚拟 IP（ClusterIP）
+#   4. 健康检查（自动剔除不健康的 Pod）
+# =====================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nexusmall-behavior
+  namespace: nexusmall  # 与 Deployment 在同一命名空间
+  labels:
+    app: nexusmall-behavior
+    app.kubernetes.io/name: nexusmall-behavior
+    app.kubernetes.io/part-of: nexusmall
+spec:
+  # ========================================
+  # Service 类型
+  # ========================================
+  # ClusterIP: 仅在集群内部可访问（微服务标准做法）
+  # NodePort: 在每个节点上暴露端口（开发测试用）
+  # LoadBalancer: 使用云提供商的负载均衡（生产环境对外服务）
+  # ExternalName: 映射到外部服务（如 RDS、Redis）
+  type: ClusterIP
+  
+  # ========================================
+  # 选择器（Selector）
+  # ========================================
+  # 作用：选择具有这些 labels 的 Pod
+  # 必须与 Deployment 中的 labels 完全一致
+  selector:
+    app: nexusmall-behavior
+  
+  # ========================================
+  # 端口配置
+  # ========================================
+  ports:
+    - name: http              # 端口名称（用于多端口服务）
+      protocol: TCP           # 协议：TCP 或 UDP
+      port: 14000             # Service 端口(集群内部访问,与Member同属用户域)
+      targetPort: 14000       # 容器端口(Pod 中的端口)
+      # nodePort: 30000       # 如果是 NodePort 类型，需指定此字段（范围：30000-32767）
+  
+  # ========================================
+  # 会话亲和性（Session Affinity）
+  # ========================================
+  # None: 不启用会话保持（默认，负载均衡）
+  # ClientIP: 基于客户端 IP 的会话保持（同一客户端总是访问同一 Pod）
+  sessionAffinity: None
+
+# =====================================================
+# 服务发现说明
+# =====================================================
+# 在 K8s 集群内部，其他服务可以通过以下方式访问 Cart 服务：
+#
+# 1. 短域名（推荐）：
+#    http://nexusmall-behavior:10001
+#
+# 2. 完整域名：
+#    http://nexusmall-behavior.nexusmall.svc.cluster.local:10001
+#
+# 3. 在同一个命名空间中：
+#    http://nexusmall-behavior:10001
+#
+# 示例：Gateway 调用 Cart 服务
+#    Gateway 配置：
+#      upstream:
+#        service: nexusmall-behavior
+#        port: 14000
+# =====================================================

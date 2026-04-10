@@ -122,19 +122,6 @@ mybatis-plus:
       logic-not-delete-value: 0
 
 # ===============================
-# RocketMQ 配置（通用参数）
-# ===============================
-rocketmq:
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-notification-{profile}.yaml 中定义：
-  # - rocketmq.name-server (NameServer 地址)
-  # - rocketmq.producer.group (生产者组名称)
-  # 生产者配置（通用参数）
-  producer:
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
-
-# ===============================
 # Seata 分布式事务配置（通用参数）
 # ===============================
 seata:

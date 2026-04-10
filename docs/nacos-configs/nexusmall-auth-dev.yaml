@@ -16,104 +16,37 @@
 # 数据库连接配置（开发环境）
 # ===============================
 spring:
-  # 数据库连接配置（完整配置，符合业界标准）
   datasource:
-    # JDBC 驱动类名
     driver-class-name: com.mysql.cj.jdbc.Driver
-    # 数据源类型：HikariCP（Spring Boot 2.x 默认，性能最优）
-    type: com.zaxxer.hikari.HikariDataSource
-    # JDBC 连接 URL（认证服务专用数据库）
-    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&serverTimezone=GMT%2B8
-    # 数据库用户名
+    url: jdbc:mysql://${MYSQL_HOST:10.10.1.1}:${MYSQL_PORT:3306}/nexusmall_auth?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true&connectTimeout=3000&socketTimeout=5000
     username: ${MYSQL_USERNAME:root}
-    # 数据库密码（生产环境建议使用环境变量或密钥管理服务）
     password: ${MYSQL_PASSWORD:123456}
-    # HikariCP 连接池参数
-    hikari:
-      # 最小空闲连接数
-      minimum-idle: 5
-      # 最大连接数
-      maximum-pool-size: 20
-      # 空闲连接超时时间（毫秒）
-      idle-timeout: 30000
-      # 连接最大生命周期（毫秒）
-      max-lifetime: 1800000
-      # 连接超时时间（毫秒）
-      connection-timeout: 30000
-  
+
   # Redis 配置（开发环境）
   redis:
-    # Redis 服务器地址
     host: ${REDIS_HOST:10.10.1.1}
-    # Redis 端口
     port: ${REDIS_PORT:6379}
-    # 使用的数据库编号
     database: ${REDIS_DATABASE:0}
-    # Redis 密码
     password: ${REDIS_PASSWORD:123456}
-  
+    timeout: 5000ms
+
   # Spring Cloud 配置（开发环境）
   cloud:
-    # Sentinel 配置（开发环境）
-    # ⚠️ 注意：Sentinel 数据源规则定义（dataId、groupId、rule-type等）在 nexusmall-auth.yaml 中定义
     sentinel:
       transport:
-        # Sentinel Dashboard 地址（开发环境）
         dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
-        port: 8719
-      datasource:
-        ds1:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
-        ds2:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
-        ds3:
-          nacos:
-            server-addr: ${NACOS_SERVER:10.10.1.1:8848}
-            namespace: dev
+        port: ${SENTINEL_TRANSPORT_PORT:8719}
 
 # ===============================
 # RocketMQ 配置（开发环境）
 # ===============================
-# ⚠️ 注意：RocketMQ 生产者通用参数（timeout、retry）在 nexusmall-auth.yaml 中定义
 rocketmq:
-  # NameServer 地址
   name-server: ${ROCKETMQ_NAMESRV:10.10.1.1:9876}
-  # 生产者配置
   producer:
     group: auth-producer-group-dev
 
 # ===============================
-# Seata 分布式事务配置（开发环境）
-# ===============================
-# ⚠️ 注意：Seata 通用参数（enabled、tx-service-group、vgroup-mapping、type、cluster、username、password、application、data-id）在 nexusmall-auth.yaml 中定义
-# ⚠️ 重要：Seata 客户端不经过 Spring 属性解析器，不能直接使用 Spring 占位符 ${xxx}
-#          应直接写明实际地址，或使用 Seata 自身支持的环境变量语法
-seata:
-  registry:
-    nacos:
-      # Seata Server 地址（开发环境）
-      # 注意：Seata 1.5+ 支持 ${xxx:default} 语法从环境变量读取
-      server-addr: 10.10.1.1:8848
-      # Seata Server 注册的命名空间（通常为 public 或 ""）
-      namespace: ""
-      # Seata Server 所在的分组
-      group: SEATA_GROUP
-  config:
-    nacos:
-      # Seata 配置中心地址（开发环境）
-      server-addr: 10.10.1.1:8848
-      # Seata 配置所在的命名空间（通常与 registry 保持一致，使用 public）
-      # 注意：如果 seataServer.properties 在 dev 命名空间，则改为 dev
-      namespace: ""
-      # Seata 配置所在的分组
-      group: SEATA_GROUP
-
-# ===============================
-# 日志级别配置（开发环境）
+# 日志配置（开发环境）
 # ===============================
 logging:
   level:
@@ -123,3 +56,44 @@ logging:
     com.nexusmall.auth: DEBUG
     com.nexusmall.common: DEBUG
     com.nexusmall.auth.infrastructure.persistence.dao: DEBUG
+  file:
+    path: ./logs
+
+# Kafka 日志收集开关（开发环境默认关闭）
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# Zipkin 链路追踪配置（开发环境）
+# ===============================
+zipkin:
+  # 开发环境默认关闭
+  enabled: false
+  # Zipkin Server 地址（本地开发）
+  base-url: ${ZIPKIN_BASE_URL:http://localhost:9411}
+
+# ===============================
+# Seata 分布式事务配置（开发环境）
+# ===============================
+seata:
+  registry:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      cluster: default
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      application: seata-server
+  config:
+    type: nacos
+    nacos:
+      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
+      namespace: ${SEATA_NAMESPACE:}
+      group: ${SEATA_GROUP:SEATA_GROUP}
+      username: ${NACOS_USERNAME:nacos}
+      password: ${NACOS_PASSWORD:nacos}
+      data-id: seataServer.properties

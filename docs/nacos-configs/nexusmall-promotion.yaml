@@ -1,14 +1,12 @@
 # =====================================================
-# NexusMall 营销服务配置
+# NexusMall Promotion Service - Nacos Configuration
+# 营销服务 Nacos 托管配置
 # =====================================================
-# Data ID: nexusmall-promotion.yaml
-# Group: MALL_GROUP
-# Namespace: dev/test/prod（根据环境选择）
-# 用途：营销服务专属业务配置（所有环境共享）
-# 说明：
-# - 此文件存放所有环境共享的通用配置
-# - 环境特定配置请创建 nexusmall-promotion-{profile}.yaml
-# - 示例：nexusmall-promotion-dev.yaml, nexusmall-promotion-test.yaml
+# 配置说明：
+# - Data ID: nexusmall-promotion.yaml
+# - Group: MALL_GROUP
+# - 适用环境：所有环境共享（具体环境差异通过环境变量区分）
+# - 维护团队：平台架构组
 # =====================================================
 
 # ===============================
@@ -120,19 +118,6 @@ mybatis-plus:
       logic-delete-field: deleted
       logic-delete-value: 1
       logic-not-delete-value: 0
-
-# ===============================
-# RocketMQ 配置（通用参数）
-# ===============================
-rocketmq:
-  # ⚠️ 注意：以下环境相关配置在 nexusmall-promotion-{profile}.yaml 中定义：
-  # - rocketmq.name-server (NameServer 地址)
-  # - rocketmq.producer.group (生产者组名称)
-  # 生产者配置（通用参数）
-  producer:
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
-    retry-times-when-send-async-failed: 2
 
 # ===============================
 # Seata 分布式事务配置（通用参数）

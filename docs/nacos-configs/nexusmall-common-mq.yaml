@@ -31,10 +31,9 @@ rocketmq:
 # ===============================
 # Kafka 配置（通用参数）
 # ===============================
+# ⚠️ 注意：bootstrap-servers 在各服务的 nexusmall-{service}-{profile}.yaml 中定义
 spring:
   kafka:
-    # Kafka 集群地址（生产级标准：K8s 内部服务地址）
-    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:mall-kafka-ok-kafka-bootstrap.kafka.svc:9092}
     # 消费者配置（通用参数）
     consumer:
       # 消费者组 ID（使用应用名称动态生成，确保每个服务唯一）

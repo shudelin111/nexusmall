@@ -1,0 +1,69 @@
+# =====================================================
+# NexusMall Gateway Service - Test Environment Configuration
+# 网关服务 - 测试环境配置
+# =====================================================
+# Data ID: nexusmall-gateway-test.yaml
+# Group: MALL_GROUP
+# Namespace: test
+# Profile: test
+# 用途：测试环境专属配置（优先级高于 nexusmall-gateway.yaml）
+# 说明：
+# - 此文件仅包含测试环境特有的差异化配置
+# - 共享配置已在 nexusmall-common.yaml 中定义
+# - 业务通用配置已在 nexusmall-gateway.yaml 中定义
+# =====================================================
+
+# ===============================
+# Spring Cloud 配置（测试环境）
+# ===============================
+spring:
+  # Sleuth 链路追踪配置（测试环境覆盖）
+  sleuth:
+    # 测试环境 100% 采样（便于调试）
+    sampler:
+      probability: 1.0
+
+# ===============================
+# Actuator 监控端点配置（测试环境覆盖）
+# ===============================
+management:
+  endpoints:
+    web:
+      exposure:
+        # 测试环境暴露所有端点（便于调试）
+        include: "*"
+  endpoint:
+    health:
+      # 测试环境始终显示健康检查详情
+      show-details: always
+
+# ===============================
+# 日志配置（测试环境）
+# ===============================
+logging:
+  file:
+    path: /var/log/nexusmall
+
+# ===============================
+# Zipkin 链路追踪配置（测试环境）
+# ===============================
+zipkin:
+  # 测试环境默认关闭
+  enabled: false
+  # Zipkin Server 地址（K8s 内部服务地址）
+  base-url: ${ZIPKIN_BASE_URL:http://zipkin.test.svc:9411}
+
+# ===============================
+# Kafka 日志收集开关（测试环境默认关闭）
+# ===============================
+nexusmall:
+  logging:
+    kafka:
+      enabled: false
+
+# ===============================
+# Knife4j API 文档配置（测试环境）
+# ===============================
+knife4j:
+  gateway:
+    enabled: true
