@@ -5,13 +5,13 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.nexusmall.cart.infrastructure.repository.CartItemMapper;
 import com.nexusmall.cart.interfaces.dto.AddCartRequest;
 import com.nexusmall.cart.domain.entity.CartItem;
-import com.nexusmall.cart.interfaces.exception.CartException;
 import com.nexusmall.cart.interfaces.feign.ProductFeignClient;
 import com.nexusmall.cart.infrastructure.messaging.CartSyncMessage;
 import com.nexusmall.cart.infrastructure.messaging.CartSyncProducer;
 import com.nexusmall.cart.interfaces.dto.CartItemVO;
 import com.nexusmall.cart.interfaces.dto.CartSummaryVO;
 import com.nexusmall.common.enums.ResultCode;
+import com.nexusmall.common.exception.CartException;
 import com.nexusmall.common.vo.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +83,7 @@ public class CartService {
         // 1. 获取分布式锁（防止并发冲突）
         String lockKey = LOCK_KEY_PREFIX + userId;
         RLock lock = redissonClient.getLock(lockKey);
-        
+
         try {
             // 尝试加锁，最多等待3秒，锁定10秒后自动释放
             boolean locked = lock.tryLock(3, 10, TimeUnit.SECONDS);
@@ -151,7 +151,7 @@ public class CartService {
             // 1. 解析购物车项
             List<Map<String, Object>> rawItems = new ArrayList<>();
             List<Long> skuIds = new ArrayList<>();
-            
+
             for (Object value : entries.values()) {
                 Map<String, Object> item = JSON.parseObject(JSON.toJSONString(value), Map.class);
                 rawItems.add(item);
@@ -168,10 +168,10 @@ public class CartService {
 
             for (Map<String, Object> rawItem : rawItems) {
                 CartItemVO vo = convertToVO(rawItem, skuInfoMap);
-                
+
                 if (vo.getValid()) {
                     validItems.add(vo);
-                    
+
                     // 收集提示信息
                     if (vo.getPriceChangeFlag() == 1) {
                         tips.add("「" + vo.getProductName() + "」价格上涨了");
@@ -187,7 +187,7 @@ public class CartService {
             // 4. 计算统计信息
             CartSummaryVO summary = calculateSummary(userId, validItems, invalidItems, tips);
 
-            log.info("【查询购物车汇总】成功, userId={}, validCount={}, invalidCount={}", 
+            log.info("【查询购物车汇总】成功, userId={}, validCount={}, invalidCount={}",
                     userId, validItems.size(), invalidItems.size());
             return summary;
         } catch (Exception e) {
@@ -450,21 +450,21 @@ public class CartService {
                     Object existingValue = redisTemplate.opsForHash().get(loggedInCartKey, String.valueOf(skuId));
                     Map<String, Object> existingItem = JSON.parseObject(JSON.toJSONString(existingValue), Map.class);
                     Integer existingQty = (Integer) existingItem.get("quantity");
-                    
+
                     // 检查限购
                     ProductFeignClient.SkuInfo skuInfo = validateAndFetchSkuInfo(skuId);
                     checkPurchaseLimit(loggedInUserId, skuId, existingQty + quantity, skuInfo);
-                    
+
                     existingItem.put("quantity", existingQty + quantity);
                     redisTemplate.opsForHash().put(loggedInCartKey, String.valueOf(skuId), existingItem);
                     mergedCount++;
-                    
+
                     log.info("【合并购物车】SKU {} 数量累加: {} -> {}", skuId, existingQty, existingQty + quantity);
                 } else {
                     // 不同SKU：直接追加
                     redisTemplate.opsForHash().put(loggedInCartKey, String.valueOf(skuId), anonymousItem);
                     addedCount++;
-                    
+
                     log.info("【合并购物车】新增 SKU {}", skuId);
                 }
             }
@@ -506,9 +506,9 @@ public class CartService {
     private void validateCartCapacity(Long userId) {
         String cartKey = CART_KEY_PREFIX + userId;
         Long size = redisTemplate.opsForHash().size(cartKey);
-        
+
         if (size != null && size >= MAX_CART_ITEMS) {
-            throw new CartException(ResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID,
                     "购物车已满，最多可添加" + MAX_CART_ITEMS + "种商品");
         }
     }
@@ -518,9 +518,9 @@ public class CartService {
      */
     private ProductFeignClient.SkuInfo validateAndFetchSkuInfo(Long skuId) {
         try {
-            Result<Map<Long, ProductFeignClient.SkuInfo>> result = 
+            Result<Map<Long, ProductFeignClient.SkuInfo>> result =
                     productFeignClient.batchQuerySkus(Collections.singletonList(skuId));
-            
+
             if (result == null || !result.isSuccess() || result.getData() == null) {
                 throw new CartException(ResultCode.PARAM_INVALID, "商品不存在或已下架");
             }
@@ -546,9 +546,9 @@ public class CartService {
         if (skuInfo.getStockStatus() == 0) {
             throw new CartException(ResultCode.PARAM_INVALID, "商品已售罄");
         }
-        
+
         if (skuInfo.getStockQuantity() < quantity) {
-            throw new CartException(ResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID,
                     "库存不足，仅剩" + skuInfo.getStockQuantity() + "件");
         }
     }
@@ -558,7 +558,7 @@ public class CartService {
      */
     private void checkPurchaseLimit(Long userId, Long skuId, Integer quantity, ProductFeignClient.SkuInfo skuInfo) {
         if (skuInfo.getMaxPurchaseLimit() != null && quantity > skuInfo.getMaxPurchaseLimit()) {
-            throw new CartException(ResultCode.PARAM_INVALID, 
+            throw new CartException(ResultCode.PARAM_INVALID,
                     "超过限购数量，单次最多购买" + skuInfo.getMaxPurchaseLimit() + "件");
         }
     }
@@ -566,27 +566,27 @@ public class CartService {
     /**
      * 执行添加到购物车
      */
-    private void executeAddToCart(Long userId, Long skuId, ProductFeignClient.SkuInfo skuInfo, 
+    private void executeAddToCart(Long userId, Long skuId, ProductFeignClient.SkuInfo skuInfo,
                                   Integer quantity, String attrs) {
         String cartKey = CART_KEY_PREFIX + userId;
         String field = String.valueOf(skuId);
 
         // 1. 检查是否已存在
         Boolean exists = redisTemplate.opsForHash().hasKey(cartKey, field);
-        
+
         if (Boolean.TRUE.equals(exists)) {
             // 已存在：累加数量
             Object existingValue = redisTemplate.opsForHash().get(cartKey, field);
             Map<String, Object> existingItem = JSON.parseObject(JSON.toJSONString(existingValue), Map.class);
             Integer currentQty = (Integer) existingItem.get("quantity");
             quantity = currentQty + quantity;
-            
+
             // 再次检查限购
             checkPurchaseLimit(userId, skuId, quantity, skuInfo);
-            
+
             existingItem.put("quantity", quantity);
             redisTemplate.opsForHash().put(cartKey, field, existingItem);
-            
+
             log.info("【添加购物车】商品已存在，更新数量: {} -> {}", currentQty, quantity);
         } else {
             // 不存在：新建
@@ -605,7 +605,7 @@ public class CartService {
 
             redisTemplate.opsForHash().put(cartKey, field, cartItem);
             redisTemplate.expire(cartKey, LOGGED_IN_EXPIRE_DAYS, TimeUnit.DAYS);
-            
+
             log.info("【添加购物车】新增商品, userId={}, skuId={}", userId, skuId);
         }
 
@@ -618,16 +618,16 @@ public class CartService {
      */
     private Map<Long, ProductFeignClient.SkuInfo> batchQuerySkuInfos(List<Long> skuIds) {
         try {
-            Result<Map<Long, ProductFeignClient.SkuInfo>> result = 
+            Result<Map<Long, ProductFeignClient.SkuInfo>> result =
                     productFeignClient.batchQuerySkus(skuIds);
-            
+
             if (result != null && result.isSuccess() && result.getData() != null) {
                 return result.getData();
             }
         } catch (Exception e) {
             log.error("【批量查询SKU】失败, skuIds={}", skuIds, e);
         }
-        
+
         return Collections.emptyMap();
     }
 
@@ -661,7 +661,7 @@ public class CartService {
                     .productSubtitle(skuInfo.getSubtitle());
 
             // 计算小计
-            BigDecimal actualPrice = skuInfo.getPromotionPrice() != null ? 
+            BigDecimal actualPrice = skuInfo.getPromotionPrice() != null ?
                     skuInfo.getPromotionPrice() : skuInfo.getPrice();
             builder.subtotal(actualPrice.multiply(new BigDecimal(builder.build().getQuantity())));
 
@@ -694,7 +694,7 @@ public class CartService {
     /**
      * 计算购物车汇总
      */
-    private CartSummaryVO calculateSummary(Long userId, List<CartItemVO> validItems, 
+    private CartSummaryVO calculateSummary(Long userId, List<CartItemVO> validItems,
                                            List<CartItemVO> invalidItems, List<String> tips) {
         // 筛选已选中的商品
         List<CartItemVO> selectedItems = validItems.stream()
@@ -704,11 +704,11 @@ public class CartService {
         // 计算统计信息
         int totalQuantity = validItems.stream().mapToInt(CartItemVO::getQuantity).sum();
         int selectedCount = selectedItems.stream().mapToInt(CartItemVO::getQuantity).sum();
-        
+
         BigDecimal originalTotal = validItems.stream()
                 .map(item -> item.getSnapshotPrice().multiply(new BigDecimal(item.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
-        
+
         BigDecimal payableAmount = selectedItems.stream()
                 .map(CartItemVO::getSubtotal)
                 .filter(Objects::nonNull)
@@ -832,7 +832,7 @@ public class CartService {
             for (Object value : entries.values()) {
                 Map<String, Object> cartItem = JSON.parseObject(JSON.toJSONString(value), Map.class);
                 Long skuId = Long.valueOf(cartItem.get("skuId").toString());
-                
+
                 CartSyncMessage message = CartSyncMessage.builder()
                         .userId(userId)
                         .skuId(skuId)

@@ -33,32 +33,10 @@
 			<artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
 		</dependency>
 		
-		<!-- OpenFeign 服务调用 -->
-		<dependency>
-			<groupId>org.springframework.cloud</groupId>
-			<artifactId>spring-cloud-starter-openfeign</artifactId>
-		</dependency>
-		
 		<!-- LoadBalancer 负载均衡 -->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-loadbalancer</artifactId>
-		</dependency>
-		
-		<!-- Seata 分布式事务 -->
-		<dependency>
-			<groupId>io.seata</groupId>
-			<artifactId>seata-spring-boot-starter</artifactId>
-		</dependency>
-
-		<!-- Kryo 4.0.2 for Seata 1.5.2 -->
-		<dependency>
-			<groupId>com.esotericsoftware</groupId>
-			<artifactId>kryo</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>de.javakaffee</groupId>
-			<artifactId>kryo-serializers</artifactId>
 		</dependency>
 
 		<!-- Redis（Auth 模块必需） -->
@@ -114,22 +92,38 @@
 			<artifactId>rocketmq-spring-boot-starter</artifactId>
 		</dependency>
 
-		<!-- 健康检查 -->
+		<!-- Kafka（ELK 日志收集架构必需） -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-actuator</artifactId>
+			<groupId>org.springframework.kafka</groupId>
+			<artifactId>spring-kafka</artifactId>
 		</dependency>
 
-		<!-- Sentinel 熔断限流 -->
+		<!-- Sentinel 熔断限流（业界标准：认证中心必须配置） -->
 		<dependency>
 			<groupId>com.alibaba.cloud</groupId>
 			<artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
 		</dependency>
 
-		<!-- Sentinel Nacos 数据源 -->
+		<!-- Sentinel Nacos 数据源（规则持久化） -->
 		<dependency>
 			<groupId>com.alibaba.csp</groupId>
 			<artifactId>sentinel-datasource-nacos</artifactId>
+		</dependency>
+
+		<!-- Sleuth + Zipkin 链路追踪（业界标准：认证中心作为调用链起点） -->
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-starter-sleuth</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.cloud</groupId>
+			<artifactId>spring-cloud-sleuth-zipkin</artifactId>
+		</dependency>
+
+		<!-- 健康检查 -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-actuator</artifactId>
 		</dependency>
 
 		<!-- Knife4j Swagger 文档增强 -->
@@ -152,11 +146,11 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Lombok -->
+		<!-- Lombok（编译期工具，运行时不需要） -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- Logstash Logback Encoder (JSON 日志格式) -->

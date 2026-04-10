@@ -30,12 +30,29 @@ spring:
     password: ${REDIS_PASSWORD:123456}
     timeout: 5000ms
 
+  # Kafka 配置（生产环境 - 仅定义 bootstrap-servers，其他参数在 nexusmall-common-mq.yaml 中）
+  kafka:
+    bootstrap-servers: ${KAFKA_SERVERS:10.10.1.1:9092}
+
   # Spring Cloud 配置（生产环境）
   cloud:
     sentinel:
       transport:
         dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         port: ${SENTINEL_TRANSPORT_PORT:8719}
+      datasource:
+        ds1:
+          nacos:
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            data-id: ${spring.application.name}-sentinel-rules
+            group-id: ${NACOS_GROUP:MALL_GROUP}
+            rule-type: flow
+    sleuth:
+      sampler:
+        probability: 0.1  # 生产环境 10% 采样，降低性能开销
+  zipkin:
+    enabled: true
+    base-url: ${ZIPKIN_BASE_URL:http://zipkin.prod.svc:9411}
 
 # ===============================
 # RocketMQ 配置（生产环境）
@@ -51,49 +68,27 @@ rocketmq:
 logging:
   level:
     root: INFO
-    io.seata: INFO
-    com.alibaba.csp.sentinel: INFO
     com.nexusmall.auth: INFO
     com.nexusmall.common: INFO
     com.nexusmall.auth.infrastructure.persistence.dao: INFO
   file:
     path: /data/logs/nexusmall
 
-# Kafka 日志收集开关（生产环境启用）
+# ===============================
+# SpringDoc + Knife4j API 文档配置（生产环境）
+# ===============================
+springdoc:
+  api-docs:
+    enabled: false  # 生产环境禁用 API 文档
+  swagger-ui:
+    enabled: false  # 生产环境禁用 Swagger UI
+
+knife4j:
+  enable: false  # 生产环境禁用 Knife4j
+  production: true  # 生产环境模式
+
+# Kafka 日志收集开关（生产环境必须开启）
 nexusmall:
   logging:
     kafka:
       enabled: true
-
-# ===============================
-# Zipkin 链路追踪配置（生产环境）
-# ===============================
-zipkin:
-  # 生产环境启用
-  enabled: true
-  # Zipkin Server 地址（K8s 内部服务地址）
-  base-url: ${ZIPKIN_BASE_URL:http://zipkin.prod.svc:9411}
-
-# ===============================
-# Seata 分布式事务配置（生产环境）
-# ===============================
-seata:
-  registry:
-    type: nacos
-    nacos:
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
-      namespace: ${SEATA_NAMESPACE:}
-      group: ${SEATA_GROUP:SEATA_GROUP}
-      cluster: default
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      application: seata-server
-  config:
-    type: nacos
-    nacos:
-      server-addr: ${SEATA_SERVER:10.10.1.1:8848}
-      namespace: ${SEATA_NAMESPACE:}
-      group: ${SEATA_GROUP:SEATA_GROUP}
-      username: ${NACOS_USERNAME:nacos}
-      password: ${NACOS_PASSWORD:nacos}
-      data-id: seataServer.properties

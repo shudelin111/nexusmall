@@ -39,12 +39,6 @@
 			<artifactId>rocketmq-spring-boot-starter</artifactId>
 		</dependency>
 
-		<!-- Kafka -->
-		<dependency>
-			<groupId>org.springframework.kafka</groupId>
-			<artifactId>spring-kafka</artifactId>
-		</dependency>
-
 		<!-- Elasticsearch -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -116,11 +110,11 @@
 			<version>${project.version}</version>
 		</dependency>
 
-		<!-- Lombok -->
+		<!-- Lombok（编译期工具，运行时不需要） -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
-			<optional>true</optional>
+			<scope>provided</scope>
 		</dependency>
 
 		<!-- 测试依赖 -->

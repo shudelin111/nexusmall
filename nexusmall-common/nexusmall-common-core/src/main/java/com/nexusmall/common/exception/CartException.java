@@ -18,7 +18,15 @@ public class CartException extends NexusmallException {
         super(resultCode);
     }
 
+    public CartException(ResultCode resultCode, String message) {
+        super(resultCode, message);
+    }
+
     public CartException(ResultCode resultCode, Throwable cause) {
         super(resultCode, cause);
+    }
+
+    public CartException(ResultCode resultCode, String message, Throwable cause) {
+        super(resultCode, message, cause);
     }
 }

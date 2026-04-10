@@ -32,9 +32,9 @@ spring:
 
   # Elasticsearch 配置（开发环境）
   elasticsearch:
-    uris: ${ES_URIS:http://localhost:9200}
-    username: ${ES_USERNAME:}
-    password: ${ES_PASSWORD:}
+    uris: ${ELASTICSEARCH_URIS:http://localhost:9200}
+    username: ${ELASTICSEARCH_USERNAME:elastic}
+    password: ${ELASTICSEARCH_PASSWORD:G2M9CI4OHL1T9E4j123vIq9M}
 
   # Kafka 配置（开发环境）
   kafka:

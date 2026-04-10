@@ -10,13 +10,6 @@
 # =====================================================
 
 # ===============================
-# Seata 分布式事务配置
-# ===============================
-seata:
-  # ⚠️ 注意：其他 Seata 通用参数已在 nexusmall-common-web.yaml 中定义
-  application-id: nexusmall-auth
-
-# ===============================
 # Security JWT RSA 密钥配置
 # ===============================
 security:
@@ -76,3 +69,15 @@ security:
 
       # JWT 受众标识
       audience: nexusmall-services
+
+# ===============================
+# SpringDoc + Knife4j API 文档配置（模块特定）
+# ===============================
+# ⚠️ 注意：通用配置（path、enable、language）已在 nexusmall-common-web.yaml 中定义
+springdoc:
+  # 扫描的包路径（Auth 模块特定）
+  packages-to-scan: com.nexusmall.auth
+  group-configs:
+    - group: default
+      paths-to-match: /**
+      packages-to-scan: com.nexusmall.auth

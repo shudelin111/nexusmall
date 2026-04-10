@@ -26,7 +26,7 @@ spring:
     host: ${REDIS_HOST:10.10.1.1}
     port: ${REDIS_PORT:6379}
     database: ${REDIS_DATABASE:0}
-    password: ${REDIS_PASSWORD:}
+    password: ${REDIS_PASSWORD:123456}
     timeout: 3000ms
 
   cloud:
@@ -34,6 +34,19 @@ spring:
       transport:
         dashboard: ${SENTINEL_DASHBOARD:10.10.1.1:8858}
         port: ${SENTINEL_TRANSPORT_PORT:8719}
+      datasource:
+        ds1:
+          nacos:
+            server-addr: ${NACOS_SERVER_ADDR:10.10.1.1:8848}
+            data-id: ${spring.application.name}-sentinel-rules
+            group-id: ${NACOS_GROUP:MALL_GROUP}
+            rule-type: flow
+    sleuth:
+      sampler:
+        probability: 0.1  # 生产环境 10% 采样，降低性能开销
+  zipkin:
+    enabled: true  # 生产环境启用
+    base-url: ${ZIPKIN_BASE_URL:http://zipkin.prod.svc:9411}
 
   # Kafka 配置（生产环境）
   kafka:
@@ -73,15 +86,6 @@ nexusmall:
 logging:
   file:
     path: /data/logs/nexusmall
-
-# ===============================
-# Zipkin 链路追踪配置（生产环境）
-# ===============================
-zipkin:
-  # 生产环境启用
-  enabled: true
-  # Zipkin Server 地址（K8s 内部服务地址）
-  base-url: ${ZIPKIN_BASE_URL:http://zipkin.prod.svc:9411}
 
 # ===============================
 # Seata 分布式事务配置（生产环境）

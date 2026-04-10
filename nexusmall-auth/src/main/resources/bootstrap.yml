@@ -65,11 +65,14 @@ spring:
           - data-id: nexusmall-common-database.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # 3. Web 组件配置（Sentinel、Actuator、Sleuth）
+          # 3. Web 组件配置（Actuator、日志）
           - data-id: nexusmall-common-web.yaml
             group: ${NACOS_GROUP:MALL_GROUP}
             refresh: true
-          # ⚠️ 注意：Auth 不需要 mq 配置
+          # 4. MQ 配置（RocketMQ - 用于发送用户注册事件）
+          - data-id: nexusmall-common-mq.yaml
+            group: ${NACOS_GROUP:MALL_GROUP}
+            refresh: true
         
         # ===============================
         # 扩展配置（服务专属）

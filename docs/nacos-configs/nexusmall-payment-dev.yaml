@@ -28,7 +28,7 @@ spring:
     host: ${REDIS_HOST:10.10.1.1}
     port: ${REDIS_PORT:6379}
     database: ${REDIS_DATABASE:0}
-    password: ${REDIS_PASSWORD:}
+    password: ${REDIS_PASSWORD:123456}
     timeout: 3000ms
 
   # Spring Cloud 配置（开发环境）
